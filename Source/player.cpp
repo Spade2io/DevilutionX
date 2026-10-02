@@ -2978,6 +2978,35 @@ void StartWarpLvl(Player &player, size_t pidx)
 	}
 }
 
+/** Essence Mod: game ticks between mana regeneration pulses (20 ticks = 1 second at normal speed). */
+constexpr int ManaRegenIntervalTicks = 20;
+
+/**
+ * @brief Essence Mod: restores a little mana on a fixed interval, scaled by the Magic stat.
+ *
+ * Mana is stored in 64ths of a point, so adding `_pMagic` per pulse gives Magic/64 mana per second.
+ * The tick counter lives in memory only and is never saved.
+ */
+void RegenerateMana(Player &player)
+{
+	static int ticksSinceLastPulse = 0;
+	if (++ticksSinceLastPulse < ManaRegenIntervalTicks)
+		return;
+	ticksSinceLastPulse = 0;
+
+	if (player._pHitPoints >> 6 <= 0)
+		return;
+	if (HasAnyOf(player._pIFlags, ItemSpecialEffect::NoMana))
+		return;
+	if (player._pMana >= player._pMaxMana)
+		return;
+
+	const int amount = std::max(player._pMagic, 0);
+	player._pMana = std::min(player._pMana + amount, player._pMaxMana);
+	player._pManaBase = std::min(player._pManaBase + amount, player._pMaxManaBase);
+	RedrawComponent(PanelDrawComponent::Mana);
+}
+
 void ProcessPlayers()
 {
 	assert(MyPlayer != nullptr);
@@ -3025,6 +3054,7 @@ void ProcessPlayers()
 				if (player.pManaShield && HasAnyOf(player._pIFlags, ItemSpecialEffect::NoMana)) {
 					NetSendCmd(true, CMD_REMSHIELD);
 				}
+				RegenerateMana(player);
 			}
 
 			bool tplayer = false;
