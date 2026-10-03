@@ -1,5 +1,7 @@
 #include "panels/spell_book.hpp"
 
+#include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <optional>
@@ -33,7 +35,6 @@ namespace {
 OptionalOwnedClxSpriteList spellBookButtons;
 OptionalOwnedClxSpriteList spellBookBackground;
 
-const size_t SpellBookPages = 6;
 const size_t SpellBookPageEntries = 7;
 
 constexpr uint16_t SpellBookButtonWidthDiablo = 76;
@@ -44,22 +45,36 @@ uint16_t SpellBookButtonWidth()
 	return gbIsHellfire ? SpellBookButtonWidthHellfire : SpellBookButtonWidthDiablo;
 }
 
-/** Maps from spellbook page number and position to SpellID. */
-const SpellID SpellPages[SpellBookPages][SpellBookPageEntries] = {
-	{ SpellID::Null, SpellID::Firebolt, SpellID::ChargedBolt, SpellID::HolyBolt, SpellID::Healing, SpellID::HealOther, SpellID::Inferno },
-	{ SpellID::Resurrect, SpellID::FireWall, SpellID::Telekinesis, SpellID::Lightning, SpellID::TownPortal, SpellID::Flash, SpellID::StoneCurse },
-	{ SpellID::Phasing, SpellID::ManaShield, SpellID::Elemental, SpellID::Fireball, SpellID::FlameWave, SpellID::ChainLightning, SpellID::Guardian },
-	{ SpellID::Nova, SpellID::Golem, SpellID::Teleport, SpellID::Apocalypse, SpellID::BoneSpirit, SpellID::BloodStar, SpellID::Etherealize },
-	{ SpellID::LightningWall, SpellID::Immolation, SpellID::Warp, SpellID::Reflect, SpellID::Berserk, SpellID::RingOfFire, SpellID::Search },
-	{ SpellID::Invalid, SpellID::Invalid, SpellID::Invalid, SpellID::Invalid, SpellID::Invalid, SpellID::Invalid, SpellID::Invalid }
-};
-
+/**
+ * @brief The spell shown at a spellbook page and position.
+ *
+ * Essence Mod: the spellbook is a live list. It shows whatever the player has, in spell-number
+ * order, filling each page in turn. No spell owns a fixed position, so new spells need no slot of
+ * their own. The class skill always comes first.
+ */
 SpellID GetSpellFromSpellPage(size_t page, size_t entry)
 {
-	assert(page <= SpellBookPages && entry <= SpellBookPageEntries);
-	if (page == 0 && entry == 0)
-		return GetPlayerStartingLoadoutForClass(InspectPlayer->_pClass).skill;
-	return SpellPages[page][entry];
+	assert(entry < SpellBookPageEntries);
+	const Player &player = *InspectPlayer;
+	const SpellID skill = GetPlayerStartingLoadoutForClass(player._pClass).skill;
+
+	size_t remaining = page * SpellBookPageEntries + entry;
+	if (remaining == 0)
+		return skill;
+	remaining--;
+
+	const uint64_t available = player._pMemSpells | player._pISpells | player._pAblSpells;
+	// "Known spells" is stored as 64 on/off bits, one per spell number.
+	const size_t spellCount = std::min<size_t>(SpellsData.size(), 64);
+	for (size_t i = static_cast<size_t>(SpellID::Firebolt); i < spellCount; i++) {
+		const auto spell = static_cast<SpellID>(i);
+		if (spell == skill || (available & GetSpellBitmask(spell)) == 0)
+			continue;
+		if (remaining == 0)
+			return spell;
+		remaining--;
+	}
+	return SpellID::Invalid;
 }
 
 constexpr Size SpellBookDescription { 250, 43 };

@@ -33,6 +33,7 @@
 #include "cursor_defs.hpp"
 #include "diablo.h"
 #include "doom.h"
+#include "buffs.h"
 #include "effects.h"
 #include "engine/animationinfo.h"
 #include "engine/backbuffer_state.hpp"
@@ -107,7 +108,7 @@ int MaxGold = GOLD_MAX_LIMIT;
 int8_t ItemCAnimTbl[] = {
 	20, 16, 16, 16, 4, 4, 4, 12, 12, 12,
 	12, 12, 12, 12, 12, 21, 21, 25, 12, 28,
-	28, 28, 38, 38, 38, 32, 38, 38, 38, 24,
+	28, 28, 38, 38, 38, 32, 32, 38, 38, 24, // 26 (awakening stone) uses the Blood Stone drop animation
 	24, 26, 2, 25, 22, 23, 24, 21, 27, 27,
 	29, 0, 0, 0, 12, 12, 12, 12, 12, 0,
 	8, 8, 0, 8, 8, 8, 8, 8, 8, 6,
@@ -1828,7 +1829,8 @@ void PrintItemMisc(const Item &item)
 	const bool isOil = (item._iMiscId >= IMISC_USEFIRST && item._iMiscId <= IMISC_USELAST)
 	    || (item._iMiscId > IMISC_OILFIRST && item._iMiscId < IMISC_OILLAST)
 	    || (item._iMiscId > IMISC_RUNEFIRST && item._iMiscId < IMISC_RUNELAST)
-	    || item._iMiscId == IMISC_ARENAPOT;
+	    || item._iMiscId == IMISC_ARENAPOT
+	    || item._iMiscId == IMISC_AWAKENINGSTONE;
 	const bool mouseRequiresTarget = (item._iMiscId == IMISC_SCROLLT && item._iSpell != SpellID::Flash)
 	    || (item._iMiscId == IMISC_SCROLL && IsAnyOf(item._iSpell, SpellID::TownPortal, SpellID::Identify));
 	const bool gamepadRequiresTarget = item.isScroll() && TargetsMonster(item._iSpell);
@@ -2526,6 +2528,8 @@ void CalcPlrPrimaryStats(Player &player, int strength, int &magic, int dexterity
 		dexterity -= playerLevel + playerLevel / 2;
 		vitality -= 2 * playerLevel;
 	}
+
+	strength += GetBuffStrengthBonus(player); // Essence Mod: persistent buffs
 
 	player._pStrength = std::clamp(strength + player._pBaseStr, 0, 750);
 	player._pMagic = std::clamp(magic + player._pBaseMag, 0, 750);
@@ -4286,6 +4290,14 @@ void UseItem(Player &player, item_misc_id mid, SpellID spellID, int spellFrom)
 			// Use CMD_SPELLXY because it's the same behavior as normal casting
 			assert(IsValidSpellFrom(spellFrom));
 			NetSendCmdLocParam3(true, CMD_SPELLXY, target, static_cast<int8_t>(spellID), static_cast<uint8_t>(SpellType::Scroll), static_cast<uint16_t>(spellFrom));
+		}
+		break;
+	case IMISC_AWAKENINGSTONE:
+		// Essence Mod: an awakening stone teaches the spell written in its item table row.
+		if (player._pSplLvl[static_cast<int8_t>(spellID)] == 0) {
+			player._pSplLvl[static_cast<int8_t>(spellID)] = 1;
+			player._pMemSpells |= GetSpellBitmask(spellID);
+			NetSendCmdParam2(true, CMD_CHANGE_SPELL_LEVEL, static_cast<uint16_t>(spellID), 1);
 		}
 		break;
 	case IMISC_BOOK: {

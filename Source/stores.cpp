@@ -1083,6 +1083,23 @@ void RefreshAwakeningStoneItems()
 {
 	AwakeningStoneItems.clear();
 	const Player &myPlayer = *MyPlayer;
+
+	// Real awakening stone items come first: every row of the item table with that type.
+	// These are handed over as items and are always listed, known spell or not.
+	for (size_t i = 0; i < AllItemsList.size(); i++) {
+		if (AllItemsList[i].iMiscId != IMISC_AWAKENINGSTONE)
+			continue;
+		Item item;
+		InitializeItem(item, static_cast<_item_indexes>(i));
+		item.IDidx = static_cast<_item_indexes>(i);
+		item._iSeed = AdvanceRndSeed();
+		item._iCreateInfo = 0; // nothing about a stone is rolled; the row says it all
+		item._iIdentified = true;
+		item._iStatFlag = true;
+		AwakeningStoneItems.push_back(item);
+	}
+
+	// Then the test entries that teach a spell directly, one per spell not yet learned.
 	for (size_t i = static_cast<size_t>(SpellID::Firebolt); i < SpellsData.size(); i++) {
 		const auto spell = static_cast<SpellID>(i);
 		if (GetSpellBookLevel(spell) == -1 || myPlayer._pSplLvl[i] != 0)
@@ -1831,13 +1848,22 @@ void BoyBuyItem(Item &item, int itemPrice)
  */
 void HealerBuyItem(Item &item)
 {
-	// Essence Mod: an awakening stone teaches its spell on the spot and stays out of the inventory.
+	// Essence Mod: a real awakening stone item goes into the inventory to be used from there.
+	if (ActiveHealerShelf == HealerShelf::AwakeningStones && item._iMiscId == IMISC_AWAKENINGSTONE) {
+		TakePlrsMoney(item._iIvalue);
+		StoreAutoPlace(item, true);
+		CalcPlrInv(*MyPlayer, true);
+		return;
+	}
+
+	// Essence Mod: a test entry teaches its spell on the spot and stays out of the inventory.
 	if (ActiveHealerShelf == HealerShelf::AwakeningStones) {
 		TakePlrsMoney(item._iIvalue);
 		Player &myPlayer = *MyPlayer;
 		myPlayer._pMemSpells |= GetSpellBitmask(item._iSpell);
 		myPlayer._pSplLvl[static_cast<size_t>(item._iSpell)] = 1;
 		NetSendCmdParam2(true, CMD_CHANGE_SPELL_LEVEL, static_cast<uint16_t>(item._iSpell), 1);
+		PlaySFX(SfxID::QuestDone);
 		EventPlrMsg(StrCat("You learned ", GetSpellData(item._iSpell).sNameText), UiFlags::ColorWhitegold);
 		return;
 	}
@@ -2032,8 +2058,9 @@ void HealerBuyEnter()
 		return;
 	}
 
-	// An awakening stone is not an item, so it needs no inventory space.
-	if (ActiveHealerShelf != HealerShelf::AwakeningStones && !StoreAutoPlace(items[idx], false)) {
+	// A test entry on the awakening stones list is not an item, so it needs no inventory space.
+	const bool isTeachOnlyEntry = ActiveHealerShelf == HealerShelf::AwakeningStones && items[idx]._iMiscId != IMISC_AWAKENINGSTONE;
+	if (!isTeachOnlyEntry && !StoreAutoPlace(items[idx], false)) {
 		StartStore(TalkID::NoRoom);
 		return;
 	}

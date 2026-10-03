@@ -161,6 +161,9 @@ std::expected<MissileID, std::string> ParseMissileId(std::string_view value)
 	if (value == "BlueExplosion") return MissileID::BlueExplosion;
 	if (value == "BlueExplosion2") return MissileID::BlueExplosion2;
 	if (value == "OrangeExplosion") return MissileID::OrangeExplosion;
+	if (value == "Frostbolt") return MissileID::Frostbolt;
+	if (value == "FrostboltExplosion") return MissileID::FrostboltExplosion;
+	if (value == "StrengthBuff") return MissileID::StrengthBuff;
 	return std::unexpected("Unknown enum value");
 }
 
@@ -223,6 +226,8 @@ std::expected<SpellID, std::string> ParseSpellId(std::string_view value)
 	if (value == "RuneOfNova") return SpellID::RuneOfNova;
 	if (value == "RuneOfImmolation") return SpellID::RuneOfImmolation;
 	if (value == "RuneOfStone") return SpellID::RuneOfStone;
+	if (value == "Frostbolt") return SpellID::Frostbolt;
+	if (value == "Strength") return SpellID::Strength;
 	return std::unexpected("Unknown enum value");
 }
 

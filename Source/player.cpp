@@ -14,6 +14,7 @@
 #include <SDL.h>
 #endif
 
+#include "buffs.h"
 #include "control/control.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
@@ -49,6 +50,7 @@
 #include "player.h"
 #include "qol/autopickup.h"
 #include "qol/stash.h"
+#include "spell_xp.h"
 #include "spells.h"
 #include "stores.h"
 #include "towners.h"
@@ -639,6 +641,7 @@ bool PlrHitMonst(Player &player, Monster &monster, bool adjacentDamage = false)
 			dam = monster.hitPoints; /* ensure monster is killed with one hit */
 		}
 #endif
+		AddAttackExperienceForDamage(player, monster, dam, monster.hitPoints); // Essence Mod
 		ApplyMonsterDamage(DamageType::Physical, monster, dam);
 	}
 
@@ -2681,6 +2684,10 @@ StartPlayerKill(Player &player, DeathReason deathReason)
 	if (player.hasNoLife() && player._pmode == PM_DEATH) {
 		return;
 	}
+
+	// Essence Mod: persistent buffs last only as long as the player is alive.
+	ClearBuffs(player);
+	CalcPlrInv(player, false);
 
 	if (&player == MyPlayer) {
 		NetSendCmdParam1(true, CMD_PLRDEAD, static_cast<uint16_t>(deathReason));

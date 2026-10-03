@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "appfat.h"
+#include "buffs.h"
 #include "control/control.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
@@ -880,7 +881,8 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 	const Player &myPlayer = *MyPlayer;
 
 	switch (spell) {
-	case SpellID::Firebolt: {
+	case SpellID::Firebolt:
+	case SpellID::Frostbolt: {
 		const int min = (myPlayer._pMagic / 8) + spellLevel + 1;
 		return { min, min + 9 };
 	}
@@ -2472,6 +2474,13 @@ void AddHealing(Missile &missile, AddMissileParameter & /*parameter*/)
 	RedrawComponent(PanelDrawComponent::Health);
 }
 
+void AddStrengthBuff(Missile &missile, AddMissileParameter & /*parameter*/)
+{
+	// The buff lives on the player, so this effect has done its job the moment it is created.
+	missile._miDelFlag = true;
+	ActivateBuff(Players[missile._misource], BuffID::Strength);
+}
+
 void AddHealOther(Missile &missile, AddMissileParameter & /*parameter*/)
 {
 	Player &player = Players[missile._misource];
@@ -2977,6 +2986,9 @@ void ProcessGenericProjectile(Missile &missile)
 		case MissileID::Firebolt:
 		case MissileID::MagmaBall:
 			AddMissile(missile.position.tile, dst, dir, MissileID::MagmaBallExplosion, missile._micaster, missile._misource, 0, 0, &missile);
+			break;
+		case MissileID::Frostbolt:
+			AddMissile(missile.position.tile, dst, dir, MissileID::FrostboltExplosion, missile._micaster, missile._misource, 0, 0, &missile);
 			break;
 		case MissileID::BloodStar:
 			AddMissile(missile.position.tile, dst, dir, MissileID::BloodStarExplosion, missile._micaster, missile._misource, 0, 0, &missile);

@@ -37,6 +37,15 @@ SpellID GetSpellForMissile(MissileID missile);
 void AddSpellExperienceForDamage(const Player &player, const Monster &monster, SpellID spell, int damage, int hitPointsBefore);
 
 /**
+ * @brief Works out what a weapon hit is worth, the same way as spell damage, and gives each active
+ * buff its tenth. No ability earns the attack's own experience yet.
+ *
+ * @param damage Damage dealt, in 64ths of a hit point.
+ * @param hitPointsBefore The monster's hit points before the damage, in 64ths of a hit point.
+ */
+void AddAttackExperienceForDamage(const Player &player, const Monster &monster, int damage, int hitPointsBefore);
+
+/**
  * @brief Kill experience of a typical monster of the given level.
  *
  * A smooth curve (5L² + 10L + 40) fitted to the average of Hellfire's monster table, which runs
@@ -69,11 +78,16 @@ void ResetSpellExperience();
 
 /**
  * @brief Loads spell experience from the sidecar file kept next to the save.
- * A missing or unreadable file leaves every spell at zero.
+ *
+ * Also restores the levels of spells the original save has no room for (spell numbers 47 and up),
+ * marking them as known on the given player. A missing or unreadable file leaves every spell at zero.
  */
-void LoadSpellExperience(const std::string &path);
+void LoadSpellExperience(const std::string &path, Player &player);
 
-/** @brief Writes spell experience to the sidecar file kept next to the save. */
-void SaveSpellExperience(const std::string &path);
+/**
+ * @brief Writes spell experience, and the levels of spells the original save has no room for,
+ * to the sidecar file kept next to the save.
+ */
+void SaveSpellExperience(const std::string &path, const Player &player);
 
 } // namespace devilution

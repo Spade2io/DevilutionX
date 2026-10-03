@@ -377,6 +377,8 @@ void AddStoneCurse(Missile &missile, AddMissileParameter &parameter);
 void AddGolem(Missile &missile, AddMissileParameter &parameter);
 void AddApocalypseBoom(Missile &missile, AddMissileParameter &parameter);
 void AddHealing(Missile &missile, AddMissileParameter &parameter);
+/** Essence Mod: switches the caster's Strength buff on. */
+void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter);
 void AddHealOther(Missile &missile, AddMissileParameter &parameter);
 
 /**

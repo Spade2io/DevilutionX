@@ -231,6 +231,8 @@ The order we are actually building in. Supersedes the build order below where th
 5. **Awakening stones (round gem, picture 26)** — stones use picture 26, tinted; behaviour to be defined.
 6. **Removing levels** — later; see section 7 for what depends on character level.
 7. **Randomized spell learning** — to be designed; see section 8.
+11. **New effect testing** — current focus after the first awakening stones; see the "New effect testing" section.
+10. **Player pets** — very low priority; see the "Player pets" section.
 9. **Database and editor tool for essences and awakening stones** (next up) — one data file the game reads, plus a tool showing every entry in a big chart with "new essence" / "new awakening stone" buttons and in-place editing.
 8. **Controller overhaul** — several spells available at once, each on its own button. The game already has 12 quick-spell slots (`QuickSpell1`–`12`) and controller button mapping, but a slot only selects the active spell; casting directly on the press is the new part.
 
@@ -265,3 +267,77 @@ Each step builds the foundation the next one needs.
   testing new spells only; remove or rework before the mod is real.
 - **Books have no Magic requirement** (`Source/items.cpp`). Other requirements will replace it later.
 - Debug builds also have a console (backtick key): `dev.player.spells.setLevel(1)` teaches every spell.
+
+---
+
+## How new spells are added (worked example: Frostbolt)
+Awakening stones are the new spell books: right-click one to learn its spell. Later a stone will go
+into one of an essence's five slots, with some randomness; for now it simply teaches the spell.
+
+- **Spell numbers.** "Known spells" is 64 on/off bits, so there can be at most 64 spells. Hellfire
+  uses 0–51; new spells take 52–63 and existing numbers are never changed. Frostbolt is 52.
+- **Spellbook.** The spellbook is a live list of whatever the player knows, in spell-number order;
+  no spell owns a fixed slot (`Source/panels/spell_book.cpp`). The final order is undecided.
+- **Saving.** The original save only stores levels for spell numbers 0–46. Levels of higher
+  numbers are kept in the sidecar file (`L <spell> <level>` lines).
+- **Awakening stone items.** Each stone is its own row in `assets/txtdata/items/itemdat.tsv` with
+  type `AWAKENINGSTONE` and its spell written in, like a scroll. Nothing about it is rolled from a
+  seed, so it cannot change on reload. Picture 26; on the ground it uses the Blood Stone animation.
+  Drop rate 0: stones are only sold by Pepin's test shop for now.
+- **Casting animation rule (decided 2026-10-03):** every new spell uses the **Magic** casting
+  animation (the `Magic` flag in `spelldat.tsv`) unless Bryan explicitly says it is a fire or
+  lightning spell. The game has only three casting animations (Fire, Lightning, Magic), and the glow
+  is painted into the character frames, so tinting it would recolour the character too. The same flag
+  sets the colour of the spell's book. A better method for per-essence casting effects is still to come.
+- **Steps for a new projectile spell:** add the spell and its projectile(s) to the enums and name
+  parsers in `Source/tables/spelldat.h/.cpp`; add rows to Hellfire's `spelldat.tsv` and `misdat.tsv`
+  (row position is the number); add a spellbook icon entry in `Source/panels/spell_icons.cpp`; add
+  damage text in `GetDamageAmt` and the XP mapping in `GetSpellForMissile`; add its stone row.
+- **Tints.** `Source/essence_tint.cpp` builds colour lookup tables; `DrawMissilePrivate` in
+  `Source/engine/render/scrollrt.cpp` draws Frostbolt and its impact through the vivid blue one.
+- **Known limits.** Frostbolt exists only in Hellfire (plain Diablo's tables are untouched). Its
+  damage type is still Fire, since the game has no cold damage type. In multiplayer, the packet that
+  shares a character's spell levels covers numbers 0–51 only, so other players would not see it.
+
+---
+
+## Player pets (very low priority, to be designed)
+Summons beyond the single Golem. What the code does today, for when this is picked up:
+
+- Golem is the only summon. The spell creates a monster; the monster system then runs it.
+- One reserved monster slot per player, so "one summon each" is built into the structure.
+- Stats are fixed at summoning: health = 10 per spell level + two-thirds of maximum mana; damage
+  2 x (level + 4) to 2 x (level + 8); armour 25. See `InitGolem` in `Source/monster.cpp`.
+- It attacks the nearest monster in melee, wakes nearby monsters, wanders when idle, takes no orders,
+  and does not follow between dungeon levels.
+- Kills are credited to the player, but pet damage is not a projectile, so it earns no spell XP yet.
+- In multiplayer only the level owner's PC creates the monster and tells the others.
+
+---
+
+## New effect testing (decided 2026-10-03)
+Before building the essence and awakening stone systems, try out individual spell effects one at a
+time, each as a test spell with its own awakening stone. The first batch:
+
+- **Persistent buff** — an effect on the caster that stays until it runs out or is removed (existing model: Mana Shield).
+- **Buff aura** — a buff that applies to everyone near the caster.
+- **Damage over time** — a hit that keeps hurting its target afterwards. New: nothing does this to monsters today.
+- **Damage aura** — hurts monsters near the caster on a pulse (closest existing shape: Flash).
+- **Cooldowns** — a wait before a spell can be cast again. New: mana is the only limit today.
+- **Leech** — damage dealt gives back life or mana (existing model: life-steal and mana-steal items, weapon hits only).
+- **Health regeneration** — life that comes back over time (model: the mana regen already built).
+
+Buffs, auras and damage-over-time are temporary state: held in memory, never saved (hard rule 1).
+
+### Persistent buffs (first one built 2026-10-03: Strength)
+- Code: `Source/buffs.h/.cpp`. A buff is switched on by casting its spell and lasts until the player
+  dies. Held in memory only; a character always loads with none.
+- **Strength** (spell 53, icon 47, Magic casting animation, 10 mana, castable in town): +10 Strength
+  at spell level 1, +5 per level after that. Applied where the game totals stats (`CalcPlrItemVals`).
+- **Buff XP (tentative):** every active buff's spell earns one-tenth of the XP a damaging spell just
+  earned. Every XP source feeds buffs, healing included (decided 2026-10-03). Weapon hits (melee, arrows, and spells cast from a staff or
+  scroll) are valued the same way as spell damage and feed the buffs their tenth; no ability earns
+  the attack's own XP yet. Melee abilities that level like spells are planned.
+- **XP message:** one line per gain, e.g. `Firebolt 50 XP, Strength 5 XP`.
+- **Buff bar:** a row of spell icons across the top-left of the screen, one per active buff. Hovering
+  an icon shows what it gives, e.g. `Strength: +10 Strength`. Icons will be replaced later.

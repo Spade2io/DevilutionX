@@ -24,6 +24,7 @@
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "cursor.h"
+#include "buffs.h"
 #include "dead.h"
 #include "diablo_msg.hpp"
 #include "doom.h"
@@ -32,6 +33,7 @@
 #include "engine/dx.h"
 #include "engine/point.hpp"
 #include "engine/render/clx_render.hpp"
+#include "essence_tint.h"
 #include "engine/render/dun_render.hpp"
 #include "engine/render/light_render.hpp"
 #include "engine/render/text_render.hpp"
@@ -345,6 +347,9 @@ void DrawMissilePrivate(const Surface &out, const Missile &missile, Point target
 	const ClxSprite sprite = (*missile._miAnimData)[missile._miAnimFrame - 1];
 	if (missile._miUniqTrans != 0) {
 		ClxDrawTRN(out, missileRenderPosition, sprite, Monsters[missile._misource].uniqueMonsterTRN.get());
+	} else if (IsAnyOf(missile._mitype, MissileID::Frostbolt, MissileID::FrostboltExplosion)) {
+		// Essence Mod: Frostbolt reuses Firebolt's art, drawn through a blue tint.
+		ClxDrawTRN(out, missileRenderPosition, sprite, GetEssenceTintTrn(EssenceTint::VividBlue));
 	} else if (missile._miLightFlag) {
 		ClxDrawLight(out, missileRenderPosition, sprite, lightTableIndex);
 	} else {
@@ -1444,6 +1449,7 @@ void DrawView(const Surface &out, Point startPosition)
 		DrawDiabloMsg(out.subregionY(0, out.h() - GetMainPanel().size.height));
 	}
 
+	DrawBuffBar(out);
 	DrawControllerModifierHints(out);
 	DrawPlrMsg(out);
 	gmenu_draw(out);

@@ -2177,8 +2177,8 @@ bool UseInvItem(int cii)
 		return true;
 	}
 
-	// Essence Mod: a book of a spell the player already knows does nothing and is not used up.
-	if (item->_iMiscId == IMISC_BOOK && player._pSplLvl[static_cast<int8_t>(item->_iSpell)] != 0) {
+	// Essence Mod: a book or awakening stone of a spell the player already knows does nothing and is not used up.
+	if (IsAnyOf(item->_iMiscId, IMISC_BOOK, IMISC_AWAKENINGSTONE) && player._pSplLvl[static_cast<int8_t>(item->_iSpell)] != 0) {
 		player.Say(HeroSpeech::ThatDidntDoAnything, SpeechDelay);
 		return true;
 	}
@@ -2204,10 +2204,17 @@ bool UseInvItem(int cii)
 	}
 
 	const int idata = ItemCAnimTbl[item->_iCurs];
-	if (item->_iMiscId == IMISC_BOOK)
+	if (item->_iMiscId == IMISC_BOOK) {
 		PlaySFX(SfxID::ReadBook);
-	else if (&player == MyPlayer)
+	} else if (item->_iMiscId == IMISC_AWAKENINGSTONE) {
+		// Essence Mod: learning from an awakening stone gets the quest-complete fanfare.
+		if (&player == MyPlayer) {
+			PlaySFX(SfxID::QuestDone);
+			EventPlrMsg(StrCat("You learned ", GetSpellData(item->_iSpell).sNameText), UiFlags::ColorWhitegold);
+		}
+	} else if (&player == MyPlayer) {
 		PlaySFX(ItemInvSnds[idata]);
+	}
 
 	UseItem(player, item->_iMiscId, item->_iSpell, cii);
 

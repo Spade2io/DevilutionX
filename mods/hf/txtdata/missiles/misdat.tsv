@@ -107,3 +107,6 @@ RedExplosion	AddMissileExplosion	ProcessMissileExplosion	SpellFireHit		RedFlareE
 BlueExplosion	AddMissileExplosion	ProcessMissileExplosion	SpellFireHit		BlueFlareExplosion	Physical	
 BlueExplosion2	AddMissileExplosion	ProcessMissileExplosion	SpellFireHit		BlueFlareExplosion2	Physical	
 OrangeExplosion	AddMissileExplosion	ProcessMissileExplosion	SpellFireHit		OrangeFlareExplosion	Physical	
+Frostbolt	AddFirebolt	ProcessGenericProjectile	SpellFirebolt	SpellFireHit	Fireball	Fire	Blockable
+FrostboltExplosion	AddMissileExplosion	ProcessMissileExplosion			MagmaBallExplosion	Physical	
+StrengthBuff	AddStrengthBuff					Physical,Invisible	

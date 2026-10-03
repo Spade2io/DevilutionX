@@ -131,6 +131,7 @@ enum item_cursor_graphic : uint8_t {
 	ICURS_EAR_WARRIOR                 = 20,
 	ICURS_EAR_ROGUE                   = 21,
 	ICURS_BLOOD_STONE                 = 25,
+	ICURS_AWAKENING_STONE             = 26, // Essence Mod: round gem, unused by vanilla items
 	ICURS_OIL                         = 30,
 	ICURS_ELIXIR_OF_VITALITY          = 31,
 	ICURS_POTION_OF_HEALING           = 32,
@@ -487,6 +488,7 @@ enum item_misc_id : int8_t {
 	IMISC_AURIC,
 	IMISC_NOTE,
 	IMISC_ARENAPOT,
+	IMISC_AWAKENINGSTONE, // Essence Mod: teaches the spell written in its item table row
 	IMISC_INVALID = -1,
 };
 

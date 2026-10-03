@@ -82,8 +82,11 @@ enum class SpellID : int8_t {
 	RuneOfNova,
 	RuneOfImmolation,
 	RuneOfStone,
+	// Essence Mod: new spells take the unused numbers 52 to 63. Never renumber the spells above.
+	Frostbolt,
+	Strength,
 
-	LAST = RuneOfStone,
+	LAST = Strength,
 	Invalid = -1,
 };
 
@@ -206,8 +209,12 @@ enum class MissileID : int8_t {
 	BlueExplosion,
 	BlueExplosion2,
 	OrangeExplosion,
+	// Essence Mod: projectiles for new spells go after the original ones.
+	Frostbolt,
+	FrostboltExplosion,
+	StrengthBuff,
 
-	LAST = OrangeExplosion,
+	LAST = StrengthBuff,
 	Null = -1,
 	// clang-format on
 };
