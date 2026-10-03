@@ -107,6 +107,11 @@ RedExplosion	AddMissileExplosion	ProcessMissileExplosion	SpellFireHit		RedFlareE
 BlueExplosion	AddMissileExplosion	ProcessMissileExplosion	SpellFireHit		BlueFlareExplosion	Physical	
 BlueExplosion2	AddMissileExplosion	ProcessMissileExplosion	SpellFireHit		BlueFlareExplosion2	Physical	
 OrangeExplosion	AddMissileExplosion	ProcessMissileExplosion	SpellFireHit		OrangeFlareExplosion	Physical	
-Frostbolt	AddFirebolt	ProcessGenericProjectile	SpellFirebolt	SpellFireHit	Fireball	Fire	Blockable
+Frostbolt	AddFirebolt	ProcessGenericProjectile	SpellFirebolt	SpellFireHit	Fireball	Ice	Blockable
 FrostboltExplosion	AddMissileExplosion	ProcessMissileExplosion			MagmaBallExplosion	Physical	
 StrengthBuff	AddStrengthBuff					Physical,Invisible	
+Corruption	AddCorruption					Shadow,Invisible	
+CorruptionExplosion	AddMissileExplosion	ProcessMissileExplosion			MagmaBallExplosion	Physical	
+FireAuraBuff	AddFireAuraBuff					Physical,Invisible	
+FireAuraPulse	AddAuraPulseVisual	ProcessAuraPulseVisual			FlashBottom	Physical	
+FireAuraPulseBack	AddAuraPulseVisual	ProcessAuraPulseVisual			FlashTop	Physical	

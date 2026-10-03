@@ -27,6 +27,7 @@
 #include "cursor.h"
 #include "dead.h"
 #include "diablo.h"
+#include "dots.h"
 #include "effects.h"
 #include "engine/clx_sprite.hpp"
 #include "engine/direction.hpp"
@@ -45,6 +46,7 @@
 #include "multi.h"
 #include "objects.h"
 #include "player.h"
+#include "qol/floatingnumbers.h"
 #include "sound_effect_enums.h"
 #include "spell_xp.h"
 #include "tables/itemdat.h"
@@ -2472,6 +2474,80 @@ void AddHealing(Missile &missile, AddMissileParameter & /*parameter*/)
 
 	missile._miDelFlag = true;
 	RedrawComponent(PanelDrawComponent::Health);
+}
+
+void AddCorruption(Missile &missile, AddMissileParameter &parameter)
+{
+	// Nothing flies through the air: the effect lands directly on the monster under the cursor.
+	missile._miDelFlag = true;
+
+	const std::optional<Point> targetMonsterPosition = FindClosestValidPosition(
+	    [](Point target) {
+		    if (!InDungeonBounds(target))
+			    return false;
+		    const int monsterId = std::abs(dMonster[target.x][target.y]) - 1;
+		    if (monsterId < 0)
+			    return false;
+		    const Monster &monster = Monsters[monsterId];
+		    return monster.isPossibleToHit() && !monster.isPlayerMinion();
+	    },
+	    parameter.dst, 0, 2);
+
+	if (!targetMonsterPosition) {
+		parameter.spellFizzled = true;
+		return;
+	}
+
+	const int monsterId = std::abs(dMonster[targetMonsterPosition->x][targetMonsterPosition->y]) - 1;
+	Monster &monster = Monsters[monsterId];
+	const Player &player = Players[missile._misource];
+
+	// Every player sees the burst on the monster and the monster wakes up.
+	missile.position.tile = *targetMonsterPosition;
+	missile.position.start = *targetMonsterPosition;
+	AddMissile(*targetMonsterPosition, { 0, 0 }, Direction::South, MissileID::CorruptionExplosion, missile._micaster, missile._misource, 0, 0, &missile);
+	monster.tag(player);
+	if (monster.activeForTicks == 0) {
+		monster.activeForTicks = UINT8_MAX;
+		monster.position.last = player.position.tile;
+	}
+
+	// The effect itself is kept and run only on the caster's own PC.
+	if (&player != MyPlayer)
+		return;
+
+	// A separate id from the damage numbers, so the game does not merge the two.
+	const int textId = 1000 + monsterId;
+	if (monster.isImmune(MissileID::Corruption, DamageType::Shadow)) {
+		AddFloatingNumber(monster.position.tile, { 0, 0 }, "Immune", UiFlags::ColorWhite | UiFlags::FontSize12, textId);
+		return;
+	}
+	const int stacks = AddMonsterDot(monster, DotID::Corruption);
+	AddFloatingNumber(monster.position.tile, { 0, 0 }, StrCat("Corruption x", stacks), UiFlags::ColorBlue | UiFlags::FontSize12, textId);
+}
+
+void AddFireAuraBuff(Missile &missile, AddMissileParameter & /*parameter*/)
+{
+	// The aura lives on the player, so this effect has done its job the moment it is created.
+	missile._miDelFlag = true;
+	ActivateBuff(Players[missile._misource], BuffID::FireAura);
+}
+
+void AddAuraPulseVisual(Missile &missile, AddMissileParameter & /*parameter*/)
+{
+	// A short burst with no effect of its own, drawn beneath the characters standing on it.
+	missile._miPreFlag = true;
+	missile.duration = missile._miAnimLen;
+}
+
+void ProcessAuraPulseVisual(Missile &missile)
+{
+	missile.duration--;
+	if (missile.duration <= 0) {
+		missile._miDelFlag = true;
+		return;
+	}
+	PutMissile(missile);
 }
 
 void AddStrengthBuff(Missile &missile, AddMissileParameter & /*parameter*/)

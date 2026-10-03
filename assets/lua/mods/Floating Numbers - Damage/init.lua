@@ -10,6 +10,8 @@ local DAMAGE_TYPE = {
     LIGHTNING = 2,
     MAGIC = 3,
     ACID = 4,
+    SHADOW = 5, -- Essence Mod
+    ICE = 6, -- Essence Mod
 }
 
 local function get_damage_style(damage_val, damage_type)
@@ -30,6 +32,9 @@ local function get_damage_style(damage_val, damage_type)
         [DAMAGE_TYPE.LIGHTNING] = render.UiFlags.ColorBlue,
         [DAMAGE_TYPE.MAGIC] = render.UiFlags.ColorOrange,
         [DAMAGE_TYPE.ACID] = render.UiFlags.ColorYellow,
+        -- Essence Mod: the game's "blue" text is drawn in the same slate-blue colours as the shadow tint.
+        [DAMAGE_TYPE.SHADOW] = render.UiFlags.ColorBlue,
+        [DAMAGE_TYPE.ICE] = render.UiFlags.ColorIce,
     }
 
     local type_style = damage_type_styles[damage_type]

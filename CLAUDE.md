@@ -6,6 +6,10 @@ The goal is to turn Diablo 1 into a classless, build-your-own-character game: es
 loadouts, a real curse system, learn-by-doing ability progression, stat-driven spells, and mana
 regeneration. Full design notes live in `docs/MOD_DESIGN.md` — read it before starting any feature.
 
+Inspired by the *He Who Fights With Monsters* books (essences, awakening stones, Astral). **Keep it
+quick and simple:** a few major changes and many small ones. Prefer reusing what Diablo already does
+over building new systems, and offer the smaller version of an idea first.
+
 **Primary target: Hellfire** (decided 2026-10-02). The mod relies on Hellfire's extra dungeons,
 monsters, spells, and its 5-tab spellbook. Write shared-engine features so they also work in plain
 Diablo where that costs nothing, but test on Hellfire characters and build Hellfire-specific UI.

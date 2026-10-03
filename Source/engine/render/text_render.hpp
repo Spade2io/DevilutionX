@@ -58,6 +58,8 @@ enum text_color : uint8_t {
 	ColorInGameDialogWhite,  // Dialog white in-game
 	ColorInGameDialogYellow, // Dialog yellow in-game
 	ColorInGameDialogRed,    // Dialog red in-game
+
+	ColorIce, // Essence Mod: bright blue
 };
 
 constexpr GameFontTables GetFontSizeFromUiFlags(UiFlags flags)

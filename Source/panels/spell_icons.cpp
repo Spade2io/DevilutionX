@@ -81,6 +81,8 @@ const SpellIcon SpellITbl[] = {
 /* SpellID::RuneOfStone      */ SpellIcon::PentaStar,
 /* SpellID::Frostbolt        */ SpellIcon::Firebolt,
 /* SpellID::Strength         */ SpellIcon::Berserk, // icon 47
+/* SpellID::Corruption       */ SpellIcon::RedSkull, // icon 30, unused by vanilla
+/* SpellID::FireAura         */ SpellIcon::FireCloud, // icon 32, unused by vanilla
 	// clang-format on
 };
 

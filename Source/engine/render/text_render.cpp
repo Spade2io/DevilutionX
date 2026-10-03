@@ -84,7 +84,7 @@ constexpr std::array<int, 6> LineHeights = { 12, 26, 38, 42, 50, 22 };
 constexpr int SmallFontTallLineHeight = 16;
 std::array<int, 6> BaseLineOffset = { -3, -2, -3, -6, -7, 3 };
 
-std::array<const char *, 19> ColorTranslations = {
+std::array<const char *, 20> ColorTranslations = {
 	"fonts\\goldui.trn",
 	"fonts\\grayui.trn",
 	"fonts\\golduis.trn",
@@ -108,12 +108,16 @@ std::array<const char *, 19> ColorTranslations = {
 	"fonts\\gamedialogwhite.trn",
 	"fonts\\gamedialogyellow.trn",
 	"fonts\\gamedialogred.trn",
+
+	"fonts\\ice.trn",
 };
 
-std::array<std::optional<std::array<uint8_t, 256>>, 19> ColorTranslationsData;
+std::array<std::optional<std::array<uint8_t, 256>>, 20> ColorTranslationsData;
 
 text_color GetColorFromFlags(UiFlags flags)
 {
+	if (HasAllOf(flags, UiFlags::ColorIce))
+		return ColorIce;
 	if (HasAnyOf(flags, UiFlags::ColorWhite))
 		return ColorWhite;
 	if (HasAnyOf(flags, UiFlags::ColorBlue))

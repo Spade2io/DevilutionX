@@ -110,7 +110,7 @@ std::string GetDetailString()
 
 std::string GetStateString()
 {
-	constexpr std::array<const char *, 3> DifficultyStrs = { N_("Normal"), N_("Nightmare"), N_("Hell") };
+	constexpr std::array<const char *, 3> DifficultyStrs = { N_("Iron"), N_("Bronze"), N_("Silver") };
 	const std::string_view difficultyStr = _(DifficultyStrs[sgGameInitInfo.nDifficulty]);
 	return FormatRuntime(_(/* TRANSLATORS: Discord state i.e. "Nightmare difficulty" */ "{} difficulty"), difficultyStr);
 }

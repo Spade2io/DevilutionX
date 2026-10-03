@@ -98,7 +98,8 @@ bool TargetsMonster(SpellID id)
 	    || id == SpellID::Inferno
 	    || id == SpellID::Lightning
 	    || id == SpellID::StoneCurse
-	    || id == SpellID::FlameWave;
+	    || id == SpellID::FlameWave
+	    || id == SpellID::Corruption;
 }
 
 int GetManaAmount(const Player &player, SpellID sn)

@@ -34,6 +34,8 @@ enum class UiFlags : uint32_t {
 	ColorOrange        = 1 << 20,
 	ColorButtonface    = 1 << 21,
 	ColorButtonpushed  = 1 << 22,
+	/** Essence Mod: bright blue. Every bit is taken, so this is a pair of colour bits never used together. */
+	ColorIce           = (1 << 19) | (1 << 15),
 
 	AlignCenter        = 1 << 23,
 	AlignRight         = 1 << 24,

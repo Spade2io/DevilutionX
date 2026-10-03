@@ -12,6 +12,15 @@ you equip, the abilities you slot, how you've used them, and your stats** — no
 Existing classes and their sprites stay as body/appearance choices (plus palette recolors). No new
 character art is planned; identity comes from abilities and effects instead.
 
+**Inspiration:** the *He Who Fights With Monsters* books. Essences, awakening stones and the Astral
+category come from there. The aim is for play to feel like that world.
+
+**Guiding principle (2026-10-03): keep it quick and simple.** This is a fun project, not a rebuild
+of the game. A few major changes and a lot of small ones, each simple and rewarding on its own.
+When there is a choice, reuse what Diablo already does over building a new system, and prefer the
+smaller version of an idea. Bigger options noted elsewhere in this document (a dedicated server,
+drawing in more colours, percentage resistances) are recorded as possibilities, not plans.
+
 ---
 
 ## 1. Essence pages (spellbook rework)
@@ -341,3 +350,153 @@ Buffs, auras and damage-over-time are temporary state: held in memory, never sav
 - **XP message:** one line per gain, e.g. `Firebolt 50 XP, Strength 5 XP`.
 - **Buff bar:** a row of spell icons across the top-left of the screen, one per active buff. Hovering
   an icon shows what it gives, e.g. `Strength: +10 Strength`. Icons will be replaced later.
+
+---
+
+## Multiplayer and enemy debuffs (discussion notes, 2026-10-03)
+Multiplayer is a firm goal. Nothing in the mod has been tested with two players yet.
+
+**How the game syncs today (read from `Source/sync.cpp`, `Source/nthread.cpp`):** there is no server.
+Every PC runs its own copy of every monster. Each PC sends a bundle to the others every 2 ticks
+(10 times a second), capped at 512 bytes: the player's actions first, then 9-byte monster
+corrections (position, health, target) for the monsters most in need. On receipt, the version from
+the player closest to the monster wins; a copy within 2 tiles walks to the reported spot, otherwise
+it snaps there.
+
+**Enemy debuffs (curses, damage over time, slows):**
+- Not fixed slots. Each monster gets a list of active effects that grows and shrinks, with a high
+  safety cap (around 32). Twenty or more effects per monster costs nothing noticeable.
+- Each effect records: type, strength, stacks, time left, caster, and the spell it came from (for XP).
+- Same effect from the same caster refreshes; different casters' effects run side by side;
+  different effects coexist. Whether damage over time stacks or only refreshes is still open.
+- Memory only, never saved; gone when the level is left.
+- **Multiplayer rule: the caster's PC decides, then announces.** One small message when an effect
+  is applied or changed, stating the *result* ("monster 37's Burn is now 3 stacks, 8 seconds left"),
+  not the change, so a missed or reordered message corrects itself. One more message for early
+  removal. Every PC runs the timers itself; ticks are never announced. Only the caster's PC deals
+  damage-over-time damage; the existing health sync carries it to the others.
+- Each effect is owned by its caster; only the owner announces it. Effects from different casters
+  stay separate, so one player's spell does not modify another's effects (revisit if a spell needs it).
+- A burst (a curse landing on 30 monsters) should be one compact message: effect details once, then
+  the list of monsters.
+- Works well for damage over time, stat curses and buffs; acceptably for slows. Effects that change
+  monster decisions (fear, confuse, taunt) and effects that jump between monsters are the weak spot
+  of "every PC runs its own copy".
+
+**Possible later steps, in order:** (1) debuff announcements as above; (2) one PC in charge of
+monsters on a level, building on the existing "level owner" idea; (3) a host that runs with no
+player and no screen, i.e. a dedicated server. Each step is useful alone and none is wasted by the
+next. Diablo 2 and modern co-op games (e.g. Enshrouded) use a server that owns the world; getting
+all the way there means separating "what decides" from "what draws" across the codebase.
+
+**Later item:** explore raising the 512-byte bundle cap and the 10-per-second rate, both chosen for
+1996 modems.
+
+**Known single-player-only gaps so far:** levels of spells numbered 52 and up are not shared with
+other players (the spell-level message covers 0–51).
+
+### Decision (2026-10-03): damage over time is private to the caster's PC
+Supersedes the damage-over-time parts of the notes above.
+
+- **How damage is shared today:** each hit sends a 7-byte message, "monster N took D damage"
+  (`CMD_MONSTDAMAGE`). Other PCs subtract it but hold the monster at 1 health; only the PC that lands
+  the killing blow sends the death message.
+- **Damage-over-time effects (bleed, burn, poison) are never announced.** Each player's PC keeps its
+  own effects, deals the ticks, and reports only the damage through the existing message.
+- **Every player has their own version of an effect.** Two players putting the same bleed on one
+  monster run independently and both deal damage. No ownership or "whose is stronger" rules.
+- **Only debuffs that change a monster's numbers or behaviour are announced** (takes more damage,
+  weaker armour, slow), using the "caster's PC decides, then announces the result" rule.
+- **Tick rate:** once or twice a second. The budget is about 5,000 bytes a second per player; 30
+  monsters ticking once a second is about 4% of it, and ticking every game tick would be about 80%.
+  If faster ticks are wanted, total the damage per monster and send one combined report per bundle.
+- **Given up for now:** other players cannot see your effect on a monster, and spells cannot react
+  to another player's damage-over-time effects. Both can be added later with a display-only
+  announcement, without changing how the damage flows.
+
+---
+
+## Damage types and resistances (decided 2026-10-03)
+**Two layers.** A spell has a *damage type* (as many as wanted: fire, ice, lightning, earth, air,
+bleed, poison, decay, light, darkness, arcane, ...). Every damage type belongs to exactly one of
+three *resistance categories*, and only the categories have resistances. New damage types can be
+added freely without touching gear, item properties, the character sheet or monster resistances.
+
+| Category | Covers | Replaces today's slot |
+|---|---|---|
+| **Elemental** | fire, ice, lightning, earth, air and the like | Fire |
+| **Natural** | bleeds, poisons, decay | Lightning |
+| **Astral** | light, darkness, arcane; the foundational, ephemeral things | Magic |
+
+- **Physical stays outside all three.** It has no resistance. Armour is left exactly as it is: it
+  reduces the chance to be hit and never reduces damage.
+- **What the game has today:** five damage types (Physical, Fire, Lightning, Magic, Acid). Monsters
+  have on/off switches (resistant = quarter damage, immune = none) for Magic, Fire and Lightning,
+  plus Acid immunity. Players have three percentages from gear (Magic, Fire, Lightning), not saved.
+- **The rename needs a re-sort of the data,** not just new labels: monster resistances in the
+  monster table were tuned for the old meanings (a "lightning immune" monster would become "Natural
+  immune"), existing resistance items change meaning, and every existing spell needs filing into a
+  category. Likely filing: fire and lightning spells to Elemental, Acid to Natural; Holy Bolt, Bone
+  Spirit, Blood Star, Elemental and Apocalypse still to be placed.
+- **Monster resistances stay as they are (decided 2026-10-03):** the existing on/off system, where a
+  monster is normal, resistant (quarter damage) or immune to each category. No percentages, no
+  weaknesses and no damage bonuses. The game already works on "full damage, and down from there".
+- **Save format is not a limit here.** Monster resistances come from the monster's type, so anything
+  beyond the original saved switches can live in memory and be refilled from the monster table on
+  load. That also allows percentages and weaknesses later, which the on/off switches cannot express.
+- **Floating damage numbers** are on (the built-in "Floating Numbers - Damage" script); floating XP
+  numbers stay off. Text comes in a fixed set of roughly eight to ten colours, so that is about how
+  many damage types can each have a distinct colour.
+
+### Damage over time (first one built 2026-10-03: Corruption)
+- Code: `Source/dots.h/.cpp`. Each monster has a list of active effects, held in memory on this PC
+  only; cleared when a level is set up. Only the damage is reported to other players.
+- **How every damage-over-time effect works in this mod:** each cast adds a stack and refreshes the
+  duration. Damage per tick is per stack, so it starts far below a direct-damage spell and builds
+  with repeated casts.
+- **Corruption** (spell 54, icon 30, Magic casting animation, 6 mana): cast on a monster like Stone
+  Curse, with no projectile. A burst, a flash and "Corruption xN" text show it landed; "Immune" shows
+  if it cannot. It cannot miss and has no line-of-sight check. It does no damage
+  when it lands and attaches one stack. 1 shadow damage per stack every 2 seconds, for 20 seconds
+  (the 20 seconds is a placeholder). Damage is kept in 64ths, so fractions work: a resistant monster
+  takes a quarter (0.25 per stack) and an immune one takes none.
+- **Shadow** is the first new damage type. It belongs to the Astral category, which is checked
+  against today's Magic resistance (`GetResistanceCategory` in `Source/tables/misdat.h`).
+- **One colour per spell** (`GetSpellTint` in `Source/essence_tint.cpp`): the projectile, the impact,
+  the awakening stone (in the bag and on the ground) and the flash on the monster all use it.
+  Shadow's colour is the dark two-thirds of the slate-blue ramp, the nearest the shared palette has
+  to purple. Floating numbers for shadow use the game's "blue" text, which is that same ramp.
+- **The flash:** a monster is drawn in the spell's colour for about a third of a second each time an
+  effect ticks. Effects keep the rhythm they started with, so several different effects on one
+  monster flash at staggered moments in their own colours.
+
+- **Ice** (added 2026-10-03) is the second new damage type, in the Elemental category (checked
+  against today's Fire resistance). Frostbolt deals ice damage. Its colour is the bright blue: bolt,
+  impact, awakening stone and floating numbers. The numbers use a new bright blue text colour
+  (`ColorIce`, `assets/fonts/ice.trn`).
+
+### Default damage scaling (decided 2026-10-03)
+Unless Bryan says otherwise, **every new spell scales its damage by 12.5% per spell level after the
+first, compounding** (`ScaleDamageForSpellLevel` in `Source/dots.cpp`). This is the rule Fireball,
+Flash and Nova already use. Level 1 is the base, level 5 is 1.6x, level 10 is 2.9x, level 15 is 5.2x.
+Damage is held in 64ths, so the fractions are real. Corruption and Fire Aura both use it. Frostbolt
+copies Firebolt's own formula. Stats do not add to damage yet.
+
+### Damage auras (first one built 2026-10-03: Fire Aura)
+- A damage aura is a persistent buff (`Source/buffs.cpp`) that pulses. It lasts until death.
+- **Fire Aura** (spell 55, icon 32, Fire casting animation, 10 mana, castable in town): every 2
+  seconds, 1 fire damage (scaled by level) to each monster within reach that it has a clear line to;
+  it does not reach through walls. Reach is 2 tiles at level 1 and 1 more every two levels.
+- Each pulse goes through the same path as a damage-over-time tick: resistances, spell XP, floating
+  numbers, and the monster flashing in the spell's colour (red). It wakes whatever it touches.
+- A damage aura earns XP from its own damage only; it does not take the tenth share that other
+  buffs get.
+- **Visual:** the Flash burst, turned red, drawn under the characters and lowered to foot level. It
+  only plays on a pulse when at least one monster is in reach, to keep exploring quiet.
+- **Multiplayer:** casting is already announced, so every PC knows who has the aura and shows the
+  burst. Only the owner's PC deals damage, reported with the normal damage message.
+
+### Difficulty names (changed 2026-10-03)
+The three difficulties are named after the books' ranks: **Iron** (was Normal), **Bronze** (was
+Nightmare) and **Silver** (was Hell). Only the displayed names changed; the rules, the level
+requirements for multiplayer (20 and 30) and the internal names in the code are untouched.

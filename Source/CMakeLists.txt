@@ -29,6 +29,7 @@ set(libdevilutionx_SRCS
   plrmsg.cpp
   portal.cpp
   buffs.cpp
+  dots.cpp
   essence_tint.cpp
   restrict.cpp
   spell_xp.cpp

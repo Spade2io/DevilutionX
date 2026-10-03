@@ -172,6 +172,8 @@ std::expected<MissileDataFlags, std::string> ParseMissileDataFlag(std::string_vi
 	if (value == "Lightning") return MissileDataFlags::Lightning;
 	if (value == "Magic") return MissileDataFlags::Magic;
 	if (value == "Acid") return MissileDataFlags::Acid;
+	if (value == "Shadow") return MissileDataFlags::Shadow;
+	if (value == "Ice") return MissileDataFlags::Ice;
 	if (value == "Arrow") return MissileDataFlags::Arrow;
 	if (value == "Invisible") return MissileDataFlags::Invisible;
 	return std::unexpected("Unknown enum value");
@@ -233,6 +235,9 @@ std::expected<MissileData::AddFn, std::string> ParseMissileAddFn(std::string_vie
 	if (value == "AddApocalypseBoom") return AddApocalypseBoom;
 	if (value == "AddHealing") return AddHealing;
 	if (value == "AddStrengthBuff") return AddStrengthBuff;
+	if (value == "AddCorruption") return AddCorruption;
+	if (value == "AddFireAuraBuff") return AddFireAuraBuff;
+	if (value == "AddAuraPulseVisual") return AddAuraPulseVisual;
 	if (value == "AddHealOther") return AddHealOther;
 	if (value == "AddElemental") return AddElemental;
 	if (value == "AddIdentify") return AddIdentify;
@@ -288,6 +293,7 @@ std::expected<MissileData::ProcessFn, std::string> ParseMissileProcessFn(std::st
 	if (value == "ProcessChainLightning") return ProcessChainLightning;
 	if (value == "ProcessWeaponExplosion") return ProcessWeaponExplosion;
 	if (value == "ProcessMissileExplosion") return ProcessMissileExplosion;
+	if (value == "ProcessAuraPulseVisual") return ProcessAuraPulseVisual;
 	if (value == "ProcessAcidSplate") return ProcessAcidSplate;
 	if (value == "ProcessTeleport") return ProcessTeleport;
 	if (value == "ProcessStoneCurse") return ProcessStoneCurse;

@@ -29,6 +29,7 @@
 #include "engine/points_in_rectangle_range.hpp"
 #include "engine/render/clx_render.hpp"
 #include "engine/render/primitive_render.hpp"
+#include "essence_tint.h"
 #include "engine/trn.hpp"
 #include "headless_mode.hpp"
 #include "hwcursor.hpp"
@@ -552,10 +553,13 @@ void FreeHalfSizeItemSprites()
 void DrawItem(const Item &item, const Surface &out, Point position, ClxSprite clx)
 {
 	const bool usable = !IsInspectingPlayer() ? item._iStatFlag : InspectPlayer->CanUseItem(item);
-	if (usable) {
-		ClxDraw(out, position, clx);
-	} else {
+	if (!usable) {
 		ClxDrawTRN(out, position, clx, GetInfravisionTRN());
+	} else if (const std::optional<EssenceTint> tint = GetItemTint(item); tint) {
+		// Essence Mod: an awakening stone is drawn in its spell's colour.
+		ClxDrawTRN(out, position, clx, GetEssenceTintTrn(*tint));
+	} else {
+		ClxDraw(out, position, clx);
 	}
 }
 

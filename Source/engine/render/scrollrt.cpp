@@ -26,6 +26,7 @@
 #include "cursor.h"
 #include "buffs.h"
 #include "dead.h"
+#include "dots.h"
 #include "diablo_msg.hpp"
 #include "doom.h"
 #include "engine/backbuffer_state.hpp"
@@ -347,9 +348,16 @@ void DrawMissilePrivate(const Surface &out, const Missile &missile, Point target
 	const ClxSprite sprite = (*missile._miAnimData)[missile._miAnimFrame - 1];
 	if (missile._miUniqTrans != 0) {
 		ClxDrawTRN(out, missileRenderPosition, sprite, Monsters[missile._misource].uniqueMonsterTRN.get());
+	} else if (IsAnyOf(missile._mitype, MissileID::FireAuraPulse, MissileID::FireAuraPulseBack)) {
+		// Essence Mod: the aura pulse reuses the Flash burst, turned red and lowered from waist height to the feet.
+		constexpr int FeetOffset = 24;
+		ClxDrawTRN(out, missileRenderPosition + Displacement { 0, FeetOffset }, sprite, GetEssenceTintTrn(EssenceTint::VividRed));
 	} else if (IsAnyOf(missile._mitype, MissileID::Frostbolt, MissileID::FrostboltExplosion)) {
 		// Essence Mod: Frostbolt reuses Firebolt's art, drawn through a blue tint.
 		ClxDrawTRN(out, missileRenderPosition, sprite, GetEssenceTintTrn(EssenceTint::VividBlue));
+	} else if (IsAnyOf(missile._mitype, MissileID::Corruption, MissileID::CorruptionExplosion)) {
+		// Essence Mod: Corruption reuses Firebolt's art, drawn through the shadow tint.
+		ClxDrawTRN(out, missileRenderPosition, sprite, GetEssenceTintTrn(EssenceTint::Shadow));
 	} else if (missile._miLightFlag) {
 		ClxDrawLight(out, missileRenderPosition, sprite, lightTableIndex);
 	} else {
@@ -393,9 +401,12 @@ void DrawMonster(const Surface &out, Point tilePosition, Point targetBufferPosit
 		ClxDrawTRN(out, targetBufferPosition, sprite, GetInfravisionTRN());
 		return;
 	}
-	uint8_t *trn = nullptr;
+	const uint8_t *trn = nullptr;
 	if (monster.isUnique())
 		trn = monster.uniqueMonsterTRN.get();
+	// Essence Mod: a monster flashes in the spell's colour each time damage over time ticks.
+	if (const uint8_t *pulseTrn = GetMonsterDotPulseTrn(monster); pulseTrn != nullptr)
+		trn = pulseTrn;
 	if (monster.mode == MonsterMode::Petrified)
 		trn = GetStoneTRN();
 	if (MyPlayer->_pInfraFlag && lightTableIndex > 8)
@@ -724,7 +735,12 @@ void DrawItem(const Surface &out, int8_t itemIndex, Point targetBufferPosition, 
 	if (!IsPlayerInStore() && (itemIndex == pcursitem || AutoMapShowItems)) {
 		ClxDrawOutlineSkipColorZero(out, GetOutlineColor(item, false), position, sprite);
 	}
-	ClxDrawLight(out, position, sprite, lightTableIndex);
+	if (const std::optional<EssenceTint> tint = GetItemTint(item); tint) {
+		// Essence Mod: an awakening stone on the ground is drawn in its spell's colour.
+		ClxDrawTRN(out, position, sprite, GetEssenceTintTrn(*tint));
+	} else {
+		ClxDrawLight(out, position, sprite, lightTableIndex);
+	}
 	if (item.AnimInfo.isLastFrame() || item._iCurs == ICURS_MAGIC_ROCK)
 		AddItemToLabelQueue(itemIndex, position);
 }

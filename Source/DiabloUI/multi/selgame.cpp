@@ -237,13 +237,13 @@ void selgame_GameSelection_Focus(size_t value)
 			std::string_view difficulty;
 			switch (gameInfo.gameData.nDifficulty) {
 			case DIFF_NORMAL:
-				difficulty = _("Normal");
+				difficulty = _("Iron");
 				break;
 			case DIFF_NIGHTMARE:
-				difficulty = _("Nightmare");
+				difficulty = _("Bronze");
 				break;
 			case DIFF_HELL:
-				difficulty = _("Hell");
+				difficulty = _("Silver");
 				break;
 			}
 			infoString.append(FormatRuntime(_(/* TRANSLATORS: {:s} means: Game Difficulty. */ "Difficulty: {:s}"), difficulty));
@@ -336,9 +336,9 @@ void selgame_GameSelection_Select(size_t value)
 		const SDL_Rect rect4 = { (Sint16)(uiPosition.x + 299), (Sint16)(uiPosition.y + 211), 295, 35 };
 		vecSelGameDialog.push_back(std::make_unique<UiArtText>(_("Select Difficulty").data(), rect4, UiFlags::AlignCenter | UiFlags::FontSize30 | UiFlags::ColorUiSilver, 3));
 
-		vecSelGameDlgItems.push_back(std::make_unique<UiListItem>(_("Normal"), DIFF_NORMAL));
-		vecSelGameDlgItems.push_back(std::make_unique<UiListItem>(_("Nightmare"), DIFF_NIGHTMARE));
-		vecSelGameDlgItems.push_back(std::make_unique<UiListItem>(_("Hell"), DIFF_HELL));
+		vecSelGameDlgItems.push_back(std::make_unique<UiListItem>(_("Iron"), DIFF_NORMAL));
+		vecSelGameDlgItems.push_back(std::make_unique<UiListItem>(_("Bronze"), DIFF_NIGHTMARE));
+		vecSelGameDlgItems.push_back(std::make_unique<UiListItem>(_("Silver"), DIFF_HELL));
 
 		vecSelGameDialog.push_back(std::make_unique<UiList>(vecSelGameDlgItems, vecSelGameDlgItems.size(), uiPosition.x + 300, (uiPosition.y + 282), 295, 26, UiFlags::AlignCenter | UiFlags::FontSize24 | UiFlags::ColorUiGold));
 
@@ -397,16 +397,16 @@ void selgame_Diff_Focus(size_t value)
 {
 	switch (vecSelGameDlgItems[value]->m_value) {
 	case DIFF_NORMAL:
-		CopyUtf8(selgame_Label, _("Normal"), sizeof(selgame_Label));
-		CopyUtf8(selgame_Description, _("Normal Difficulty\nThis is where a starting character should begin the quest to defeat Diablo."), sizeof(selgame_Description));
+		CopyUtf8(selgame_Label, _("Iron"), sizeof(selgame_Label));
+		CopyUtf8(selgame_Description, _("Iron Rank\nThis is where a starting character should begin the quest to defeat Diablo."), sizeof(selgame_Description));
 		break;
 	case DIFF_NIGHTMARE:
-		CopyUtf8(selgame_Label, _("Nightmare"), sizeof(selgame_Label));
-		CopyUtf8(selgame_Description, _("Nightmare Difficulty\nThe denizens of the Labyrinth have been bolstered and will prove to be a greater challenge. This is recommended for experienced characters only."), sizeof(selgame_Description));
+		CopyUtf8(selgame_Label, _("Bronze"), sizeof(selgame_Label));
+		CopyUtf8(selgame_Description, _("Bronze Rank\nThe denizens of the Labyrinth have been bolstered and will prove to be a greater challenge. This is recommended for experienced characters only."), sizeof(selgame_Description));
 		break;
 	case DIFF_HELL:
-		CopyUtf8(selgame_Label, _("Hell"), sizeof(selgame_Label));
-		CopyUtf8(selgame_Description, _("Hell Difficulty\nThe most powerful of the underworld's creatures lurk at the gateway into Hell. Only the most experienced characters should venture in this realm."), sizeof(selgame_Description));
+		CopyUtf8(selgame_Label, _("Silver"), sizeof(selgame_Label));
+		CopyUtf8(selgame_Description, _("Silver Rank\nThe most powerful of the underworld's creatures lurk at the gateway into Hell. Only the most experienced characters should venture in this realm."), sizeof(selgame_Description));
 		break;
 	}
 	CopyUtf8(selgame_Description, WordWrapString(selgame_Description, DESCRIPTION_WIDTH), sizeof(selgame_Description));
@@ -421,9 +421,9 @@ bool IsDifficultyAllowed(int value)
 	selgame_Free();
 
 	if (value == 1)
-		UiSelOkDialog(title, _("Your character must reach level 20 before you can enter a multiplayer game of Nightmare difficulty.").data(), false);
+		UiSelOkDialog(title, _("Your character must reach level 20 before you can enter a multiplayer game of Bronze rank.").data(), false);
 	if (value == 2)
-		UiSelOkDialog(title, _("Your character must reach level 30 before you can enter a multiplayer game of Hell difficulty.").data(), false);
+		UiSelOkDialog(title, _("Your character must reach level 30 before you can enter a multiplayer game of Silver rank.").data(), false);
 
 	selgame_Init();
 

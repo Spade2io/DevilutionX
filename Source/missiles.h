@@ -377,6 +377,13 @@ void AddStoneCurse(Missile &missile, AddMissileParameter &parameter);
 void AddGolem(Missile &missile, AddMissileParameter &parameter);
 void AddApocalypseBoom(Missile &missile, AddMissileParameter &parameter);
 void AddHealing(Missile &missile, AddMissileParameter &parameter);
+/** Essence Mod: lands a stack of Corruption directly on the monster under the cursor. */
+void AddCorruption(Missile &missile, AddMissileParameter &parameter);
+/** Essence Mod: switches the caster's Fire Aura on. */
+void AddFireAuraBuff(Missile &missile, AddMissileParameter &parameter);
+/** Essence Mod: the burst shown at a player's feet when their aura pulses. It has no effect of its own. */
+void AddAuraPulseVisual(Missile &missile, AddMissileParameter &parameter);
+void ProcessAuraPulseVisual(Missile &missile);
 /** Essence Mod: switches the caster's Strength buff on. */
 void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter);
 void AddHealOther(Missile &missile, AddMissileParameter &parameter);

@@ -164,6 +164,11 @@ std::expected<MissileID, std::string> ParseMissileId(std::string_view value)
 	if (value == "Frostbolt") return MissileID::Frostbolt;
 	if (value == "FrostboltExplosion") return MissileID::FrostboltExplosion;
 	if (value == "StrengthBuff") return MissileID::StrengthBuff;
+	if (value == "Corruption") return MissileID::Corruption;
+	if (value == "CorruptionExplosion") return MissileID::CorruptionExplosion;
+	if (value == "FireAuraBuff") return MissileID::FireAuraBuff;
+	if (value == "FireAuraPulse") return MissileID::FireAuraPulse;
+	if (value == "FireAuraPulseBack") return MissileID::FireAuraPulseBack;
 	return std::unexpected("Unknown enum value");
 }
 
@@ -228,6 +233,8 @@ std::expected<SpellID, std::string> ParseSpellId(std::string_view value)
 	if (value == "RuneOfStone") return SpellID::RuneOfStone;
 	if (value == "Frostbolt") return SpellID::Frostbolt;
 	if (value == "Strength") return SpellID::Strength;
+	if (value == "Corruption") return SpellID::Corruption;
+	if (value == "FireAura") return SpellID::FireAura;
 	return std::unexpected("Unknown enum value");
 }
 

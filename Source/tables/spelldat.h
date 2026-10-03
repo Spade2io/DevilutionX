@@ -85,8 +85,10 @@ enum class SpellID : int8_t {
 	// Essence Mod: new spells take the unused numbers 52 to 63. Never renumber the spells above.
 	Frostbolt,
 	Strength,
+	Corruption,
+	FireAura,
 
-	LAST = Strength,
+	LAST = FireAura,
 	Invalid = -1,
 };
 
@@ -213,8 +215,13 @@ enum class MissileID : int8_t {
 	Frostbolt,
 	FrostboltExplosion,
 	StrengthBuff,
+	Corruption,
+	CorruptionExplosion,
+	FireAuraBuff,
+	FireAuraPulse,
+	FireAuraPulseBack,
 
-	LAST = StrengthBuff,
+	LAST = FireAuraPulseBack,
 	Null = -1,
 	// clang-format on
 };

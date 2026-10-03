@@ -119,7 +119,7 @@ void ShareExperienceWithActiveBuffs(Player &player, uint32_t gained, std::string
 {
 	for (size_t i = 0; i <= static_cast<size_t>(BuffID::LAST); i++) {
 		const auto buff = static_cast<BuffID>(i);
-		if (!IsBuffActive(player, buff))
+		if (!IsBuffActive(player, buff) || !BuffSharesExperience(buff))
 			continue;
 		const SpellID buffSpell = GetBuffSpell(buff);
 		if (buffSpell == SpellID::Invalid || player._pSplLvl[static_cast<size_t>(buffSpell)] == 0)

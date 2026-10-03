@@ -39,7 +39,9 @@
 #include "diablo.h"
 #include "diablo_msg.hpp"
 #include "discord/discord.h"
+#include "buffs.h"
 #include "doom.h"
+#include "dots.h"
 #include "encrypt.h"
 #include "engine/backbuffer_state.hpp"
 #include "engine/clx_sprite.hpp"
@@ -1535,6 +1537,8 @@ void GameLogic()
 		if (!DebugInvisible)
 #endif
 			ProcessMonsters();
+		ProcessMonsterDots(); // Essence Mod: damage-over-time effects
+		ProcessBuffs();       // Essence Mod: aura pulses
 		gGameLogicStep = GameLogicStep::ProcessObjects;
 		ProcessObjects();
 		gGameLogicStep = GameLogicStep::ProcessMissiles;

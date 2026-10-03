@@ -36,6 +36,7 @@
 #include "crawl.hpp"
 #include "cursor.h"
 #include "dead.h"
+#include "dots.h"
 #include "diablo.h"
 #include "dvlnet/leaveinfo.hpp"
 #include "effects.h"
@@ -3414,6 +3415,8 @@ std::expected<void, std::string> PrepareUniqueMonst(Monster &monster, UniqueMons
 
 void InitLevelMonsters()
 {
+	ClearAllMonsterDots(); // Essence Mod: effects belong to the level's monsters and are never saved
+
 	LevelMonsterTypeCount = 0;
 	monstimgtot = 0;
 
@@ -4933,6 +4936,7 @@ bool Monster::isWalking() const
 
 bool Monster::isImmune(MissileID missileType, DamageType missileElement) const
 {
+	missileElement = GetResistanceCategory(missileElement); // Essence Mod: many damage types, three resistances
 	if (((resistance & IMMUNE_MAGIC) != 0 && missileElement == DamageType::Magic)
 	    || ((resistance & IMMUNE_FIRE) != 0 && missileElement == DamageType::Fire)
 	    || ((resistance & IMMUNE_LIGHTNING) != 0 && missileElement == DamageType::Lightning)
@@ -4945,6 +4949,7 @@ bool Monster::isImmune(MissileID missileType, DamageType missileElement) const
 
 bool Monster::isResistant(MissileID missileType, DamageType missileElement) const
 {
+	missileElement = GetResistanceCategory(missileElement); // Essence Mod: many damage types, three resistances
 	if (((resistance & RESIST_MAGIC) != 0 && missileElement == DamageType::Magic)
 	    || ((resistance & RESIST_FIRE) != 0 && missileElement == DamageType::Fire)
 	    || ((resistance & RESIST_LIGHTNING) != 0 && missileElement == DamageType::Lightning))

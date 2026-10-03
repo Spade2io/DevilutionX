@@ -30,7 +30,29 @@ enum class DamageType : uint8_t {
 	Lightning,
 	Magic,
 	Acid,
+	// Essence Mod: new damage types go below. Each belongs to one resistance category;
+	// see GetResistanceCategory. At most 8 types fit in the projectile table's flags.
+	Shadow,
+	Ice,
 };
+
+/**
+ * @brief Essence Mod: the resistance category a damage type is checked against.
+ *
+ * There are many damage types but only three resistances. The original three types stand for the
+ * categories: Fire is Elemental, Lightning is Natural (after the planned re-sort) and Magic is Astral.
+ */
+constexpr DamageType GetResistanceCategory(DamageType type)
+{
+	switch (type) {
+	case DamageType::Shadow:
+		return DamageType::Magic; // Astral
+	case DamageType::Ice:
+		return DamageType::Fire; // Elemental
+	default:
+		return type;
+	}
+}
 
 enum class MissileGraphicID : uint8_t {
 	Arrow,
@@ -123,6 +145,8 @@ enum class MissileDataFlags : uint8_t {
 	Lightning = static_cast<uint8_t>(DamageType::Lightning),
 	Magic = static_cast<uint8_t>(DamageType::Magic),
 	Acid = static_cast<uint8_t>(DamageType::Acid),
+	Shadow = static_cast<uint8_t>(DamageType::Shadow),
+	Ice = static_cast<uint8_t>(DamageType::Ice),
 	Arrow = 1 << 4,
 	Invisible = 1 << 5,
 };
