@@ -10,14 +10,17 @@
 #include "engine/clx_sprite.hpp"
 #include "engine/load_cel.hpp"
 #include "engine/load_clx.hpp"
+#include "engine/palette.h"
 #include "engine/rectangle.hpp"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/primitive_render.hpp"
 #include "engine/render/text_render.hpp"
 #include "game_mode.hpp"
 #include "missiles.h"
 #include "panels/spell_icons.hpp"
 #include "panels/ui_panels.hpp"
 #include "player.h"
+#include "spell_xp.h"
 #include "tables/spelldat.h"
 #include "utils/format.hpp"
 #include "utils/language.h"
@@ -182,6 +185,16 @@ void DrawSpellBook(const Surface &out)
 					PrintSBookStr(out, line1, text, UiFlags::AlignRight);
 				}
 				PrintSBookStr(out, line1, FormatRuntime(pgettext(/* TRANSLATORS: UI constraints, keep short please.*/ "spellbook", "Mana: {:d}"), mana));
+				// Essence Mod: progress towards the spell's next level. Spell experience is only tracked for the local player.
+				if (!IsInspectingPlayer()) {
+					constexpr int BarHeight = 3;
+					const int barWidth = SpellBookDescription.width - 2 * SpellBookDescriptionPaddingHorizontal;
+					const Point barPosition = GetPanelPosition(UiPanels::Spell, { SPLICONLENGTH + SpellBookDescriptionPaddingHorizontal, yp + SpellBookDescription.height - BarHeight - 1 });
+					FillRect(out, barPosition.x, barPosition.y, barWidth, BarHeight, PAL16_GRAY + 13);
+					const int filledWidth = barWidth * GetSpellLevelProgressPercent(player, sn) / 100;
+					if (filledWidth > 0)
+						FillRect(out, barPosition.x, barPosition.y, filledWidth, BarHeight, PAL16_YELLOW + 4);
+				}
 			} break;
 			}
 		}

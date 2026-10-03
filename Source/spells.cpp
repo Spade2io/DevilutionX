@@ -18,6 +18,7 @@
 #include "gamemenu.h"
 #include "inv.h"
 #include "missiles.h"
+#include "spell_xp.h"
 
 namespace devilution {
 
@@ -291,6 +292,7 @@ void DoHealOther(const Player &caster, Player &target)
 	const ClassAttributes &classAttributes = GetClassAttributes(caster._pClass);
 	hp = hp * classAttributes.healOtherRestoreLife >> 6;
 
+	AddSpellExperienceForHealing(caster, target, SpellID::HealOther, std::min(hp, target._pMaxHP - target._pHitPoints));
 	target._pHitPoints = std::min(target._pHitPoints + hp, target._pMaxHP);
 	target._pHPBase = std::min(target._pHPBase + hp, target._pMaxHPBase);
 

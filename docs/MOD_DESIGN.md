@@ -22,6 +22,21 @@ Replace the current spellbook pages with **essence pages**.
 - Players **custom-design each page** by slotting abilities they've learned.
 - Spell books **teach** an ability into the player's personal library; slotting decides what's usable.
 - Essences themselves are loot (rare drops).
+- **Item graphics (decided 2026-10-02, replaces the rune idea below):** essences use item picture **27**
+  (the cube gem) and awakening stones use picture **26** (the round gem). Both are unused by any
+  vanilla item. Each is tinted per essence or stone by remapping palette ramps at draw time; ten
+  single-ramp colours exist (vivid red, orange, yellow, blue; muted red, orange, gold, steel blue,
+  rose, grey). There is no green or purple in the fixed half of the palette. On the ground both
+  currently show the shared rune animation (`runes1`, a small tumbling cube); picture 26 should be
+  pointed at the Blood Stone animation (`bldstn`) in `ItemCAnimTbl` so it is round there too.
+  Ten colours are enough for now. Kept in reserve: a few shades of purple (rose and blue mixed pixel
+  by pixel) and a brighter orange (red and yellow mixed), plus two-tone stones. True green or purple
+  would need either repainting part of the shared palette or drawing in more than 256 colours; not
+  ruled out, just not now.
+  Sample sheets and the scripts that make them are in `graphics_tool` (outside the repo).
+- Earlier idea, superseded: essence items use the Hellfire rune graphics. Six rune
+  graphics exist: Rune of Fire, Greater Rune of Fire, Rune of Lightning, Greater Rune of Lightning,
+  Rune of Stone, and the Rune Bomb quest item (`ICURS_RUNE_*` in `Source/tables/itemdat.h`).
 
 **Controller / hotkey proposal:** all 4 pages are equipped, but **one page is active at a time**.
 The player cycles pages (like a weapon swap), so only 5 abilities are on the bar at once.
@@ -29,6 +44,11 @@ Switching essences mid-fight becomes a skill (e.g., curse a pack from the Death 
 
 **Tab layout (decided 2026-10-02):** the mod targets Hellfire, whose spellbook has 5 tabs. Tabs 1–4
 are the four essence pages (5 abilities each). **Tab 5 holds non-essence skills** the character can learn.
+
+**Page layout (decided 2026-10-02, part of "spell books for essences"):** remap each spellbook page
+from 7 entries to **5**. Use the freed space for text on each spell: a description and the XP
+required for its next level. Today's page is laid out in `Source/panels/spell_book.cpp`
+(`SpellBookPageEntries = 7`, 43 pixels per entry).
 
 **Open questions**
 - What counts as a non-essence skill on tab 5, and how many slots does that tab have?
@@ -147,14 +167,72 @@ Balance watch-outs: mana potions lose value; Mana Shield becomes a second life b
 
 ---
 
+## 7. Removing levels
+Character levels will be ditched at some point, possibly with something else in their place. Not
+designed yet, and not now. This section lists everything that depends on character level, so it
+can be found when that time comes.
+
+- **Spell XP level modifier (in effect).** Spell XP uses the game's existing kill-XP adjustment:
+  10% more or less per level of difference between the monster and the **character's** level
+  (deliberately not the spell's level). See `Source/spell_xp.cpp`. Needs a replacement when levels go.
+- **Spell level-up table (in effect).** Spells level up on the character level XP table: spell level
+  1 → 2 costs what character level 1 → 2 costs, and so on. Chosen because those numbers are already
+  balanced around character growth. Also needs a replacement when levels go.
+
+---
+
+## Spell XP rule (decided 2026-10-02)
+Spell XP = monster's kill XP × (damage dealt ÷ monster's total health) × level modifier.
+
+- Damage beyond the monster's remaining health earns nothing, so one kill never pays more than 100%.
+- Tracked in 64ths of a point so small hits still add up.
+- Separate from, and in addition to, the character's normal kill XP.
+- Level modifier: see "Removing levels" above.
+- Only learned spells earn XP. Casting from a staff or scroll does not teach or level a spell.
+- Level-ups use the character level XP table (see "Removing levels"). Maximum spell level is still 15.
+- **Books only teach.** Reading a book of a spell you already know does nothing and the book is not
+  used up. A book can never raise a spell's level.
+- XP is saved in a sidecar text file next to the save (`essence_single_<slot>_<ext>.txt`), written
+  whenever the hero is saved and deleted with the character. Spells are identified by number in that
+  file, so the format needs revisiting when the spell list is overhauled.
+- Known gap: loading an older saved game does not rewind spell XP to that save's moment.
+
+## Spell list overhaul (planned)
+Many spells and abilities will be added, and some current ones removed. Size unknown.
+
+- **All characters will start with no spells** (decided 2026-10-02, not built yet). Today a Sorcerer
+  starts with Firebolt at level 2; spell XP counts from the start of whatever level a spell already has.
+- Learn-by-doing currently covers the damage spells that hit through a projectile (Firebolt, Charged
+  Bolt, Holy Bolt, Lightning, Flash, Fire Wall, Fireball, Flame Wave, Nova, Inferno, Elemental, Blood
+  Star, Bone Spirit, Apocalypse, Lightning Wall, Immolation). Guardian, Chain Lightning and Ring of
+  Fire fire another spell's projectile, so their damage is credited to Firebolt, Lightning and Fire Wall.
+- **Healing and Heal Other (decided 2026-10-02):** the healed player counts as an average monster of
+  their own level. XP = average monster kill XP for that level × (hit points actually restored ÷ the
+  target's maximum hit points), then the usual level modifier (target level vs caster level, so zero
+  for self-healing). Healing at full health earns nothing. The average comes from a curve fitted to
+  Hellfire's monster table: 5L² + 10L + 40 (`AverageMonsterExperienceForLevel` in `Source/spell_xp.cpp`).
+  It depends on character level, so it is also affected by "Removing levels".
+- Other non-damage spells (Mana Shield, Teleport, Stone Curse, Golem, and so on) earn nothing yet;
+  each needs its own measure of effective use.
+
+## 8. Randomized spell learning (to be designed)
+A book never gives you a spell you already have, but it might give you a different one. How the
+replacement spell is picked is undecided. Until this is built, a book of a known spell does nothing.
+
+---
+
 ## Current roadmap (decided 2026-10-02)
 The order we are actually building in. Supersedes the build order below where they differ.
 
 1. **Mana regeneration** — Magic-based. Vanilla has no passive player mana regen (confirmed in code).
 2. **Spell learn-by-doing** — one spell first (Firebolt), then level-ups, sidecar save, progress bar, all spells.
 3. **Stat increases from spell increases** — rules to be defined.
-4. **Spell books for essences** — to be defined.
-5. **Spell books for awakening stones** — to be defined; "awakening stone" is a new concept not yet described here.
+4. **Essences (cube gem, picture 27)** — essence items use picture 27, tinted; behaviour to be defined. Includes remapping spellbook pages to 5 entries.
+5. **Awakening stones (round gem, picture 26)** — stones use picture 26, tinted; behaviour to be defined.
+6. **Removing levels** — later; see section 7 for what depends on character level.
+7. **Randomized spell learning** — to be designed; see section 8.
+9. **Database and editor tool for essences and awakening stones** (next up) — one data file the game reads, plus a tool showing every entry in a big chart with "new essence" / "new awakening stone" buttons and in-place editing.
+8. **Controller overhaul** — several spells available at once, each on its own button. The game already has 12 quick-spell slots (`QuickSpell1`–`12`) and controller button mapping, but a slot only selects the active spell; casting directly on the press is the new part.
 
 ## Build order
 Each step builds the foundation the next one needs.
@@ -177,3 +255,13 @@ Each step builds the foundation the next one needs.
 - How DevilutionX stores its stash outside the main save — a possible model for the sidecar file.
 - Where spell damage formulas and spellbook tooltip numbers are calculated.
 - Current state of the Lua mod API, and whether any of this could be Lua instead of C++.
+
+---
+
+## Temporary test tools
+- **Pepin's test shop** (`Source/stores.cpp`, search "Essence Mod"). Pepin's menu has two extra lists:
+  "Buy essences" (empty placeholder) and "Buy awakening stones", which lists every spell the player
+  has not learned for 1 gold and teaches it directly on purchase, with no item handed over. For
+  testing new spells only; remove or rework before the mod is real.
+- **Books have no Magic requirement** (`Source/items.cpp`). Other requirements will replace it later.
+- Debug builds also have a console (backtick key): `dev.player.spells.setLevel(1)` teaches every spell.

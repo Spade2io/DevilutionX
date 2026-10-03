@@ -25,12 +25,16 @@
 #include "game_mode.hpp"
 #include "lua/lua_event.hpp"
 #include "minitext.h"
+#include "msg.h"
 #include "multi.h"
 #include "options.h"
 #include "panels/info_box.hpp"
 #include "panels/quest_log.hpp"
+#include "plrmsg.h"
 #include "qol/stash.h"
 #include "qol/visual_store.h"
+#include "spells.h"
+#include "tables/spelldat.h"
 #include "tables/townerdat.hpp"
 #include "towners.h"
 #include "utils/format.hpp"
@@ -1027,6 +1031,76 @@ void HealPlayer()
 	RedrawComponent(PanelDrawComponent::Health);
 }
 
+/** Essence Mod: which of Pepin's lists is open. All three share the HealerBuy screen. */
+enum class HealerShelf : uint8_t {
+	Items,
+	Essences,
+	AwakeningStones,
+};
+
+HealerShelf ActiveHealerShelf = HealerShelf::Items;
+
+/** Essence Mod: placeholder list. Essences are not defined yet, so it is always empty. */
+std::vector<Item> EssenceItems;
+
+/**
+ * Essence Mod: TEMPORARY TEST SHOP. One entry for every spell the player has not learned, each
+ * costing 1 gold. Buying an entry teaches the spell directly; no item is handed over.
+ */
+std::vector<Item> AwakeningStoneItems;
+
+constexpr int HealerBuyItemsLine = 14;
+constexpr int HealerBuyEssencesLine = 16;
+constexpr int HealerBuyAwakeningStonesLine = 18;
+constexpr int HealerLeaveLine = 20;
+
+/** The line of Pepin's menu that leads to the list currently open. */
+int HealerShelfLine()
+{
+	switch (ActiveHealerShelf) {
+	case HealerShelf::Essences:
+		return HealerBuyEssencesLine;
+	case HealerShelf::AwakeningStones:
+		return HealerBuyAwakeningStonesLine;
+	default:
+		return HealerBuyItemsLine;
+	}
+}
+
+std::span<Item> ActiveHealerItems()
+{
+	switch (ActiveHealerShelf) {
+	case HealerShelf::Essences:
+		return EssenceItems;
+	case HealerShelf::AwakeningStones:
+		return AwakeningStoneItems;
+	default:
+		return HealerItems;
+	}
+}
+
+void RefreshAwakeningStoneItems()
+{
+	AwakeningStoneItems.clear();
+	const Player &myPlayer = *MyPlayer;
+	for (size_t i = static_cast<size_t>(SpellID::Firebolt); i < SpellsData.size(); i++) {
+		const auto spell = static_cast<SpellID>(i);
+		if (GetSpellBookLevel(spell) == -1 || myPlayer._pSplLvl[i] != 0)
+			continue;
+
+		Item item;
+		InitializeItem(item, IDI_BOOK1);
+		item._iSpell = spell;
+		item._iMinMag = 0;
+		item._ivalue = 1;
+		item._iIvalue = 1;
+		item._iIdentified = true;
+		item._iStatFlag = true;
+		item._iCreateInfo = 1; // non-zero so the entry is named "Book of <spell>"
+		AwakeningStoneItems.push_back(item);
+	}
+}
+
 void StartHealer()
 {
 	HealPlayer();
@@ -1036,15 +1110,18 @@ void StartHealer()
 	AddSText(0, 3, _("Healer's home"), UiFlags::ColorWhitegold | UiFlags::AlignCenter, false);
 	AddSText(0, 9, _("Would you like to:"), UiFlags::ColorWhitegold | UiFlags::AlignCenter, false);
 	AddSText(0, 12, _("Talk to Pepin"), UiFlags::ColorBlue | UiFlags::AlignCenter, true);
-	AddSText(0, 14, _("Buy items"), UiFlags::ColorWhite | UiFlags::AlignCenter, true);
-	AddSText(0, 18, _("Leave Healer's home"), UiFlags::ColorWhite | UiFlags::AlignCenter, true);
+	AddSText(0, HealerBuyItemsLine, _("Buy items"), UiFlags::ColorWhite | UiFlags::AlignCenter, true);
+	AddSText(0, HealerBuyEssencesLine, "Buy essences", UiFlags::ColorWhite | UiFlags::AlignCenter, true);
+	AddSText(0, HealerBuyAwakeningStonesLine, "Buy awakening stones", UiFlags::ColorWhite | UiFlags::AlignCenter, true);
+	AddSText(0, HealerLeaveLine, _("Leave Healer's home"), UiFlags::ColorWhite | UiFlags::AlignCenter, true);
 	AddSLine(5);
 	CurrentItemIndex = 20;
 }
 
 void ScrollHealerBuy(int idx)
 {
-	ScrollVendorStore(HealerItems, static_cast<int>(HealerItems.size()), idx);
+	const std::span<Item> items = ActiveHealerItems();
+	ScrollVendorStore(items, static_cast<int>(items.size()), idx);
 }
 
 void StartHealerBuy()
@@ -1053,16 +1130,33 @@ void StartHealerBuy()
 	HasScrollbar = true;
 	ScrollPos = 0;
 
+	if (ActiveHealerShelf == HealerShelf::AwakeningStones)
+		RefreshAwakeningStoneItems();
+	const std::span<Item> items = ActiveHealerItems();
+
 	RenderGold = true;
-	AddSText(20, 1, _("I have these items for sale:"), UiFlags::ColorWhitegold, false);
+	switch (ActiveHealerShelf) {
+	case HealerShelf::Essences:
+		AddSText(20, 1, "I have these essences for sale:", UiFlags::ColorWhitegold, false);
+		break;
+	case HealerShelf::AwakeningStones:
+		AddSText(20, 1, "I have these awakening stones for sale:", UiFlags::ColorWhitegold, false);
+		break;
+	default:
+		AddSText(20, 1, _("I have these items for sale:"), UiFlags::ColorWhitegold, false);
+		break;
+	}
 	AddSLine(3);
 
 	ScrollHealerBuy(ScrollPos);
+	if (items.empty())
+		AddSText(0, 10, "Nothing for sale here yet", UiFlags::ColorWhite | UiFlags::AlignCenter, false);
 	AddItemListBackButton();
 
 	CurrentItemIndex = 0;
-	for (Item &item : HealerItems) {
-		item._iStatFlag = MyPlayer->CanUseItem(item);
+	for (Item &item : items) {
+		if (ActiveHealerShelf == HealerShelf::Items)
+			item._iStatFlag = MyPlayer->CanUseItem(item);
 		CurrentItemIndex++;
 	}
 
@@ -1737,6 +1831,17 @@ void BoyBuyItem(Item &item, int itemPrice)
  */
 void HealerBuyItem(Item &item)
 {
+	// Essence Mod: an awakening stone teaches its spell on the spot and stays out of the inventory.
+	if (ActiveHealerShelf == HealerShelf::AwakeningStones) {
+		TakePlrsMoney(item._iIvalue);
+		Player &myPlayer = *MyPlayer;
+		myPlayer._pMemSpells |= GetSpellBitmask(item._iSpell);
+		myPlayer._pSplLvl[static_cast<size_t>(item._iSpell)] = 1;
+		NetSendCmdParam2(true, CMD_CHANGE_SPELL_LEVEL, static_cast<uint16_t>(item._iSpell), 1);
+		EventPlrMsg(StrCat("You learned ", GetSpellData(item._iSpell).sNameText), UiFlags::ColorWhitegold);
+		return;
+	}
+
 	int idx = OldScrollPos + ((OldTextLine - PreviousScrollPos) / 4);
 	if (!gbIsMultiplayer) {
 		if (idx < 2)
@@ -1882,7 +1987,8 @@ void HealerEnter()
 		OldActiveStore = TalkID::Healer;
 		StartStore(TalkID::Gossip);
 		break;
-	case 14:
+	case HealerBuyItemsLine:
+		ActiveHealerShelf = HealerShelf::Items;
 		if (*GetOptions().Gameplay.storeUi == StoreUi::VisualGrid) {
 			ActiveStore = TalkID::None;
 			OpenVisualStore(VisualStoreVendor::Healer);
@@ -1890,7 +1996,15 @@ void HealerEnter()
 			StartStore(TalkID::HealerBuy);
 		}
 		break;
-	case 18:
+	case HealerBuyEssencesLine:
+		ActiveHealerShelf = HealerShelf::Essences;
+		StartStore(TalkID::HealerBuy);
+		break;
+	case HealerBuyAwakeningStonesLine:
+		ActiveHealerShelf = HealerShelf::AwakeningStones;
+		StartStore(TalkID::HealerBuy);
+		break;
+	case HealerLeaveLine:
 		ActiveStore = TalkID::None;
 		break;
 	}
@@ -1900,7 +2014,7 @@ void HealerBuyEnter()
 {
 	if (CurrentTextLine == BackButtonLine()) {
 		StartStore(TalkID::Healer);
-		CurrentTextLine = 14;
+		CurrentTextLine = HealerShelfLine();
 		return;
 	}
 
@@ -1908,19 +2022,23 @@ void HealerBuyEnter()
 	OldScrollPos = ScrollPos;
 	OldActiveStore = TalkID::HealerBuy;
 
+	const std::span<Item> items = ActiveHealerItems();
 	const int idx = ScrollPos + ((CurrentTextLine - PreviousScrollPos) / 4);
+	if (idx < 0 || static_cast<size_t>(idx) >= items.size())
+		return;
 
-	if (!PlayerCanAfford(HealerItems[idx]._iIvalue)) {
+	if (!PlayerCanAfford(items[idx]._iIvalue)) {
 		StartStore(TalkID::NoMoney);
 		return;
 	}
 
-	if (!StoreAutoPlace(HealerItems[idx], false)) {
+	// An awakening stone is not an item, so it needs no inventory space.
+	if (ActiveHealerShelf != HealerShelf::AwakeningStones && !StoreAutoPlace(items[idx], false)) {
 		StartStore(TalkID::NoRoom);
 		return;
 	}
 
-	TempItem = HealerItems[idx];
+	TempItem = items[idx];
 	StartStore(TalkID::Confirm);
 }
 
@@ -2533,7 +2651,7 @@ void StoreESC()
 		break;
 	case TalkID::HealerBuy:
 		StartStore(TalkID::Healer);
-		CurrentTextLine = 14;
+		CurrentTextLine = HealerShelfLine();
 		break;
 	case TalkID::StorytellerIdentify:
 		StartStore(TalkID::Storyteller);

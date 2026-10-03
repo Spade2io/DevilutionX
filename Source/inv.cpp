@@ -2177,6 +2177,12 @@ bool UseInvItem(int cii)
 		return true;
 	}
 
+	// Essence Mod: a book of a spell the player already knows does nothing and is not used up.
+	if (item->_iMiscId == IMISC_BOOK && player._pSplLvl[static_cast<int8_t>(item->_iSpell)] != 0) {
+		player.Say(HeroSpeech::ThatDidntDoAnything, SpeechDelay);
+		return true;
+	}
+
 	if (item->_iMiscId == IMISC_NONE && item->_itype == ItemType::Gold) {
 		StartGoldDrop();
 		return true;

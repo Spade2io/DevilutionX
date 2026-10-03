@@ -45,6 +45,7 @@
 #include "objects.h"
 #include "player.h"
 #include "sound_effect_enums.h"
+#include "spell_xp.h"
 #include "tables/itemdat.h"
 #include "tables/misdat.h"
 #include "tables/monstdat.h"
@@ -321,8 +322,10 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 	if (resist)
 		dam >>= 2;
 
-	if (&player == MyPlayer)
+	if (&player == MyPlayer) {
+		AddSpellExperienceForDamage(player, monster, GetSpellForMissile(t), dam, monster.hitPoints);
 		ApplyMonsterDamage(damageType, monster, dam);
+	}
 
 	if (monster.hasNoLife()) {
 		M_StartKill(monster, player);
@@ -2461,6 +2464,7 @@ void AddHealing(Missile &missile, AddMissileParameter & /*parameter*/)
 
 	const ClassAttributes &classAttributes = GetClassAttributes(player._pClass);
 	hp = hp * classAttributes.splRestoreLife >> 6;
+	AddSpellExperienceForHealing(player, player, SpellID::Healing, std::min(hp, player._pMaxHP - player._pHitPoints));
 	player._pHitPoints = std::min(player._pHitPoints + hp, player._pMaxHP);
 	player._pHPBase = std::min(player._pHPBase + hp, player._pMaxHPBase);
 

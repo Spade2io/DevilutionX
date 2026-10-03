@@ -32,6 +32,7 @@
 #include "mpq/mpq_common.hpp"
 #include "pack.h"
 #include "qol/stash.h"
+#include "spell_xp.h"
 #include "tables/playerdat.hpp"
 #include "utils/endian_read.hpp"
 #include "utils/endian_swap.hpp"
@@ -91,6 +92,14 @@ std::string GetSavePath(uint32_t saveNum, std::string_view savePrefix = {})
 	    ".", ext
 #endif
 	);
+}
+
+/** Essence Mod: the sidecar file holding data the mod adds, kept next to the save it belongs to. */
+std::string GetEssenceSidecarPath(uint32_t saveNum)
+{
+	return StrCat(paths::PrefPath(), "essence_",
+	    gbIsMultiplayer ? "multi_" : "single_",
+	    saveNum, "_", GetSaveExtension(), ".txt");
 }
 
 std::string GetStashSavePath()
@@ -646,6 +655,7 @@ void pfile_write_hero(bool writeGameData)
 {
 	SaveWriter saveWriter = GetSaveWriter(gSaveNumber, /*carryForward=*/writeGameData);
 	pfile_write_hero(saveWriter, writeGameData);
+	SaveSpellExperience(GetEssenceSidecarPath(gSaveNumber));
 
 #ifdef __EMSCRIPTEN__
 	// Persist saves to IndexedDB for browser storage
@@ -756,6 +766,7 @@ bool pfile_ui_save_create(_uiheroinfo *heroinfo)
 
 	SaveWriter saveWriter = GetSaveWriter(saveNum, /*carryForward=*/false);
 	saveWriter.RemoveHashEntries(GetFileName);
+	RemoveFile(GetEssenceSidecarPath(saveNum).c_str());
 	CopyUtf8(hero_names[saveNum], heroinfo->name, sizeof(hero_names[saveNum]));
 
 	Player &player = Players[0];
@@ -778,6 +789,7 @@ bool pfile_delete_save(_uiheroinfo *heroInfo)
 	if (saveNum < MAX_CHARACTERS) {
 		hero_names[saveNum][0] = '\0';
 		RemoveFile(GetSavePath(saveNum).c_str());
+		RemoveFile(GetEssenceSidecarPath(saveNum).c_str());
 	}
 	return true;
 }
@@ -801,6 +813,7 @@ void pfile_read_player_from_save(uint32_t saveNum, Player &player)
 	LoadHeroItems(player);
 	RemoveAllInvalidItems(player);
 	CalcPlrInv(player, false);
+	LoadSpellExperience(GetEssenceSidecarPath(saveNum));
 }
 
 void pfile_save_level()

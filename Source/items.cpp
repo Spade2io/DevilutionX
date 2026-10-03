@@ -647,7 +647,7 @@ void GetBookSpell(Item &item, int lvl)
 	CopyUtf8(item._iIName + iINameLen, spellName, ItemNameLength - iINameLen);
 	item._iSpell = bs;
 	const SpellData &spellData = GetSpellData(bs);
-	item._iMinMag = spellData.minInt;
+	item._iMinMag = 0; // Essence Mod: books carry no Magic requirement.
 	item._ivalue += static_cast<int32_t>(spellData.bookCost());
 	item._iIvalue += static_cast<int32_t>(spellData.bookCost());
 	switch (spellData.type()) {
@@ -4289,8 +4289,9 @@ void UseItem(Player &player, item_misc_id mid, SpellID spellID, int spellFrom)
 		}
 		break;
 	case IMISC_BOOK: {
-		const uint8_t newSpellLevel = player._pSplLvl[static_cast<int8_t>(spellID)] + 1;
-		if (newSpellLevel <= MaxSpellLevel) {
+		// Essence Mod: a book only teaches a spell. Levels beyond the first come from using it (see spell_xp.cpp).
+		if (player._pSplLvl[static_cast<int8_t>(spellID)] == 0) {
+			const uint8_t newSpellLevel = 1;
 			player._pSplLvl[static_cast<int8_t>(spellID)] = newSpellLevel;
 			NetSendCmdParam2(true, CMD_CHANGE_SPELL_LEVEL, static_cast<uint16_t>(spellID), newSpellLevel);
 		}
@@ -4828,16 +4829,8 @@ void Item::setNewAnimation(bool showAnimation)
 void Item::updateRequiredStatsCacheForPlayer(const Player &player)
 {
 	if (_itype == ItemType::Misc && _iMiscId == IMISC_BOOK) {
-		_iMinMag = GetSpellData(_iSpell).minInt;
-		int8_t spellLevel = player._pSplLvl[static_cast<int8_t>(_iSpell)];
-		while (spellLevel != 0) {
-			_iMinMag += 20 * _iMinMag / 100;
-			spellLevel--;
-			if (_iMinMag + 20 * _iMinMag / 100 > 255) {
-				_iMinMag = 255;
-				spellLevel = 0;
-			}
-		}
+		// Essence Mod: books carry no Magic requirement. Other requirements will replace it later.
+		_iMinMag = 0;
 	}
 	_iStatFlag = player.CanUseItem(*this);
 }
