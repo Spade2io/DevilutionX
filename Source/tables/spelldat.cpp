@@ -232,6 +232,8 @@ void LoadExtendedSpellData()
 		reader.readInt("radius", item.effectRadius);
 		reader.readString("rider", item.rider);
 		reader.readInt("riderAmount", item.riderAmount);
+		reader.readString("stat", item.buffStat);
+		reader.readInt("duration", item.durationSeconds);
 		item.sBookLvl = 1;
 		ExtendedSpellKeys.emplace_back(std::move(key), static_cast<SpellID>(number));
 	}

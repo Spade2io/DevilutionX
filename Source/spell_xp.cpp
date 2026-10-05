@@ -149,6 +149,14 @@ void ShareExperienceWithActiveBuffs(Player &player, uint32_t gained, std::string
 		if (buffGain != 0)
 			StrAppend(message, message.empty() ? "" : ", ", DescribeGain(buffSpell, buffGain));
 	}
+	// The same share for buffs read from essence_powers.tsv.
+	for (const SpellID buffSpell : GetActivePowerBuffs(player)) {
+		if (player.GetBaseSpellLevel(buffSpell) == 0)
+			continue;
+		const uint32_t buffGain = AwardSpellExperience(player, buffSpell, gained / BuffExperienceDivisor, 0);
+		if (buffGain != 0)
+			StrAppend(message, message.empty() ? "" : ", ", DescribeGain(buffSpell, buffGain));
+	}
 }
 
 /**

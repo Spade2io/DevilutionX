@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include "diablo.h"
 #include "dots.h"
@@ -22,6 +23,7 @@
 #include "multi.h"
 #include "panels/spell_icons.hpp"
 #include "player.h"
+#include "spells.h"
 #include "tables/misdat.h"
 #include "utils/str_cat.hpp"
 
@@ -30,6 +32,9 @@ namespace devilution {
 namespace {
 
 constexpr size_t BuffCount = static_cast<size_t>(BuffID::LAST) + 1;
+
+/** Game ticks per second at normal speed. */
+constexpr int TicksPerSecond = 20;
 
 /** Game ticks between aura pulses: 2 seconds at normal speed. */
 constexpr int AuraPulseInterval = 40;
@@ -42,6 +47,16 @@ constexpr int FlamingWeaponBaseDamage = 3 * 64;
 
 /** Which buffs each player has on. Memory only; never saved. */
 std::array<std::array<bool, BuffCount>, MAX_PLRS> ActiveBuffs {};
+
+/** A buff read from essence_powers.tsv that a player has running. */
+struct PowerBuff {
+	SpellID spell;
+	/** Game ticks left, or -1 for a lasting buff that does not run out. */
+	int ticksLeft;
+};
+
+/** The data-file buffs each player has running. Memory only; never saved. */
+std::array<std::vector<PowerBuff>, MAX_PLRS> PowerBuffs;
 
 /** Game ticks until each player's auras next pulse. */
 std::array<int, MAX_PLRS> AuraPulseCountdown {};
@@ -154,7 +169,8 @@ bool IsExperienceSharingBuffSpell(SpellID spell)
 		if (GetBuffSpell(buff) == spell)
 			return BuffSharesExperience(buff);
 	}
-	return false;
+	// Every buff read from essence_powers.tsv is a passive one.
+	return IsExtendedSpell(spell) && IsValidSpell(spell) && GetSpellData(spell).effect == "Buff";
 }
 
 int GetFlamingWeaponDamage(const Player &player)
@@ -178,6 +194,64 @@ bool IsBuffActive(const Player &player, BuffID buff)
 void ClearBuffs(Player &player)
 {
 	BuffsOf(player).fill(false);
+	PowerBuffs[player.getId()].clear();
+}
+
+void ActivatePowerBuff(Player &player, SpellID spell)
+{
+	if (!IsValidSpell(spell))
+		return;
+	const int seconds = GetSpellData(spell).durationSeconds;
+	const int ticks = seconds > 0 ? seconds * TicksPerSecond : -1;
+	std::vector<PowerBuff> &buffs = PowerBuffs[player.getId()];
+	for (PowerBuff &buff : buffs) {
+		if (buff.spell == spell) {
+			buff.ticksLeft = ticks;
+			return;
+		}
+	}
+	buffs.push_back(PowerBuff { spell, ticks });
+	CalcPlrInv(player, true);
+}
+
+std::vector<SpellID> GetActivePowerBuffs(const Player &player)
+{
+	std::vector<SpellID> spells;
+	for (const PowerBuff &buff : PowerBuffs[player.getId()])
+		spells.push_back(buff.spell);
+	return spells;
+}
+
+int ApplyDamageBuffs(const Player &player, int damage)
+{
+	int percent = 0;
+	for (const PowerBuff &buff : PowerBuffs[player.getId()]) {
+		const SpellData &spellData = GetSpellData(buff.spell);
+		// Buffs to the same stat do not add up: the strongest one counts.
+		if (spellData.buffStat == "Damage")
+			percent = std::max(percent, ScaleDamageForSpellLevel(spellData.effectAmount, SpellLevelOf(player, buff.spell)));
+	}
+	if (percent == 0)
+		return damage;
+	return damage + static_cast<int>(static_cast<int64_t>(damage) * percent / 100);
+}
+
+void ProcessBuffTimers()
+{
+	for (Player &player : Players) {
+		if (!player.plractive)
+			continue;
+		std::vector<PowerBuff> &buffs = PowerBuffs[player.getId()];
+		bool expired = false;
+		for (PowerBuff &buff : buffs) {
+			if (buff.ticksLeft > 0 && --buff.ticksLeft == 0)
+				expired = true;
+		}
+		if (!expired)
+			continue;
+		std::erase_if(buffs, [](const PowerBuff &buff) { return buff.ticksLeft == 0; });
+		CalcPlrInv(player, true);
+	}
 }
 
 void RefreshBuffStats(Player &player)
@@ -234,6 +308,30 @@ void DrawBuffBar(const Surface &out)
 		const Rectangle iconArea { Point { position.x, position.y - IconHeight + 1 }, Size { IconWidth, IconHeight } };
 		if (iconArea.contains(MousePosition)) {
 			DrawString(out, DescribeBuff(player, buff),
+			    Rectangle { Point { Margin, Margin + IconHeight + 2 }, Size { 420, 16 } },
+			    { .flags = UiFlags::ColorWhitegold });
+		}
+
+		position.x += IconWidth + Gap;
+	}
+
+	// Buffs read from essence_powers.tsv follow, with the seconds left on those that run out.
+	for (const PowerBuff &buff : PowerBuffs[player.getId()]) {
+		SetSpellTrans(SpellType::Spell);
+		DrawSmallSpellIcon(out, position, buff.spell);
+
+		const Rectangle iconArea { Point { position.x, position.y - IconHeight + 1 }, Size { IconWidth, IconHeight } };
+		const SpellData &spellData = GetSpellData(buff.spell);
+		const int secondsLeft = buff.ticksLeft > 0 ? (buff.ticksLeft + TicksPerSecond - 1) / TicksPerSecond : 0;
+		if (buff.ticksLeft > 0) {
+			DrawString(out, StrCat(secondsLeft), Rectangle { Point { position.x, position.y - 13 }, Size { IconWidth - 2, 12 } },
+			    { .flags = UiFlags::ColorWhite | UiFlags::AlignRight | UiFlags::FontSize12 });
+		}
+		if (iconArea.contains(MousePosition)) {
+			std::string text = StrCat(spellData.sNameText, ": ", spellData.description);
+			if (buff.ticksLeft > 0)
+				StrAppend(text, " (", secondsLeft, "s left)");
+			DrawString(out, text,
 			    Rectangle { Point { Margin, Margin + IconHeight + 2 }, Size { 420, 16 } },
 			    { .flags = UiFlags::ColorWhitegold });
 		}

@@ -13,6 +13,7 @@
 #include <string_view>
 #include <vector>
 
+#include "buffs.h"
 #include "essence_tint.h"
 #include "monster.h"
 #include "player.h"
@@ -121,6 +122,7 @@ void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, Dam
 		return;
 
 	const Player &player = *MyPlayer;
+	damage = ApplyDamageBuffs(player, damage);
 	AddSpellExperienceForDamage(player, monster, spell, damage, monster.hitPoints);
 	ApplyMonsterDamage(damageType, monster, damage);
 	if (monster.hasNoLife()) {

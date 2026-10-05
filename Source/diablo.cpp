@@ -1534,6 +1534,7 @@ void GameLogic()
 		ProcessPlayers();
 	}
 	ProcessCooldowns(); // Essence Mod: runs in town as well as in the dungeon
+	ProcessBuffTimers(); // Essence Mod: so do the timers on buffs that run out
 	if (leveltype != DTYPE_TOWN) {
 		gGameLogicStep = GameLogicStep::ProcessMonsters;
 #ifdef _DEBUG

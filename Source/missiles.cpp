@@ -337,6 +337,7 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 	} else {
 		if (resist)
 			dam >>= 2;
+		dam = ApplyDamageBuffs(player, dam); // Essence Mod
 
 		if (&player == MyPlayer) {
 			// The spell that was cast earns the experience; without one, go by the kind of projectile.
@@ -2640,6 +2641,11 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter & /*parameter*/)
 {
 	// The buff lives on the player, so this effect has done its job the moment it is created.
 	missile._miDelFlag = true;
+	// A power read from essence_powers.tsv names its own buff; otherwise this is Strength itself.
+	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && GetSpellData(missile.sourceSpell).effect == "Buff") {
+		ActivatePowerBuff(Players[missile._misource], missile.sourceSpell);
+		return;
+	}
 	ActivateBuff(Players[missile._misource], BuffID::Strength);
 }
 

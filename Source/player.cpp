@@ -671,6 +671,7 @@ bool PlrHitMonst(Player &player, Monster &monster, bool adjacentDamage = false)
 			AddMissile(monster.position.tile, { 1, 0 }, Direction::South, MissileID::WeaponExplosion, TARGET_MONSTERS, player, 0, 0);
 			ApplySpecialAttackExtras(player, monster, specialAttack, dam);
 		} else {
+			dam = ApplyDamageBuffs(player, dam);                                   // Essence Mod
 			AddAttackExperienceForDamage(player, monster, dam, monster.hitPoints); // Essence Mod
 			ApplyMonsterDamage(DamageType::Physical, monster, dam);
 		}

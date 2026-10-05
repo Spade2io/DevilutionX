@@ -295,6 +295,13 @@ struct SpellData {
 	 */
 	std::string rider;
 	int riderAmount = 0;
+	/**
+	 * Essence Mod: for a power whose effect is "Buff", the stat it changes ("Damage") and how long
+	 * it lasts in seconds. Zero seconds is a lasting buff: it stays until death or the end of the
+	 * session. The size of the change is effectAmount, as a plain number (30 is +30%).
+	 */
+	std::string buffStat;
+	uint16_t durationSeconds = 0;
 
 	[[nodiscard]] MagicType type() const
 	{

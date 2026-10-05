@@ -10,6 +10,8 @@
 
 #include <cstdint>
 
+#include <vector>
+
 #include "engine/surface.hpp"
 #include "tables/spelldat.h"
 
@@ -43,6 +45,24 @@ bool IsExperienceSharingBuffSpell(SpellID spell);
 void ActivateBuff(Player &player, BuffID buff);
 
 bool IsBuffActive(const Player &player, BuffID buff);
+
+/**
+ * @brief Switches on a buff that is read from essence_powers.tsv (effect "Buff"). Casting it again
+ * while it is running starts its time again. Such buffs are held in memory only, like the others.
+ */
+void ActivatePowerBuff(Player &player, SpellID spell);
+
+/** @brief The spells of the data-file buffs a player has running. */
+std::vector<SpellID> GetActivePowerBuffs(const Player &player);
+
+/**
+ * @brief Damage after the player's "more damage dealt" buffs. Every kind of damage a player deals
+ * to a monster passes through this: weapon hits, spells, and effects over time.
+ */
+int ApplyDamageBuffs(const Player &player, int damage);
+
+/** @brief Counts down the buffs that run out. Runs every game tick, in town as well as the dungeon. */
+void ProcessBuffTimers();
 
 /** @brief Switches every buff off, e.g. on death or when a character is loaded. Does not recalculate stats. */
 void ClearBuffs(Player &player);
