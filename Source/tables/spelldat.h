@@ -289,6 +289,12 @@ struct SpellData {
 	std::string effect;
 	int effectAmount = 0;
 	uint8_t effectRadius = 0;
+	/**
+	 * Essence Mod: a second effect that rides along with the first and lands on the main target,
+	 * e.g. a weapon strike that also adds Burn. The amount is per tick, in 64ths of a hit point.
+	 */
+	std::string rider;
+	int riderAmount = 0;
 
 	[[nodiscard]] MagicType type() const
 	{

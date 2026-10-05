@@ -27,6 +27,7 @@
 #include "cursor.h"
 #include "dead.h"
 #include "diablo.h"
+#include "cooldowns.h"
 #include "dots.h"
 #include "effects.h"
 #include "engine/clx_sprite.hpp"
@@ -48,6 +49,7 @@
 #include "player.h"
 #include "qol/floatingnumbers.h"
 #include "sound_effect_enums.h"
+#include "special_attacks.h"
 #include "spell_xp.h"
 #include "tables/itemdat.h"
 #include "tables/misdat.h"
@@ -322,13 +324,25 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 	const bool resist = monster.isResistant(t, damageType);
 	if (!shift)
 		dam <<= 6;
-	if (resist)
-		dam >>= 2;
 
-	if (&player == MyPlayer) {
-		// The spell that was cast earns the experience; without one, go by the kind of projectile.
-		AddSpellExperienceForDamage(player, monster, sourceSpell != SpellID::Invalid ? sourceSpell : GetSpellForMissile(t), dam, monster.hitPoints);
-		ApplyMonsterDamage(damageType, monster, dam);
+	if (&player == MyPlayer && missileData.isArrow() && IsSpecialAttack(sourceSpell)) {
+		// Essence Mod: this shot carries a special attack. As with a melee swing, the whole hit is
+		// turned into the attack's element with its bonus added, the cooldown starts because the
+		// shot landed, and the attack's rider and spread happen here at the monster.
+		dam = ApplySpecialAttackDamage(player, sourceSpell, dam);
+		StartSpellCooldown(sourceSpell);
+		DealSpellTickDamage(monster, sourceSpell, MissileID::WeaponExplosion, GetSpecialAttackDamageType(sourceSpell), dam, /*finishKill=*/false);
+		AddMissile(monster.position.tile, { 1, 0 }, Direction::South, MissileID::WeaponExplosion, TARGET_MONSTERS, player, 0, 0);
+		ApplySpecialAttackExtras(player, monster, sourceSpell, dam);
+	} else {
+		if (resist)
+			dam >>= 2;
+
+		if (&player == MyPlayer) {
+			// The spell that was cast earns the experience; without one, go by the kind of projectile.
+			AddSpellExperienceForDamage(player, monster, sourceSpell != SpellID::Invalid ? sourceSpell : GetSpellForMissile(t), dam, monster.hitPoints);
+			ApplyMonsterDamage(damageType, monster, dam);
+		}
 	}
 
 	if (monster.hasNoLife()) {

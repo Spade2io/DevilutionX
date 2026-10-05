@@ -667,8 +667,9 @@ bool PlrHitMonst(Player &player, Monster &monster, bool adjacentDamage = false)
 		} else if (specialAttack != SpellID::Invalid) {
 			// Essence Mod: a fire special attack turns the whole swing into fire damage and adds to it.
 			dam = ApplySpecialAttackDamage(player, specialAttack, dam);
-			DealSpellTickDamage(monster, specialAttack, MissileID::WeaponExplosion, DamageType::Fire, dam, /*finishKill=*/false);
+			DealSpellTickDamage(monster, specialAttack, MissileID::WeaponExplosion, GetSpecialAttackDamageType(specialAttack), dam, /*finishKill=*/false);
 			AddMissile(monster.position.tile, { 1, 0 }, Direction::South, MissileID::WeaponExplosion, TARGET_MONSTERS, player, 0, 0);
+			ApplySpecialAttackExtras(player, monster, specialAttack, dam);
 		} else {
 			AddAttackExperienceForDamage(player, monster, dam, monster.hitPoints); // Essence Mod
 			ApplyMonsterDamage(DamageType::Physical, monster, dam);
@@ -923,7 +924,7 @@ bool DoRangeAttack(Player &player)
 			mistype = MissileID::SpectralArrow;
 		}
 
-		AddMissile(
+		Missile *shot = AddMissile(
 		    player.position.tile,
 		    player.position.temp + Displacement { xoff, yoff },
 		    player._pdir,
@@ -932,6 +933,11 @@ bool DoRangeAttack(Player &player)
 		    player,
 		    dmg,
 		    0);
+
+		// Essence Mod: with a ranged weapon a special attack rides on the shot and takes effect
+		// where it lands. Only the first arrow of a multiple shot carries it.
+		if (shot != nullptr && arrow == 0 && &player == MyPlayer)
+			shot->sourceSpell = TakeQueuedSpecialAttackForShot(player);
 
 		if (arrow == 0 && mistype != MissileID::SpectralArrow) {
 			PlaySfxLoc(arrows != 1 ? SfxID::ShootBow2 : SfxID::ShootBow, player.position.tile);
@@ -3254,7 +3260,7 @@ void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 
 	// Essence Mod: a power read from essence_powers.tsv with no behaviour yet. It can be learned
 	// and readied, but casting it only says so, and costs nothing.
-	if (IsExtendedSpell(spellID) && GetSpellData(spellID).sMissiles[0] == MissileID::Null) {
+	if (IsExtendedSpell(spellID) && GetSpellData(spellID).sMissiles[0] == MissileID::Null && GetSpellData(spellID).effect.empty()) {
 		EventPlrMsg(StrCat(GetSpellData(spellID).sNameText, " is not built yet"), UiFlags::ColorWhite);
 		return;
 	}
@@ -3324,14 +3330,16 @@ void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 	}
 
 	if (IsSpecialAttack(spellID)) {
-		if (pcursmonst == -1 || myPlayer.UsesRangedWeapon()) {
+		if (pcursmonst == -1) {
 			myPlayer.Say(HeroSpeech::ICantDoThat);
 			LastPlayerAction = PlayerActionType::None;
 			return;
 		}
+		// Any weapon will do. A melee weapon walks over and swings; a ranged one shoots from
+		// where the character stands, and the shot carries the attack.
 		QueueSpecialAttack(spellID, pcursmonst);
 		LastPlayerAction = PlayerActionType::AttackMonsterTarget;
-		NetSendCmdParam1(true, CMD_ATTACKID, pcursmonst);
+		NetSendCmdParam1(true, myPlayer.UsesRangedWeapon() ? CMD_RATTACKID : CMD_ATTACKID, pcursmonst);
 		return;
 	}
 

@@ -51,11 +51,17 @@ const SHORT_TEXT = {
 //         potency, its total over that time, is spread over 10 ticks.
 //   Burst: every enemy within the power's radius of the target takes the power's potency as damage
 //         at once, in the power's element.
+//   Strike: a weapon attack. The power's potency is added to the swing, and the whole hit lands in
+//         the power's element. "spread" carries the same hit to every other enemy within the
+//         power's radius of the target. "rider" adds a damage-over-time effect to the target;
+//         riderTotal is that effect's total over its 20 seconds.
 const TICKS_PER_EFFECT = 10
 const BEHAVIOUR = {
   'Smolder': { missile: 'Corruption', effect: 'Burn' },
   'Wildfire': { missile: 'Corruption', effect: 'Burn' },
   'Meteor': { missile: 'Corruption', effect: 'Burst' },
+  'Ignite': { effect: 'Strike', rider: 'Burn', riderTotal: 5 },
+  'Flame Cleave': { effect: 'Strike', spread: true },
 }
 const FIRST_NUMBER = 100
 
@@ -94,16 +100,19 @@ const row = ({ power, essence }) => {
   const behaviour = BEHAVIOUR[power.name]
   // Amounts are in 64ths of a hit point, the unit the game counts damage in.
   const amount = behaviour?.effect === 'Burn' ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
-    : behaviour?.effect === 'Burst' ? Math.round((power.potency ?? 0) * 64)
+    : behaviour?.effect === 'Burst' || behaviour?.effect === 'Strike' ? Math.round((power.potency ?? 0) * 64)
     : 0
+  // A strike only reaches past its target when it is marked to spread.
+  const radius = !behaviour ? 0 : behaviour.effect === 'Strike' && !behaviour.spread ? 0 : Math.round(power.radius ?? 0)
+  const riderAmount = behaviour?.rider ? Math.round(behaviour.riderTotal * 64 / TICKS_PER_EFFECT) : 0
   return [
     power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : 'CastFire',
     mana, flags, behaviour?.missile ?? '', 0, mana, power.icon,
     Math.round(power.cooldown ?? 0), shortLine(power),
-    behaviour?.effect ?? '', amount, behaviour ? Math.round(power.radius ?? 0) : 0,
+    behaviour?.effect ?? '', amount, radius, behaviour?.rider ?? '', riderAmount,
   ].join('\t')
 }
-const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius'].join('\t')
+const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount'].join('\t')
 const powersText = [header, ...exported.map(row)].join('\r\n') + '\r\n'
 
 // Stones. Keep every existing row exactly where it is; drop the stand-in test stone if it is

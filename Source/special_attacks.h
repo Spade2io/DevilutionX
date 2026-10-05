@@ -9,6 +9,7 @@
  */
 #pragma once
 
+#include "tables/misdat.h"
 #include "tables/spelldat.h"
 
 namespace devilution {
@@ -34,6 +35,12 @@ void QueueSpecialAttack(SpellID spell, int monsterId);
 SpellID TakeQueuedSpecialAttack(Player &player, const Monster &monster);
 
 /** @brief Counts down the queued order so that it lapses. Called once per game tick. */
+/**
+ * @brief The same for a ranged weapon: the special attack waiting when a shot is loosed, whoever
+ * it was aimed at. Its mana is spent now; the shot carries it and it takes effect where it lands.
+ */
+SpellID TakeQueuedSpecialAttackForShot(Player &player);
+
 void ProcessSpecialAttacks();
 
 /** @brief Fire damage Flame Strike adds to the swing, in 64ths of a hit point. */
@@ -48,5 +55,16 @@ int GetFlameStrikeBonusDamage(const Player &player);
  * @param weaponDamage The swing's normal damage, in 64ths of a hit point.
  */
 int ApplySpecialAttackDamage(const Player &player, SpellID attack, int weaponDamage);
+
+/** @brief The kind of damage a special attack's swing is turned into. */
+DamageType GetSpecialAttackDamageType(SpellID attack);
+
+/**
+ * @brief What a special attack does beyond its own hit, once that hit has landed: a rider on the
+ * target (Ignite adds Burn) and, with a radius, the same damage to every other monster near it
+ * (Flame Cleave). Only powers read from essence_powers.tsv have either.
+ * @param damage The damage the swing dealt, in 64ths of a hit point.
+ */
+void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID attack, int damage);
 
 } // namespace devilution
