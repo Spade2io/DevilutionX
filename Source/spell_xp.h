@@ -64,6 +64,12 @@ unsigned AverageMonsterExperienceForLevel(unsigned level);
  */
 void AddSpellExperienceForHealing(const Player &caster, const Player &target, SpellID spell, int healed);
 
+/**
+ * @brief The total experience, in whole points, at which a spell reaches its next level.
+ * Zero for a spell that is not learned or is already at the maximum level.
+ */
+uint32_t GetSpellExperienceForNextLevel(const Player &player, SpellID spell);
+
 /** @brief Total experience a spell has earned, in 64ths of a point. */
 uint32_t GetSpellExperience(SpellID spell);
 

@@ -96,11 +96,14 @@ TintTable MakeEverythingToEightShadeRamp(uint8_t targetRamp)
 const uint8_t *GetEssenceTintTrn(EssenceTint tint)
 {
 	static const TintTable VividRed = MakeEverythingToEightShadeRamp(PAL8_RED);
+	static const TintTable VividYellow = MakeEverythingToEightShadeRamp(PAL8_YELLOW);
 	static const TintTable VividBlue = MakeWarmToEightShadeRamp(PAL8_BLUE);
 	// The slate-blue ramp is the nearest the shared palette has to purple. Its darker two-thirds read as shadow.
 	static const TintTable Shadow = MakeEverythingToDarkRamp(PAL16_BLUE, 5);
 
 	switch (tint) {
+	case EssenceTint::VividYellow:
+		return VividYellow.data();
 	case EssenceTint::VividRed:
 		return VividRed.data();
 	case EssenceTint::VividBlue:
@@ -119,6 +122,9 @@ std::optional<EssenceTint> GetSpellTint(SpellID spell)
 	case SpellID::Corruption:
 		return EssenceTint::Shadow;
 	case SpellID::FireAura:
+	case SpellID::FlamingWeapon:
+	case SpellID::FlameStrike:
+	case SpellID::InfernoStrike:
 		return EssenceTint::VividRed;
 	default:
 		return std::nullopt;
@@ -127,9 +133,27 @@ std::optional<EssenceTint> GetSpellTint(SpellID spell)
 
 std::optional<EssenceTint> GetItemTint(const Item &item)
 {
+	if (item._iMiscId == IMISC_ESSENCE)
+		return GetEssenceTint(GetSpellEssence(item._iSpell));
 	if (item._iMiscId != IMISC_AWAKENINGSTONE)
 		return std::nullopt;
-	return GetSpellTint(item._iSpell);
+	// A stone takes its ability's own colour, or failing that its essence's.
+	if (const std::optional<EssenceTint> tint = GetSpellTint(item._iSpell); tint)
+		return tint;
+	return GetEssenceTint(GetSpellEssence(item._iSpell));
+}
+
+std::optional<EssenceTint> GetEssenceTint(EssenceID essence)
+{
+	switch (essence) {
+	case EssenceID::Fire:
+		return EssenceTint::VividRed;
+	case EssenceID::Lightning:
+		return EssenceTint::VividYellow;
+	case EssenceID::None:
+		break;
+	}
+	return std::nullopt;
 }
 
 } // namespace devilution

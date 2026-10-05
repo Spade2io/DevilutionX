@@ -172,3 +172,9 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Strength	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Strength	true	1
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Corruption	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Corruption	true	1
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Fire Aura	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	FireAura	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Flaming Weapon	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	FlamingWeapon	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Flame Strike	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	FlameStrike	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Inferno Strike	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	InfernoStrike	true	1
+	0	Misc	Unequippable	ESSENCE	Misc	NONE	Fire Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Firebolt	true	1
+	0	Misc	Unequippable	ESSENCE	Misc	NONE	Lightning Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Lightning	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Test Bolt	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	TestBolt	true	1

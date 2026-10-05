@@ -16,6 +16,7 @@
 
 #include "buffs.h"
 #include "control/control.hpp"
+#include "cooldowns.h"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "cursor.h"
@@ -50,6 +51,9 @@
 #include "player.h"
 #include "qol/autopickup.h"
 #include "qol/stash.h"
+#include "dots.h"
+#include "essences.h"
+#include "special_attacks.h"
 #include "spell_xp.h"
 #include "spells.h"
 #include "stores.h"
@@ -534,6 +538,11 @@ bool PlrHitMonst(Player &player, Monster &monster, bool adjacentDamage = false)
 	if (!monster.isPossibleToHit())
 		return false;
 
+	// Essence Mod: a queued special attack is spent on this swing, whether or not it lands.
+	const SpellID specialAttack = (&player == MyPlayer && !adjacentDamage)
+	    ? TakeQueuedSpecialAttack(player, monster)
+	    : SpellID::Invalid;
+
 	if (adjacentDamage) {
 		if (player.getCharacterLevel() > 20)
 			hper -= 30;
@@ -558,6 +567,10 @@ bool PlrHitMonst(Player &player, Monster &monster, bool adjacentDamage = false)
 #endif
 			return false;
 	}
+
+	// Essence Mod: a special attack's cooldown starts only when the swing lands. A miss leaves it ready.
+	if (specialAttack != SpellID::Invalid)
+		StartSpellCooldown(specialAttack);
 
 	if (gbIsHellfire && HasAllOf(player._pIFlags, ItemSpecialEffect::FireDamage | ItemSpecialEffect::LightningDamage)) {
 		// Fixed off by 1 error from Hellfire
@@ -641,8 +654,24 @@ bool PlrHitMonst(Player &player, Monster &monster, bool adjacentDamage = false)
 			dam = monster.hitPoints; /* ensure monster is killed with one hit */
 		}
 #endif
-		AddAttackExperienceForDamage(player, monster, dam, monster.hitPoints); // Essence Mod
-		ApplyMonsterDamage(DamageType::Physical, monster, dam);
+		// Essence Mod: the Flaming Weapon buff adds its own fire damage to every hit that lands.
+		// The monster's death, if any, is started further down as for any hit.
+		if (const int flamingWeaponDamage = GetFlamingWeaponDamage(player); flamingWeaponDamage > 0) {
+			DealSpellTickDamage(monster, SpellID::FlamingWeapon, MissileID::WeaponExplosion, DamageType::Fire, flamingWeaponDamage, /*finishKill=*/false);
+			AddMissile(monster.position.tile, { 1, 0 }, Direction::South, MissileID::WeaponExplosion, TARGET_MONSTERS, player, 0, 0);
+		}
+
+		if (monster.hasNoLife()) {
+			// The buff's fire already killed it; the weapon's own damage has nothing left to do.
+		} else if (specialAttack != SpellID::Invalid) {
+			// Essence Mod: a fire special attack turns the whole swing into fire damage and adds to it.
+			dam = ApplySpecialAttackDamage(player, specialAttack, dam);
+			DealSpellTickDamage(monster, specialAttack, MissileID::WeaponExplosion, DamageType::Fire, dam, /*finishKill=*/false);
+			AddMissile(monster.position.tile, { 1, 0 }, Direction::South, MissileID::WeaponExplosion, TARGET_MONSTERS, player, 0, 0);
+		} else {
+			AddAttackExperienceForDamage(player, monster, dam, monster.hitPoints); // Essence Mod
+			ApplyMonsterDamage(DamageType::Physical, monster, dam);
+		}
 	}
 
 	int skdam = 0;
@@ -1460,7 +1489,7 @@ void ValidatePlayer()
 	}
 
 	uint64_t msk = 0;
-	for (auto b = static_cast<size_t>(SpellID::Firebolt); b < SpellsData.size(); b++) {
+	for (auto b = static_cast<size_t>(SpellID::Firebolt); b < LegacySpellCount(); b++) {
 		if (GetSpellBookLevel((SpellID)b) != -1) {
 			msk |= GetSpellBitmask(static_cast<SpellID>(b));
 			if (myPlayer._pSplLvl[b] > MaxSpellLevel)
@@ -1469,6 +1498,22 @@ void ValidatePlayer()
 	}
 
 	myPlayer._pMemSpells &= msk;
+
+	// Essence Mod: the only abilities a character knows are the ones held under their essences.
+	// Anything else (a class's starting spell, a spell from before essences) is forgotten.
+	// Class skills are removed as well.
+	const uint64_t slotted = GetSlottedAbilityMask();
+	for (auto b = static_cast<size_t>(SpellID::Firebolt); b < LegacySpellCount(); b++) {
+		if ((slotted & GetSpellBitmask(static_cast<SpellID>(b))) == 0)
+			myPlayer._pSplLvl[b] = 0;
+	}
+	// The same rule for powers beyond the original 64, which have no switch to check.
+	std::erase_if(myPlayer.extendedSpellLevels, [](const std::pair<SpellID, uint8_t> &known) {
+		return !IsAbilitySlotted(known.first) || known.second > MaxSpellLevel;
+	});
+	myPlayer._pMemSpells &= slotted;
+	myPlayer._pAblSpells = 0;
+
 	myPlayer._pInfraFlag = false;
 }
 
@@ -1741,7 +1786,7 @@ bool Player::isWalking() const
 int Player::GetManaShieldDamageReduction()
 {
 	constexpr uint8_t Max = 7;
-	return 24 - (std::min(_pSplLvl[static_cast<int8_t>(SpellID::ManaShield)], Max) * 3);
+	return 24 - (std::min(_pSplLvl[static_cast<size_t>(SpellID::ManaShield)], Max) * 3);
 }
 
 void Player::RestorePartialLife()
@@ -2832,7 +2877,7 @@ void ApplyPlrDamage(DamageType damageType, Player &player, int dam, int minHP /*
 		lua::OnPlayerTakeDamage(&player, totalDamage, static_cast<int>(damageType));
 	}
 	if (totalDamage > 0 && player.pManaShield && HasNoneOf(player._pIFlags, ItemSpecialEffect::NoMana)) {
-		const uint8_t manaShieldLevel = player._pSplLvl[static_cast<int8_t>(SpellID::ManaShield)];
+		const uint8_t manaShieldLevel = player._pSplLvl[static_cast<size_t>(SpellID::ManaShield)];
 		if (manaShieldLevel > 0) {
 			totalDamage += totalDamage / -player.GetManaShieldDamageReduction();
 		}
@@ -2985,33 +3030,52 @@ void StartWarpLvl(Player &player, size_t pidx)
 	}
 }
 
-/** Essence Mod: game ticks between mana regeneration pulses (20 ticks = 1 second at normal speed). */
-constexpr int ManaRegenIntervalTicks = 20;
+/** Essence Mod: game ticks between regeneration pulses (20 ticks = 1 second at normal speed). */
+constexpr int RegenIntervalTicks = 20;
+
+int GetLifeRegenPerSecond(const Player &player)
+{
+	// Base: Recovery (the Vitality stat) / 10 hit points per second, in 64ths.
+	// Spells, abilities and buffs that change health regeneration adjust the result here.
+	return std::max(player._pVitality, 0) * 64 / 10;
+}
+
+int GetManaRegenPerSecond(const Player &player)
+{
+	// Base: Recovery (the Vitality stat) / 10 mana per second, in 64ths.
+	// Spells, abilities and buffs that change mana regeneration adjust the result here.
+	return std::max(player._pVitality, 0) * 64 / 10;
+}
 
 /**
- * @brief Essence Mod: restores a little mana on a fixed interval, scaled by the Magic stat.
+ * @brief Essence Mod: restores life and mana once a second.
  *
- * Mana is stored in 64ths of a point, so adding `_pMagic` per pulse gives Magic/64 mana per second.
+ * Both are stored in 64ths of a point, so fractions of a point add up correctly.
  * The tick counter lives in memory only and is never saved.
  */
-void RegenerateMana(Player &player)
+void RegenerateLifeAndMana(Player &player)
 {
 	static int ticksSinceLastPulse = 0;
-	if (++ticksSinceLastPulse < ManaRegenIntervalTicks)
+	if (++ticksSinceLastPulse < RegenIntervalTicks)
 		return;
 	ticksSinceLastPulse = 0;
 
 	if (player._pHitPoints >> 6 <= 0)
 		return;
-	if (HasAnyOf(player._pIFlags, ItemSpecialEffect::NoMana))
-		return;
-	if (player._pMana >= player._pMaxMana)
-		return;
 
-	const int amount = std::max(player._pMagic, 0);
-	player._pMana = std::min(player._pMana + amount, player._pMaxMana);
-	player._pManaBase = std::min(player._pManaBase + amount, player._pMaxManaBase);
-	RedrawComponent(PanelDrawComponent::Mana);
+	if (player._pHitPoints < player._pMaxHP) {
+		const int amount = GetLifeRegenPerSecond(player);
+		player._pHitPoints = std::min(player._pHitPoints + amount, player._pMaxHP);
+		player._pHPBase = std::min(player._pHPBase + amount, player._pMaxHPBase);
+		RedrawComponent(PanelDrawComponent::Health);
+	}
+
+	if (player._pMana < player._pMaxMana && HasNoneOf(player._pIFlags, ItemSpecialEffect::NoMana)) {
+		const int amount = GetManaRegenPerSecond(player);
+		player._pMana = std::min(player._pMana + amount, player._pMaxMana);
+		player._pManaBase = std::min(player._pManaBase + amount, player._pMaxManaBase);
+		RedrawComponent(PanelDrawComponent::Mana);
+	}
 }
 
 void ProcessPlayers()
@@ -3061,7 +3125,7 @@ void ProcessPlayers()
 				if (player.pManaShield && HasAnyOf(player._pIFlags, ItemSpecialEffect::NoMana)) {
 					NetSendCmd(true, CMD_REMSHIELD);
 				}
-				RegenerateMana(player);
+				RegenerateLifeAndMana(player);
 			}
 
 			bool tplayer = false;
@@ -3235,17 +3299,38 @@ void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 		return;
 	}
 
+	// Essence Mod: a special attack is a weapon attack, not a cast. The character walks to the
+	// monster and swings exactly as for a left click, and that swing carries the effect.
+	// Essence Mod: an ability on cooldown cannot be used until its clock has gone all the way round.
+	if (IsSpellOnCooldown(spellID)) {
+		myPlayer.Say(HeroSpeech::ICantDoThat);
+		LastPlayerAction = PlayerActionType::None;
+		return;
+	}
+
+	if (IsSpecialAttack(spellID)) {
+		if (pcursmonst == -1 || myPlayer.UsesRangedWeapon()) {
+			myPlayer.Say(HeroSpeech::ICantDoThat);
+			LastPlayerAction = PlayerActionType::None;
+			return;
+		}
+		QueueSpecialAttack(spellID, pcursmonst);
+		LastPlayerAction = PlayerActionType::AttackMonsterTarget;
+		NetSendCmdParam1(true, CMD_ATTACKID, pcursmonst);
+		return;
+	}
+
 	const int spellFrom = 0;
 	if (IsWallSpell(spellID)) {
 		LastPlayerAction = PlayerActionType::Spell;
 		const Direction sd = GetDirection(myPlayer.position.tile, cursPosition);
-		NetSendCmdLocParam4(true, CMD_SPELLXYD, cursPosition, static_cast<int8_t>(spellID), static_cast<uint8_t>(spellType), static_cast<uint16_t>(sd), spellFrom);
+		NetSendCmdLocParam4(true, CMD_SPELLXYD, cursPosition, static_cast<uint16_t>(spellID), static_cast<uint8_t>(spellType), static_cast<uint16_t>(sd), spellFrom);
 	} else if (pcursmonst != -1 && !isShiftHeld) {
 		LastPlayerAction = PlayerActionType::SpellMonsterTarget;
-		NetSendCmdParam4(true, CMD_SPELLID, pcursmonst, static_cast<int8_t>(spellID), static_cast<uint8_t>(spellType), spellFrom);
+		NetSendCmdParam4(true, CMD_SPELLID, pcursmonst, static_cast<uint16_t>(spellID), static_cast<uint8_t>(spellType), spellFrom);
 	} else if (PlayerUnderCursor != nullptr && !PlayerUnderCursor->hasNoLife() && !isShiftHeld && !myPlayer.friendlyMode) {
 		LastPlayerAction = PlayerActionType::SpellPlayerTarget;
-		NetSendCmdParam4(true, CMD_SPELLPID, PlayerUnderCursor->getId(), static_cast<int8_t>(spellID), static_cast<uint8_t>(spellType), spellFrom);
+		NetSendCmdParam4(true, CMD_SPELLPID, PlayerUnderCursor->getId(), static_cast<uint16_t>(spellID), static_cast<uint8_t>(spellType), spellFrom);
 	} else {
 		Point targetedTile = cursPosition;
 		if (spellID == SpellID::Teleport && myPlayer.executedSpell.spellId == SpellID::Teleport) {
@@ -3258,7 +3343,7 @@ void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 			}
 		}
 		LastPlayerAction = PlayerActionType::Spell;
-		NetSendCmdLocParam3(true, CMD_SPELLXY, targetedTile, static_cast<int8_t>(spellID), static_cast<uint8_t>(spellType), spellFrom);
+		NetSendCmdLocParam3(true, CMD_SPELLXY, targetedTile, static_cast<uint16_t>(spellID), static_cast<uint8_t>(spellType), spellFrom);
 	}
 }
 

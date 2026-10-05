@@ -11,8 +11,10 @@
 #include <cstdint>
 #include <cstdio>
 #include <string>
+#include <vector>
 
 #include "buffs.h"
+#include "essences.h"
 #include "monster.h"
 #include "msg.h"
 #include "multi.h"
@@ -37,7 +39,15 @@ constexpr char SidecarHeader[] = "essence-spell-xp 1";
 constexpr size_t FirstSpellNotInSave = 47;
 
 /** Experience per spell, in 64ths of a point so that small hits still add up. */
-std::array<uint32_t, static_cast<size_t>(SpellID::LAST) + 1> SpellExperience {};
+std::vector<uint32_t> SpellExperience;
+
+/** The experience counter for one spell. The list grows to cover every row of the spell table. */
+uint32_t &ExperienceOf(SpellID spell)
+{
+	if (SpellExperience.size() < SpellsData.size())
+		SpellExperience.resize(SpellsData.size(), 0);
+	return SpellExperience[static_cast<size_t>(spell)];
+}
 
 /**
  * Formats a value held in 64ths for display: a whole number from 10 up (640 -> "10"),
@@ -62,11 +72,12 @@ uint64_t ExperienceToAdvancePast(uint8_t spellLevel)
 
 void RaiseSpellLevelIfEarned(Player &player, SpellID spell)
 {
-	uint8_t &level = player._pSplLvl[static_cast<size_t>(spell)];
-	const uint32_t total = SpellExperience[static_cast<size_t>(spell)];
+	uint8_t level = player.GetBaseSpellLevel(spell);
+	const uint32_t total = ExperienceOf(spell);
 
 	while (level < MaxSpellLevel && total >= ExperienceToAdvancePast(level)) {
 		level++;
+		player.SetBaseSpellLevel(spell, level);
 		NetSendCmdParam2(true, CMD_CHANGE_SPELL_LEVEL, static_cast<uint16_t>(spell), level);
 		EventPlrMsg(StrCat(GetSpellData(spell).sNameText, " reached level ", static_cast<int>(level)), UiFlags::ColorWhitegold);
 		// A buff's strength depends on its spell's level, so a level-up takes effect straight away.
@@ -93,11 +104,11 @@ uint32_t AwardSpellExperience(Player &player, SpellID spell, int64_t gained, int
 	if (gained <= 0)
 		return 0;
 
-	uint32_t &total = SpellExperience[static_cast<size_t>(spell)];
+	uint32_t &total = ExperienceOf(spell);
 
 	// A spell can hold a level its experience never earned (a class's starting spell, a shrine).
 	// Count from the start of that level, so progress shows straight away instead of after catching up.
-	const uint8_t level = player._pSplLvl[static_cast<size_t>(spell)];
+	const uint8_t level = player.GetBaseSpellLevel(spell);
 	if (level > 1 && level <= MaxSpellLevel)
 		total = std::max(total, static_cast<uint32_t>(ExperienceToAdvancePast(level - 1)));
 
@@ -122,7 +133,7 @@ void ShareExperienceWithActiveBuffs(Player &player, uint32_t gained, std::string
 		if (!IsBuffActive(player, buff) || !BuffSharesExperience(buff))
 			continue;
 		const SpellID buffSpell = GetBuffSpell(buff);
-		if (buffSpell == SpellID::Invalid || player._pSplLvl[static_cast<size_t>(buffSpell)] == 0)
+		if (buffSpell == SpellID::Invalid || player.GetBaseSpellLevel(buffSpell) == 0)
 			continue;
 		const uint32_t buffGain = AwardSpellExperience(player, buffSpell, gained / BuffExperienceDivisor, 0);
 		if (buffGain != 0)
@@ -204,7 +215,9 @@ void AddSpellExperienceForDamage(const Player &player, const Monster &monster, S
 		return;
 
 	// Only learned spells grow. Arrows, and spells cast from a staff or scroll, count as plain attacks.
-	if (spell == SpellID::Invalid || player._pSplLvl[static_cast<size_t>(spell)] == 0) {
+	// A passive buff earns only its tenth share, so any damage credited to one counts as a plain
+	// attack too. Buffs that deal damage, such as Flaming Weapon, earn the full value like any spell.
+	if (spell == SpellID::Invalid || player.GetBaseSpellLevel(spell) == 0 || IsExperienceSharingBuffSpell(spell)) {
 		AddAttackExperienceForDamage(player, monster, damage, hitPointsBefore);
 		return;
 	}
@@ -247,7 +260,7 @@ void AddSpellExperienceForHealing(const Player &caster, const Player &target, Sp
 		return;
 
 	// Only learned spells grow. Casting from a staff or scroll does not teach the spell.
-	if (caster._pSplLvl[static_cast<size_t>(spell)] == 0)
+	if (caster.GetBaseSpellLevel(spell) == 0)
 		return;
 
 	// The healed player stands in for an average monster of their own level:
@@ -270,14 +283,24 @@ uint32_t GetSpellExperience(SpellID spell)
 {
 	if (spell == SpellID::Invalid)
 		return 0;
-	return SpellExperience[static_cast<size_t>(spell)];
+	return ExperienceOf(spell);
+}
+
+uint32_t GetSpellExperienceForNextLevel(const Player &player, SpellID spell)
+{
+	if (spell == SpellID::Invalid)
+		return 0;
+	const uint8_t level = player.GetBaseSpellLevel(spell);
+	if (level == 0 || level >= MaxSpellLevel)
+		return 0;
+	return GetNextExperienceThresholdForLevel(level);
 }
 
 int GetSpellLevelProgressPercent(const Player &player, SpellID spell)
 {
 	if (spell == SpellID::Invalid)
 		return 0;
-	const uint8_t level = player._pSplLvl[static_cast<size_t>(spell)];
+	const uint8_t level = player.GetBaseSpellLevel(spell);
 	if (level == 0)
 		return 0;
 	if (level >= MaxSpellLevel)
@@ -287,7 +310,7 @@ int GetSpellLevelProgressPercent(const Player &player, SpellID spell)
 	// It then shows an empty bar until its experience catches up with the level it already has.
 	const uint64_t levelStart = level > 1 ? ExperienceToAdvancePast(level - 1) : 0;
 	const uint64_t levelEnd = ExperienceToAdvancePast(level);
-	const uint64_t total = SpellExperience[static_cast<size_t>(spell)];
+	const uint64_t total = ExperienceOf(spell);
 	if (total <= levelStart || levelEnd <= levelStart)
 		return 0;
 	return static_cast<int>(std::min<uint64_t>((total - levelStart) * 100 / (levelEnd - levelStart), 100));
@@ -295,12 +318,14 @@ int GetSpellLevelProgressPercent(const Player &player, SpellID spell)
 
 void ResetSpellExperience()
 {
-	SpellExperience.fill(0);
+	SpellExperience.assign(SpellsData.size(), 0);
 }
 
 void LoadSpellExperience(const std::string &path, Player &player)
 {
 	ResetSpellExperience();
+	ResetEssences();
+	player.extendedSpellLevels.clear();
 
 	FILE *file = OpenFile(path.c_str(), "rb");
 	if (file == nullptr)
@@ -311,15 +336,30 @@ void LoadSpellExperience(const std::string &path, Player &player)
 		while (std::fgets(line, sizeof(line), file) != nullptr) {
 			unsigned spell = 0;
 			unsigned value = 0;
+			unsigned hotkey = 0;
+			if (ReadEssenceSidecarLine(line))
+				continue;
 			if (std::sscanf(line, "L %u %u", &spell, &value) == 2) {
 				// The level of a spell the original save has no room for.
-				if (spell >= FirstSpellNotInSave && spell < SpellExperience.size() && value > 0) {
-					player._pSplLvl[spell] = static_cast<uint8_t>(std::min<unsigned>(value, MaxSpellLevel));
+				if (spell >= FirstSpellNotInSave && IsValidSpell(static_cast<SpellID>(spell)) && value > 0) {
+					player.SetBaseSpellLevel(static_cast<SpellID>(spell), static_cast<uint8_t>(std::min<unsigned>(value, MaxSpellLevel)));
 					player._pMemSpells |= GetSpellBitmask(static_cast<SpellID>(spell));
 				}
+			} else if (std::sscanf(line, "R %u %u", &spell, &value) == 2) {
+				// The readied spell, when it is one the save file's own field cannot name.
+				if (IsValidSpell(static_cast<SpellID>(spell)) && value <= static_cast<unsigned>(SpellType::Invalid)) {
+					player._pRSpell = static_cast<SpellID>(spell);
+					player._pRSplType = static_cast<SpellType>(value);
+				}
+			} else if (std::sscanf(line, "H %u %u %u", &hotkey, &spell, &value) == 3) {
+				// A hotkey holding such a spell.
+				if (hotkey < NumHotkeys && IsValidSpell(static_cast<SpellID>(spell)) && value <= static_cast<unsigned>(SpellType::Invalid)) {
+					player._pSplHotKey[hotkey] = static_cast<SpellID>(spell);
+					player._pSplTHotKey[hotkey] = static_cast<SpellType>(value);
+				}
 			} else if (std::sscanf(line, "%u %u", &spell, &value) == 2) {
-				if (spell < SpellExperience.size())
-					SpellExperience[spell] = value;
+				if (IsValidSpell(static_cast<SpellID>(spell)))
+					ExperienceOf(static_cast<SpellID>(spell)) = value;
 			}
 		}
 	}
@@ -337,10 +377,21 @@ void SaveSpellExperience(const std::string &path, const Player &player)
 		if (SpellExperience[spell] != 0)
 			std::fprintf(file, "%u %u\n", static_cast<unsigned>(spell), static_cast<unsigned>(SpellExperience[spell]));
 	}
-	for (size_t spell = FirstSpellNotInSave; spell < SpellExperience.size(); spell++) {
+	for (size_t spell = FirstSpellNotInSave; spell < LegacySpellCount(); spell++) {
 		if (player._pSplLvl[spell] != 0)
 			std::fprintf(file, "L %u %u\n", static_cast<unsigned>(spell), static_cast<unsigned>(player._pSplLvl[spell]));
 	}
+	// Powers beyond the original 64: their levels, and where one is readied or on a hotkey.
+	// The save file's own fields for those hold "none" instead (see loadsave.cpp).
+	for (const auto &[spell, level] : player.extendedSpellLevels)
+		std::fprintf(file, "L %u %u\n", static_cast<unsigned>(spell), static_cast<unsigned>(level));
+	if (IsExtendedSpell(player._pRSpell))
+		std::fprintf(file, "R %u %u\n", static_cast<unsigned>(player._pRSpell), static_cast<unsigned>(player._pRSplType));
+	for (size_t i = 0; i < NumHotkeys; i++) {
+		if (IsExtendedSpell(player._pSplHotKey[i]))
+			std::fprintf(file, "H %u %u %u\n", static_cast<unsigned>(i), static_cast<unsigned>(player._pSplHotKey[i]), static_cast<unsigned>(player._pSplTHotKey[i]));
+	}
+	WriteEssenceSidecarLines(file);
 	std::fclose(file);
 }
 

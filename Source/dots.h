@@ -32,8 +32,9 @@ int ScaleDamageForSpellLevel(int baseDamage, int spellLevel);
  * Used by damage-over-time effects and damage auras.
  *
  * @param damage Damage before resistance, in 64ths of a hit point.
+ * @param finishKill Start the death of a monster this kills. Pass false when the caller does that itself.
  */
-void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, DamageType damageType, int damage);
+void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, DamageType damageType, int damage, bool finishKill = true);
 
 enum class DotID : uint8_t {
 	Corruption,

@@ -52,6 +52,16 @@ uint8_t giNumberOfLevels;
 
 namespace {
 
+/**
+ * Essence Mod: the number written to the save file for a spell. The file's fields are laid out
+ * for the original 8-bit numbers, so a power beyond the original 64 is written as "none" and its
+ * real number is kept in the sidecar file (see spell_xp.cpp). The layout of the save is unchanged.
+ */
+int32_t SaveSpellId(SpellID spell)
+{
+	return IsExtendedSpell(spell) ? static_cast<int32_t>(SpellID::Invalid) : static_cast<int8_t>(spell);
+}
+
 constexpr size_t MaxMissilesForSaveGame = 125;
 constexpr size_t PlayerWalkPathSizeForSaveGame = 25;
 
@@ -388,6 +398,11 @@ void LoadAndValidateItemData(LoadHelper &file, Item &item)
 		return;
 	}
 
+	// Essence Mod: an awakening stone or essence takes its spell from its row in the item table.
+	// The save file holds "none" for a power beyond the original 64 (see SaveSpellId).
+	if (IsAnyOf(item._iMiscId, IMISC_AWAKENINGSTONE, IMISC_ESSENCE) && static_cast<size_t>(item.IDidx) < AllItemsList.size())
+		item._iSpell = AllItemsList[static_cast<size_t>(item.IDidx)].iSpell;
+
 	RemoveInvalidItem(item);
 }
 
@@ -461,8 +476,8 @@ void LoadPlayer(LoadHelper &file, Player &player)
 		file.Skip<uint8_t>();
 	// These spells are unavailable in Diablo as learnable spells
 	if (!gbIsHellfire) {
-		player._pSplLvl[static_cast<uint8_t>(SpellID::Apocalypse)] = 0;
-		player._pSplLvl[static_cast<uint8_t>(SpellID::Nova)] = 0;
+		player._pSplLvl[static_cast<size_t>(SpellID::Apocalypse)] = 0;
+		player._pSplLvl[static_cast<size_t>(SpellID::Nova)] = 0;
 	}
 
 	file.Skip(7); // Alignment
@@ -1202,7 +1217,7 @@ void SaveItem(SaveHelper &file, const Item &item)
 	file.WriteLE<int32_t>(item._iAC);
 	file.WriteLE<uint32_t>(static_cast<uint32_t>(item._iFlags));
 	file.WriteLE<int32_t>(item._iMiscId);
-	file.WriteLE<int32_t>(static_cast<int8_t>(item._iSpell));
+	file.WriteLE<int32_t>(SaveSpellId(item._iSpell));
 	file.WriteLE<int32_t>(item._iCharges);
 	file.WriteLE<int32_t>(item._iMaxCharges);
 	file.WriteLE<int32_t>(item._iDurability);
@@ -1306,17 +1321,17 @@ void SavePlayer(SaveHelper &file, const Player &player)
 	file.WriteLE<int32_t>(player.lightId);
 	file.WriteLE<int32_t>(1); // _pvid
 
-	file.WriteLE<int32_t>(static_cast<int8_t>(player.queuedSpell.spellId));
+	file.WriteLE<int32_t>(SaveSpellId(player.queuedSpell.spellId));
 	file.WriteLE<int8_t>(static_cast<int8_t>(player.queuedSpell.spellType));
 	file.WriteLE<int8_t>(player.queuedSpell.spellFrom);
 	file.Skip(2); // Alignment
-	file.WriteLE<int32_t>(static_cast<int8_t>(player.inventorySpell));
+	file.WriteLE<int32_t>(SaveSpellId(player.inventorySpell));
 	file.Skip<int8_t>(); // Skip _pTSplType
 	file.Skip(3);        // Alignment
-	file.WriteLE<int32_t>(static_cast<int8_t>(player._pRSpell));
+	file.WriteLE<int32_t>(SaveSpellId(player._pRSpell));
 	file.WriteLE<int8_t>(static_cast<uint8_t>(player._pRSplType));
 	file.Skip(3); // Alignment
-	file.WriteLE<int32_t>(static_cast<int8_t>(player._pSBkSpell));
+	file.WriteLE<int32_t>(SaveSpellId(player._pSBkSpell));
 	file.Skip<int8_t>(); // Skip _pSBkSplType
 
 	for (const uint8_t spellLevel : player._pSplLvl)
@@ -1331,7 +1346,7 @@ void SavePlayer(SaveHelper &file, const Player &player)
 
 	// Extra hotkeys: to keep single player save compatibility, write only 4 hotkeys here, rely on SaveHotkeys for the rest
 	for (size_t i = 0; i < 4; i++) {
-		file.WriteLE<int32_t>(static_cast<int8_t>(player._pSplHotKey[i]));
+		file.WriteLE<int32_t>(SaveSpellId(player._pSplHotKey[i]));
 	}
 	for (size_t i = 0; i < 4; i++) {
 		file.WriteLE<uint8_t>(static_cast<uint8_t>(player._pSplTHotKey[i]));
@@ -2381,14 +2396,14 @@ void SaveHotkeys(SaveWriter &saveWriter, const Player &player)
 
 	// Write the spell hotkeys
 	for (const auto &spellId : player._pSplHotKey) {
-		file.WriteLE<int32_t>(static_cast<int8_t>(spellId));
+		file.WriteLE<int32_t>(SaveSpellId(spellId));
 	}
 	for (const auto &spellType : player._pSplTHotKey) {
 		file.WriteLE<uint8_t>(static_cast<uint8_t>(spellType));
 	}
 
 	// Write the selected spell last
-	file.WriteLE<int32_t>(static_cast<int8_t>(player._pRSpell));
+	file.WriteLE<int32_t>(SaveSpellId(player._pRSpell));
 	file.WriteLE<uint8_t>(static_cast<uint8_t>(player._pRSplType));
 }
 

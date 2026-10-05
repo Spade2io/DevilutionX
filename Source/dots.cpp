@@ -74,7 +74,7 @@ std::array<Pulse, MaxMonsters> MonsterPulses;
 void DealDotDamage(Monster &monster, const ActiveDot &dot)
 {
 	const DotDefinition &definition = DefinitionOf(dot.id);
-	const int spellLevel = MyPlayer->_pSplLvl[static_cast<size_t>(definition.spell)];
+	const int spellLevel = MyPlayer->GetBaseSpellLevel(definition.spell);
 	const int damage = ScaleDamageForSpellLevel(definition.damagePerStack, spellLevel) * dot.stacks;
 	DealSpellTickDamage(monster, definition.spell, definition.missile, definition.damageType, damage);
 }
@@ -88,7 +88,7 @@ int ScaleDamageForSpellLevel(int baseDamage, int spellLevel)
 	return baseDamage;
 }
 
-void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, DamageType damageType, int damage)
+void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, DamageType damageType, int damage, bool finishKill)
 {
 	// Resistances work as they do for a spell hit: immune takes nothing, resistant takes a quarter.
 	if (monster.isImmune(missile, damageType))
@@ -102,7 +102,8 @@ void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, Dam
 	AddSpellExperienceForDamage(player, monster, spell, damage, monster.hitPoints);
 	ApplyMonsterDamage(damageType, monster, damage);
 	if (monster.hasNoLife()) {
-		M_StartKill(monster, player);
+		if (finishKill)
+			M_StartKill(monster, player);
 	} else {
 		monster.tag(player);
 		// Being hurt gets a monster's attention.

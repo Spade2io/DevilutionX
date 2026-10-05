@@ -72,7 +72,8 @@ void ClearReadiedSpell(Player &player)
 
 bool IsValidSpell(SpellID spl)
 {
-	return spl > SpellID::Null && static_cast<size_t>(spl) < SpellsData.size();
+	// Essence Mod: the numbers between the original spells and the extended powers are blank rows.
+	return spl > SpellID::Null && static_cast<size_t>(spl) < SpellsData.size() && !SpellsData[static_cast<size_t>(spl)].sNameText.empty();
 }
 
 bool IsValidSpellFrom(int spellFrom)
@@ -99,7 +100,9 @@ bool TargetsMonster(SpellID id)
 	    || id == SpellID::Lightning
 	    || id == SpellID::StoneCurse
 	    || id == SpellID::FlameWave
-	    || id == SpellID::Corruption;
+	    || id == SpellID::Corruption
+	    || id == SpellID::FlameStrike
+	    || id == SpellID::InfernoStrike;
 }
 
 int GetManaAmount(const Player &player, SpellID sn)
@@ -219,6 +222,8 @@ void CastSpell(Player &player, SpellID spl, WorldTilePosition src, WorldTilePosi
 	for (size_t i = 0; i < sizeof(spellData.sMissiles) / sizeof(spellData.sMissiles[0]) && spellData.sMissiles[i] != MissileID::Null; i++) {
 		Missile *missile = AddMissile(src, dst, dir, spellData.sMissiles[i], TARGET_MONSTERS, player, 0, spllvl);
 		fizzled |= (missile == nullptr);
+		if (missile != nullptr)
+			missile->sourceSpell = spl;
 	}
 	if (spl == SpellID::ChargedBolt) {
 		for (int i = (spllvl / 2) + 3; i > 0; i--) {
@@ -318,7 +323,7 @@ int GetSpellBookLevel(SpellID s)
 		}
 	}
 
-	if (static_cast<uint8_t>(s) >= SpellsData.size()) {
+	if (s < SpellID::Null || static_cast<size_t>(s) >= SpellsData.size()) {
 		return -1;
 	}
 
@@ -342,7 +347,7 @@ int GetSpellStaffLevel(SpellID s)
 		}
 	}
 
-	if (static_cast<uint8_t>(s) >= SpellsData.size()) {
+	if (s < SpellID::Null || static_cast<size_t>(s) >= SpellsData.size()) {
 		return -1;
 	}
 

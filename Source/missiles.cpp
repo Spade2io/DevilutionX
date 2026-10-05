@@ -272,7 +272,7 @@ int ProjectileTrapDamage()
 	return currlevel + GenerateRnd(2 * currlevel);
 }
 
-bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam, int dist, MissileID t, WorldTilePosition startPos, DamageType damageType, bool shift)
+bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam, int dist, MissileID t, WorldTilePosition startPos, DamageType damageType, bool shift, SpellID sourceSpell = SpellID::Invalid)
 {
 	if (!monster.isPossibleToHit() || monster.isImmune(t, damageType))
 		return false;
@@ -326,7 +326,8 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 		dam >>= 2;
 
 	if (&player == MyPlayer) {
-		AddSpellExperienceForDamage(player, monster, GetSpellForMissile(t), dam, monster.hitPoints);
+		// The spell that was cast earns the experience; without one, go by the kind of projectile.
+		AddSpellExperienceForDamage(player, monster, sourceSpell != SpellID::Invalid ? sourceSpell : GetSpellForMissile(t), dam, monster.hitPoints);
 		ApplyMonsterDamage(damageType, monster, dam);
 	}
 
@@ -375,16 +376,16 @@ bool Plr2PlrMHit(const Player &player, Player &target, int mindam, int maxdam, i
 	}
 
 	int8_t resper;
-	switch (damageType) {
+	switch (GetResistanceCategory(damageType)) { // Essence Mod: many damage types, three resistances
 	case DamageType::Fire:
 		resper = target._pFireResist;
 		break;
-	case DamageType::Lightning:
-		resper = target._pLghtResist;
+	case DamageType::Lightning: // only acid reaches here: lightning itself is Elemental
+	case DamageType::Acid:
+		resper = target._pLghtResist; // Natural
 		break;
 	case DamageType::Magic:
-	case DamageType::Acid:
-		resper = target._pMagResist;
+		resper = target._pMagResist; // Astral
 		break;
 	default:
 		resper = 0;
@@ -501,7 +502,7 @@ void CheckMissileCol(Missile &missile, DamageType damageType, int minDamage, int
 				// then the missile can potentially hit this target
 				isMonsterHit = MonsterTrapHit(monster, minDamage, maxDamage, missile._midist, missile._mitype, damageType, isDamageShifted);
 			} else if (IsAnyOf(missile._micaster, TARGET_BOTH, TARGET_MONSTERS)) {
-				isMonsterHit = MonsterMHit(*missile.sourcePlayer(), monster, minDamage, maxDamage, missile._midist, missile._mitype, missile.position.start, damageType, isDamageShifted);
+				isMonsterHit = MonsterMHit(*missile.sourcePlayer(), monster, minDamage, maxDamage, missile._midist, missile._mitype, missile.position.start, damageType, isDamageShifted, missile.sourceSpell);
 			}
 		}
 	}
@@ -878,7 +879,7 @@ bool IsMissileBlockedByTile(Point tile)
 DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 {
 	assert(MyPlayer != nullptr);
-	assert(spell >= SpellID::FIRST && spell <= SpellID::LAST);
+	assert(spell >= SpellID::FIRST && static_cast<size_t>(spell) < SpellsData.size());
 
 	const Player &myPlayer = *MyPlayer;
 
@@ -1127,16 +1128,16 @@ bool PlayerMHit(Player &player, Monster *monster, int dist, int mind, int maxd, 
 	blkper = std::clamp(blkper, 0, 100);
 
 	int8_t resper;
-	switch (damageType) {
+	switch (GetResistanceCategory(damageType)) { // Essence Mod: many damage types, three resistances
 	case DamageType::Fire:
 		resper = player._pFireResist;
 		break;
-	case DamageType::Lightning:
-		resper = player._pLghtResist;
+	case DamageType::Lightning: // only acid reaches here: lightning itself is Elemental
+	case DamageType::Acid:
+		resper = player._pLghtResist; // Natural
 		break;
 	case DamageType::Magic:
-	case DamageType::Acid:
-		resper = player._pMagResist;
+		resper = player._pMagResist; // Astral
 		break;
 	default:
 		resper = 0;
@@ -2531,6 +2532,13 @@ void AddFireAuraBuff(Missile &missile, AddMissileParameter & /*parameter*/)
 	// The aura lives on the player, so this effect has done its job the moment it is created.
 	missile._miDelFlag = true;
 	ActivateBuff(Players[missile._misource], BuffID::FireAura);
+}
+
+void AddFlamingWeaponBuff(Missile &missile, AddMissileParameter & /*parameter*/)
+{
+	// The buff lives on the player, so this effect has done its job the moment it is created.
+	missile._miDelFlag = true;
+	ActivateBuff(Players[missile._misource], BuffID::FlamingWeapon);
 }
 
 void AddAuraPulseVisual(Missile &missile, AddMissileParameter & /*parameter*/)

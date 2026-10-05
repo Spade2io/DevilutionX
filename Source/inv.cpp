@@ -22,6 +22,7 @@
 #include "cursor.h"
 #include "cursor_defs.hpp"
 #include "engine/backbuffer_state.hpp"
+#include "essences.h"
 #include "engine/clx_sprite.hpp"
 #include "engine/load_cel.hpp"
 #include "engine/palette.h"
@@ -2177,10 +2178,25 @@ bool UseInvItem(int cii)
 		return true;
 	}
 
-	// Essence Mod: a book or awakening stone of a spell the player already knows does nothing and is not used up.
-	if (IsAnyOf(item->_iMiscId, IMISC_BOOK, IMISC_AWAKENINGSTONE) && player._pSplLvl[static_cast<int8_t>(item->_iSpell)] != 0) {
-		player.Say(HeroSpeech::ThatDidntDoAnything, SpeechDelay);
-		return true;
+	// Essence Mod: a book or awakening stone can only be used if its ability can be learned now:
+	// not already known, its essence held, and that essence not yet full. Otherwise it is kept.
+	if (IsAnyOf(item->_iMiscId, IMISC_BOOK, IMISC_AWAKENINGSTONE)) {
+		const LearnResult result = CheckCanLearn(item->_iSpell);
+		if (result != LearnResult::Ok) {
+			EventPlrMsg(DescribeLearnResult(result), UiFlags::ColorWhite);
+			player.Say(HeroSpeech::ICantDoThat, SpeechDelay);
+			return true;
+		}
+	}
+
+	// Essence Mod: an essence can only be absorbed once, and only while a slot is free.
+	if (item->_iMiscId == IMISC_ESSENCE) {
+		const EssenceID essence = GetSpellEssence(item->_iSpell);
+		if (!CanAbsorbEssence(essence)) {
+			EventPlrMsg(HasEssence(essence) ? "You already have this essence" : "You already have three essences", UiFlags::ColorWhite);
+			player.Say(HeroSpeech::ICantDoThat, SpeechDelay);
+			return true;
+		}
 	}
 
 	if (item->_iMiscId == IMISC_NONE && item->_itype == ItemType::Gold) {
@@ -2206,6 +2222,12 @@ bool UseInvItem(int cii)
 	const int idata = ItemCAnimTbl[item->_iCurs];
 	if (item->_iMiscId == IMISC_BOOK) {
 		PlaySFX(SfxID::ReadBook);
+	} else if (item->_iMiscId == IMISC_ESSENCE) {
+		// Essence Mod: absorbing an essence gets the quest-complete fanfare too.
+		if (&player == MyPlayer) {
+			PlaySFX(SfxID::QuestDone);
+			EventPlrMsg(StrCat("You absorbed the ", GetEssenceName(GetSpellEssence(item->_iSpell)), " essence"), UiFlags::ColorWhitegold);
+		}
 	} else if (item->_iMiscId == IMISC_AWAKENINGSTONE) {
 		// Essence Mod: learning from an awakening stone gets the quest-complete fanfare.
 		if (&player == MyPlayer) {

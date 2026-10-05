@@ -86,6 +86,16 @@ void DrawLargeSpellIcon(const Surface &out, Point position, SpellID spell);
 void DrawSmallSpellIcon(const Surface &out, Point position, SpellID spell);
 
 /**
+ * Essence Mod: draw a small spell icon enlarged about its centre, without the cooldown clock.
+ *
+ * @param out Output buffer.
+ * @param position Buffer coordinates (bottom-left) of the icon at its normal size.
+ * @param spell Spell ID.
+ * @param percent Size as a percentage of normal, e.g. 105.
+ */
+void DrawSmallSpellIconScaled(const Surface &out, Point position, SpellID spell, int percent);
+
+/**
  * Draw an inset 2px border for a large (56x56) spell icon.
  *
  * @param out Output buffer.

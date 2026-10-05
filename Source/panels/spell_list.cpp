@@ -1,6 +1,7 @@
 #include "panels/spell_list.hpp"
 
 #include <cstdint>
+#include <vector>
 
 #include "control/control.hpp"
 #include "controls/control_mode.hpp"
@@ -195,11 +196,48 @@ void DrawSpellList(const Surface &out)
 	}
 }
 
+/**
+ * Essence Mod: every spell the player has of one kind, in the order the lists show them.
+ * The original spells come from the 64 switches. Learned powers beyond those have no switch, so
+ * they are added from the player's level list.
+ */
+std::vector<SpellID> SpellsOfType(const Player &player, SpellType type)
+{
+	uint64_t mask = 0;
+	switch (type) {
+	case SpellType::Skill:
+		mask = player._pAblSpells;
+		break;
+	case SpellType::Spell:
+		mask = player._pMemSpells;
+		break;
+	case SpellType::Scroll:
+		mask = player._pScrlSpells;
+		break;
+	case SpellType::Charges:
+		mask = player._pISpells;
+		break;
+	default:
+		return {};
+	}
+	std::vector<SpellID> spells;
+	for (size_t j = 1; j < LegacySpellCount(); j++) {
+		if ((mask & GetSpellBitmask(static_cast<SpellID>(j))) != 0)
+			spells.push_back(static_cast<SpellID>(j));
+	}
+	if (type == SpellType::Spell) {
+		for (const auto &[spell, level] : player.extendedSpellLevels) {
+			if (level != 0)
+				spells.push_back(spell);
+		}
+	}
+	return spells;
+}
+
 std::vector<SpellListItem> GetSpellListItems()
 {
 	std::vector<SpellListItem> spellListItems;
 
-	uint64_t mask;
 	const Point mainPanelPosition = GetMainPanel().position;
 
 	int x = mainPanelPosition.x + 12 + (SPLICONLENGTH * SPLROWICONLS);
@@ -207,37 +245,21 @@ std::vector<SpellListItem> GetSpellListItems()
 
 	for (auto i : enum_values<SpellType>()) {
 		const Player &myPlayer = *MyPlayer;
-		switch (static_cast<SpellType>(i)) {
-		case SpellType::Skill:
-			mask = myPlayer._pAblSpells;
-			break;
-		case SpellType::Spell:
-			mask = myPlayer._pMemSpells;
-			break;
-		case SpellType::Scroll:
-			mask = myPlayer._pScrlSpells;
-			break;
-		case SpellType::Charges:
-			mask = myPlayer._pISpells;
-			break;
-		default:
+		if (!IsAnyOf(static_cast<SpellType>(i), SpellType::Skill, SpellType::Spell, SpellType::Scroll, SpellType::Charges))
 			continue;
-		}
-		auto j = static_cast<int8_t>(SpellID::Firebolt);
-		for (uint64_t spl = 1; static_cast<size_t>(j) < SpellsData.size(); spl <<= 1, j++) {
-			if ((mask & spl) == 0)
-				continue;
+		const std::vector<SpellID> spellsOfType = SpellsOfType(myPlayer, static_cast<SpellType>(i));
+		for (const SpellID spellId : spellsOfType) {
 			const int lx = x;
 			const int ly = y - SPLICONLENGTH;
 			const bool isSelected = (MousePosition.x >= lx && MousePosition.x < lx + SPLICONLENGTH && MousePosition.y >= ly && MousePosition.y < ly + SPLICONLENGTH);
-			spellListItems.emplace_back(SpellListItem { { x, y }, static_cast<SpellType>(i), static_cast<SpellID>(j), isSelected });
+			spellListItems.emplace_back(SpellListItem { { x, y }, static_cast<SpellType>(i), spellId, isSelected });
 			x -= SPLICONLENGTH;
 			if (x == mainPanelPosition.x + 12 - SPLICONLENGTH) {
 				x = mainPanelPosition.x + 12 + SPLICONLENGTH * SPLROWICONLS;
 				y -= SPLICONLENGTH;
 			}
 		}
-		if (mask != 0 && x != mainPanelPosition.x + 12 + SPLICONLENGTH * SPLROWICONLS)
+		if (!spellsOfType.empty() && x != mainPanelPosition.x + 12 + SPLICONLENGTH * SPLROWICONLS)
 			x -= SPLICONLENGTH;
 		if (x == mainPanelPosition.x + 12 - SPLICONLENGTH) {
 			x = mainPanelPosition.x + 12 + SPLICONLENGTH * SPLROWICONLS;
@@ -317,6 +339,9 @@ bool IsValidSpeedSpell(size_t slot)
 		return false;
 	}
 
+	// Essence Mod: powers beyond the original 64 have no switch; they are known by their level.
+	if (IsExtendedSpell(spellId))
+		return myPlayer._pSplTHotKey[slot] == SpellType::Spell && myPlayer.GetBaseSpellLevel(spellId) != 0;
 	return (spells & GetSpellBitmask(spellId)) != 0;
 }
 
@@ -343,39 +368,21 @@ void DoSpeedBook()
 
 	if (IsValidSpell(myPlayer._pRSpell)) {
 		for (auto i : enum_values<SpellType>()) {
-			uint64_t spells;
-			switch (static_cast<SpellType>(i)) {
-			case SpellType::Skill:
-				spells = myPlayer._pAblSpells;
-				break;
-			case SpellType::Spell:
-				spells = myPlayer._pMemSpells;
-				break;
-			case SpellType::Scroll:
-				spells = myPlayer._pScrlSpells;
-				break;
-			case SpellType::Charges:
-				spells = myPlayer._pISpells;
-				break;
-			default:
+			if (!IsAnyOf(static_cast<SpellType>(i), SpellType::Skill, SpellType::Spell, SpellType::Scroll, SpellType::Charges))
 				continue;
-			}
-			uint64_t spell = 1;
-			for (size_t j = 1; j < SpellsData.size(); j++) {
-				if ((spell & spells) != 0) {
-					if (j == static_cast<size_t>(myPlayer._pRSpell) && static_cast<SpellType>(i) == myPlayer._pRSplType) {
-						x = xo + SPLICONLENGTH / 2;
-						y = yo - SPLICONLENGTH / 2;
-					}
-					xo -= SPLICONLENGTH;
-					if (xo == mainPanelPosition.x + 12 - SPLICONLENGTH) {
-						xo = mainPanelPosition.x + 12 + SPLICONLENGTH * SPLROWICONLS;
-						yo -= SPLICONLENGTH;
-					}
+			const std::vector<SpellID> spellsOfType = SpellsOfType(myPlayer, static_cast<SpellType>(i));
+			for (const SpellID spellId : spellsOfType) {
+				if (spellId == myPlayer._pRSpell && static_cast<SpellType>(i) == myPlayer._pRSplType) {
+					x = xo + SPLICONLENGTH / 2;
+					y = yo - SPLICONLENGTH / 2;
 				}
-				spell <<= 1ULL;
+				xo -= SPLICONLENGTH;
+				if (xo == mainPanelPosition.x + 12 - SPLICONLENGTH) {
+					xo = mainPanelPosition.x + 12 + SPLICONLENGTH * SPLROWICONLS;
+					yo -= SPLICONLENGTH;
+				}
 			}
-			if (spells != 0 && xo != mainPanelPosition.x + 12 + SPLICONLENGTH * SPLROWICONLS)
+			if (!spellsOfType.empty() && xo != mainPanelPosition.x + 12 + SPLICONLENGTH * SPLROWICONLS)
 				xo -= SPLICONLENGTH;
 			if (xo == mainPanelPosition.x + 12 - SPLICONLENGTH) {
 				xo = mainPanelPosition.x + 12 + SPLICONLENGTH * SPLROWICONLS;

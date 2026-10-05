@@ -37,6 +37,9 @@ constexpr int AuraPulseInterval = 40;
 /** Fire Aura damage per pulse at spell level 1, in 64ths of a hit point. */
 constexpr int FireAuraBaseDamage = 1 * 64;
 
+/** Fire damage Flaming Weapon adds to a weapon hit at spell level 1, in 64ths of a hit point. */
+constexpr int FlamingWeaponBaseDamage = 3 * 64;
+
 /** Which buffs each player has on. Memory only; never saved. */
 std::array<std::array<bool, BuffCount>, MAX_PLRS> ActiveBuffs {};
 
@@ -50,7 +53,7 @@ std::array<bool, BuffCount> &BuffsOf(const Player &player)
 
 int SpellLevelOf(const Player &player, SpellID spell)
 {
-	return std::max<int>(player._pSplLvl[static_cast<size_t>(spell)], 1);
+	return std::max<int>(player.GetBaseSpellLevel(spell), 1);
 }
 
 /** Fire Aura reaches 2 tiles at spell level 1 and one tile further every two levels. */
@@ -78,9 +81,11 @@ std::string DescribeBuff(const Player &player, BuffID buff)
 {
 	switch (buff) {
 	case BuffID::Strength:
-		return StrCat("Strength: +", GetBuffStrengthBonus(player), " Strength");
+		return StrCat("Strength: +", GetBuffStrengthBonus(player), " Power");
 	case BuffID::FireAura:
 		return StrCat("Fire Aura: ", FormatDamage(FireAuraDamage(player)), " fire damage every 2 seconds within ", FireAuraRadius(player), " tiles");
+	case BuffID::FlamingWeapon:
+		return StrCat("Flaming Weapon: +", FormatDamage(GetFlamingWeaponDamage(player)), " fire damage on every weapon hit");
 	}
 	return {};
 }
@@ -129,13 +134,34 @@ SpellID GetBuffSpell(BuffID buff)
 		return SpellID::Strength;
 	case BuffID::FireAura:
 		return SpellID::FireAura;
+	case BuffID::FlamingWeapon:
+		return SpellID::FlamingWeapon;
 	}
 	return SpellID::Invalid;
 }
 
 bool BuffSharesExperience(BuffID buff)
 {
-	return buff != BuffID::FireAura;
+	// Only passive buffs, which deal no damage of their own, earn a tenth of the player's experience
+	// gains. Buffs that deal damage (Fire Aura, Flaming Weapon) earn the full value of that damage instead.
+	return buff == BuffID::Strength;
+}
+
+bool IsExperienceSharingBuffSpell(SpellID spell)
+{
+	for (size_t i = 0; i < BuffCount; i++) {
+		const auto buff = static_cast<BuffID>(i);
+		if (GetBuffSpell(buff) == spell)
+			return BuffSharesExperience(buff);
+	}
+	return false;
+}
+
+int GetFlamingWeaponDamage(const Player &player)
+{
+	if (!IsBuffActive(player, BuffID::FlamingWeapon))
+		return 0;
+	return ScaleDamageForSpellLevel(FlamingWeaponBaseDamage, SpellLevelOf(player, SpellID::FlamingWeapon));
 }
 
 void ActivateBuff(Player &player, BuffID buff)

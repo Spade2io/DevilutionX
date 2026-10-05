@@ -27,7 +27,14 @@ enum class SpellType : uint8_t {
 	Invalid,
 };
 
-enum class SpellID : int8_t {
+/**
+ * Essence Mod: spell numbers are 16 bits wide (the original game used 8), so there is room for
+ * far more than 127. Numbers below LegacySpellLimit are the original spells and the first few the
+ * mod added; they use the game's 64-entry tables, which are part of the save file. Numbers from
+ * FirstExtendedSpell up are powers read from essence_powers.tsv; what a character knows of those
+ * is kept in the sidecar file instead.
+ */
+enum class SpellID : int16_t {
 	Null,
 	FIRST = Null,
 	Firebolt,
@@ -87,10 +94,24 @@ enum class SpellID : int8_t {
 	Strength,
 	Corruption,
 	FireAura,
+	FlamingWeapon,
+	FlameStrike,
+	InfernoStrike,
 
-	LAST = FireAura,
+	LAST = InfernoStrike,
 	Invalid = -1,
 };
+
+/** Spells numbered below this fit the original 64-entry "known spells" switches and level list. */
+constexpr int LegacySpellLimit = 64;
+/** The first number given to a power read from essence_powers.tsv. */
+constexpr int FirstExtendedSpell = 100;
+
+/** Whether a spell is numbered beyond what the original 64-entry tables can hold. */
+constexpr bool IsExtendedSpell(SpellID spell)
+{
+	return static_cast<int>(spell) >= LegacySpellLimit;
+}
 
 std::expected<SpellID, std::string> ParseSpellId(std::string_view value);
 
@@ -220,8 +241,9 @@ enum class MissileID : int8_t {
 	FireAuraBuff,
 	FireAuraPulse,
 	FireAuraPulseBack,
+	FlamingWeaponBuff,
 
-	LAST = FireAuraPulseBack,
+	LAST = FlamingWeaponBuff,
 	Null = -1,
 	// clang-format on
 };
@@ -251,6 +273,10 @@ struct SpellData {
 	uint8_t sMinMana;
 	uint8_t sStaffMin;
 	uint8_t sStaffMax;
+	/** Essence Mod: for a power from essence_powers.tsv, the name of the essence it belongs to. */
+	std::string essence;
+	/** Essence Mod: for a power from essence_powers.tsv, its picture in the spell icon sheet. */
+	uint8_t iconFrame = 0;
 
 	[[nodiscard]] MagicType type() const
 	{
@@ -279,6 +305,9 @@ struct SpellData {
 };
 
 extern std::vector<SpellData> SpellsData;
+
+/** How many rows of the spell table belong to the original 64-entry range. */
+size_t LegacySpellCount();
 
 inline const SpellData &GetSpellData(SpellID spellId)
 {

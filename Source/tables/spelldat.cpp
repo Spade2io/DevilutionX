@@ -5,13 +5,19 @@
  */
 #include "tables/spelldat.h"
 
+#include <algorithm>
 #include <expected>
 #include <optional>
+#include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 
+#include "appfat.h"
 #include "data/file.hpp"
 #include "data/iterators.hpp"
 #include "data/record_reader.hpp"
+#include "utils/str_cat.hpp"
 
 namespace devilution {
 
@@ -169,13 +175,70 @@ std::expected<MissileID, std::string> ParseMissileId(std::string_view value)
 	if (value == "FireAuraBuff") return MissileID::FireAuraBuff;
 	if (value == "FireAuraPulse") return MissileID::FireAuraPulse;
 	if (value == "FireAuraPulseBack") return MissileID::FireAuraPulseBack;
+	if (value == "FlamingWeaponBuff") return MissileID::FlamingWeaponBuff;
 	return std::unexpected("Unknown enum value");
+}
+
+/** Essence Mod: the keys of powers read from essence_powers.tsv, so other tables can name them. */
+std::vector<std::pair<std::string, SpellID>> ExtendedSpellKeys;
+
+/** Fills the unused numbers between the original spells and the extended powers with blank rows. */
+void AddGapSpell()
+{
+	AddNullSpell();
+	SpellData &gap = SpellsData.back();
+	gap.sBookLvl = gap.sStaffLvl = -1;
+}
+
+/**
+ * Essence Mod: reads the powers that live beyond the original 64. Each row carries its own number,
+ * so numbers stay fixed however the file is sorted. The file is optional.
+ */
+void LoadExtendedSpellData()
+{
+	ExtendedSpellKeys.clear();
+	const std::string_view filename = "txtdata\\spells\\essence_powers.tsv";
+	std::expected<DataFile, DataFile::Error> dataFileResult = DataFile::load(filename);
+	if (!dataFileResult.has_value())
+		return;
+	DataFile &dataFile = dataFileResult.value();
+	dataFile.skipHeaderOrDie(filename);
+	for (DataFileRecord record : dataFile) {
+		RecordReader reader { record, filename };
+		std::string key;
+		int number = 0;
+		reader.readString("id", key);
+		reader.readInt("number", number);
+		if (number < FirstExtendedSpell || number > 32000)
+			app_fatal(StrCat("essence_powers.tsv: ", key, " has number ", number, "; it must be ", FirstExtendedSpell, " or more"));
+		while (SpellsData.size() <= static_cast<size_t>(number))
+			AddGapSpell();
+		SpellData &item = SpellsData[number];
+		if (!item.sNameText.empty())
+			app_fatal(StrCat("essence_powers.tsv: number ", number, " is used twice"));
+		reader.readString("name", item.sNameText);
+		reader.readString("essence", item.essence);
+		reader.read("soundId", item.sSFX, ParseSpellSoundId);
+		reader.readInt("manaCost", item.sManaCost);
+		reader.readEnumList("flags", item.flags, ParseSpellDataFlag);
+		reader.readEnumArray("missiles", /*fillMissing=*/std::make_optional(MissileID::Null), item.sMissiles, ParseMissileId);
+		reader.readInt("manaMultiplier", item.sManaAdj);
+		reader.readInt("minMana", item.sMinMana);
+		reader.readInt("icon", item.iconFrame);
+		item.sBookLvl = 1;
+		ExtendedSpellKeys.emplace_back(std::move(key), static_cast<SpellID>(number));
+	}
 }
 
 } // namespace
 
 /** Data related to each spell ID. */
 std::vector<SpellData> SpellsData;
+
+size_t LegacySpellCount()
+{
+	return std::min<size_t>(SpellsData.size(), LegacySpellLimit);
+}
 
 std::expected<SpellID, std::string> ParseSpellId(std::string_view value)
 {
@@ -235,6 +298,13 @@ std::expected<SpellID, std::string> ParseSpellId(std::string_view value)
 	if (value == "Strength") return SpellID::Strength;
 	if (value == "Corruption") return SpellID::Corruption;
 	if (value == "FireAura") return SpellID::FireAura;
+	if (value == "FlamingWeapon") return SpellID::FlamingWeapon;
+	if (value == "FlameStrike") return SpellID::FlameStrike;
+	if (value == "InfernoStrike") return SpellID::InfernoStrike;
+	for (const auto &[key, spell] : ExtendedSpellKeys) {
+		if (value == key)
+			return spell;
+	}
 	return std::unexpected("Unknown enum value");
 }
 
@@ -265,6 +335,7 @@ void LoadSpellData()
 		reader.readInt("staffMin", item.sStaffMin);
 		reader.readInt("staffMax", item.sStaffMax);
 	}
+	LoadExtendedSpellData();
 	SpellsData.shrink_to_fit();
 }
 

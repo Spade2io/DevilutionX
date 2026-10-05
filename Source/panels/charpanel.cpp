@@ -11,6 +11,7 @@
 #include "control/control.hpp"
 #include "engine/load_clx.hpp"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/primitive_render.hpp"
 #include "engine/render/text_render.hpp"
 #include "panels/ui_panels.hpp"
 #include "player.h"
@@ -146,18 +147,18 @@ PanelEntry panelEntries[] = {
 
 	{ N_("Base"), { LeftColumnLabelX, /* set dynamically */ 0 }, 0, 44, {} },
 	{ N_("Now"), { 135, /* set dynamically */ 0 }, 0, 44, {} },
-	{ N_("Strength"), { LeftColumnLabelX, 135 }, 45, LeftColumnLabelWidth,
+	{ N_("Power"), { LeftColumnLabelX, 135 }, 45, LeftColumnLabelWidth,
 	    []() { return StyledText { GetBaseStatColor(CharacterAttribute::Strength), StrCat(InspectPlayer->_pBaseStr) }; } },
 	{ "", { 135, 135 }, 45, 0,
 	    []() { return StyledText { GetCurrentStatColor(CharacterAttribute::Strength), StrCat(InspectPlayer->_pStrength) }; } },
-	{ N_("Magic"), { LeftColumnLabelX, 163 }, 45, LeftColumnLabelWidth,
+	{ N_("Spirit"), { LeftColumnLabelX, 163 }, 45, LeftColumnLabelWidth,
 	    []() { return StyledText { GetBaseStatColor(CharacterAttribute::Magic), StrCat(InspectPlayer->_pBaseMag) }; } },
 	{ "", { 135, 163 }, 45, 0,
 	    []() { return StyledText { GetCurrentStatColor(CharacterAttribute::Magic), StrCat(InspectPlayer->_pMagic) }; } },
-	{ N_("Dexterity"), { LeftColumnLabelX, 191 }, 45, LeftColumnLabelWidth, []() { return StyledText { GetBaseStatColor(CharacterAttribute::Dexterity), StrCat(InspectPlayer->_pBaseDex) }; } },
+	{ N_("Speed"), { LeftColumnLabelX, 191 }, 45, LeftColumnLabelWidth, []() { return StyledText { GetBaseStatColor(CharacterAttribute::Dexterity), StrCat(InspectPlayer->_pBaseDex) }; } },
 	{ "", { 135, 191 }, 45, 0,
 	    []() { return StyledText { GetCurrentStatColor(CharacterAttribute::Dexterity), StrCat(InspectPlayer->_pDexterity) }; } },
-	{ N_("Vitality"), { LeftColumnLabelX, 219 }, 45, LeftColumnLabelWidth, []() { return StyledText { GetBaseStatColor(CharacterAttribute::Vitality), StrCat(InspectPlayer->_pBaseVit) }; } },
+	{ N_("Recovery"), { LeftColumnLabelX, 219 }, 45, LeftColumnLabelWidth, []() { return StyledText { GetBaseStatColor(CharacterAttribute::Vitality), StrCat(InspectPlayer->_pBaseVit) }; } },
 	{ "", { 135, 219 }, 45, 0,
 	    []() { return StyledText { GetCurrentStatColor(CharacterAttribute::Vitality), StrCat(InspectPlayer->_pVitality) }; } },
 	{ N_("Points to distribute"), { LeftColumnLabelX, 248 }, 45, LeftColumnLabelWidth,
@@ -189,11 +190,11 @@ PanelEntry panelEntries[] = {
 	{ "", { 135, 312 }, 45, 0,
 	    []() { return StyledText { (InspectPlayer->_pMana != InspectPlayer->_pMaxMana ? UiFlags::ColorRed : GetMaxManaColor()), StrCat((HasAnyOf(InspectPlayer->_pIFlags, ItemSpecialEffect::NoMana) || InspectPlayer->hasNoMana()) ? 0 : InspectPlayer->_pMana >> 6) }; } },
 
-	{ N_("Resist magic"), { RightColumnLabelX, 256 }, 57, RightColumnLabelWidth,
+	{ N_("Resist astral"), { RightColumnLabelX, 256 }, 57, RightColumnLabelWidth,
 	    []() { return GetResistInfo(InspectPlayer->_pMagResist); } },
-	{ N_("Resist fire"), { RightColumnLabelX, 284 }, 57, RightColumnLabelWidth,
+	{ N_("Resist elemental"), { RightColumnLabelX, 284 }, 57, RightColumnLabelWidth,
 	    []() { return GetResistInfo(InspectPlayer->_pFireResist); } },
-	{ N_("Resist lightning"), { RightColumnLabelX, 313 }, 57, RightColumnLabelWidth,
+	{ N_("Resist natural"), { RightColumnLabelX, 313 }, 57, RightColumnLabelWidth,
 	    []() { return GetResistInfo(InspectPlayer->_pLghtResist); } },
 };
 
@@ -305,6 +306,54 @@ void FreeCharPanel()
 	Panel = std::nullopt;
 }
 
+namespace {
+
+/** Formats a value held in 64ths with one decimal place, e.g. 96 -> "1.5". */
+std::string FormatSixtyFourthsPerSecond(int value)
+{
+	const int tenths = value * 10 / 64;
+	return StrCat(tenths / 10, ".", tenths % 10);
+}
+
+/**
+ * @brief Essence Mod: a plain list of the stats the mod adds, shown beside the character sheet.
+ *
+ * To show a new stat, add one line to `lines`.
+ */
+void DrawExtraStats(const Surface &out, Point panelPosition)
+{
+	const Player &player = *InspectPlayer;
+
+	struct Line {
+		std::string_view label;
+		std::string value;
+	};
+	const Line lines[] = {
+		{ "Health regeneration", StrCat(FormatSixtyFourthsPerSecond(GetLifeRegenPerSecond(player)), " per second") },
+		{ "Mana regeneration", StrCat(FormatSixtyFourthsPerSecond(GetManaRegenPerSecond(player)), " per second") },
+	};
+
+	constexpr int Padding = 8;
+	constexpr int LineHeight = 16;
+	constexpr int Width = 290;
+	constexpr int LabelWidth = 160;
+	const int height = static_cast<int>(std::size(lines) + 1) * LineHeight + Padding * 2;
+	const Point origin { panelPosition.x + SidePanelSize.width + 6, panelPosition.y + 8 };
+
+	DrawHalfTransparentRectTo(out, origin.x, origin.y, Width, height);
+
+	int y = origin.y + Padding;
+	DrawString(out, "Essence stats", { { origin.x + Padding, y }, { Width - Padding * 2, LineHeight } }, { .flags = UiFlags::ColorWhitegold });
+	y += LineHeight;
+	for (const Line &line : lines) {
+		DrawString(out, line.label, { { origin.x + Padding, y }, { LabelWidth, LineHeight } }, { .flags = UiFlags::ColorWhite });
+		DrawString(out, line.value, { { origin.x + Padding + LabelWidth, y }, { Width - LabelWidth - Padding * 2, LineHeight } }, { .flags = UiFlags::ColorWhite | UiFlags::AlignRight });
+		y += LineHeight;
+	}
+}
+
+} // namespace
+
 void DrawChr(const Surface &out)
 {
 	const Point pos = GetPanelPosition(UiPanels::Character, { 0, 0 });
@@ -320,6 +369,7 @@ void DrawChr(const Surface &out)
 		}
 	}
 	DrawStatButtons(out);
+	DrawExtraStats(out, pos);
 }
 
 } // namespace devilution

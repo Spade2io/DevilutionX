@@ -89,6 +89,12 @@ enum class RedPortalFrame : uint8_t {
 struct Missile {
 	/** Type of projectile */
 	MissileID _mitype;
+	/**
+	 * Essence Mod: the spell that was cast to create this missile, when known. Several powers can
+	 * share one kind of projectile, so the projectile's type alone does not say which power earns
+	 * the experience. Not saved; a missile loaded from a save falls back to its type.
+	 */
+	SpellID sourceSpell = SpellID::Invalid;
 	MissilePosition position;
 
 private:
@@ -379,6 +385,8 @@ void AddApocalypseBoom(Missile &missile, AddMissileParameter &parameter);
 void AddHealing(Missile &missile, AddMissileParameter &parameter);
 /** Essence Mod: lands a stack of Corruption directly on the monster under the cursor. */
 void AddCorruption(Missile &missile, AddMissileParameter &parameter);
+/** Essence Mod: switches the caster's Flaming Weapon buff on. */
+void AddFlamingWeaponBuff(Missile &missile, AddMissileParameter &parameter);
 /** Essence Mod: switches the caster's Fire Aura on. */
 void AddFireAuraBuff(Missile &missile, AddMissileParameter &parameter);
 /** Essence Mod: the burst shown at a player's feet when their aura pulses. It has no effect of its own. */

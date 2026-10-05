@@ -18,6 +18,7 @@
 #include "cursor.h"
 #include "engine/backbuffer_state.hpp"
 #include "engine/random.hpp"
+#include "essences.h"
 #include "engine/render/clx_render.hpp"
 #include "engine/render/primitive_render.hpp"
 #include "engine/render/text_render.hpp"
@@ -402,11 +403,11 @@ void PrintStoreItem(const Item &item, int l, UiFlags flags, bool cursIndent = fa
 			productLine.append(_(",  "));
 		productLine.append(_("Required:"));
 		if (str != 0)
-			productLine.append(FormatRuntime(_(" {:d} Str"), str));
+			productLine.append(FormatRuntime(_(" {:d} Pow"), str));
 		if (mag != 0)
-			productLine.append(FormatRuntime(_(" {:d} Mag"), mag));
+			productLine.append(FormatRuntime(_(" {:d} Spi"), mag));
 		if (dex != 0)
-			productLine.append(FormatRuntime(_(" {:d} Dex"), dex));
+			productLine.append(FormatRuntime(_(" {:d} Spd"), dex));
 	}
 	AddSText(40, l++, productLine, flags, false, -1, cursIndent);
 }
@@ -724,7 +725,7 @@ void WitchBookLevel(Item &bookItem)
 	if (bookItem._iMiscId != IMISC_BOOK)
 		return;
 	bookItem._iMinMag = GetSpellData(bookItem._iSpell).minInt;
-	uint8_t spellLevel = MyPlayer->_pSplLvl[static_cast<int8_t>(bookItem._iSpell)];
+	uint8_t spellLevel = MyPlayer->GetBaseSpellLevel(bookItem._iSpell);
 	while (spellLevel > 0) {
 		bookItem._iMinMag += 20 * bookItem._iMinMag / 100;
 		spellLevel--;
@@ -1079,6 +1080,24 @@ std::span<Item> ActiveHealerItems()
 	}
 }
 
+/** Essence Mod: Pepin sells every essence in the item table. */
+void RefreshEssenceItems()
+{
+	EssenceItems.clear();
+	for (size_t i = 0; i < AllItemsList.size(); i++) {
+		if (AllItemsList[i].iMiscId != IMISC_ESSENCE)
+			continue;
+		Item item;
+		InitializeItem(item, static_cast<_item_indexes>(i));
+		item.IDidx = static_cast<_item_indexes>(i);
+		item._iSeed = AdvanceRndSeed();
+		item._iCreateInfo = 0; // nothing about an essence is rolled; the row says it all
+		item._iIdentified = true;
+		item._iStatFlag = true;
+		EssenceItems.push_back(item);
+	}
+}
+
 void RefreshAwakeningStoneItems()
 {
 	AwakeningStoneItems.clear();
@@ -1100,9 +1119,12 @@ void RefreshAwakeningStoneItems()
 	}
 
 	// Then the test entries that teach a spell directly, one per spell not yet learned.
-	for (size_t i = static_cast<size_t>(SpellID::Firebolt); i < SpellsData.size(); i++) {
+	for (size_t i = static_cast<size_t>(SpellID::Firebolt); i < LegacySpellCount(); i++) {
 		const auto spell = static_cast<SpellID>(i);
 		if (GetSpellBookLevel(spell) == -1 || myPlayer._pSplLvl[i] != 0)
+			continue;
+		// Only abilities that belong to an essence can be learned at all.
+		if (GetSpellEssence(spell) == EssenceID::None)
 			continue;
 
 		Item item;
@@ -1149,6 +1171,8 @@ void StartHealerBuy()
 
 	if (ActiveHealerShelf == HealerShelf::AwakeningStones)
 		RefreshAwakeningStoneItems();
+	if (ActiveHealerShelf == HealerShelf::Essences)
+		RefreshEssenceItems();
 	const std::span<Item> items = ActiveHealerItems();
 
 	RenderGold = true;
@@ -1849,7 +1873,7 @@ void BoyBuyItem(Item &item, int itemPrice)
 void HealerBuyItem(Item &item)
 {
 	// Essence Mod: a real awakening stone item goes into the inventory to be used from there.
-	if (ActiveHealerShelf == HealerShelf::AwakeningStones && item._iMiscId == IMISC_AWAKENINGSTONE) {
+	if (IsAnyOf(item._iMiscId, IMISC_AWAKENINGSTONE, IMISC_ESSENCE)) {
 		TakePlrsMoney(item._iIvalue);
 		StoreAutoPlace(item, true);
 		CalcPlrInv(*MyPlayer, true);
@@ -1860,8 +1884,9 @@ void HealerBuyItem(Item &item)
 	if (ActiveHealerShelf == HealerShelf::AwakeningStones) {
 		TakePlrsMoney(item._iIvalue);
 		Player &myPlayer = *MyPlayer;
+		SlotLearnedAbility(item._iSpell);
 		myPlayer._pMemSpells |= GetSpellBitmask(item._iSpell);
-		myPlayer._pSplLvl[static_cast<size_t>(item._iSpell)] = 1;
+		myPlayer.SetBaseSpellLevel(item._iSpell, 1);
 		NetSendCmdParam2(true, CMD_CHANGE_SPELL_LEVEL, static_cast<uint16_t>(item._iSpell), 1);
 		PlaySFX(SfxID::QuestDone);
 		EventPlrMsg(StrCat("You learned ", GetSpellData(item._iSpell).sNameText), UiFlags::ColorWhitegold);
@@ -2060,6 +2085,14 @@ void HealerBuyEnter()
 
 	// A test entry on the awakening stones list is not an item, so it needs no inventory space.
 	const bool isTeachOnlyEntry = ActiveHealerShelf == HealerShelf::AwakeningStones && items[idx]._iMiscId != IMISC_AWAKENINGSTONE;
+	if (isTeachOnlyEntry) {
+		// Essence Mod: the same rules as using a stone: its essence must be held and not yet full.
+		const LearnResult result = CheckCanLearn(items[idx]._iSpell);
+		if (result != LearnResult::Ok) {
+			EventPlrMsg(DescribeLearnResult(result), UiFlags::ColorWhite);
+			return;
+		}
+	}
 	if (!isTeachOnlyEntry && !StoreAutoPlace(items[idx], false)) {
 		StartStore(TalkID::NoRoom);
 		return;

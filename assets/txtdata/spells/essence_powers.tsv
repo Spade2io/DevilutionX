@@ -1,0 +1,2 @@
+id	number	name	essence	soundId	manaCost	flags	missiles	manaMultiplier	minMana	icon
+TestBolt	200	Test Bolt	Fire	CastFire	6	Fire,Targeted	Firebolt	1	3	0

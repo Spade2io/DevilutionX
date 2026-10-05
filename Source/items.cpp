@@ -35,6 +35,7 @@
 #include "doom.h"
 #include "buffs.h"
 #include "effects.h"
+#include "essences.h"
 #include "engine/animationinfo.h"
 #include "engine/backbuffer_state.hpp"
 #include "engine/clx_sprite.hpp"
@@ -616,12 +617,12 @@ void GetBookSpell(Item &item, int lvl)
 	if (lvl == 0)
 		lvl = 1;
 
-	int rv = GenerateRnd(static_cast<int32_t>(SpellsData.size())) + 1;
+	int rv = GenerateRnd(static_cast<int32_t>(LegacySpellCount())) + 1;
 
 	if (gbIsSpawn && lvl > 5)
 		lvl = 5;
 
-	int s = static_cast<int8_t>(SpellID::Firebolt);
+	int s = static_cast<int>(SpellID::Firebolt);
 	SpellID bs = SpellID::Firebolt;
 	while (rv > 0) {
 		const int sLevel = GetSpellBookLevel(static_cast<SpellID>(s));
@@ -631,14 +632,14 @@ void GetBookSpell(Item &item, int lvl)
 		}
 		s++;
 		if (!gbIsMultiplayer) {
-			if (s == static_cast<int8_t>(SpellID::Resurrect))
-				s = static_cast<int8_t>(SpellID::Telekinesis);
+			if (s == static_cast<int>(SpellID::Resurrect))
+				s = static_cast<int>(SpellID::Telekinesis);
 		}
 		if (!gbIsMultiplayer) {
-			if (s == static_cast<int8_t>(SpellID::HealOther))
-				s = static_cast<int8_t>(SpellID::BloodStar);
+			if (s == static_cast<int>(SpellID::HealOther))
+				s = static_cast<int>(SpellID::BloodStar);
 		}
-		if (static_cast<size_t>(s) == SpellsData.size())
+		if (static_cast<size_t>(s) == LegacySpellCount())
 			s = 1;
 	}
 	const std::string_view spellName = GetSpellData(bs).sNameText;
@@ -1245,12 +1246,12 @@ void GetStaffSpell(const Player &player, Item &item, int lvl, bool onlygood)
 	int l = lvl / 2;
 	if (l == 0)
 		l = 1;
-	int rv = GenerateRnd(static_cast<int32_t>(SpellsData.size())) + 1;
+	int rv = GenerateRnd(static_cast<int32_t>(LegacySpellCount())) + 1;
 
 	if (gbIsSpawn && lvl > 10)
 		lvl = 10;
 
-	int s = static_cast<int8_t>(SpellID::Firebolt);
+	int s = static_cast<int>(SpellID::Firebolt);
 	SpellID bs = SpellID::Null;
 	while (rv > 0) {
 		const int sLevel = GetSpellStaffLevel(static_cast<SpellID>(s));
@@ -1259,12 +1260,12 @@ void GetStaffSpell(const Player &player, Item &item, int lvl, bool onlygood)
 			bs = static_cast<SpellID>(s);
 		}
 		s++;
-		if (!gbIsMultiplayer && s == static_cast<int8_t>(SpellID::Resurrect))
-			s = static_cast<int8_t>(SpellID::Telekinesis);
-		if (!gbIsMultiplayer && s == static_cast<int8_t>(SpellID::HealOther))
-			s = static_cast<int8_t>(SpellID::BloodStar);
-		if (static_cast<size_t>(s) == SpellsData.size())
-			s = static_cast<int8_t>(SpellID::Firebolt);
+		if (!gbIsMultiplayer && s == static_cast<int>(SpellID::Resurrect))
+			s = static_cast<int>(SpellID::Telekinesis);
+		if (!gbIsMultiplayer && s == static_cast<int>(SpellID::HealOther))
+			s = static_cast<int>(SpellID::BloodStar);
+		if (static_cast<size_t>(s) == LegacySpellCount())
+			s = static_cast<int>(SpellID::Firebolt);
 	}
 
 	const int minc = GetSpellData(bs).sStaffMin;
@@ -1708,16 +1709,16 @@ void PrintItemOil(char iDidx)
 		AddItemInfoBoxString(_("restore all mana"));
 		break;
 	case IMISC_ELIXSTR:
-		AddItemInfoBoxString(_("increase strength"));
+		AddItemInfoBoxString(_("increase power"));
 		break;
 	case IMISC_ELIXMAG:
-		AddItemInfoBoxString(_("increase magic"));
+		AddItemInfoBoxString(_("increase spirit"));
 		break;
 	case IMISC_ELIXDEX:
-		AddItemInfoBoxString(_("increase dexterity"));
+		AddItemInfoBoxString(_("increase speed"));
 		break;
 	case IMISC_ELIXVIT:
-		AddItemInfoBoxString(_("increase vitality"));
+		AddItemInfoBoxString(_("increase recovery"));
 		break;
 	case IMISC_REJUV:
 		AddItemInfoBoxString(_("restore some life and mana"));
@@ -1830,7 +1831,8 @@ void PrintItemMisc(const Item &item)
 	    || (item._iMiscId > IMISC_OILFIRST && item._iMiscId < IMISC_OILLAST)
 	    || (item._iMiscId > IMISC_RUNEFIRST && item._iMiscId < IMISC_RUNELAST)
 	    || item._iMiscId == IMISC_ARENAPOT
-	    || item._iMiscId == IMISC_AWAKENINGSTONE;
+	    || item._iMiscId == IMISC_AWAKENINGSTONE
+	    || item._iMiscId == IMISC_ESSENCE;
 	const bool mouseRequiresTarget = (item._iMiscId == IMISC_SCROLLT && item._iSpell != SpellID::Flash)
 	    || (item._iMiscId == IMISC_SCROLL && IsAnyOf(item._iSpell, SpellID::TownPortal, SpellID::Identify));
 	const bool gamepadRequiresTarget = item.isScroll() && TargetsMonster(item._iSpell);
@@ -1859,11 +1861,11 @@ void PrintItemInfo(const Item &item)
 	if (str != 0 || mag != 0 || dex != 0) {
 		std::string text = std::string(_("Required:"));
 		if (str != 0)
-			text.append(FormatRuntime(_(" {:d} Str"), str));
+			text.append(FormatRuntime(_(" {:d} Pow"), str));
 		if (mag != 0)
-			text.append(FormatRuntime(_(" {:d} Mag"), mag));
+			text.append(FormatRuntime(_(" {:d} Spi"), mag));
 		if (dex != 0)
-			text.append(FormatRuntime(_(" {:d} Dex"), dex));
+			text.append(FormatRuntime(_(" {:d} Spd"), dex));
 		AddItemInfoBoxString(text);
 	}
 }
@@ -3912,21 +3914,21 @@ bool DoOil(Player &player, int cii)
 	case IPL_FIRERES:
 	case IPL_FIRERES_CURSE:
 		if (item._iPLFR < MaxResistance)
-			return FormatRuntime(_("Resist Fire: {:+d}%"), item._iPLFR);
+			return FormatRuntime(_("Resist Elemental: {:+d}%"), item._iPLFR);
 		else
-			return FormatRuntime(_("Resist Fire: {:+d}% MAX"), MaxResistance);
+			return FormatRuntime(_("Resist Elemental: {:+d}% MAX"), MaxResistance);
 	case IPL_LIGHTRES:
 	case IPL_LIGHTRES_CURSE:
 		if (item._iPLLR < MaxResistance)
-			return FormatRuntime(_("Resist Lightning: {:+d}%"), item._iPLLR);
+			return FormatRuntime(_("Resist Natural: {:+d}%"), item._iPLLR);
 		else
-			return FormatRuntime(_("Resist Lightning: {:+d}% MAX"), MaxResistance);
+			return FormatRuntime(_("Resist Natural: {:+d}% MAX"), MaxResistance);
 	case IPL_MAGICRES:
 	case IPL_MAGICRES_CURSE:
 		if (item._iPLMR < MaxResistance)
-			return FormatRuntime(_("Resist Magic: {:+d}%"), item._iPLMR);
+			return FormatRuntime(_("Resist Astral: {:+d}%"), item._iPLMR);
 		else
-			return FormatRuntime(_("Resist Magic: {:+d}% MAX"), MaxResistance);
+			return FormatRuntime(_("Resist Astral: {:+d}% MAX"), MaxResistance);
 	case IPL_ALLRES:
 		if (item._iPLFR < MaxResistance)
 			return FormatRuntime(_("Resist All: {:+d}%"), item._iPLFR);
@@ -3955,16 +3957,16 @@ bool DoOil(Player &player, int cii)
 			return FormatRuntime(_("Lightning hit damage: {:d}-{:d}"), item._iLMinDam, item._iLMaxDam);
 	case IPL_STR:
 	case IPL_STR_CURSE:
-		return FormatRuntime(_("{:+d} to strength"), item._iPLStr);
+		return FormatRuntime(_("{:+d} to power"), item._iPLStr);
 	case IPL_MAG:
 	case IPL_MAG_CURSE:
-		return FormatRuntime(_("{:+d} to magic"), item._iPLMag);
+		return FormatRuntime(_("{:+d} to spirit"), item._iPLMag);
 	case IPL_DEX:
 	case IPL_DEX_CURSE:
-		return FormatRuntime(_("{:+d} to dexterity"), item._iPLDex);
+		return FormatRuntime(_("{:+d} to speed"), item._iPLDex);
 	case IPL_VIT:
 	case IPL_VIT_CURSE:
-		return FormatRuntime(_("{:+d} to vitality"), item._iPLVit);
+		return FormatRuntime(_("{:+d} to recovery"), item._iPLVit);
 	case IPL_ATTRIBS:
 	case IPL_ATTRIBS_CURSE:
 		return FormatRuntime(_("{:+d} to all attributes"), item._iPLStr);
@@ -4065,7 +4067,7 @@ bool DoOil(Player &player, int cii)
 	case IPL_RNDSTEALLIFE:
 		return _("life stealing");
 	case IPL_NOMINSTR:
-		return _("no strength requirement");
+		return _("no power requirement");
 	case IPL_ADDACLIFE:
 		if (item._iFMinDam == item._iFMaxDam)
 			return FormatRuntime(_("lightning damage: {:d}"), item._iFMinDam);
@@ -4289,22 +4291,31 @@ void UseItem(Player &player, item_misc_id mid, SpellID spellID, int spellFrom)
 				target = player.position.future + Displacement(player._pdir);
 			// Use CMD_SPELLXY because it's the same behavior as normal casting
 			assert(IsValidSpellFrom(spellFrom));
-			NetSendCmdLocParam3(true, CMD_SPELLXY, target, static_cast<int8_t>(spellID), static_cast<uint8_t>(SpellType::Scroll), static_cast<uint16_t>(spellFrom));
+			NetSendCmdLocParam3(true, CMD_SPELLXY, target, static_cast<uint16_t>(spellID), static_cast<uint8_t>(SpellType::Scroll), static_cast<uint16_t>(spellFrom));
 		}
+		break;
+	case IMISC_ESSENCE:
+		// Essence Mod: an essence item grants the essence that its row's spell belongs to.
+		if (&player == MyPlayer)
+			AbsorbEssence(GetSpellEssence(spellID));
 		break;
 	case IMISC_AWAKENINGSTONE:
 		// Essence Mod: an awakening stone teaches the spell written in its item table row.
-		if (player._pSplLvl[static_cast<int8_t>(spellID)] == 0) {
-			player._pSplLvl[static_cast<int8_t>(spellID)] = 1;
+		if (player.GetBaseSpellLevel(spellID) == 0) {
+			if (&player == MyPlayer)
+				SlotLearnedAbility(spellID);
+			player.SetBaseSpellLevel(spellID, 1);
 			player._pMemSpells |= GetSpellBitmask(spellID);
 			NetSendCmdParam2(true, CMD_CHANGE_SPELL_LEVEL, static_cast<uint16_t>(spellID), 1);
 		}
 		break;
 	case IMISC_BOOK: {
 		// Essence Mod: a book only teaches a spell. Levels beyond the first come from using it (see spell_xp.cpp).
-		if (player._pSplLvl[static_cast<int8_t>(spellID)] == 0) {
+		if (player.GetBaseSpellLevel(spellID) == 0) {
+			if (&player == MyPlayer)
+				SlotLearnedAbility(spellID);
 			const uint8_t newSpellLevel = 1;
-			player._pSplLvl[static_cast<int8_t>(spellID)] = newSpellLevel;
+			player.SetBaseSpellLevel(spellID, newSpellLevel);
 			NetSendCmdParam2(true, CMD_CHANGE_SPELL_LEVEL, static_cast<uint16_t>(spellID), newSpellLevel);
 		}
 		if (HasNoneOf(player._pIFlags, ItemSpecialEffect::NoMana)) {

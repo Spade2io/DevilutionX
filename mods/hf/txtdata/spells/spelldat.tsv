@@ -54,3 +54,6 @@ Frostbolt	Frostbolt	CastFire	100	5	6	Magic,Targeted	1	1	15	Frostbolt	1	3	40	80
 Strength	Strength	CastHealing	100	5	10	Magic,AllowedInTown	1	-1	0	StrengthBuff	0	10	0	0
 Corruption	Corruption	CastFire	100	5	6	Magic,Targeted	1	-1	0	Corruption	1	3	0	0
 FireAura	Fire Aura	CastFire	100	5	10	Fire,AllowedInTown	1	-1	0	FireAuraBuff	0	10	0	0
+FlamingWeapon	Flaming Weapon	CastFire	100	5	10	Fire,AllowedInTown	1	-1	0	FlamingWeaponBuff	0	10	0	0
+FlameStrike	Flame Strike	CastFire	100	5	2	Fire,Targeted	1	-1	0		0	2	0	0
+InfernoStrike	Inferno Strike	CastFire	100	5	6	Fire,Targeted	1	-1	0		0	6	0	0

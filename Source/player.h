@@ -324,6 +324,11 @@ public:
 	SpellType _pRSplType;
 	SpellID _pSBkSpell;
 	uint8_t _pSplLvl[64];
+	/**
+	 * Essence Mod: levels of spells numbered 64 and up, which the list above cannot hold. A spell is
+	 * known when its level here is above zero. Kept in the sidecar file, never in the save.
+	 */
+	std::vector<std::pair<SpellID, uint8_t>> extendedSpellLevels;
 	/** @brief Bitmask of staff spell */
 	uint64_t _pISpells;
 	/** @brief Bitmask of learned spells */
@@ -639,11 +644,50 @@ public:
 	 */
 	int GetSpellLevel(SpellID spell) const
 	{
-		if (spell == SpellID::Invalid || static_cast<std::size_t>(spell) >= sizeof(_pSplLvl)) {
+		if (spell <= SpellID::Null) {
 			return 0;
 		}
 
-		return std::max<int>(_pISplLvlAdd + _pSplLvl[static_cast<std::size_t>(spell)], 0);
+		return std::max<int>(_pISplLvlAdd + GetBaseSpellLevel(spell), 0);
+	}
+
+	/**
+	 * @brief Essence Mod: the level a spell has been learned to, before item bonuses. Zero means unknown.
+	 * Works for every spell number; use this instead of reading _pSplLvl directly.
+	 */
+	uint8_t GetBaseSpellLevel(SpellID spell) const
+	{
+		if (spell <= SpellID::Null)
+			return 0;
+		if (!IsExtendedSpell(spell))
+			return _pSplLvl[static_cast<std::size_t>(spell)];
+		for (const auto &[known, level] : extendedSpellLevels) {
+			if (known == spell)
+				return level;
+		}
+		return 0;
+	}
+
+	/** @brief Essence Mod: sets the level a spell has been learned to. Zero forgets it. */
+	void SetBaseSpellLevel(SpellID spell, uint8_t level)
+	{
+		if (spell <= SpellID::Null)
+			return;
+		if (!IsExtendedSpell(spell)) {
+			_pSplLvl[static_cast<std::size_t>(spell)] = level;
+			return;
+		}
+		for (auto it = extendedSpellLevels.begin(); it != extendedSpellLevels.end(); ++it) {
+			if (it->first != spell)
+				continue;
+			if (level == 0)
+				extendedSpellLevels.erase(it);
+			else
+				it->second = level;
+			return;
+		}
+		if (level != 0)
+			extendedSpellLevels.emplace_back(spell, level);
 	}
 
 	/**
@@ -979,6 +1023,18 @@ void StartNewLvl(Player &player, interface_mode fom, int lvl);
 void RestartTownLvl(Player &player);
 void StartWarpLvl(Player &player, size_t pidx);
 void ProcessPlayers();
+
+/**
+ * @brief Essence Mod: life a player regains each second, in 64ths of a hit point.
+ * The base is Recovery (the Vitality stat) / 10. The one place regeneration bonuses are applied.
+ */
+int GetLifeRegenPerSecond(const Player &player);
+
+/**
+ * @brief Essence Mod: mana a player regains each second, in 64ths of a point.
+ * The base is Recovery (the Vitality stat) / 10. The one place regeneration bonuses are applied.
+ */
+int GetManaRegenPerSecond(const Player &player);
 void ClrPlrPath(Player &player);
 bool PosOkPlayer(const Player &player, Point position);
 void MakePlrPath(Player &player, Point targetPosition, bool endspace);

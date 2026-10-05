@@ -409,8 +409,8 @@ void UnPackPlayer(const PlayerPack &packed, Player &player)
 	}
 	// These spells are unavailable in Diablo as learnable spells
 	if (!gbIsHellfire) {
-		player._pSplLvl[static_cast<uint8_t>(SpellID::Apocalypse)] = 0;
-		player._pSplLvl[static_cast<uint8_t>(SpellID::Nova)] = 0;
+		player._pSplLvl[static_cast<size_t>(SpellID::Apocalypse)] = 0;
+		player._pSplLvl[static_cast<size_t>(SpellID::Nova)] = 0;
 	}
 
 	const bool isHellfire = packed.bIsHellfire != 0;

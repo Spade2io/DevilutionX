@@ -336,6 +336,13 @@ time, each as a test spell with its own awakening stone. The first batch:
 - **Leech** — damage dealt gives back life or mana (existing model: life-steal and mana-steal items, weapon hits only).
 - **Health regeneration** — life that comes back over time (model: the mana regen already built).
 
+Added 2026-10-04, details to come:
+
+- **Stealth** — monsters fail to notice the player, or lose track of them.
+- **Threat / taunting** — controls which target a monster picks.
+- **Speed** — faster movement or actions for the player, or slower for a monster.
+- **Teleport** — already in the game (Teleport jumps to the pointed spot, Phasing jumps a short random distance); neither belongs to an essence yet.
+
 Buffs, auras and damage-over-time are temporary state: held in memory, never saved (hard rule 1).
 
 ### Persistent buffs (first one built 2026-10-03: Strength)
@@ -500,3 +507,430 @@ copies Firebolt's own formula. Stats do not add to damage yet.
 The three difficulties are named after the books' ranks: **Iron** (was Normal), **Bronze** (was
 Nightmare) and **Silver** (was Hell). Only the displayed names changed; the rules, the level
 requirements for multiplayer (20 and 30) and the internal names in the code are untouched.
+
+### Stat names and regeneration (changed 2026-10-03)
+- **Stat names, display only:** Strength is shown as **Power**, Magic as **Spirit**, Dexterity as
+  **Speed**, Vitality as **Recovery**. They work exactly as before and keep their old names in the
+  code. Renamed on the character sheet, the new-hero screen, item bonuses ("+5 to power"), elixir
+  tooltips and item requirements ("Pow", "Spi", "Spd"). Prefix and suffix names on items are
+  unchanged, as are item names such as Elixir of Strength and the shrine messages.
+- **Regeneration:** life and mana each come back once a second. The base for both is
+  **Recovery / 10 per second**. This replaces the earlier Magic-based mana regen. Spells, abilities
+  and buffs will later raise either one; the single place to apply them is
+  `GetLifeRegenPerSecond` / `GetManaRegenPerSecond` in `Source/player.cpp`.
+- **Essence stats list:** opening the character sheet also shows a plain list to its right with the
+  stats the mod adds (health and mana regeneration so far). New stats are added as one line each in
+  `DrawExtraStats` in `Source/panels/charpanel.cpp`. To be made prettier later.
+
+### Resistances renamed and re-sorted (changed 2026-10-03)
+- **Names:** the three resistances are shown as **Elemental** (was Fire), **Natural** (was Lightning)
+  and **Astral** (was Magic) on the character sheet, on items ("Resist Elemental: +20%") and in the
+  monster information shown on hover. "Resist All" is unchanged.
+- **What each one covers now:** Elemental covers fire, lightning and ice. Natural covers acid (for
+  players). Astral covers magic and shadow. Lightning damage is now checked against the Elemental
+  slot, for players and monsters alike (`GetResistanceCategory` in `Source/tables/misdat.h`).
+- **Item prefixes were not renamed.** The resistance prefixes are gem and colour names (Red,
+  Crimson, Garnet, Ruby for the old fire slot; Blue, Azure, Lapis, Cobalt, Sapphire for the old
+  lightning slot; White, Pearl, Ivory, Crystal, Diamond for the old magic slot; Topaz, Amber, Jade,
+  Obsidian, Emerald for all), so none mention fire or lightning. The "of flame", "of lightning" and
+  similar suffixes add fire or lightning *damage*, which are still real damage types.
+- **Still to do (monster table pass):** monsters marked resistant or immune to lightning now resist
+  Natural, which no player spell deals yet, and they no longer resist lightning; monsters resistant
+  to fire now also resist lightning and ice. Undead are still immune to Astral.
+
+### Races instead of classes (changed 2026-10-03)
+The hero creation screen says "Choose Race", and the four choices are named after races from the
+books. Display names only; each keeps its original art, starting stats and class skill.
+
+| Was | Now |
+|---|---|
+| Warrior | Human |
+| Rogue | Celestine |
+| Sorcerer | Runic |
+| Monk | Leonid |
+
+The names live in the first column of `classdat.tsv` (both the base and Hellfire copies). Bard and
+Barbarian, Hellfire's two hidden classes, are not renamed.
+
+### Special attacks and weapon buffs (first ones built 2026-10-03)
+Two kinds of ability that work through the weapon. Both are learned from awakening stones, level
+from use, and cost mana, exactly like spells.
+
+- **Special attack:** "casting" it makes a weapon attack with an added effect. Right-clicking a
+  monster makes the character walk over and swing as for a left click, and that one swing carries
+  the effect. Distinct from spells. Code: `Source/special_attacks.cpp`; the swing is resolved in
+  `PlrHitMonst` in `Source/player.cpp`. The mana is paid when the swing happens, hit or miss. Melee
+  only for now; with a bow the character says "I can't do that".
+  - **Flame Strike** (spell 57, icon 33, 2 mana): the whole weapon hit becomes fire damage, plus 3.
+    The +3 scales by the default 12.5% per level. Being fire damage, it is resisted as Elemental.
+    The hit's full value earns Flame Strike its XP.
+- **Weapon buff:** a persistent buff (until death) that adds to every weapon hit. Code: `Source/buffs.cpp`.
+  - **Flaming Weapon** (spell 56, icon 31, 10 mana, castable in town): every weapon hit that lands
+    also deals 3 fire damage, scaled 12.5% per level. Applies to whatever weapon is held and stacks
+    with fire or lightning properties on the weapon itself (those may be removed from the game
+    later). It earns the full XP value of the fire damage it adds.
+- Both show the small fire burst on the monster, as a flaming weapon does, and the monster flashes red.
+- The spellbook lists special attacks alongside spells for now.
+- **XP rule (decided 2026-10-03):** anything that deals damage earns the full XP value of that
+  damage: spells, special attacks (Flame Strike), damage auras (Fire Aura) and weapon buffs
+  (Flaming Weapon). Only **passive buffs**, which deal no damage of their own (Strength), use the
+  one-tenth rule: a tenth of every XP gain the player makes.
+
+### Cooldowns (first one built 2026-10-03: Inferno Strike)
+- Code: `Source/cooldowns.h/.cpp`. Most abilities have no cooldown. One that does cannot be used
+  again until it runs out. Cooldowns are the local player's only: memory only, never saved, never
+  sent to other players. They keep counting in town.
+- A special attack's cooldown starts only when its swing lands. A miss still costs the mana but
+  leaves the ability ready to use again (decided 2026-10-03).
+- **Inferno Strike** (spell 58, special attack, icon 34, 6 mana, 12-second cooldown): the whole
+  weapon hit becomes fire damage and is increased by 200%, so three times the normal hit. The 200%
+  grows 12.5% per spell level.
+- **The clock sweep:** every place a spell icon is drawn (the active spell button, the spell
+  selection list, the spellbook) shows the cooldown. The icon turns a washed-out red, and a clock
+  hand sweeps clockwise from 12 o'clock, restoring the usable colour behind it. A full turn means
+  ready. Done inside `DrawLargeSpellIcon` / `DrawSmallSpellIcon` in `Source/panels/spell_icons.cpp`,
+  so any new place that draws an icon gets it automatically.
+- **The tracker:** a row of small icons at the bottom-right of the play area, just above the mana
+  orb, one per ability on cooldown, soonest-ready nearest the corner. When an ability becomes ready
+  its icon grows 5% for a moment and disappears.
+
+---
+
+## Essences and the spellbook (first version built 2026-10-03)
+Supersedes the earlier "essence pages" sketch and tab layout where they differ.
+
+**The five tabs**
+1. **Racial abilities** — six planned; the page says "Not yet implemented". Class skills (Item
+   Repair and the rest) are removed from the game.
+2. to 4. **Essences** — the character's three essences, in the order they were absorbed.
+5. **Confluence** — a special set that depends on the three essences. Not designed yet; the page
+   says "Not yet implemented". The combinations will be kept deliberately few.
+
+**Rules**
+- A character absorbs up to **three essences**. The first goes on tab 2, the second on tab 3, the
+  third on tab 4. An essence cannot be absorbed twice.
+- Each essence holds **five abilities**: the first five awakening stones (or books) of that essence
+  the character uses, in that order.
+- An awakening stone can only be used if the character holds its essence and that essence is not
+  full. Otherwise it stays in the bag and a message says why.
+- Essences and abilities are **permanent**. There is no swapping or unlearning; the game becomes
+  roguelike in that sense.
+- An ability with no essence assigned cannot be learned by anyone. Only Fire and Lightning exist so
+  far, so every other ability is unlearnable until it is given a home.
+- The only abilities a character knows are the ones held under their essences. A class's starting
+  spell, or anything learned before essences, is forgotten.
+
+**Essences so far** (`GetSpellEssence` in `Source/essences.cpp`)
+- **Fire:** Firebolt, Fireball, Fire Wall, Flame Wave, Inferno, Fire Aura, Flaming Weapon, Flame
+  Strike, Inferno Strike.
+- **Lightning:** Lightning, Chain Lightning, Charged Bolt, Flash, Nova.
+
+**Items.** An essence is an item: the cube gem (picture 27) in the essence's colour (Fire red,
+Lightning yellow). Like an awakening stone it is a row in the item table; the spell named in its
+row says which essence it grants. Pepin's "Buy essences" list sells them for 1 gold for testing.
+
+**Page layout.** An essence page is a header row (the essence, and how many of its five slots are
+filled) followed by five ability rows. Dropping from seven rows to six gives each ability three
+lines: name and level; mana cost, cooldown and damage; a short description and XP towards the next
+level; then the XP bar. Layout is in `Source/panels/spell_book.cpp`.
+
+**Storage.** Essences and their abilities are saved in the sidecar file (`E` and `A` lines). They
+belong to the local player only; other players cannot see them.
+
+---
+
+## Threat and stealth (decided 2026-10-04, not built)
+How targeting works today: a monster wakes when its tile is in a player's line of sight, picks the
+nearest player (same room beats a different room), and re-picks each time it stands still
+(`UpdateEnemy` in `Source/monster.cpp`). A staggering hit switches it to the hitter until the next re-pick.
+
+Decision: each player has one **distance ratio** (100 = normal).
+- **Targeting:** the monster sees the player's distance multiplied by the ratio. Below 100 is
+  threatening (seems closer), above 100 is stealthy (seems farther). The amount is tunable per ability
+  and level, not a flat double or half.
+- **Waking:** at 100 or below, monsters wake on sight as today. Above 100 the wake-up range shrinks as
+  the ratio grows, with a floor of a couple of tiles.
+- **No taunt.** Forcing monsters off other players is out; it asks too much of the front-line player.
+- **Speed** and **Teleport** need no design work: Bryan knows how speed works, and teleport already exists.
+
+Multiplayer: every PC keeps a copy of each player's ratio. A player announces it only when it changes
+(about three bytes) and once when someone joins. Brief disagreements settle through the existing
+monster sync, which already carries each monster's target. Needs two players to test.
+
+Added 2026-10-05: stealth and threat come only from buffs (never auras). A buff *sets* the ratio;
+buffs do not add up, and the strongest one active wins. Stealth and threat active together is undecided.
+
+---
+
+## Green and purple tints (measured 2026-10-04, parked on the "maybe someday" list)
+The ten tint ramps live in palette slots 128-255, which are the same on every level. There is no
+green or purple ramp. Slots 1-127 change per area and hold scenery colours.
+
+Measurement (scripts in `graphics_tool/palette_scan/`, read-only):
+- Monsters, missiles, dropped items, players and screen panels use **no** slots in 1-127. Only
+  scenery and area-specific objects (doors, Crypt furniture) do. One monster recolour
+  (`mage\cnselbk`) maps onto slots 1-4.
+- No 16 slots are unused in every area, but each area has 16 it barely uses. Borrowing a
+  different 16 per area would repaint: Crypt 0% (31 slots unused), Caves 0.003%, Catacombs 0.01%,
+  Town 0.03%, Cathedral 0.08%, Hell 0.2%, Nest 0.9% of scenery pixels, each with a near-identical
+  replacement colour. The same 16 everywhere would touch 1-6%, so per-area lists are the way.
+- Animated slots must be avoided: Caves and Crypt cycle 1-31, Nest cycles 1-15.
+
+Work if picked up: per-area slot lists and a scenery/object repaint at level load; install two
+8-shade ramps (also on mid-level palette swaps); lighting-table entries for them; two new tints
+and text colours; add both to the Essence Designer. Not measured: how the lighting table copes.
+Suggested first step: a proof in the Cathedral only.
+
+---
+
+## Rules for drafting powers (for Claude, when asked to fill an essence)
+Content lives in `designer/essence_data.json`, edited with the Essence Designer. Bryan sets up each
+essence (tag lines, pool size, description); Claude invents the power names and the powers from
+these rules. **Wait for Bryan to call for it** before drafting. Expect many rounds of adding,
+deleting and remaking. Drafted powers are saved as drafts; nothing counts until Bryan accepts it.
+If the rules and an essence's lines ask for something impossible or contradictory, say so instead
+of quietly bending a rule.
+
+### The essence's five lines
+- **All**: every power has these tags. **Most**: most powers. **Some**: a fair share.
+  **Never**: no power may have these, including everything an "All other <group>" entry sweeps in.
+  Tags on no line count as "a few": allowed, but rare.
+- Target shares, counted per tag: All 100%; **Most about 60%; Some about 30%**; Never 0%.
+  (Most was 70% until Bryan lowered it on 2026-10-05: the higher figure was bottlenecking the
+  sets, because several Most and Some tags compete for the same 20 powers.)
+- **Finite** (added 2026-10-05, sits between Some and Never): the essence must have **at least one
+  power with this tag, two at most**. These tags are important to the essence and must not be
+  missed, but should not spread. A Finite tag is never swept up by an "All other <group>" entry.
+  This is the proper way to ask for the single stealth or threat power, a lone resurrect, and the
+  like.
+- A tag on no line is **not** capped at a small share. It simply follows the tag group rules below.
+  A tag the rules require (a Damage Style on every attack, a Target on everything) appears as
+  often as the rules demand. A tag nothing requires stays rare, about 10% or less. Use judgment.
+
+### How closely to hit the targets (calibrated on Holy, 2026-10-05)
+Bryan approved the second Holy set as hitting the targets "just fine". It is the reference for how
+loose the shares may be when an essence lists more than 20 powers can carry: Most tags landed at
+60-70% (target 70%), Some tags at 15-30% (target 30%), and Instant at 80% because the rules require
+a duration. Distinct powers matter more than exact shares; do not pad tags to reach a number.
+Resurrect at 3 of 20 was accepted. Report the actual shares and the reasons for any miss.
+
+### An essence does not have to cover its own weaknesses (Bryan, 2026-10-05)
+A player holds three essences plus a confluence, so a monster immune to one essence's damage can
+usually be handled with another. Do not add powers just to patch an essence's blind spot (a
+fire-immune monster against Fire, say). A power that does so is welcome when it is a good power in
+its own right (Bryan liked Kindling), but it is not a requirement.
+
+### First-pass numbers (Claude's model, 2026-10-05; for testing, not balanced)
+Bryan asked for every power to be given numbers so they can be looked at and tested. They come
+from one model in `essence_designer/tools/fill-numbers.mjs` (re-runnable; it only touches drafts).
+All numbers are for power level 1 and grow 12.5% per level like the game's spells.
+- Anchors taken from the game as built: Firebolt 6 mana for about 6 damage; Flame Strike 2 mana
+  for +3 damage; Fire Aura 1 damage every 2 seconds; Flaming Weapon +3 per hit; Inferno Strike
+  6 mana, +200%, 12 seconds.
+- Baselines: a spell attack is 6 mana for 6 damage; a special attack 2 mana for +3 on the hit; a
+  heal 8 mana for 12; a shield 8 mana for 14; a cleanse 4 mana; a lasting buff 10 mana, once.
+- Area: Splash gives each target 70% for 1.5x the mana; Blanket 50% for 2x; Chain 80% then less;
+  Cone 70% for 1.5x; Everyone 40% for 2.5x.
+- Cooldown buys power at similar cost: Skirmish 1.5x, Battle 3x (for 1.5x mana), Ultimate 8x (for
+  3x mana).
+- Efficient: 0.6x mana for 0.9x effect. Inefficient: 3x mana for 1.8x effect. Over Time: 1.3x in
+  total. A power that both harms and heals gives 60% of each.
+- Lasting buff on one person: +10 armor, +10% resistances, +10% maximum life or mana, +30% faster
+  regeneration, +10% speed, +10% damage. In an aura: half. On a cooldown (Timed): three times.
+  For Everyone: half.
+- **Radius (Bryan's figures):** a damaging aura 2, growing with level; Splash 2 (Fireball included); Blanket 4, or 6 on an Ultimate; an
+  aura that only buffs, heals or debuffs 8.
+- Known gap: the original spells kept in Fire use the model's numbers, not what the game charges
+  today (Fireball is 16 mana for about 26 damage in the game; the model says 9 mana for 4 to each
+  target). Overhauling the old spells' numbers is still to be decided.
+
+### No two powers alike (given by Bryan 2026-10-05)
+Two powers may share an identical tag list, but they must still play differently. Ways to tell
+similar powers apart, roughly in order of preference:
+- A different **cooldown** tier. A cooldown can buy more *effect*, or it can buy more *efficiency*
+  (a heal with a much better healing-per-mana ratio, on a short 6-second cooldown so it cannot be
+  used constantly).
+- **Size** at the same ratio: a small effect for small mana against a huge effect for huge mana.
+  This does not show in the tags; say it plainly in the description.
+- **Efficiency** tags, used sparingly.
+- A different mechanic (heals more on a nearly dead ally, bounces, also cleanses...).
+Hybrids Bryan liked and wants more of: one power that harms enemies and heals allies at once
+(Dawnburst: a blanket on the ground; Atonement: a strike whose damage heals a wounded ally).
+
+### Tag group rules (given by Bryan 2026-10-05)
+Words used below: an **attack** is any power that deals damage and is not an aura.
+
+**Element** (several allowed)
+- Assume every power needs at least one element; every attack certainly does. It is flavour.
+- A pure essence (Fire, Water...) has its element on All and "All other Elements" on Never.
+- A power may carry two elements only when the essence does not bar the second one.
+
+- Naming: Water covers water itself and frozen water. Names may use ice, frost and glacial, which
+  suit its attacks better than splashing someone with water.
+
+**Target** (exactly one; every power has one)
+- Attacks: Enemy or Ground.
+- Buffs (including Defensive): Self or Ally.
+- Debuffs: Enemy or Ground.
+- Direction: used by cones. Area of Effect "Cone" requires Target "Direction".
+- Healing and Shielding: Self or Ally, like buffs. Ground-effect healing also exists.
+- Auras always target Self (see Aura).
+- Nothing affects "every enemy". Anything that affects enemies needs a centre point (a target or a
+  ground spot) and a radius.
+
+**Area of Effect** (exactly one; every power has one)
+- Single Target: one target picked. Very common.
+- Splash: one target picked, and it also hits everything close to that target. A small area.
+- Blanket: a much larger area than Splash. Less damage, more reach (or reach that grows).
+  More likely aimed at the Ground, but may be aimed at an Enemy or an Ally.
+- Everyone (allies only): the caster targets Self and every player in the game is affected. No
+  range, no stepping out of it. Used for buffs, and also for "heal everyone" powers, which must be
+  weaker than ranged heals or be a heal over time. Never for anything that affects enemies.
+  (This is not an aura.)
+- Chain: hits a target, then bounces to another, and so on (Chain Lightning, chain heals).
+  The number of bounces is a value to set.
+- Cone: starts at the caster and fires out in a direction (Inferno, Charged Bolt). Needs Target
+  "Direction".
+- Aura: its own special area (moved into this group by Bryan 2026-10-05). It has a radius, always
+  targets Self and is always Permanent. See Aura below.
+
+**Purpose** (several allowed): the basic idea of the power
+- Attack (deals damage; this tag was called Damage until 2026-10-05); Healing; Shielding
+  (preemptive, temporary health); Buff (strengthens players); Debuff (weakens enemies).
+- Shielding, defined (Bryan 2026-10-05): the magical effect of putting *temporary health* on
+  someone. It is a buffer, pre-healing: it is lost first when they are hit, and once used up it is
+  gone. The Shield essence's aura is this effect: every 10 seconds a very small shield on everyone
+  in the aura.
+- Resurrect: brings someone back to life. Normally an Ally power. The one exception is a
+  self-resurrect, which must be an Ultimate with a super long cooldown (10 to 20 minutes) and must
+  be super rare.
+- Cleanse: removes debuffs that monsters have put on allies. Usually Instant, never Permanent.
+  Self, Ally, Splash, Blanket and Everyone all apply. Strength varies (remove one stack, all stacks
+  of one thing, everything). How monsters apply debuffs is not designed yet, so keep the wording
+  loose.
+
+**Stat Effect** (several allowed) (added by Bryan 2026-10-05)
+Says *what a buff or debuff changes*. Every buff and debuff should carry one; nothing else does.
+- Specific: Power, Speed, Recovery, Spirit (the four stats), Damage, Accuracy, HP, MP,
+  Health Regen, Mana Regen. "Damage" here means a change to damage dealt; a power that deals
+  damage carries the purpose tag Attack.
+- General: Defensive (helps allies live longer, or makes the enemy worse at killing) and Offensive
+  (helps allies kill faster, or makes the enemy die faster).
+- **Tag the most specific one only.** A mana-regeneration buff is tagged Mana Regen, not
+  Defensive + Recovery + Mana Regen. Use Defensive or Offensive on a power only when no specific
+  tag fits (a cheat-death buff, an immunity to debuffs).
+- **On an essence line, a Stat Effect tag is a focus, not a quantity** (global rule, 2026-10-05).
+  Mana Regen on Most does not ask for more buffs; it says this essence's buffs and debuffs should
+  mostly be about mana regeneration. How many buffs and debuffs there are comes only from the Buff
+  and Debuff tags. The essence summary will therefore show a low share for such a tag; that is
+  not a miss.
+- Defensive and Offensive are mainly for *asking*: on an essence line, Defensive means "give this
+  essence buffs and debuffs of the defensive kind" (Health, Health Regen, Recovery and the like),
+  and the powers themselves then carry the specific tags. Debuff plus Defensive on an essence
+  means it debuffs enemies to protect the party.
+
+**Duration** (several allowed; every power has at least one)
+- Instant: very common. Most attacks are Instant.
+- Over Time: the effect itself is spread out in ticks (about every 2 seconds) for the duration:
+  damage over time, healing over time. Avoid it unless the essence lists it on Most or Some, or
+  Bryan calls for it.
+- **Buffs are Permanent by default** (Bryan 2026-10-05, replacing the earlier "most buffs are
+  Timed"). Juggling several cooldown buffs, especially ones cast on other people, is a nightmare
+  to manage, and an essence full of them makes it hard to avoid picking up three or four. So:
+  - Most buffs in an essence are lasting buffs: cast once, they stay until death or the end of the
+    session (nothing is saved). Claude assigns Permanent freely to buffs. A permanent buff is
+    naturally a smaller effect than a cooldown one, and normally has No CD.
+  - Cooldown (Timed) buffs are used **sparingly**: a small handful per essence. Cooldowns are good
+    for attacks, and only occasionally for buffs.
+  - Of those, **favour Self buffs**. At most **one or two Timed buffs per essence that go on other
+    people** (Ally or Everyone), the Ultimate included.
+- **Debuffs also tend towards Permanent** (Bryan 2026-10-05): once on a monster it stays until
+  the monster dies. Unlike a lasting buff, a lasting debuff *may* have a cooldown, and often
+  should: the cooldown is the wait before it can be put on the next enemy or group. (A lasting
+  buff with a cooldown makes no sense: it is cast once and the cooldown never matters again.)
+  Short stuns and freezes stay Timed.
+- The aim behind all of this: a character has 20 powers, and Bryan hopes about half turn out to be
+  passive, lasting buffs that never need attention in a fight. Buffs and debuffs are things you
+  apply and move on from; the active juggling is for attacks and heals.
+- Timed: a buff, debuff or shield that is there for a period and then goes away.
+  - Most last 10 to 30 seconds; 20 seconds is common. As a guide the effect lasts about a third of
+    its cooldown (Ultimates excepted).
+  - Avoid Skirmish-cooldown buffs. If one is used, it lasts 5 or 6 seconds at most.
+  - Shields of temporary health and debuffs on enemies are not part of the juggling problem and
+    may be Timed as needed.
+- Permanent: buffs (the default, above), some debuffs, and every aura. Never damage, healing or
+  shielding. Permanent means until death or the end of the session; a permanent debuff on a
+  monster lasts until it dies. Stealth and Threat buffs are always Permanent.
+- Not exclusive: a power may be Instant and Over Time (a hit that also leaves damage over time).
+
+**Efficiency** (at most one; most powers have neither)
+- No tag means ordinary efficiency, which is the norm.
+- Efficient: low output, but better than average output per mana. Cheap and weak, good ratio.
+- Inefficient: a lot of power, quickly, for much more mana than it is worth. The heavy hitters
+  that drain mana fast.
+- The essence listing one calls for it. Otherwise they may be used sparingly as one way to make
+  two similar powers differ.
+
+**Cooldown** (exactly one; mutually exclusive) (given by Bryan 2026-10-05)
+A cooldown trades being always available for more effect. The longer the wait, the more powerful
+the power may be for its cost. It adds variety and big moments without unbalancing things.
+- No Cooldown (tag "No CD"): always available. The baseline for power.
+- Skirmish: about 15 seconds or less. Back for every fight or every other fight. A little more
+  powerful than baseline.
+- Battle: roughly 30 seconds to a minute. "I have entered a room full of monsters and use this
+  once." More powerful than Skirmish.
+- Ultimate: 2 to 5 minutes. The defining moment-of-glory power; very powerful. Five minutes is the
+  normal ceiling. A very few niche, astonishing powers (a self-resurrect, say) may sit at 10 to 20
+  minutes.
+- **Every essence gets at least one Ultimate.** One is the norm. Two should not be common. Three is
+  the absolute maximum and should be rare.
+
+**Weapon** (Sword, Axe, Bow, Staff, Shield, Blunt) (added by Bryan 2026-10-05)
+A power with a Weapon tag only works while that kind of weapon is equipped.
+- **Use these only when the essence calls for them.** They are for weapon-locked essences (a Sword
+  essence, an Axe essence, the Shield essence). Never add one to any other essence's powers.
+- **Weapon tags go on Special Attacks only.** A weapon tag on an essence's *All* line does not mean
+  every power requires that weapon. It means every *Special Attack* in the essence requires it.
+  Buffs, shields, spells and the aura in that essence carry no weapon tag and work with anything
+  equipped.
+- Example, the Shield essence: Shield on All, Special Attack on Most, Attack on Some. It is
+  primarily a defensive buffing essence with only some attacks, and every attack it does have is a
+  shield slam or shield bash that requires a shield. "Special Attack on Most" is the usual lean:
+  its attacks are special attacks, not spells.
+- The game already has a shield-strike animation (shield and no weapon), so shield attacks can be
+  drawn; see graphics_tool/extracted/shield_only_attack_warrior.png.
+
+**Awareness** (Stealth, Threat)
+- Only on buffs. **Never on auras.**
+- **Always Permanent, never Timed** (Bryan 2026-10-05: temporary stealth or threat adds more
+  complication than he wants). A stealth or threat power is a lasting buff, like Flaming Weapon.
+- Bryan puts them on Never for most essences. **If one is deliberately left off an essence's Never
+  line, that is a quiet request for exactly one power with it** (corrected 2026-10-05: Nature left
+  Stealth off Never and expected one stealth power). Listing it on Some or Most asks for more.
+- A Stealth or Threat buff needs no Stat Effect tag; the Awareness tag already says what it changes.
+- In the game these set the player's distance ratio (see "Threat and stealth"). They do not add
+  up: the strongest one active wins (a 50% threat buff beats a 70% one). A stealth buff and a
+  threat buff active together is undecided.
+
+**Damage Style** (Special Attack, Spell Attack)
+- Every power that deals damage, **except auras**, is exactly one of the two. This covers
+  attacks, damage over time and damaging debuffs. Powers that deal no damage carry neither.
+- About 50/50 by default. If the essence lists one on Some or Most, lean that way; it is a lean,
+  not an exclusion.
+- Future, not built: racial bonuses will tilt this. Example: a human "special attack" racial adds
+  the Special Attack tag to every awakening stone the player uses that has no damage style of its
+  own, so it prefers special attacks unless a Spell Attack stone is used.
+
+**Aura**
+- Every essence gets exactly one aura, and only one. It is the power most aligned with the
+  essence: build it from as many of the essence's Most tags (and All tags) as possible, and keep
+  "a few" tags off it. Its Area of Effect is the Aura tag, so it carries no other area even when
+  the essence has Splash or Blanket on Most. Bryan will go through each aura.
+- An aura is a self-buff that emanates from the caster: Target is always Self, Duration is always
+  Permanent, and it pulses around the caster within a radius. What the pulse does is flexible: hurt enemies, curse enemies,
+  buff allies, heal allies.
+- Auras never carry Stealth or Threat, and carry no Damage Style.
+- Idea to try for a shielding essence: an aura that puts a very small shield on everyone nearby on
+  a slow timer (about every 10 seconds).
+- Game rule, not built: a character can hold only one aura power. The first aura a character
+  unlocks locks them out of every other aura.

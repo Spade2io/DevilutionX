@@ -40,7 +40,8 @@ enum class DamageType : uint8_t {
  * @brief Essence Mod: the resistance category a damage type is checked against.
  *
  * There are many damage types but only three resistances. The original three types stand for the
- * categories: Fire is Elemental, Lightning is Natural (after the planned re-sort) and Magic is Astral.
+ * categories: the Fire slot is Elemental (fire, lightning, ice), the Lightning slot is Natural
+ * (acid, for players) and the Magic slot is Astral (magic, shadow).
  */
 constexpr DamageType GetResistanceCategory(DamageType type)
 {
@@ -48,6 +49,7 @@ constexpr DamageType GetResistanceCategory(DamageType type)
 	case DamageType::Shadow:
 		return DamageType::Magic; // Astral
 	case DamageType::Ice:
+	case DamageType::Lightning:
 		return DamageType::Fire; // Elemental
 	default:
 		return type;

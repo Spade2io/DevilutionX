@@ -1695,7 +1695,7 @@ bool InitNewSpell(Player &player, uint16_t wParamSpellID, uint16_t wParamSpellTy
 	wParamSpellType = Swap16LE(wParamSpellType);
 	wParamSpellFrom = Swap16LE(wParamSpellFrom);
 
-	if (wParamSpellID > static_cast<int8_t>(SpellID::LAST))
+	if (wParamSpellID >= SpellsData.size())
 		return false;
 	auto spellID = static_cast<SpellID>(wParamSpellID);
 	if (!IsValidSpell(spellID)) {
@@ -2531,7 +2531,8 @@ size_t OnChangeSpellLevel(const TCmdParam2 &message, Player &player) // NOLINT(m
 		BufferMessage(player, &message, sizeof(message));
 	} else {
 		player._pMemSpells |= GetSpellBitmask(spellID);
-		player._pSplLvl[static_cast<size_t>(spellID)] = spellLevel;
+		if (IsValidSpell(spellID))
+			player.SetBaseSpellLevel(spellID, spellLevel);
 	}
 
 	return sizeof(message);

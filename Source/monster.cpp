@@ -4506,26 +4506,26 @@ void PrintMonstHistory(int mt)
 	if (MonsterKillCounts[mt] >= 15) {
 		const int res = (sgGameInitInfo.nDifficulty != DIFF_HELL) ? MonstersData[mt].resistance : MonstersData[mt].resistanceHell;
 		if ((res & (RESIST_MAGIC | RESIST_FIRE | RESIST_LIGHTNING | IMMUNE_MAGIC | IMMUNE_FIRE | IMMUNE_LIGHTNING)) == 0) {
-			AddInfoBoxString(_("No magic resistance"));
+			AddInfoBoxString(_("No resistances"));
 		} else {
 			if ((res & (RESIST_MAGIC | RESIST_FIRE | RESIST_LIGHTNING)) != 0) {
 				std::string resists = std::string(_("Resists:"));
 				if ((res & RESIST_MAGIC) != 0)
-					resists.append(_(" Magic"));
+					resists.append(_(" Astral"));
 				if ((res & RESIST_FIRE) != 0)
-					resists.append(_(" Fire"));
+					resists.append(_(" Elemental"));
 				if ((res & RESIST_LIGHTNING) != 0)
-					resists.append(_(" Lightning"));
+					resists.append(_(" Natural"));
 				AddInfoBoxString(resists);
 			}
 			if ((res & (IMMUNE_MAGIC | IMMUNE_FIRE | IMMUNE_LIGHTNING)) != 0) {
 				std::string immune = std::string(_("Immune:"));
 				if ((res & IMMUNE_MAGIC) != 0)
-					immune.append(_(" Magic"));
+					immune.append(_(" Astral"));
 				if ((res & IMMUNE_FIRE) != 0)
-					immune.append(_(" Fire"));
+					immune.append(_(" Elemental"));
 				if ((res & IMMUNE_LIGHTNING) != 0)
-					immune.append(_(" Lightning"));
+					immune.append(_(" Natural"));
 				AddInfoBoxString(immune);
 			}
 		}
@@ -4545,11 +4545,11 @@ void PrintUniqueHistory()
 		AddInfoBoxString(_("No Immunities"));
 	} else {
 		if ((res & (RESIST_MAGIC | RESIST_FIRE | RESIST_LIGHTNING)) != 0)
-			AddInfoBoxString(_("Some Magic Resistances"));
+			AddInfoBoxString(_("Some Resistances"));
 		else
 			AddInfoBoxString(_("No resistances"));
 		if ((res & (IMMUNE_MAGIC | IMMUNE_FIRE | IMMUNE_LIGHTNING)) != 0) {
-			AddInfoBoxString(_("Some Magic Immunities"));
+			AddInfoBoxString(_("Some Immunities"));
 		} else {
 			AddInfoBoxString(_("No Immunities"));
 		}

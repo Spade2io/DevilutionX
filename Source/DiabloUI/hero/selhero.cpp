@@ -169,7 +169,7 @@ void SelheroListSelect(size_t value)
 		vecSelDlgItems.clear();
 
 		const SDL_Rect rect1 = { (Sint16)(uiPosition.x + 242), (Sint16)(uiPosition.y + 211), 365, 33 };
-		vecSelDlgItems.push_back(std::make_unique<UiArtText>(_("Choose Class").data(), rect1, UiFlags::AlignCenter | UiFlags::FontSize30 | UiFlags::ColorUiSilver, 3));
+		vecSelDlgItems.push_back(std::make_unique<UiArtText>(_("Choose Race").data(), rect1, UiFlags::AlignCenter | UiFlags::FontSize30 | UiFlags::ColorUiSilver, 3));
 
 		vecSelHeroDlgItems.clear();
 		int itemH = 33;
@@ -514,7 +514,7 @@ void selhero_Init()
 	vecSelHeroDialog.push_back(std::make_unique<UiArtText>(textStats[0], MakeSdlRect(valueX, uiPosition.y + 323, valueWidth, statHeight), valueFlags));
 
 	const char *statLabels[] {
-		_("Strength:").data(), _("Magic:").data(), _("Dexterity:").data(), _("Vitality:").data(),
+		_("Power:").data(), _("Spirit:").data(), _("Speed:").data(), _("Recovery:").data(),
 #ifdef _DEBUG
 		_("Savegame:").data()
 #endif

@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <optional>
 
+#include "essences.h"
 #include "tables/spelldat.h"
 
 namespace devilution {
@@ -19,6 +20,8 @@ namespace devilution {
 enum class EssenceTint : uint8_t {
 	/** Bright red. Fire. */
 	VividRed,
+	/** Bright yellow. Lightning. */
+	VividYellow,
 	/** Bright blue. Frost. */
 	VividBlue,
 	/** The darkest, most purple the shared palette offers: deep slate-indigo. Shadow. */
@@ -35,6 +38,9 @@ const uint8_t *GetEssenceTintTrn(EssenceTint tint);
  * flash on a monster when its damage over time ticks.
  */
 std::optional<EssenceTint> GetSpellTint(SpellID spell);
+
+/** @brief The colour that belongs to an essence, used for its item and its page of the spellbook. */
+std::optional<EssenceTint> GetEssenceTint(EssenceID essence);
 
 struct Item;
 

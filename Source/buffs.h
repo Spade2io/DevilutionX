@@ -20,7 +20,8 @@ struct Player;
 enum class BuffID : uint8_t {
 	Strength,
 	FireAura,
-	LAST = FireAura,
+	FlamingWeapon,
+	LAST = FlamingWeapon,
 };
 
 /** @brief The spell that switches a buff on, and that earns its experience. */
@@ -31,6 +32,12 @@ SpellID GetBuffSpell(BuffID buff);
  * A damage aura earns experience from its own damage instead.
  */
 bool BuffSharesExperience(BuffID buff);
+
+/**
+ * @brief Whether a spell belongs to a passive buff, the kind that earns the tenth share.
+ * Passive buffs deal no damage; if one ever did, it would count as a plain weapon hit.
+ */
+bool IsExperienceSharingBuffSpell(SpellID spell);
 
 /** @brief Switches a buff on for a player and recalculates their stats. */
 void ActivateBuff(Player &player, BuffID buff);
@@ -45,6 +52,9 @@ void RefreshBuffStats(Player &player);
 
 /** @brief Strength added by the player's active buffs: 10 at spell level 1, plus 5 per level after that. */
 int GetBuffStrengthBonus(const Player &player);
+
+/** @brief Fire damage Flaming Weapon adds to each weapon hit, in 64ths of a hit point. Zero when the buff is off. */
+int GetFlamingWeaponDamage(const Player &player);
 
 /** @brief Runs auras for one game tick: every 2 seconds a damage aura pulses around its owner. */
 void ProcessBuffs();

@@ -52,7 +52,12 @@ int GetSpellStaffLevel(SpellID s);
  */
 constexpr uint64_t GetSpellBitmask(SpellID spellId)
 {
-	return 1ULL << (static_cast<int8_t>(spellId) - 1);
+	// Essence Mod: only spells 1 to 64 have a switch. Anything else gets none, which also keeps the
+	// shift below from going out of range.
+	const int number = static_cast<int>(spellId);
+	if (number < 1 || number > LegacySpellLimit)
+		return 0;
+	return 1ULL << (number - 1);
 }
 
 } // namespace devilution

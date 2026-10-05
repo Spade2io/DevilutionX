@@ -25,6 +25,7 @@
 #include "controls/plrctrls.h"
 #include "cursor.h"
 #include "buffs.h"
+#include "cooldowns.h"
 #include "dead.h"
 #include "dots.h"
 #include "diablo_msg.hpp"
@@ -1466,6 +1467,7 @@ void DrawView(const Surface &out, Point startPosition)
 	}
 
 	DrawBuffBar(out);
+	DrawCooldownTracker(out);
 	DrawControllerModifierHints(out);
 	DrawPlrMsg(out);
 	gmenu_draw(out);
