@@ -41,6 +41,16 @@ constexpr size_t FirstSpellNotInSave = 47;
 /** Experience per spell, in 64ths of a point so that small hits still add up. */
 std::vector<uint32_t> SpellExperience;
 
+/** A spell and how it is cast (learned, scroll, staff), as held on a hotkey or readied. */
+struct SpellSelection {
+	SpellID spell = SpellID::Invalid;
+	SpellType type = SpellType::Invalid;
+};
+
+/** What the side file last loaded says is readied and on each hotkey. Invalid where it says nothing. */
+SpellSelection SavedReadiedSpell;
+std::array<SpellSelection, NumHotkeys> SavedHotkeys;
+
 /** The experience counter for one spell. The list grows to cover every row of the spell table. */
 uint32_t &ExperienceOf(SpellID spell)
 {
@@ -326,6 +336,8 @@ void LoadSpellExperience(const std::string &path, Player &player)
 	ResetSpellExperience();
 	ResetEssences();
 	player.extendedSpellLevels.clear();
+	SavedReadiedSpell = {};
+	SavedHotkeys.fill({});
 
 	FILE *file = OpenFile(path.c_str(), "rb");
 	if (file == nullptr)
@@ -347,16 +359,12 @@ void LoadSpellExperience(const std::string &path, Player &player)
 				}
 			} else if (std::sscanf(line, "R %u %u", &spell, &value) == 2) {
 				// The readied spell, when it is one the save file's own field cannot name.
-				if (IsValidSpell(static_cast<SpellID>(spell)) && value <= static_cast<unsigned>(SpellType::Invalid)) {
-					player._pRSpell = static_cast<SpellID>(spell);
-					player._pRSplType = static_cast<SpellType>(value);
-				}
+				if (IsValidSpell(static_cast<SpellID>(spell)) && value <= static_cast<unsigned>(SpellType::Invalid))
+					SavedReadiedSpell = { static_cast<SpellID>(spell), static_cast<SpellType>(value) };
 			} else if (std::sscanf(line, "H %u %u %u", &hotkey, &spell, &value) == 3) {
 				// A hotkey holding such a spell.
-				if (hotkey < NumHotkeys && IsValidSpell(static_cast<SpellID>(spell)) && value <= static_cast<unsigned>(SpellType::Invalid)) {
-					player._pSplHotKey[hotkey] = static_cast<SpellID>(spell);
-					player._pSplTHotKey[hotkey] = static_cast<SpellType>(value);
-				}
+				if (hotkey < NumHotkeys && IsValidSpell(static_cast<SpellID>(spell)) && value <= static_cast<unsigned>(SpellType::Invalid))
+					SavedHotkeys[hotkey] = { static_cast<SpellID>(spell), static_cast<SpellType>(value) };
 			} else if (std::sscanf(line, "%u %u", &spell, &value) == 2) {
 				if (IsValidSpell(static_cast<SpellID>(spell)))
 					ExperienceOf(static_cast<SpellID>(spell)) = value;
@@ -364,6 +372,22 @@ void LoadSpellExperience(const std::string &path, Player &player)
 		}
 	}
 	std::fclose(file);
+	ApplyExtendedSpellSelections(player);
+}
+
+void ApplyExtendedSpellSelections(Player &player)
+{
+	// Only a power the character still knows is put back.
+	if (SavedReadiedSpell.spell != SpellID::Invalid && player.GetBaseSpellLevel(SavedReadiedSpell.spell) != 0) {
+		player._pRSpell = SavedReadiedSpell.spell;
+		player._pRSplType = SavedReadiedSpell.type;
+	}
+	for (size_t i = 0; i < NumHotkeys; i++) {
+		if (SavedHotkeys[i].spell != SpellID::Invalid && player.GetBaseSpellLevel(SavedHotkeys[i].spell) != 0) {
+			player._pSplHotKey[i] = SavedHotkeys[i].spell;
+			player._pSplTHotKey[i] = SavedHotkeys[i].type;
+		}
+	}
 }
 
 void SaveSpellExperience(const std::string &path, const Player &player)

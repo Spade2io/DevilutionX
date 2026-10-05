@@ -91,6 +91,12 @@ void ResetSpellExperience();
 void LoadSpellExperience(const std::string &path, Player &player);
 
 /**
+ * @brief Puts back the readied spell and hotkeys that the side file holds for powers beyond the
+ * original 64. Call it after the game has read its own hotkey record, which holds "none" for those.
+ */
+void ApplyExtendedSpellSelections(Player &player);
+
+/**
  * @brief Writes spell experience, and the levels of spells the original save has no room for,
  * to the sidecar file kept next to the save.
  */

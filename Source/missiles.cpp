@@ -2505,23 +2505,44 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 
 	// What lands, how much, and how far around the target it reaches. Corruption itself is the
 	// original, hand-written case; a power read from essence_powers.tsv says all three in its row.
+	//
+	// Two kinds of effect exist so far:
+	//   a damage-over-time effect ("Burn", "Corruption"): the amount is added to it, per tick;
+	//   "Burst": the amount is dealt at once, in the power's own element.
 	SpellID spell = SpellID::Corruption;
 	DotID dot = DotID::Corruption;
-	int damagePerTick = 1 * 64;
+	bool isBurst = false;
+	DamageType burstDamageType = DamageType::Fire;
+	MissileID burstImmunityMissile = MissileID::Firebolt;
+	int amount = 1 * 64;
 	int radius = 0;
 	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell)) {
 		const SpellData &spellData = GetSpellData(missile.sourceSpell);
-		const std::optional<DotID> named = ParseDotName(spellData.effect);
-		if (!named) {
+		if (spellData.effect == "Burst") {
+			isBurst = true;
+			switch (spellData.type()) {
+			case MagicType::Lightning:
+				burstDamageType = DamageType::Lightning;
+				burstImmunityMissile = MissileID::Lightning;
+				break;
+			case MagicType::Magic:
+				burstDamageType = DamageType::Magic;
+				burstImmunityMissile = MissileID::BloodStar;
+				break;
+			default:
+				break;
+			}
+		} else if (const std::optional<DotID> named = ParseDotName(spellData.effect); named) {
+			dot = *named;
+		} else {
 			parameter.spellFizzled = true;
 			return;
 		}
 		spell = missile.sourceSpell;
-		dot = *named;
-		damagePerTick = spellData.effectAmount;
+		amount = spellData.effectAmount;
 		radius = spellData.effectRadius;
 	}
-	damagePerTick = ScaleDamageForSpellLevel(damagePerTick, std::max<int>(player.GetBaseSpellLevel(spell), 1));
+	amount = ScaleDamageForSpellLevel(amount, std::max<int>(player.GetBaseSpellLevel(spell), 1));
 	const UiFlags textColor = dot == DotID::Corruption ? UiFlags::ColorBlue : UiFlags::ColorRed;
 
 	// The monster under the cursor, and with a radius every monster standing within it.
@@ -2556,11 +2577,16 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 
 		// A separate id from the damage numbers, so the game does not merge the two.
 		const int textId = 1000 + monsterId;
-		if (IsImmuneToDot(monster, dot)) {
+		if (isBurst ? monster.isImmune(burstImmunityMissile, burstDamageType) : IsImmuneToDot(monster, dot)) {
 			AddFloatingNumber(monster.position.tile, { 0, 0 }, "Immune", UiFlags::ColorWhite | UiFlags::FontSize12, textId);
 			continue;
 		}
-		const int stacks = AddMonsterDot(monster, dot, spell, damagePerTick);
+		if (isBurst) {
+			// Resistance, experience, the damage number and the kill are all handled as for any spell damage.
+			DealSpellTickDamage(monster, spell, burstImmunityMissile, burstDamageType, amount);
+			continue;
+		}
+		const int stacks = AddMonsterDot(monster, dot, spell, amount);
 		AddFloatingNumber(monster.position.tile, { 0, 0 }, StrCat(GetDotName(dot), " x", stacks), textColor | UiFlags::FontSize12, textId);
 	}
 }

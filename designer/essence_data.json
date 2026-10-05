@@ -2183,7 +2183,7 @@
     {
       "id": "p_cadeabe9",
       "name": "Meteor",
-      "description": "New. A burning rock falls on one enemy for very heavy damage and crushes everything around it for less. Cooldown of about 45 seconds.",
+      "description": "A burning rock falls on one enemy. It and every enemy within the radius take the same heavy fire damage, at once. Cooldown of about 45 seconds.",
       "status": "accepted",
       "essenceIds": [
         "e_4021590a"

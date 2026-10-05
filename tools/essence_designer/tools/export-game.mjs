@@ -49,10 +49,13 @@ const SHORT_TEXT = {
 //   Burn: adds to the shared Burn on the target (and on everything within the power's radius).
 //         Every damage-over-time effect ticks every 2 seconds for 20 seconds, so the power's
 //         potency, its total over that time, is spread over 10 ticks.
+//   Burst: every enemy within the power's radius of the target takes the power's potency as damage
+//         at once, in the power's element.
 const TICKS_PER_EFFECT = 10
 const BEHAVIOUR = {
   'Smolder': { missile: 'Corruption', effect: 'Burn' },
   'Wildfire': { missile: 'Corruption', effect: 'Burn' },
+  'Meteor': { missile: 'Corruption', effect: 'Burst' },
 }
 const FIRST_NUMBER = 100
 
@@ -90,7 +93,9 @@ const row = ({ power, essence }) => {
   const mana = Math.min(250, Math.max(0, Math.round(power.manaCost ?? 0)))
   const behaviour = BEHAVIOUR[power.name]
   // Amounts are in 64ths of a hit point, the unit the game counts damage in.
-  const amount = behaviour?.effect === 'Burn' ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT) : 0
+  const amount = behaviour?.effect === 'Burn' ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
+    : behaviour?.effect === 'Burst' ? Math.round((power.potency ?? 0) * 64)
+    : 0
   return [
     power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : 'CastFire',
     mana, flags, behaviour?.missile ?? '', 0, mana, power.icon,

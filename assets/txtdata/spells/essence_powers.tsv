@@ -6,7 +6,7 @@ StokeTheFlames	103	Stoke the Flames	Fire	CastFire	18	Fire		0	18	18	60	+30% damag
 Phoenix	104	Phoenix	Fire	CastFire	0	Fire		0	0	40	900	Rise again on death		0	0
 Smolder	105	Smolder	Fire	CastFire	6	Fire,Targeted	Corruption	0	6	32	0	Stacking burn from range	Burn	64	0
 Wildfire	106	Wildfire	Fire	CastFire	9	Fire,Targeted	Corruption	0	9	46	10	Burn that spreads	Burn	64	2
-Meteor	107	Meteor	Fire	CastFire	20	Fire,Targeted		0	20	24	45	Heavy hit, radius 2		0	0
+Meteor	107	Meteor	Fire	CastFire	20	Fire,Targeted	Corruption	0	20	24	45	Heavy hit, radius 2	Burst	1216	2
 Kindling	108	Kindling	Fire	CastFire	15	Fire,Targeted		0	15	37	60	Removes fire resistance		0	0
 SearingBrand	109	Searing Brand	Fire	CastFire	2	Fire,Targeted		0	2	31	12	All hits deal extra fire		0	0
 FanTheFlames	110	Fan the Flames	Fire	CastFire	10	Fire		0	10	33	0	Ally acts 10% faster		0	0
