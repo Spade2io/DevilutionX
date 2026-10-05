@@ -1984,7 +1984,7 @@
     {
       "id": "p_fb6a1e25",
       "name": "Ignite",
-      "description": "New. A weapon strike that sets the enemy alight. A light hit now, then it burns for several seconds. Striking again adds another layer of burning.",
+      "description": "A weapon strike that sets the enemy alight. A light hit now, and it adds to the Burn on that enemy. Every strike adds more.",
       "status": "accepted",
       "essenceIds": [
         "e_4021590a"
@@ -2004,7 +2004,7 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "bonus damage on the hit, then 4 burning over 6 seconds; each strike adds another layer",
+      "potencyNote": "bonus damage on the hit, plus 5 Burn in total over 20 seconds",
       "number": 100,
       "gameKey": "Ignite",
       "icon": 22,
@@ -2127,7 +2127,7 @@
     {
       "id": "p_6de213df",
       "name": "Smolder",
-      "description": "New. Sets one enemy smouldering from a distance. No hit up front; it burns steadily for several seconds. Casting it again adds another layer.",
+      "description": "Sets one enemy smouldering from a distance. No hit up front; it adds to the Burn on that enemy, which ticks every 2 seconds for 20 seconds. Every new Burn, from any power, restarts the 20 seconds for all of it.",
       "status": "accepted",
       "essenceIds": [
         "e_4021590a"
@@ -2141,12 +2141,12 @@
         "t_b5fae28d",
         "t_5462244b"
       ],
-      "potency": 8,
+      "potency": 10,
       "manaCost": 6,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "damage in total over 8 seconds",
+      "potencyNote": "Burn in total over 20 seconds (1 each tick)",
       "number": 105,
       "gameKey": "Smolder",
       "icon": 32,
@@ -2155,7 +2155,7 @@
     {
       "id": "p_8b8dbc48",
       "name": "Wildfire",
-      "description": "New. Fire that spreads. Sets one enemy and every enemy beside it burning for several seconds. Cooldown of about 10 seconds.",
+      "description": "Fire that spreads. Adds to the Burn on one enemy and on every enemy within its radius. Cooldown of about 10 seconds.",
       "status": "accepted",
       "essenceIds": [
         "e_4021590a"
@@ -2169,12 +2169,12 @@
         "t_b5fae28d",
         "t_a9a0b1a6"
       ],
-      "potency": 8,
+      "potency": 10,
       "manaCost": 9,
       "cooldown": 10,
       "radius": 2,
       "growth": 12.5,
-      "potencyNote": "damage in total over 8 seconds to each target",
+      "potencyNote": "Burn in total over 20 seconds, to each target (1 each tick)",
       "number": 106,
       "gameKey": "Wildfire",
       "icon": 46,

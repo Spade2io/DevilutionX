@@ -2499,32 +2499,70 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 		return;
 	}
 
-	const int monsterId = std::abs(dMonster[targetMonsterPosition->x][targetMonsterPosition->y]) - 1;
-	Monster &monster = Monsters[monsterId];
 	const Player &player = Players[missile._misource];
-
-	// Every player sees the burst on the monster and the monster wakes up.
 	missile.position.tile = *targetMonsterPosition;
 	missile.position.start = *targetMonsterPosition;
-	AddMissile(*targetMonsterPosition, { 0, 0 }, Direction::South, MissileID::CorruptionExplosion, missile._micaster, missile._misource, 0, 0, &missile);
-	monster.tag(player);
-	if (monster.activeForTicks == 0) {
-		monster.activeForTicks = UINT8_MAX;
-		monster.position.last = player.position.tile;
+
+	// What lands, how much, and how far around the target it reaches. Corruption itself is the
+	// original, hand-written case; a power read from essence_powers.tsv says all three in its row.
+	SpellID spell = SpellID::Corruption;
+	DotID dot = DotID::Corruption;
+	int damagePerTick = 1 * 64;
+	int radius = 0;
+	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell)) {
+		const SpellData &spellData = GetSpellData(missile.sourceSpell);
+		const std::optional<DotID> named = ParseDotName(spellData.effect);
+		if (!named) {
+			parameter.spellFizzled = true;
+			return;
+		}
+		spell = missile.sourceSpell;
+		dot = *named;
+		damagePerTick = spellData.effectAmount;
+		radius = spellData.effectRadius;
+	}
+	damagePerTick = ScaleDamageForSpellLevel(damagePerTick, std::max<int>(player.GetBaseSpellLevel(spell), 1));
+	const UiFlags textColor = dot == DotID::Corruption ? UiFlags::ColorBlue : UiFlags::ColorRed;
+
+	// The monster under the cursor, and with a radius every monster standing within it.
+	std::vector<int> targets;
+	for (int y = targetMonsterPosition->y - radius; y <= targetMonsterPosition->y + radius; y++) {
+		for (int x = targetMonsterPosition->x - radius; x <= targetMonsterPosition->x + radius; x++) {
+			if (!InDungeonBounds({ x, y }))
+				continue;
+			const int monsterId = std::abs(dMonster[x][y]) - 1;
+			if (monsterId < 0 || std::find(targets.begin(), targets.end(), monsterId) != targets.end())
+				continue;
+			const Monster &candidate = Monsters[monsterId];
+			if (candidate.isPossibleToHit() && !candidate.isPlayerMinion())
+				targets.push_back(monsterId);
+		}
 	}
 
-	// The effect itself is kept and run only on the caster's own PC.
-	if (&player != MyPlayer)
-		return;
+	for (const int monsterId : targets) {
+		Monster &monster = Monsters[monsterId];
 
-	// A separate id from the damage numbers, so the game does not merge the two.
-	const int textId = 1000 + monsterId;
-	if (monster.isImmune(MissileID::Corruption, DamageType::Shadow)) {
-		AddFloatingNumber(monster.position.tile, { 0, 0 }, "Immune", UiFlags::ColorWhite | UiFlags::FontSize12, textId);
-		return;
+		// Every player sees the burst on the monster and the monster wakes up.
+		AddMissile(monster.position.tile, { 0, 0 }, Direction::South, MissileID::CorruptionExplosion, missile._micaster, missile._misource, 0, 0, &missile);
+		monster.tag(player);
+		if (monster.activeForTicks == 0) {
+			monster.activeForTicks = UINT8_MAX;
+			monster.position.last = player.position.tile;
+		}
+
+		// The effect itself is kept and run only on the caster's own PC.
+		if (&player != MyPlayer)
+			continue;
+
+		// A separate id from the damage numbers, so the game does not merge the two.
+		const int textId = 1000 + monsterId;
+		if (IsImmuneToDot(monster, dot)) {
+			AddFloatingNumber(monster.position.tile, { 0, 0 }, "Immune", UiFlags::ColorWhite | UiFlags::FontSize12, textId);
+			continue;
+		}
+		const int stacks = AddMonsterDot(monster, dot, spell, damagePerTick);
+		AddFloatingNumber(monster.position.tile, { 0, 0 }, StrCat(GetDotName(dot), " x", stacks), textColor | UiFlags::FontSize12, textId);
 	}
-	const int stacks = AddMonsterDot(monster, DotID::Corruption);
-	AddFloatingNumber(monster.position.tile, { 0, 0 }, StrCat("Corruption x", stacks), UiFlags::ColorBlue | UiFlags::FontSize12, textId);
 }
 
 void AddFireAuraBuff(Missile &missile, AddMissileParameter & /*parameter*/)
@@ -2887,6 +2925,8 @@ void AddDiabloApocalypse(Missile &missile, AddMissileParameter & /*parameter*/)
 	missile._miDelFlag = true;
 }
 
+SpellID SpellBeingCast = SpellID::Invalid;
+
 Missile *AddMissile(WorldTilePosition src, WorldTilePosition dst, Direction midir, MissileID mitype,
     mienemy_type micaster, int id, int midam, int spllvl,
     Missile *parent, std::optional<SfxID> lSFX)
@@ -2901,6 +2941,8 @@ Missile *AddMissile(WorldTilePosition src, WorldTilePosition dst, Direction midi
 	const MissileData &missileData = GetMissileData(mitype);
 
 	missile._mitype = mitype;
+	// Essence Mod: a missile spawned by another belongs to the same spell as its parent.
+	missile.sourceSpell = parent != nullptr ? parent->sourceSpell : SpellBeingCast;
 	missile._micaster = micaster;
 	missile._misource = id;
 	missile._midam = midam;

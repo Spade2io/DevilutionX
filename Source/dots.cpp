@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <string_view>
 #include <vector>
 
 #include "essence_tint.h"
@@ -32,23 +33,22 @@ constexpr size_t MaxEffectsPerMonster = 32;
 /** How long a monster stays tinted after a damage tick. */
 constexpr int PulseTicks = 6;
 
+/** Every effect ticks every 2 seconds and lasts 20 seconds from its latest application. */
+constexpr int TickInterval = 2 * TicksPerSecond;
+constexpr int EffectDuration = 20 * TicksPerSecond;
+
 struct DotDefinition {
-	/** The spell that applies the effect and earns experience from its damage. */
-	SpellID spell;
-	/** The projectile that applies it, used when checking a monster's immunities. */
+	std::string_view name;
+	/** A projectile of the same kind, used when checking a monster's immunities. */
 	MissileID missile;
 	DamageType damageType;
-	/** Damage per stack each time the effect ticks, in 64ths of a hit point. */
-	int damagePerStack;
-	/** Game ticks between damage ticks. */
-	int interval;
-	/** Game ticks the effect lasts. Every new stack starts this again. */
-	int duration;
+	/** The colour a monster flashes when the effect lands or ticks. */
+	EssenceTint tint;
 };
 
 constexpr DotDefinition Definitions[] = {
-	// Corruption: 1 shadow damage per stack every 2 seconds, for 20 seconds.
-	{ SpellID::Corruption, MissileID::Corruption, DamageType::Shadow, 1 * 64, 2 * TicksPerSecond, 20 * TicksPerSecond },
+	{ "Corruption", MissileID::Corruption, DamageType::Shadow, EssenceTint::Shadow },
+	{ "Burn", MissileID::Firebolt, DamageType::Fire, EssenceTint::VividRed },
 };
 
 const DotDefinition &DefinitionOf(DotID dot)
@@ -56,11 +56,21 @@ const DotDefinition &DefinitionOf(DotID dot)
 	return Definitions[static_cast<size_t>(dot)];
 }
 
+/** What one power has poured into an effect on one monster. */
+struct DotShare {
+	SpellID spell;
+	/** Damage each tick, in 64ths of a hit point. */
+	int damagePerTick;
+};
+
 struct ActiveDot {
 	DotID id;
+	/** How many times it has been applied since it last ran out. */
 	int stacks;
 	int ticksUntilDamage;
 	int ticksLeft;
+	/** One entry per power that has added to it, so each earns experience for its own part. */
+	std::vector<DotShare> shares;
 };
 
 struct Pulse {
@@ -71,12 +81,24 @@ struct Pulse {
 std::array<std::vector<ActiveDot>, MaxMonsters> MonsterDots;
 std::array<Pulse, MaxMonsters> MonsterPulses;
 
+void FlashMonster(const Monster &monster, EssenceTint tint)
+{
+	Pulse &pulse = MonsterPulses[monster.getId()];
+	pulse.ticksLeft = PulseTicks;
+	pulse.tint = tint;
+}
+
 void DealDotDamage(Monster &monster, const ActiveDot &dot)
 {
 	const DotDefinition &definition = DefinitionOf(dot.id);
-	const int spellLevel = MyPlayer->GetBaseSpellLevel(definition.spell);
-	const int damage = ScaleDamageForSpellLevel(definition.damagePerStack, spellLevel) * dot.stacks;
-	DealSpellTickDamage(monster, definition.spell, definition.missile, definition.damageType, damage);
+	// Each power deals the part it added, so each is credited with its own experience.
+	for (const DotShare &share : dot.shares) {
+		DealSpellTickDamage(monster, share.spell, definition.missile, definition.damageType, share.damagePerTick);
+		if (monster.hasNoLife())
+			break;
+	}
+	if (!monster.hasNoLife())
+		FlashMonster(monster, definition.tint);
 }
 
 } // namespace
@@ -119,28 +141,54 @@ void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, Dam
 	pulse.tint = GetSpellTint(spell).value_or(EssenceTint::Shadow);
 }
 
-int AddMonsterDot(Monster &monster, DotID dot)
+std::optional<DotID> ParseDotName(std::string_view name)
+{
+	for (size_t i = 0; i <= static_cast<size_t>(DotID::LAST); i++) {
+		if (Definitions[i].name == name)
+			return static_cast<DotID>(i);
+	}
+	return std::nullopt;
+}
+
+std::string_view GetDotName(DotID dot)
+{
+	return DefinitionOf(dot).name;
+}
+
+bool IsImmuneToDot(const Monster &monster, DotID dot)
+{
+	const DotDefinition &definition = DefinitionOf(dot);
+	return monster.isImmune(definition.missile, definition.damageType);
+}
+
+int AddMonsterDot(Monster &monster, DotID dot, SpellID spell, int damagePerTick)
 {
 	std::vector<ActiveDot> &dots = MonsterDots[monster.getId()];
-	const DotDefinition &definition = DefinitionOf(dot);
+	FlashMonster(monster, DefinitionOf(dot).tint);
 
-	Pulse &pulse = MonsterPulses[monster.getId()];
-	pulse.ticksLeft = PulseTicks;
-	pulse.tint = GetSpellTint(definition.spell).value_or(EssenceTint::Shadow);
-
-	for (ActiveDot &active : dots) {
-		if (active.id != dot)
-			continue;
-		// Another cast adds a stack and starts the duration again. The damage rhythm carries on.
-		active.stacks++;
-		active.ticksLeft = definition.duration;
-		return active.stacks;
+	ActiveDot *active = nullptr;
+	for (ActiveDot &existing : dots) {
+		if (existing.id == dot)
+			active = &existing;
+	}
+	if (active == nullptr) {
+		if (dots.size() >= MaxEffectsPerMonster)
+			return 0;
+		active = &dots.emplace_back(ActiveDot { dot, 0, TickInterval, EffectDuration, {} });
 	}
 
-	if (dots.size() >= MaxEffectsPerMonster)
-		return 0;
-	dots.push_back(ActiveDot { dot, 1, definition.interval, definition.duration });
-	return 1;
+	// Pour this application in and restart the timer for the whole effect. The rhythm of the
+	// damage ticks carries on undisturbed.
+	active->stacks++;
+	active->ticksLeft = EffectDuration;
+	for (DotShare &share : active->shares) {
+		if (share.spell == spell) {
+			share.damagePerTick += damagePerTick;
+			return active->stacks;
+		}
+	}
+	active->shares.push_back(DotShare { spell, damagePerTick });
+	return active->stacks;
 }
 
 void ProcessMonsterDots()
@@ -168,7 +216,7 @@ void ProcessMonsterDots()
 			dot.ticksUntilDamage--;
 			if (dot.ticksUntilDamage > 0)
 				continue;
-			dot.ticksUntilDamage = DefinitionOf(dot.id).interval;
+			dot.ticksUntilDamage = TickInterval;
 			DealDotDamage(monster, dot);
 			if (monster.hasNoLife())
 				break;

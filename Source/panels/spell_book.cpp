@@ -244,10 +244,9 @@ void DrawAbilityRow(const Surface &out, const Player &player, SpellID sn, size_t
 	if (const StringOrView text = GetSpellPowerText(sn, level); !text.empty())
 		PrintSBookStr(out, line1, text, UiFlags::AlignRight);
 
-	// Line 3: what it does on the left, experience towards the next level on the right.
+	// Line 3: what it does. Progress towards the next level is shown by the bar underneath alone;
+	// the numbers were dropped to leave the whole line for the description.
 	PrintSBookStr(out, line2, GetAbilityDescription(sn));
-	if (const uint32_t needed = GetSpellExperienceForNextLevel(player, sn); needed > 0)
-		PrintSBookStr(out, line2, StrCat(GetSpellExperience(sn) / 64, "/", needed, " XP"), UiFlags::AlignRight);
 
 	constexpr int BarHeight = 3;
 	const int barWidth = SpellBookDescription.width - 2 * SpellBookDescriptionPaddingHorizontal;

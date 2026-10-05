@@ -43,6 +43,17 @@ const SHORT_TEXT = {
   'Wildfire': 'Burn that spreads', 'Meteor': 'Heavy hit, radius 2', 'Kindling': 'Removes fire resistance',
   'Searing Brand': 'All hits deal extra fire', 'Fan the Flames': 'Ally acts 10% faster',
 }
+// What each built power does in the game. "missile" is the game projectile that carries the cast;
+// "effect" names what lands. A power not listed here has no behaviour yet: it can be learned, and
+// casting it says "not built yet".
+//   Burn: adds to the shared Burn on the target (and on everything within the power's radius).
+//         Every damage-over-time effect ticks every 2 seconds for 20 seconds, so the power's
+//         potency, its total over that time, is spread over 10 ticks.
+const TICKS_PER_EFFECT = 10
+const BEHAVIOUR = {
+  'Smolder': { missile: 'Corruption', effect: 'Burn' },
+  'Wildfire': { missile: 'Corruption', effect: 'Burn' },
+}
 const FIRST_NUMBER = 100
 
 const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))
@@ -77,13 +88,17 @@ const row = ({ power, essence }) => {
   const element = tags.includes('Lightning') ? 'Lightning' : tags.includes('Fire') ? 'Fire' : 'Magic'
   const flags = [element, ...(tags.includes('Enemy') ? ['Targeted'] : [])].join(',')
   const mana = Math.min(250, Math.max(0, Math.round(power.manaCost ?? 0)))
+  const behaviour = BEHAVIOUR[power.name]
+  // Amounts are in 64ths of a hit point, the unit the game counts damage in.
+  const amount = behaviour?.effect === 'Burn' ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT) : 0
   return [
     power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : 'CastFire',
-    mana, flags, /* missiles: none until the power's behaviour is built */ '', 0, mana, power.icon,
+    mana, flags, behaviour?.missile ?? '', 0, mana, power.icon,
     Math.round(power.cooldown ?? 0), shortLine(power),
+    behaviour?.effect ?? '', amount, behaviour ? Math.round(power.radius ?? 0) : 0,
   ].join('\t')
 }
-const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description'].join('\t')
+const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius'].join('\t')
 const powersText = [header, ...exported.map(row)].join('\r\n') + '\r\n'
 
 // Stones. Keep every existing row exactly where it is; drop the stand-in test stone if it is
@@ -99,7 +114,7 @@ for (const { power } of exported) {
   stonesAdded.push(power.name)
 }
 
-for (const { power } of exported) console.log(String(power.number).padStart(4), power.gameKey.padEnd(16), String(power.manaCost ?? '-').padStart(3) + ' mana', String(power.cooldown ?? 0).padStart(4) + 's', ' icon ' + String(power.icon).padStart(2), ' ', shortLine(power))
+for (const { power } of exported) console.log(String(power.number).padStart(4), power.gameKey.padEnd(16), String(power.manaCost ?? '-').padStart(3) + ' mana', String(power.cooldown ?? 0).padStart(4) + 's', ' icon ' + String(power.icon).padStart(2), ' ', shortLine(power).padEnd(28), BEHAVIOUR[power.name] ? '[' + BEHAVIOUR[power.name].effect + ']' : '[not built]')
 console.log(`${exported.length} powers for ${essenceNames.join(', ')}; ${stonesAdded.length} stones added`)
 if (check) {
   console.log('Check only: nothing was written.')

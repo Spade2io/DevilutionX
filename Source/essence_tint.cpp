@@ -127,8 +127,20 @@ std::optional<EssenceTint> GetSpellTint(SpellID spell)
 	case SpellID::InfernoStrike:
 		return EssenceTint::VividRed;
 	default:
-		return std::nullopt;
+		break;
 	}
+	// A power read from essence_powers.tsv takes its colour from its element.
+	if (IsExtendedSpell(spell) && static_cast<size_t>(spell) < SpellsData.size()) {
+		switch (GetSpellData(spell).type()) {
+		case MagicType::Fire:
+			return EssenceTint::VividRed;
+		case MagicType::Lightning:
+			return EssenceTint::VividBlue;
+		default:
+			break;
+		}
+	}
+	return std::nullopt;
 }
 
 std::optional<EssenceTint> GetItemTint(const Item &item)

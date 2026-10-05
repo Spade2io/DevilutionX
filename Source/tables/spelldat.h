@@ -281,6 +281,14 @@ struct SpellData {
 	uint16_t cooldownSeconds = 0;
 	/** Essence Mod: for a power from essence_powers.tsv, the short line the spellbook shows under it. */
 	std::string description;
+	/**
+	 * Essence Mod: for a power from essence_powers.tsv, the effect it applies ("Burn"), how much,
+	 * and how far around the target it reaches. The amount's meaning depends on the effect; for a
+	 * damage-over-time effect it is damage per tick in 64ths of a hit point. Radius 0 is the target alone.
+	 */
+	std::string effect;
+	int effectAmount = 0;
+	uint8_t effectRadius = 0;
 
 	[[nodiscard]] MagicType type() const
 	{

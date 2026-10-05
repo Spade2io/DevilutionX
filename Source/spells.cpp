@@ -17,6 +17,7 @@
 #include "game_mode.hpp"
 #include "gamemenu.h"
 #include "inv.h"
+#include "cooldowns.h"
 #include "missiles.h"
 #include "spell_xp.h"
 
@@ -219,12 +220,12 @@ void CastSpell(Player &player, SpellID spl, WorldTilePosition src, WorldTilePosi
 
 	bool fizzled = false;
 	const SpellData &spellData = GetSpellData(spl);
+	SpellBeingCast = spl;
 	for (size_t i = 0; i < sizeof(spellData.sMissiles) / sizeof(spellData.sMissiles[0]) && spellData.sMissiles[i] != MissileID::Null; i++) {
 		Missile *missile = AddMissile(src, dst, dir, spellData.sMissiles[i], TARGET_MONSTERS, player, 0, spllvl);
 		fizzled |= (missile == nullptr);
-		if (missile != nullptr)
-			missile->sourceSpell = spl;
 	}
+	SpellBeingCast = SpellID::Invalid;
 	if (spl == SpellID::ChargedBolt) {
 		for (int i = (spllvl / 2) + 3; i > 0; i--) {
 			Missile *missile = AddMissile(src, dst, dir, MissileID::ChargedBolt, TARGET_MONSTERS, player, 0, spllvl);
@@ -233,6 +234,10 @@ void CastSpell(Player &player, SpellID spl, WorldTilePosition src, WorldTilePosi
 	}
 	if (!fizzled) {
 		ConsumeSpell(player, spl);
+		// Essence Mod: a power read from essence_powers.tsv goes on cooldown when it is cast.
+		// (A special attack's cooldown starts when its swing lands instead; see player.cpp.)
+		if (&player == MyPlayer && IsExtendedSpell(spl))
+			StartSpellCooldown(spl);
 	}
 }
 

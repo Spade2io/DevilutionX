@@ -3,13 +3,19 @@
  *
  * Essence Mod: damage-over-time effects on monsters.
  *
- * Every cast adds a stack and refreshes the duration, so damage builds slowly with repeated casts.
+ * An effect such as Burn is shared by every power that applies it. Think of it as a bucket of
+ * "damage per tick" on the monster: each application pours in its own amount (a higher-level power
+ * pours in more), the monster takes the whole bucket every 2 seconds, any new application restarts
+ * the 20-second timer for the whole bucket, and when the timer runs out the bucket empties. There is
+ * no limit to how full it can get. Every effect uses the same 2-second tick and 20-second duration.
  * Effects are private to this PC: they are held in memory only, never saved, and never sent to other
  * players. Only the damage they deal is reported, through the game's normal damage message.
  */
 #pragma once
 
 #include <cstdint>
+#include <optional>
+#include <string_view>
 
 #include "tables/misdat.h"
 #include "tables/spelldat.h"
@@ -38,15 +44,27 @@ void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, Dam
 
 enum class DotID : uint8_t {
 	Corruption,
-	LAST = Corruption,
+	Burn,
+	LAST = Burn,
 };
 
+/** @brief The effect with this name ("Burn", "Corruption"), if there is one. */
+std::optional<DotID> ParseDotName(std::string_view name);
+
+/** @brief The name shown to the player, e.g. "Burn". */
+std::string_view GetDotName(DotID dot);
+
+/** @brief Whether a monster shrugs the effect off entirely. */
+bool IsImmuneToDot(const Monster &monster, DotID dot);
+
 /**
- * @brief Adds one stack of an effect to a monster, refreshes its duration, and flashes the monster
- * in the spell's colour so the caster can see it landed.
- * @return The number of stacks the monster now has.
+ * @brief Adds one application of an effect to a monster, restarts the effect's timer, and flashes
+ * the monster in the effect's colour so the caster can see it landed.
+ * @param spell The power applying it. Each power earns the experience for the damage it added.
+ * @param damagePerTick What this application adds to each tick, in 64ths of a hit point.
+ * @return The number of applications the monster now has.
  */
-int AddMonsterDot(Monster &monster, DotID dot);
+int AddMonsterDot(Monster &monster, DotID dot, SpellID spell, int damagePerTick);
 
 /** @brief Runs every effect for one game tick: counts down, deals damage when due, and expires. */
 void ProcessMonsterDots();

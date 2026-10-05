@@ -385,6 +385,13 @@ void AddApocalypseBoom(Missile &missile, AddMissileParameter &parameter);
 void AddHealing(Missile &missile, AddMissileParameter &parameter);
 /** Essence Mod: lands a stack of Corruption directly on the monster under the cursor. */
 void AddCorruption(Missile &missile, AddMissileParameter &parameter);
+
+/**
+ * Essence Mod: the spell being cast while CastSpell creates its missiles. A new missile records it
+ * (see Missile::sourceSpell), so one kind of missile can serve several powers and still know which
+ * power it belongs to. Invalid at all other times.
+ */
+extern SpellID SpellBeingCast;
 /** Essence Mod: switches the caster's Flaming Weapon buff on. */
 void AddFlamingWeaponBuff(Missile &missile, AddMissileParameter &parameter);
 /** Essence Mod: switches the caster's Fire Aura on. */

@@ -834,6 +834,16 @@ Says *what a buff or debuff changes*. Every buff and debuff should carry one; no
 - Over Time: the effect itself is spread out in ticks (about every 2 seconds) for the duration:
   damage over time, healing over time. Avoid it unless the essence lists it on Most or Some, or
   Bryan calls for it.
+- **Every damage-over-time effect ticks every 2 seconds and lasts 20 seconds** (Bryan
+  2026-10-05). Shorter is too hard to keep up without better tracking. Healing over time is not
+  covered by this yet.
+- **A damage-over-time effect is shared, not owned by a power.** Burn is Burn: every Fire power
+  that burns adds to the same Burn on the monster, and any new application restarts the 20 seconds
+  for all of it. Each application adds its own amount (a higher-level power adds more), so the
+  total compounds for as long as the player keeps it up. **There is no limit to the stacks**; going
+  very high on a long boss fight is the point. Each power earns the XP for the part it added.
+  Corruption is the same kind of effect for Shadow. A power's potency for such an effect is its
+  total over the 20 seconds; similar powers should add similar amounts (1 per tick is the baseline).
 - **Buffs are Permanent by default** (Bryan 2026-10-05, replacing the earlier "most buffs are
   Timed"). Juggling several cooldown buffs, especially ones cast on other people, is a nightmare
   to manage, and an essence full of them makes it hard to avoid picking up three or four. So:
