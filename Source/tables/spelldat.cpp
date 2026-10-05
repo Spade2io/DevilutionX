@@ -225,6 +225,8 @@ void LoadExtendedSpellData()
 		reader.readInt("manaMultiplier", item.sManaAdj);
 		reader.readInt("minMana", item.sMinMana);
 		reader.readInt("icon", item.iconFrame);
+		reader.readInt("cooldown", item.cooldownSeconds);
+		reader.readString("description", item.description);
 		item.sBookLvl = 1;
 		ExtendedSpellKeys.emplace_back(std::move(key), static_cast<SpellID>(number));
 	}

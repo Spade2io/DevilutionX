@@ -2004,7 +2004,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "bonus damage on the hit, then 4 burning over 6 seconds; each strike adds another layer"
+      "potencyNote": "bonus damage on the hit, then 4 burning over 6 seconds; each strike adds another layer",
+      "number": 100,
+      "gameKey": "Ignite",
+      "icon": 22,
+      "shortText": "Strike that leaves a burn"
     },
     {
       "id": "p_ff710f66",
@@ -2028,7 +2032,11 @@
       "cooldown": 8,
       "radius": 2,
       "growth": 12.5,
-      "potencyNote": "bonus damage on the hit to each target"
+      "potencyNote": "bonus damage on the hit to each target",
+      "number": 101,
+      "gameKey": "FlameCleave",
+      "icon": 47,
+      "shortText": "Hits target and neighbours"
     },
     {
       "id": "p_a25022ac",
@@ -2055,7 +2063,11 @@
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "bonus damage on the hit; also 15 % more damage taken by the enemy"
+      "potencyNote": "bonus damage on the hit; also 15 % more damage taken by the enemy",
+      "number": 102,
+      "gameKey": "MeltArmor",
+      "icon": 30,
+      "shortText": "Target takes more damage"
     },
     {
       "id": "p_201f6790",
@@ -2079,7 +2091,11 @@
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% more damage dealt for 20 seconds"
+      "potencyNote": "% more damage dealt for 20 seconds",
+      "number": 103,
+      "gameKey": "StokeTheFlames",
+      "icon": 18,
+      "shortText": "+30% damage for 20s"
     },
     {
       "id": "p_730905cd",
@@ -2102,7 +2118,11 @@
       "cooldown": 900,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% of life you rise with"
+      "potencyNote": "% of life you rise with",
+      "number": 104,
+      "gameKey": "Phoenix",
+      "icon": 40,
+      "shortText": "Rise again on death"
     },
     {
       "id": "p_6de213df",
@@ -2126,7 +2146,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "damage in total over 8 seconds"
+      "potencyNote": "damage in total over 8 seconds",
+      "number": 105,
+      "gameKey": "Smolder",
+      "icon": 32,
+      "shortText": "Stacking burn from range"
     },
     {
       "id": "p_8b8dbc48",
@@ -2150,7 +2174,11 @@
       "cooldown": 10,
       "radius": 2,
       "growth": 12.5,
-      "potencyNote": "damage in total over 8 seconds to each target"
+      "potencyNote": "damage in total over 8 seconds to each target",
+      "number": 106,
+      "gameKey": "Wildfire",
+      "icon": 46,
+      "shortText": "Burn that spreads"
     },
     {
       "id": "p_cadeabe9",
@@ -2174,7 +2202,11 @@
       "cooldown": 45,
       "radius": 2,
       "growth": 12.5,
-      "potencyNote": "damage to each target"
+      "potencyNote": "damage to each target",
+      "number": 107,
+      "gameKey": "Meteor",
+      "icon": 24,
+      "shortText": "Heavy hit, radius 2"
     },
     {
       "id": "p_09e61983",
@@ -2198,7 +2230,11 @@
       "cooldown": 60,
       "radius": 2,
       "growth": 12.5,
-      "potencyNote": "removes fire resistance and fire immunity"
+      "potencyNote": "removes fire resistance and fire immunity",
+      "number": 108,
+      "gameKey": "Kindling",
+      "icon": 37,
+      "shortText": "Removes fire resistance"
     },
     {
       "id": "p_4922e8a6",
@@ -2225,7 +2261,11 @@
       "cooldown": 12,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "bonus damage on the hit; from then on every hit on that enemy deals 2 extra fire damage"
+      "potencyNote": "bonus damage on the hit; from then on every hit on that enemy deals 2 extra fire damage",
+      "number": 109,
+      "gameKey": "SearingBrand",
+      "icon": 31,
+      "shortText": "All hits deal extra fire"
     },
     {
       "id": "p_4af4aa27",
@@ -2249,7 +2289,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% faster attacks and casting, lasting"
+      "potencyNote": "% faster attacks and casting, lasting",
+      "number": 110,
+      "gameKey": "FanTheFlames",
+      "icon": 33,
+      "shortText": "Ally acts 10% faster"
     },
     {
       "id": "p_e00dcee8",

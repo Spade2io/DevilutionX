@@ -14,6 +14,7 @@
 #include "engine/point.hpp"
 #include "panels/spell_icons.hpp"
 #include "player.h"
+#include "spells.h"
 
 namespace devilution {
 
@@ -47,8 +48,12 @@ int GetSpellCooldownTicks(SpellID spell)
 	case SpellID::InfernoStrike:
 		return 12 * TicksPerSecond;
 	default:
-		return 0;
+		break;
 	}
+	// A power read from essence_powers.tsv carries its cooldown in its own row.
+	if (IsExtendedSpell(spell) && IsValidSpell(spell))
+		return GetSpellData(spell).cooldownSeconds * TicksPerSecond;
+	return 0;
 }
 
 void StartSpellCooldown(SpellID spell)

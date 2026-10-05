@@ -177,4 +177,14 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Inferno Strike	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	InfernoStrike	true	1
 	0	Misc	Unequippable	ESSENCE	Misc	NONE	Fire Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Firebolt	true	1
 	0	Misc	Unequippable	ESSENCE	Misc	NONE	Lightning Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Lightning	true	1
-	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Test Bolt	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	TestBolt	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Ignite	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Ignite	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Flame Cleave	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	FlameCleave	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Melt Armor	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	MeltArmor	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Stoke the Flames	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	StokeTheFlames	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Phoenix	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Phoenix	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Smolder	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Smolder	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Wildfire	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Wildfire	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Meteor	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Meteor	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Kindling	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Kindling	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Searing Brand	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	SearingBrand	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Fan the Flames	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	FanTheFlames	true	1

@@ -49,6 +49,7 @@
 #include "objects.h"
 #include "options.h"
 #include "player.h"
+#include "plrmsg.h"
 #include "qol/autopickup.h"
 #include "qol/stash.h"
 #include "dots.h"
@@ -3245,6 +3246,16 @@ void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 
 		if (GetMainPanel().contains(MousePosition)) // inside main panel
 			return;
+	}
+
+	// Essence Mod: a power read from essence_powers.tsv with no behaviour yet. It can be learned
+	// and readied, but casting it only says so, and costs nothing.
+	if (IsExtendedSpell(spellID) && GetSpellData(spellID).sMissiles[0] == MissileID::Null) {
+		EventPlrMsg(StrCat(GetSpellData(spellID).sNameText, " is not built yet"), UiFlags::ColorWhite);
+		return;
+	}
+
+	if (ControlMode == ControlTypes::KeyboardAndMouse) {
 
 		if (
 		    (IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition))      // inside left panel

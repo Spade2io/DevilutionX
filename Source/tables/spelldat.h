@@ -277,6 +277,10 @@ struct SpellData {
 	std::string essence;
 	/** Essence Mod: for a power from essence_powers.tsv, its picture in the spell icon sheet. */
 	uint8_t iconFrame = 0;
+	/** Essence Mod: for a power from essence_powers.tsv, its cooldown in seconds. Zero means none. */
+	uint16_t cooldownSeconds = 0;
+	/** Essence Mod: for a power from essence_powers.tsv, the short line the spellbook shows under it. */
+	std::string description;
 
 	[[nodiscard]] MagicType type() const
 	{

@@ -171,8 +171,12 @@ std::string_view GetAbilityDescription(SpellID spell)
 	case SpellID::Nova:
 		return "Ring of lightning";
 	default:
-		return "";
+		break;
 	}
+	// A power read from essence_powers.tsv carries its short line in its own row.
+	if (IsExtendedSpell(spell) && IsValidSpell(spell))
+		return GetSpellData(spell).description;
+	return "";
 }
 
 /** A page that has nothing on it yet: a title and a note. */
