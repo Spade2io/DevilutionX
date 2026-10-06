@@ -117,3 +117,4 @@ FireAuraPulse	AddAuraPulseVisual	ProcessAuraPulseVisual			FlashBottom	Physical
 FireAuraPulseBack	AddAuraPulseVisual	ProcessAuraPulseVisual			FlashTop	Physical	
 FlamingWeaponBuff	AddFlamingWeaponBuff					Physical,Invisible	
 HealingZone	AddHealingZone	ProcessHealingZone				Physical,Invisible	
+PowerBolt	AddFirebolt	ProcessGenericProjectile	SpellFirebolt	SpellFireHit	Fireball	Magic	Blockable

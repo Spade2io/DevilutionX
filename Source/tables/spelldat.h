@@ -250,8 +250,9 @@ enum class MissileID : int8_t {
 	FireAuraPulseBack,
 	FlamingWeaponBuff,
 	HealingZone,
+	PowerBolt,
 
-	LAST = HealingZone,
+	LAST = PowerBolt,
 	Null = -1,
 	// clang-format on
 };

@@ -356,7 +356,8 @@ void DrawMissilePrivate(const Surface &out, const Missile &missile, Point target
 		ClxDrawTRN(out, missileRenderPosition + Displacement { 0, FeetOffset }, sprite, GetEssenceTintTrn(GetSpellTint(missile.sourceSpell).value_or(EssenceTint::VividRed)));
 	} else if (IsAnyOf(missile._mitype, MissileID::Frostbolt, MissileID::FrostboltExplosion)) {
 		// Essence Mod: Frostbolt reuses Firebolt's art, drawn through a blue tint.
-		ClxDrawTRN(out, missileRenderPosition, sprite, GetEssenceTintTrn(EssenceTint::VividBlue));
+		// The burst left by a data-file power's bolt is the same art, in that power's colour.
+		ClxDrawTRN(out, missileRenderPosition, sprite, GetEssenceTintTrn(GetSpellTint(missile.sourceSpell).value_or(EssenceTint::VividBlue)));
 	} else if (IsAnyOf(missile._mitype, MissileID::Corruption, MissileID::CorruptionExplosion)) {
 		// Essence Mod: this burst reuses Firebolt's art, drawn in the colour of the power that made it.
 		// Corruption itself is shadow.

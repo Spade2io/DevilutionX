@@ -342,11 +342,20 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 		dam = ApplyDamageBuffs(player, dam); // Essence Mod
 		if (&player == MyPlayer)
 			dam = ApplyMonsterVulnerability(monster, dam);
+		dam = ApplyAuraCurses(monster, damageType, dam);
 
 		if (&player == MyPlayer) {
 			// The spell that was cast earns the experience; without one, go by the kind of projectile.
 			AddSpellExperienceForDamage(player, monster, sourceSpell != SpellID::Invalid ? sourceSpell : GetSpellForMissile(t), dam, monster.hitPoints);
 			ApplyMonsterDamage(damageType, monster, dam);
+			// Essence Mod: a data-file power's projectile leaves behind the effect over time its rider names.
+			if (IsExtendedSpell(sourceSpell) && IsValidSpell(sourceSpell) && !monster.hasNoLife()) {
+				const SpellData &spellData = GetSpellData(sourceSpell);
+				if (const std::optional<DotID> left = ParseDotName(spellData.rider); left && !IsImmuneToDot(monster, *left)) {
+					const int stacks = AddMonsterDot(monster, *left, sourceSpell, ScaleDamageForSpellLevel(spellData.riderAmount, std::max<int>(player.GetBaseSpellLevel(sourceSpell), 1)));
+					AddFloatingNumber(monster.position.tile, { 0, 0 }, StrCat(GetDotName(*left), " x", stacks), GetSpellTextColor(sourceSpell) | UiFlags::FontSize12, 1000 + static_cast<int>(monster.getId()));
+				}
+			}
 		}
 	}
 	if (&player == MyPlayer)
@@ -1132,6 +1141,9 @@ bool PlayerMHit(Player &player, Monster *monster, int dist, int mind, int maxd, 
 	if (currlevel == 16)
 		minhit = 30;
 	hper = std::max(hper, minhit);
+	// Essence Mod: a blinded monster's shots miss more often too.
+	if (monster != nullptr)
+		hper = std::max(hper - GetMonsterAccuracyPenalty(*monster), 0);
 
 	int blk = 100;
 	if ((player._pmode == PM_STAND || player._pmode == PM_ATTACK) && player._pBlockFlag) {
@@ -1903,6 +1915,11 @@ void AddFirebolt(Missile &missile, AddMissileParameter &parameter)
 	missile.var1 = missile.position.start.x;
 	missile.var2 = missile.position.start.y;
 	missile._mlid = AddLight(missile.position.start, 8);
+	// Essence Mod: a bolt thrown by a power read from essence_powers.tsv deals that power's amount.
+	if (missile._mitype == MissileID::PowerBolt && IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && missile.sourceType() == MissileSource::Player) {
+		const Player &caster = *missile.sourcePlayer();
+		missile._midam = std::max(ScaleDamageForSpellLevel(GetSpellData(missile.sourceSpell).effectAmount, std::max<int>(caster.GetBaseSpellLevel(missile.sourceSpell), 1)) >> 6, 1);
+	}
 	if (missile._midam == 0) {
 		switch (missile.sourceType()) {
 		case MissileSource::Player: {
@@ -2510,6 +2527,9 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 
 	// "GroundBurst" is the exception: it lands on the spot chosen, whether or not anything is there.
 	const bool isGround = IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && GetSpellData(missile.sourceSpell).effect == "GroundBurst";
+	// "Cone" needs no target either: it spreads out from the caster towards the spot chosen.
+	const bool isCone = IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && GetSpellData(missile.sourceSpell).effect == "Cone";
+	const bool isChain = IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && GetSpellData(missile.sourceSpell).effect == "Chain";
 
 	const std::optional<Point> targetMonsterPosition = FindClosestValidPosition(
 	    [](Point target) {
@@ -2523,11 +2543,12 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	    },
 	    parameter.dst, 0, 2);
 
-	if (!isGround && !targetMonsterPosition) {
+	if (!isGround && !isCone && !targetMonsterPosition) {
 		parameter.spellFizzled = true;
 		return;
 	}
-	const Point centre = isGround ? Point { parameter.dst.x, parameter.dst.y } : *targetMonsterPosition;
+	const Point casterTile = Players[missile._misource].position.tile;
+	const Point centre = isGround ? Point { parameter.dst.x, parameter.dst.y } : isCone ? casterTile : *targetMonsterPosition;
 
 	const Player &player = Players[missile._misource];
 	missile.position.tile = centre;
@@ -2544,6 +2565,7 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	bool isBurst = false;
 	bool isKindle = false;
 	bool isFreeze = false;
+	bool isCurse = false;
 	DamageType burstDamageType = DamageType::Fire;
 	MissileID burstImmunityMissile = MissileID::Firebolt;
 	int amount = 1 * 64;
@@ -2573,6 +2595,11 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 			isKindle = true;
 		} else if (spellData.effect == "Freeze") {
 			isFreeze = true;
+		} else if (spellData.effect == "Curse") {
+			isCurse = true;
+		} else if (const std::optional<DotID> shaped = ParseDotName(spellData.rider); (isCone || isChain) && shaped) {
+			// A cone or a chain lays down the effect over time its rider names.
+			dot = *shaped;
 		} else if (const std::optional<DotID> named = ParseDotName(spellData.effect); named) {
 			dot = *named;
 		} else {
@@ -2619,6 +2646,58 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 		}
 	}
 
+	const auto canBeTargeted = [](const Monster &candidate) {
+		return candidate.isPossibleToHit() && !candidate.isPlayerMinion();
+	};
+	if (isCone) {
+		// Everything within reach of the caster that lies the way they aimed, or one step of the
+		// compass to either side of it.
+		constexpr int ConeReach = 6;
+		const Direction aim = GetDirection(casterTile, parameter.dst);
+		targets.clear();
+		for (size_t i = 0; i < ActiveMonsterCount; i++) {
+			const int monsterId = static_cast<int>(ActiveMonsters[i]);
+			const Monster &candidate = Monsters[monsterId];
+			if (!canBeTargeted(candidate) || candidate.position.tile.WalkingDistance(casterTile) > ConeReach || candidate.position.tile == casterTile)
+				continue;
+			const Direction towards = GetDirection(casterTile, candidate.position.tile);
+			if (towards == aim || towards == Left(aim) || towards == Right(aim))
+				targets.push_back(monsterId);
+		}
+		// The wind is seen even when it catches nothing.
+		AddMissile(casterTile + aim + aim, { 0, 0 }, Direction::South, MissileID::CorruptionExplosion, missile._micaster, missile._misource, 0, 0, &missile);
+	}
+	if (isChain && !targets.empty()) {
+		// From the first monster it leaps to the nearest other one within reach, and again. Two
+		// leaps, and one more for every two levels of the power.
+		constexpr int LeapReach = 5;
+		targets.resize(1);
+		const int leaps = 2 + player.GetBaseSpellLevel(spell) / 2;
+		for (int leap = 0; leap < leaps; leap++) {
+			const Point from = Monsters[targets.back()].position.tile;
+			int next = -1;
+			for (size_t i = 0; i < ActiveMonsterCount; i++) {
+				const int monsterId = static_cast<int>(ActiveMonsters[i]);
+				const Monster &candidate = Monsters[monsterId];
+				if (!canBeTargeted(candidate) || std::find(targets.begin(), targets.end(), monsterId) != targets.end())
+					continue;
+				const int distance = candidate.position.tile.WalkingDistance(from);
+				if (distance <= LeapReach && (next == -1 || distance < Monsters[next].position.tile.WalkingDistance(from)))
+					next = monsterId;
+			}
+			if (next == -1)
+				break;
+			targets.push_back(next);
+		}
+	}
+	// What a chain leaves shrinks by a quarter with each leap.
+	int chainAmount = amount;
+	bool landedOnAny = false;
+	const SpellData *extended = IsExtendedSpell(spell) && IsValidSpell(spell) ? &GetSpellData(spell) : nullptr;
+	const auto scaled = [&](int base) {
+		return ScaleDamageForSpellLevel(base, std::max<int>(player.GetBaseSpellLevel(spell), 1));
+	};
+
 	for (const int monsterId : targets) {
 		Monster &monster = Monsters[monsterId];
 
@@ -2647,6 +2726,11 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 
 		// A separate id from the damage numbers, so the game does not merge the two.
 		const int textId = 1000 + monsterId;
+		if (isCurse) {
+			// A curse on the monster itself. Every PC has to know of it, so they are all told.
+			NetSendCmdPowerOnMonster(static_cast<uint16_t>(monsterId), spell, static_cast<uint32_t>(amount));
+			continue;
+		}
 		if (isKindle) {
 			// "Kindle": strip its resistance and immunity to fire until it dies. Nothing resists this.
 			const bool hadAny = KindleMonster(monster);
@@ -2660,11 +2744,31 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 		if (isBurst) {
 			// Resistance, experience, the damage number and the kill are all handled as for any spell damage.
 			DealSpellTickDamage(monster, spell, burstImmunityMissile, burstDamageType, amount);
+			landedOnAny = true;
+			// A rider that names an effect over time leaves it behind on whatever survives the hit.
+			if (const std::optional<DotID> left = extended != nullptr ? ParseDotName(extended->rider) : std::nullopt; left && !monster.hasNoLife() && !IsImmuneToDot(monster, *left)) {
+				const int stacks = AddMonsterDot(monster, *left, spell, scaled(extended->riderAmount));
+				AddFloatingNumber(monster.position.tile, { 0, 0 }, StrCat(GetDotName(*left), " x", stacks), GetSpellTextColor(spell) | UiFlags::FontSize12, textId);
+			}
 			continue;
 		}
-		const int stacks = AddMonsterDot(monster, dot, spell, amount);
+		const int stacks = AddMonsterDot(monster, dot, spell, isChain ? chainAmount : amount);
+		chainAmount = chainAmount * 3 / 4;
+		landedOnAny = true;
 		AddFloatingNumber(monster.position.tile, { 0, 0 }, StrCat(GetDotName(dot), " x", stacks), textColor | UiFlags::FontSize12, textId);
+		if (extended == nullptr)
+			continue;
+		// Riders on an effect over time. "Accuracy": the monster also misses more often, which
+		// every PC must know. "Wither": every effect over time on it deals more from now on.
+		if (extended->rider == "Accuracy")
+			NetSendCmdPowerOnMonster(static_cast<uint16_t>(monsterId), spell, static_cast<uint32_t>(extended->riderAmount));
+		if (extended->rider == "Wither")
+			WitherMonster(monster, extended->riderAmount);
 	}
+
+	// The rider "Leech": if it took hold of anything, the caster draws life back over time.
+	if (&player == MyPlayer && landedOnAny && extended != nullptr && extended->rider == "Leech")
+		NetSendCmdPowerOnPlayer(player, spell, static_cast<uint32_t>(scaled(extended->riderAmount)));
 }
 
 void AddFireAuraBuff(Missile &missile, AddMissileParameter & /*parameter*/)
@@ -3395,7 +3499,9 @@ void ProcessGenericProjectile(Missile &missile)
 {
 	missile.duration--;
 
-	MoveMissileAndCheckMissileCol(missile, GetMissileData(missile._mitype).damageType(), missile._midam, missile._midam, true, true);
+	// Essence Mod: a data-file power's bolt deals that power's kind of damage.
+	const DamageType boltDamageType = missile._mitype == MissileID::PowerBolt && IsValidSpell(missile.sourceSpell) ? GetSpellDamageType(missile.sourceSpell) : GetMissileData(missile._mitype).damageType();
+	MoveMissileAndCheckMissileCol(missile, boltDamageType, missile._midam, missile._midam, true, true);
 	if (missile.duration == 0) {
 		missile._miDelFlag = true;
 		const Point dst = { 0, 0 };
@@ -3406,6 +3512,7 @@ void ProcessGenericProjectile(Missile &missile)
 			AddMissile(missile.position.tile, dst, dir, MissileID::MagmaBallExplosion, missile._micaster, missile._misource, 0, 0, &missile);
 			break;
 		case MissileID::Frostbolt:
+		case MissileID::PowerBolt:
 			AddMissile(missile.position.tile, dst, dir, MissileID::FrostboltExplosion, missile._micaster, missile._misource, 0, 0, &missile);
 			break;
 		case MissileID::BloodStar:

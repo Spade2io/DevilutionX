@@ -222,6 +222,14 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 	if (spellData.rider == "ShieldPerHit")
 		NetSendCmdPowerOnPlayer(player, attack, static_cast<uint32_t>(monstersStruck * ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack))));
 
+	// "Rupture": the hit deals extra damage for the Corruption still ticking on the target. The
+	// rider's amount is the share of it, as a percentage. The Corruption is not used up.
+	if (spellData.rider == "Rupture" && !target.hasNoLife()) {
+		const int extra = static_cast<int>(static_cast<int64_t>(GetMonsterDotRemaining(target, DotID::Corruption)) * spellData.riderAmount / 100);
+		if (extra > 0)
+			DealSpellTickDamage(target, attack, MissileID::WeaponExplosion, damageType, extra);
+	}
+
 	// "Bane": the hit deals more to the undead and to demons. The rider's amount is the percentage.
 	if (spellData.rider == "Bane" && !target.hasNoLife() && IsAnyOf(target.data().monsterClass, MonsterClass::Undead, MonsterClass::Demon)) {
 		const int extra = static_cast<int>(static_cast<int64_t>(damage) * spellData.riderAmount / 100);

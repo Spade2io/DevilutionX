@@ -58,6 +58,8 @@ std::string_view GetEssenceName(EssenceID essence)
 		return "Nature";
 	case EssenceID::Shield:
 		return "Shield";
+	case EssenceID::Dark:
+		return "Dark";
 	case EssenceID::None:
 		break;
 	}
@@ -87,6 +89,8 @@ EssenceID GetSpellEssence(SpellID spell)
 		return EssenceID::Water;
 	case SpellID::HolyBolt:
 		return EssenceID::Holy;
+	case SpellID::Corruption:
+		return EssenceID::Dark;
 	default:
 		break;
 	}

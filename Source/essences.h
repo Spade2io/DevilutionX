@@ -27,7 +27,8 @@ enum class EssenceID : uint8_t {
 	Holy,
 	Nature,
 	Shield,
-	LAST = Shield,
+	Dark,
+	LAST = Dark,
 };
 
 /** Essence tabs in the spellbook: tabs 2, 3 and 4. */

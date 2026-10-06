@@ -271,3 +271,23 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Brace	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Brace	true	1
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Unbreakable	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Unbreakable	true	1
 	0	Misc	Unequippable	ESSENCE	Misc	NONE	Shield Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Barrier	true	1
+	0	Misc	Unequippable	ESSENCE	Misc	NONE	Dark Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Corruption	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Pall of Shadow	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	PallOfShadow	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Creeping Rot	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	CreepingRot	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Shadow Bolt	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ShadowBolt	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Blight	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Blight	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Plague Wind	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	PlagueWind	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Contagion	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Contagion	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Drain	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Drain	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Black Sun	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	BlackSun	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Umbral Strike	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	UmbralStrike	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Night Blade	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	NightBlade	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Rupture	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Rupture	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Blind	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Blind	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Murk	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Murk	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Night Terrors	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	NightTerrors	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Wither	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Wither	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Soul Rend	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	SoulRend	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Cloak of Night	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	CloakOfNight	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Malice	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Malice	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Night's Edge	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	NightsEdge	true	1

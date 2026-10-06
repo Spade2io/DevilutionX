@@ -52,7 +52,7 @@ const FIXED = {
   "Shadow Bolt": { potency: 3, note: "damage at once, then 4 Corruption over 20 seconds", mana: 6 },
   "Blight": { potency: 7, note: "Corruption in total over 20 seconds to each target", mana: 9 },
   "Plague Wind": { potency: 10, note: "Corruption in total over 20 seconds to each target", mana: 9, cooldown: 10 },
-  "Contagion": { potency: 24, note: "Corruption over 20 seconds on the first target, a quarter less with each leap", mana: 14, cooldown: 30 },
+  "Contagion": { potency: 24, note: "Corruption over 20 seconds on the first target, a quarter less with each leap", mana: 22 },
   "Drain": { potency: 5, note: "Corruption in total over 20 seconds; heals you for 5 over the same time", mana: 4 },
   "Black Sun": { potency: 24, note: "damage at once to each target, then 40 Corruption over 20 seconds", mana: 36, cooldown: 180 },
   "Umbral Strike": { potency: 3, note: "bonus damage on the hit, then 4 Corruption over 20 seconds", mana: 2 },

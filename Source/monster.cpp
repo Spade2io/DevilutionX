@@ -1217,6 +1217,8 @@ void MonsterAttackPlayer(Monster &monster, Player &player, int hit, int minDam, 
 	}
 	int blk = player.GetBlockChance() - (monster.level(sgGameInitInfo.nDifficulty) * 2);
 	blk = std::clamp(blk, 0, 100);
+	// Essence Mod: a blinded monster misses more often. This comes off after the usual minimum.
+	hit = std::max(hit - GetMonsterAccuracyPenalty(monster), 0);
 	if (hper >= hit)
 		return;
 	if (blkper < blk) {
@@ -4958,6 +4960,8 @@ bool Monster::isImmune(MissileID missileType, DamageType missileElement) const
 	if (missileElement == DamageType::Fire && IsMonsterKindled(*this)) // Essence Mod
 		return false;
 	missileElement = GetResistanceCategory(missileElement); // Essence Mod: many damage types, three resistances
+	if (missileElement == DamageType::Magic && IsMonsterAstralStripped(*this)) // Essence Mod
+		return false;
 	if (((resistance & IMMUNE_MAGIC) != 0 && missileElement == DamageType::Magic)
 	    || ((resistance & IMMUNE_FIRE) != 0 && missileElement == DamageType::Fire)
 	    || ((resistance & IMMUNE_LIGHTNING) != 0 && missileElement == DamageType::Lightning)
@@ -4972,6 +4976,8 @@ bool Monster::isResistant(MissileID missileType, DamageType missileElement) cons
 	if (missileElement == DamageType::Fire && IsMonsterKindled(*this)) // Essence Mod
 		return false;
 	missileElement = GetResistanceCategory(missileElement); // Essence Mod: many damage types, three resistances
+	if (missileElement == DamageType::Magic && IsMonsterAstralStripped(*this)) // Essence Mod
+		return false;
 	if (((resistance & RESIST_MAGIC) != 0 && missileElement == DamageType::Magic)
 	    || ((resistance & RESIST_FIRE) != 0 && missileElement == DamageType::Fire)
 	    || ((resistance & RESIST_LIGHTNING) != 0 && missileElement == DamageType::Lightning))

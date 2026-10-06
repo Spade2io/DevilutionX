@@ -97,6 +97,22 @@ struct Brand {
 /** The brand on each monster. Lasts until the monster dies. */
 std::array<Brand, MaxMonsters> MonsterBrands {};
 
+struct AccuracyPenalty {
+	/** Percentage points off the monster's chance to hit. Zero means none. */
+	int percent = 0;
+	/** Game ticks left, or -1 for as long as the monster lives. */
+	int ticksLeft = 0;
+};
+
+/** How much worse each monster's aim is. Every PC keeps its own copy, told by the caster's. */
+std::array<AccuracyPenalty, MaxMonsters> MonsterAccuracy {};
+
+/** Monsters whose Astral resistance and immunity have been stripped. Every PC keeps this too. */
+std::array<bool, MaxMonsters> MonsterAstralStripped {};
+
+/** How much more each monster takes from effects over time, in percent. This PC only. */
+std::array<int, MaxMonsters> MonsterWither {};
+
 void FlashMonster(const Monster &monster, EssenceTint tint)
 {
 	Pulse &pulse = MonsterPulses[monster.getId()];
@@ -108,8 +124,11 @@ void DealDotDamage(Monster &monster, const ActiveDot &dot)
 {
 	const DotDefinition &definition = DefinitionOf(dot.id);
 	// Each power deals the part it added, so each is credited with its own experience.
+	// A withered monster takes more from every tick, and the caster's own "DotDamage" buffs add
+	// to each tick they cause.
+	const int morePercent = MonsterWither[monster.getId()] + (MyPlayer != nullptr ? GetPowerBuffPercent(*MyPlayer, "DotDamage") : 0);
 	for (const DotShare &share : dot.shares) {
-		DealSpellTickDamage(monster, share.spell, definition.missile, definition.damageType, share.damagePerTick);
+		DealSpellTickDamage(monster, share.spell, definition.missile, definition.damageType, share.damagePerTick + static_cast<int>(static_cast<int64_t>(share.damagePerTick) * morePercent / 100));
 		if (monster.hasNoLife())
 			break;
 	}
@@ -138,6 +157,7 @@ void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, Dam
 
 	const Player &player = *MyPlayer;
 	damage = ApplyMonsterVulnerability(monster, ApplyDamageBuffs(player, damage));
+	damage = ApplyAuraCurses(monster, damageType, damage);
 	AddSpellExperienceForDamage(player, monster, spell, damage, monster.hitPoints);
 	ApplyMonsterDamage(damageType, monster, damage);
 	if (monster.hasNoLife()) {
@@ -248,6 +268,52 @@ void TriggerMonsterBrand(Monster &monster)
 	DealSpellTickDamage(monster, brand.spell, MissileID::WeaponExplosion, DamageType::Fire, brand.damage, /*finishKill=*/false);
 }
 
+void SetMonsterAccuracyPenalty(Monster &monster, int percent, int ticks)
+{
+	FlashMonster(monster, EssenceTint::Shadow);
+	AccuracyPenalty &penalty = MonsterAccuracy[monster.getId()];
+	// A weaker curse does not replace a stronger one that is still running.
+	if (percent < penalty.percent && penalty.ticksLeft != 0)
+		return;
+	penalty = AccuracyPenalty { percent, ticks };
+}
+
+int GetMonsterAccuracyPenalty(const Monster &monster)
+{
+	const AccuracyPenalty &penalty = MonsterAccuracy[monster.getId()];
+	return penalty.ticksLeft != 0 ? penalty.percent : 0;
+}
+
+void StripMonsterAstralResistance(Monster &monster)
+{
+	FlashMonster(monster, EssenceTint::Shadow);
+	MonsterAstralStripped[monster.getId()] = true;
+}
+
+bool IsMonsterAstralStripped(const Monster &monster)
+{
+	return MonsterAstralStripped[monster.getId()];
+}
+
+void WitherMonster(Monster &monster, int percent)
+{
+	FlashMonster(monster, EssenceTint::Shadow);
+	MonsterWither[monster.getId()] = std::max(MonsterWither[monster.getId()], percent);
+}
+
+int GetMonsterDotRemaining(const Monster &monster, DotID dot)
+{
+	for (const ActiveDot &active : MonsterDots[monster.getId()]) {
+		if (active.id != dot)
+			continue;
+		int perTick = 0;
+		for (const DotShare &share : active.shares)
+			perTick += share.damagePerTick;
+		return perTick * std::max(active.ticksLeft / TickInterval, 0);
+	}
+	return 0;
+}
+
 int ApplyMonsterVulnerability(const Monster &monster, int damage)
 {
 	const int percent = MonsterVulnerability[monster.getId()];
@@ -272,6 +338,14 @@ void ProcessMonsterDots()
 			MonsterKindled[i] = false;
 			MonsterBrands[i] = {};
 		}
+		if ((MonsterAccuracy[i].ticksLeft != 0 || MonsterAstralStripped[i] || MonsterWither[i] != 0) && Monsters[i].hasNoLife()) {
+			MonsterAccuracy[i] = {};
+			MonsterAstralStripped[i] = false;
+			MonsterWither[i] = 0;
+		}
+		// A timed curse on a monster's aim runs out.
+		if (MonsterAccuracy[i].ticksLeft > 0 && --MonsterAccuracy[i].ticksLeft == 0)
+			MonsterAccuracy[i] = {};
 
 		std::vector<ActiveDot> &dots = MonsterDots[i];
 		if (dots.empty())
@@ -310,6 +384,9 @@ void ClearAllMonsterDots()
 	MonsterVulnerability.fill(0);
 	MonsterKindled.fill(false);
 	MonsterBrands.fill(Brand {});
+	MonsterAccuracy.fill(AccuracyPenalty {});
+	MonsterAstralStripped.fill(false);
+	MonsterWither.fill(0);
 }
 
 const uint8_t *GetMonsterDotPulseTrn(const Monster &monster)

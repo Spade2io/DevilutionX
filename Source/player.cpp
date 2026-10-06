@@ -694,6 +694,16 @@ bool PlrHitMonst(Player &player, Monster &monster, bool adjacentDamage = false)
 #endif
 		// Essence Mod: the Flaming Weapon buff adds its own fire damage to every hit that lands.
 		// The monster's death, if any, is started further down as for any hit.
+		// Essence Mod: a buff with the stat "WeaponDot" makes every hit that lands leave an effect
+		// over time, the one its rider names.
+		{
+			SpellID dotSpell = SpellID::Invalid;
+			int dotAmount = 0;
+			if (&player == MyPlayer && GetPowerBuffWithStat(player, "WeaponDot", dotSpell, dotAmount)) {
+				if (const std::optional<DotID> dot = ParseDotName(GetSpellData(dotSpell).rider); dot && !monster.hasNoLife() && !IsImmuneToDot(monster, *dot))
+					AddMonsterDot(monster, *dot, dotSpell, dotAmount);
+			}
+		}
 		if (const int flamingWeaponDamage = GetFlamingWeaponDamage(player); flamingWeaponDamage > 0) {
 			DealSpellTickDamage(monster, SpellID::FlamingWeapon, MissileID::WeaponExplosion, DamageType::Fire, flamingWeaponDamage, /*finishKill=*/false);
 			AddMissile(monster.position.tile, { 1, 0 }, Direction::South, MissileID::WeaponExplosion, TARGET_MONSTERS, player, 0, 0);

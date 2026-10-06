@@ -432,6 +432,36 @@ void PulseShieldAuras()
 		AddFloatingNumber(MyPlayer->position.tile, { 0, 0 }, StrCat("Shield ", std::max((AuraShieldLeft + 32) >> 6, 1)), UiFlags::ColorGold | UiFlags::FontSize12, 3000 + MyPlayer->getId());
 }
 
+int ApplyAuraCurses(const Monster &monster, DamageType damageType, int damage)
+{
+	if (GetResistanceCategory(damageType) != DamageType::Magic || damage <= 0)
+		return damage;
+	int percent = 0;
+	for (const Player &owner : Players) {
+		if (!owner.plractive || !owner.isOnActiveLevel() || owner.hasNoLife())
+			continue;
+		for (const PowerBuff &buff : PowerBuffs[owner.getId()]) {
+			const SpellData &spellData = GetSpellData(buff.spell);
+			// The same aura from two players does not double: the strongest counts.
+			if (spellData.effect == "Aura" && spellData.buffStat == "AstralCurse" && owner.position.tile.WalkingDistance(monster.position.tile) <= spellData.effectRadius)
+				percent = std::max(percent, buff.amount);
+		}
+	}
+	return damage + static_cast<int>(static_cast<int64_t>(damage) * percent / 100);
+}
+
+bool GetPowerBuffWithStat(const Player &player, std::string_view stat, SpellID &spell, int &amount)
+{
+	for (const PowerBuff &buff : PowerBuffs[player.getId()]) {
+		if (GetSpellData(buff.spell).buffStat != stat)
+			continue;
+		spell = buff.spell;
+		amount = buff.amount;
+		return true;
+	}
+	return false;
+}
+
 int ApplyDamageBuffs(const Player &player, int damage)
 {
 	const int percent = GetPowerBuffPercent(player, "Damage");

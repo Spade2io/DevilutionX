@@ -88,3 +88,22 @@ Oathbound	185	Oathbound	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0
 Stalwart	186	Stalwart	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	31	0	Monsters prefer you	Buff	50	0		0	Distance	0	0	
 Brace	187	Brace	Shield	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	30	60	+30 armor and resist, 20s	Buff	30	0	Resist	30	Armor	20	0	
 Unbreakable	188	Unbreakable	Shield	CastHealing	40	Magic,AllowedInTown	StrengthBuff	0	40	34	180	All allies: half damage 12s	Buff	50	99		0	DamageTaken	12	0	
+PallOfShadow	189	Pall of Shadow	Dark	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: foes resist less	Aura	10	8		0	AstralCurse	0	0	
+CreepingRot	190	Creeping Rot	Dark	CastFire	4	Magic,Targeted	Corruption	0	4	32	0	Cheap Corruption	Corruption	58	0		0		0	0	
+ShadowBolt	191	Shadow Bolt	Dark	CastFire	6	Magic,Targeted	PowerBolt	0	6	35	0	Hit that leaves Corruption	Bolt	192	0	Corruption	26		0	0	
+Blight	192	Blight	Dark	CastFire	9	Magic,Targeted	Corruption	0	9	46	0	Corruption, radius 2	Corruption	45	2		0		0	0	
+PlagueWind	193	Plague Wind	Dark	CastFire	9	Magic	Corruption	0	9	13	10	Corruption in a cone	Cone	64	0	Corruption	0		0	0	
+Contagion	194	Contagion	Dark	CastFire	22	Magic,Targeted	Corruption	0	22	15	0	Corruption that leaps	Chain	154	0	Corruption	0		0	0	
+Drain	195	Drain	Dark	CastFire	4	Magic,Targeted	Corruption	0	4	29	0	Corruption that heals you	Corruption	32	0	Leech	32	HealPulse	20	0	
+BlackSun	196	Black Sun	Dark	CastFire	36	Magic	Corruption	0	36	24	180	Hit + Corruption, radius 6	GroundBurst	1536	6	Corruption	256		0	0	
+UmbralStrike	197	Umbral Strike	Dark	CastFire	2	Magic,Targeted		0	2	22	0	Strike leaving Corruption	Strike	192	0	Corruption	26		0	0	
+NightBlade	198	Night Blade	Dark	CastFire	1	Magic,Targeted		0	1	47	0	Cheap shadow strike	Strike	192	0		0		0	0	
+Rupture	199	Rupture	Dark	CastFire	2	Magic,Targeted		0	2	34	8	Strike: more per Corruption	Strike	320	0	Rupture	50		0	0	
+Blind	200	Blind	Dark	CastFire	6	Magic,Targeted	Corruption	0	6	30	6	Foe misses more	Curse	10	0		0	Accuracy	0	0	
+Murk	201	Murk	Dark	CastFire	18	Magic,Targeted	Corruption	0	18	31	40	Foes miss a lot for 12s	Curse	30	2		0	Accuracy	12	0	
+NightTerrors	202	Night Terrors	Dark	CastFire	6	Magic,Targeted	Corruption	0	6	33	10	Corruption; foe misses more	Corruption	64	0	Accuracy	15		20	0	
+Wither	203	Wither	Dark	CastFire	6	Magic,Targeted	Corruption	0	6	37	12	Foe takes more over time	Corruption	32	0	Wither	25		0	0	
+SoulRend	204	Soul Rend	Dark	CastFire	15	Magic,Targeted	Corruption	0	15	36	45	Removes Astral resistance	Curse	100	0		0	AstralStrip	0	0	
+CloakOfNight	205	Cloak of Night	Dark	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	19	0	Monsters notice you less	Buff	150	0		0	Distance	0	0	
+Malice	206	Malice	Dark	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	Your Corruption hits harder	Buff	10	0		0	DotDamage	0	0	
+NightsEdge	207	Night's Edge	Dark	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	44	0	Weapon hits add Corruption	Buff	13	0	Corruption	0	WeaponDot	0	0	

@@ -98,6 +98,32 @@ void BrandMonster(Monster &monster, SpellID spell, int damage);
  */
 void TriggerMonsterBrand(Monster &monster);
 
+/**
+ * @brief Makes a monster miss more often. Unlike the effects above, every PC is told and keeps
+ * this, because each PC works out the hits on its own player.
+ * @param percent How much is taken off its chance to hit. The larger of two counts.
+ * @param ticks How long it lasts in game ticks, or -1 for as long as the monster lives.
+ */
+void SetMonsterAccuracyPenalty(Monster &monster, int percent, int ticks);
+
+/** @brief What is taken off a monster's chance to hit a player, in percentage points. */
+int GetMonsterAccuracyPenalty(const Monster &monster);
+
+/** @brief Strips a monster's resistance and immunity to Astral damage, for as long as it lives. Every PC keeps this. */
+void StripMonsterAstralResistance(Monster &monster);
+
+/** @brief Whether a monster has had its Astral resistance and immunity stripped. */
+bool IsMonsterAstralStripped(const Monster &monster);
+
+/**
+ * @brief Makes every effect over time on a monster deal more, for as long as it lives. Held on
+ * this PC only, like the effects themselves. The larger of two percentages counts.
+ */
+void WitherMonster(Monster &monster, int percent);
+
+/** @brief The damage an effect over time on a monster still has to deal, in 64ths of a hit point. */
+int GetMonsterDotRemaining(const Monster &monster, DotID dot);
+
 /** @brief Damage to a monster after its "takes more damage" debuff, if it has one. */
 int ApplyMonsterVulnerability(const Monster &monster, int damage);
 

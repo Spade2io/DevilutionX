@@ -1,5 +1,5 @@
 // Writes the designer's powers into the files the game reads.
-// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire, Water, Holy, Nature and Shield)
+// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire, Water, Holy, Nature, Shield and Dark)
 //
 // What it writes:
 //   assets/txtdata/spells/essence_powers.tsv  one row per power the game does not already have
@@ -20,7 +20,7 @@ const POWERS_FILE = path.join(REPO, 'assets/txtdata/spells/essence_powers.tsv')
 const ITEMS_FILE = path.join(REPO, 'assets/txtdata/items/itemdat.tsv')
 const check = process.argv.includes('--check')
 const wanted = process.argv.slice(2).filter((a) => !a.startsWith('--'))
-const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy', 'Nature', 'Shield']
+const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy', 'Nature', 'Shield', 'Dark']
 
 // Powers the game already has as hand-written spells. They keep their original numbers and are
 // not exported; the name on the right is the game's own name for the spell.
@@ -29,6 +29,7 @@ const ALREADY_IN_GAME = {
   'Fire Aura': 'FireAura', 'Flaming Weapon': 'FlamingWeapon', 'Flame Strike': 'FlameStrike', 'Inferno Strike': 'InfernoStrike',
   'Guardian': 'Guardian', 'Elemental': 'Elemental', 'Immolation': 'Immolation', 'Ring of Fire': 'RingOfFire',
   'Rune of Fire': 'RuneOfFire', 'Rune of Immolation': 'RuneOfImmolation', 'Frostbolt': 'Frostbolt', 'Holy Bolt': 'HolyBolt',
+  'Corruption': 'Corruption',
 }
 // Which picture each power borrows from the game's sheet of spell icons, until it has its own.
 // The numbers are positions in that sheet (see SpellIcon in Source/panels/spell_icons.hpp).
@@ -46,6 +47,9 @@ const ICONS = {
   'Aegis': 8, 'Shield Bash': 47, 'Shield Slam': 22, 'Shield Sweep': 46, 'Concussive Blow': 7, 'Guarded Strike': 44, 'Bulwark Slam': 24,
   'Barrier': 12, 'Reinforce': 16, 'Shield Wall': 45, 'Phalanx': 48, 'Bulwark': 25, 'Spell Ward': 21, 'Hold the Line': 33, 'Stout Heart': 18,
   'Resilience': 43, 'Oathbound': 40, 'Stalwart': 31, 'Brace': 30, 'Unbreakable': 34,
+  'Pall of Shadow': 8, 'Creeping Rot': 32, 'Shadow Bolt': 35, 'Blight': 46, 'Plague Wind': 13, 'Contagion': 15, 'Drain': 29, 'Black Sun': 24,
+  'Umbral Strike': 22, 'Night Blade': 47, 'Rupture': 34, 'Blind': 30, 'Murk': 31, 'Night Terrors': 33, 'Wither': 37, 'Soul Rend': 36,
+  'Cloak of Night': 19, 'Malice': 18, "Night's Edge": 44,
   'Wellspring': 8, 'Tidal Wave': 13, 'Deep Freeze': 7, 'Wash Away': 4, 'Purging Rain': 21, 'Monsoon': 3, 'Great Flood': 24,
 }
 // The short line the spellbook shows under each power. There is room for about 28 letters.
@@ -61,6 +65,13 @@ const SHORT_TEXT = {
   'Wellspring': 'Aura: mana regen, radius 8', 'Tidal Wave': 'Wave of ice damage', 'Deep Freeze': 'Holds foes still 6s, rad 2',
   'Wash Away': 'Cleanses and heals an ally', 'Purging Rain': 'Cleanses allies, radius 4', 'Monsoon': 'Big heal + cleanse, rad 4',
   'Great Flood': 'Hurts foes, heals, radius 6',
+  'Pall of Shadow': 'Aura: foes resist less', 'Creeping Rot': 'Cheap Corruption', 'Shadow Bolt': 'Hit that leaves Corruption',
+  'Blight': 'Corruption, radius 2', 'Plague Wind': 'Corruption in a cone', 'Contagion': 'Corruption that leaps',
+  'Drain': 'Corruption that heals you', 'Black Sun': 'Hit + Corruption, radius 6', 'Umbral Strike': 'Strike leaving Corruption',
+  'Night Blade': 'Cheap shadow strike', 'Rupture': 'Strike: more per Corruption', 'Blind': 'Foe misses more',
+  'Murk': 'Foes miss a lot for 12s', 'Night Terrors': 'Corruption; foe misses more', 'Wither': 'Foe takes more over time',
+  'Soul Rend': 'Removes Astral resistance', 'Cloak of Night': 'Monsters notice you less', 'Malice': 'Your Corruption hits harder',
+  "Night's Edge": 'Weapon hits add Corruption',
   'Aegis': 'Aura: small shield per 10s', 'Shield Bash': 'Shield strike', 'Shield Slam': 'Heavy; armor adds damage',
   'Shield Sweep': 'Hits target and neighbours', 'Concussive Blow': 'Strike; holds foe 3s', 'Guarded Strike': 'Strike; +15 armor for 5s',
   'Bulwark Slam': 'Shield per enemy struck', 'Barrier': 'Shield of 14 on an ally', 'Reinforce': 'Big shield and +15 armor',
@@ -155,6 +166,25 @@ const SHORT_TEXT = {
 //         of the striker's armor as extra damage), Guard (the striker gains the power's buff, at
 //         riderPercent strength), ShieldPerHit (a shield of riderHeal for each monster struck).
 //   A power with a Weapon tag needs that weapon in hand. Only Shield is checked by the game.
+//   Corruption works as Burn does, for Shadow. Riders on either: Leech (the caster gains
+//         riderDamage of life every 2 seconds for the duration), Accuracy (the monster also has
+//         riderPercent less chance to hit, for the duration), Wither (every effect over time on
+//         the monster deals riderPercent more until it dies).
+//   A Burst or GroundBurst whose rider names an effect over time leaves riderTotal of it behind.
+//   Cone and Chain lay down the effect over time their rider names, the potency being its total:
+//         a cone on everything within 6 tiles the way the caster aims, a chain on the target and
+//         then on the nearest other monster, and again, a quarter less each leap.
+//   Curse: a debuff on the target, and on monsters within the radius, that every PC is told of.
+//         Stat Accuracy: potency percent less chance to hit, for the duration, or with none
+//         until it dies. Stat AstralStrip: no Astral resistance or immunity until it dies.
+//   An Aura with the stat AstralCurse makes monsters within it take potency percent more from
+//         Astral damage.
+//   More Buff stats: DotDamage (percent more from the caster's effects over time), WeaponDot
+//         (each weapon hit adds the effect over time its rider names; potency is the total).
+//   The Strike rider Rupture adds riderPercent of the Corruption still to tick on the target.
+//   Bolt (missile PowerBolt): a projectile like Firebolt, in the power's colour, dealing its
+//         potency in its damage type. It can miss. A rider naming an effect over time leaves
+//         riderTotal of it on whatever the bolt hits.
 //   Buff: switches a buff on for the caster, or for the player aimed at if the power is tagged Ally. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10
@@ -189,6 +219,25 @@ const BEHAVIOUR = {
   'Purging Rain': { missile: 'StrengthBuff', effect: 'Cleanse' },
   'Monsoon': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 99 },
   'Great Flood': { missile: 'Corruption', effect: 'GroundBurst', rider: 'HealCleanse', riderHeal: 29 },
+  'Pall of Shadow': { missile: 'StrengthBuff', effect: 'Aura', stat: 'AstralCurse', duration: 0 },
+  'Creeping Rot': { missile: 'Corruption', effect: 'Corruption' },
+  'Shadow Bolt': { missile: 'PowerBolt', effect: 'Bolt', rider: 'Corruption', riderTotal: 4 },
+  'Blight': { missile: 'Corruption', effect: 'Corruption' },
+  'Plague Wind': { missile: 'Corruption', effect: 'Cone', rider: 'Corruption', riderPercent: 0 },
+  'Contagion': { missile: 'Corruption', effect: 'Chain', rider: 'Corruption', riderPercent: 0 },
+  'Drain': { missile: 'Corruption', effect: 'Corruption', rider: 'Leech', riderDamage: 0.5, stat: 'HealPulse', duration: 20 },
+  'Black Sun': { missile: 'Corruption', effect: 'GroundBurst', rider: 'Corruption', riderTotal: 40 },
+  'Umbral Strike': { effect: 'Strike', rider: 'Corruption', riderTotal: 4 },
+  'Night Blade': { effect: 'Strike' },
+  'Rupture': { effect: 'Strike', rider: 'Rupture', riderPercent: 50 },
+  'Blind': { missile: 'Corruption', effect: 'Curse', stat: 'Accuracy', duration: 0 },
+  'Murk': { missile: 'Corruption', effect: 'Curse', stat: 'Accuracy', duration: 12 },
+  'Night Terrors': { missile: 'Corruption', effect: 'Corruption', rider: 'Accuracy', riderPercent: 15, duration: 20 },
+  'Wither': { missile: 'Corruption', effect: 'Corruption', rider: 'Wither', riderPercent: 25 },
+  'Soul Rend': { missile: 'Corruption', effect: 'Curse', stat: 'AstralStrip', duration: 0 },
+  'Cloak of Night': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0 },
+  'Malice': { missile: 'StrengthBuff', effect: 'Buff', stat: 'DotDamage', duration: 0 },
+  "Night's Edge": { missile: 'StrengthBuff', effect: 'Buff', stat: 'WeaponDot', duration: 0, perTick: true, rider: 'Corruption', riderPercent: 0 },
   'Aegis': { missile: 'StrengthBuff', effect: 'Aura', stat: 'ShieldPulse', duration: 0 },
   'Shield Bash': { effect: 'Strike' },
   'Shield Slam': { effect: 'Strike', rider: 'ArmorBonus', riderPercent: 25 },
@@ -252,7 +301,7 @@ const BEHAVIOUR = {
 const FIRST_NUMBER = 100
 // The powers whose awakening stones Pepin's test shelf sells: the ones being tested now. Use the
 // names as the designer shows them. Everything else stays in the game but is not for sale.
-const ON_SALE = ['Flaming Weapon', 'Flame Strike', 'Inferno Strike']
+const ON_SALE = []
 const SHOP_FILE = path.join(REPO, 'assets/txtdata/spells/stone_shop.tsv')
 
 const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))
@@ -294,7 +343,9 @@ const row = ({ power, essence }) => {
   const mana = Math.min(250, Math.max(0, Math.round(power.manaCost ?? 0)))
   const behaviour = BEHAVIOUR[power.name]
   // Amounts are in 64ths of a hit point, the unit the game counts damage in.
-  const amount = behaviour?.effect === 'Burn' ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
+  const amount = behaviour?.perTick || ['Burn', 'Corruption', 'Cone', 'Chain'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
+    : behaviour?.effect === 'Curse' ? Math.round(power.potency ?? 0)
+    : behaviour?.effect === 'Bolt' ? Math.round((power.potency ?? 0) * 64)
     : behaviour?.overTime || behaviour?.effect === 'Zone' ? Math.round((power.potency ?? 0) * 64 / (behaviour.duration / 2))
     : ['HealPulse', 'ShieldPulse'].includes(behaviour?.stat) && behaviour.effect === 'Aura' ? Math.round((power.potency ?? 0) * 64)
     : behaviour?.effect === 'Shield' ? Math.round((power.potency ?? 0) * 64)

@@ -178,6 +178,9 @@ std::optional<EssenceTint> GetSpellTint(SpellID spell)
 			return EssenceTint::VividBlue;
 		default:
 			// Anything else takes its essence's colour.
+			// Dark's effects are the deep shadow tint, darker than the dull blue of its items.
+			if (GetSpellEssence(spell) == EssenceID::Dark)
+				return EssenceTint::Shadow;
 			return GetEssenceTint(GetSpellEssence(spell));
 		}
 	}
@@ -207,6 +210,8 @@ DamageType GetSpellDamageType(SpellID spell)
 		return DamageType::Nature;
 	case EssenceID::Shield:
 		return DamageType::Physical;
+	case EssenceID::Dark:
+		return DamageType::Shadow;
 	case EssenceID::None:
 		break;
 	}
@@ -292,6 +297,8 @@ std::optional<EssenceTint> GetEssenceTint(EssenceID essence)
 		return EssenceTint::DullYellow;
 	case EssenceID::Shield: // Physical
 		return EssenceTint::DullYellow;
+	case EssenceID::Dark: // Shadow
+		return EssenceTint::DullBlue;
 	case EssenceID::None:
 		break;
 	}

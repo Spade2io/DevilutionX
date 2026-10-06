@@ -21,6 +21,7 @@
 #include "missiles.h"
 #include "spell_xp.h"
 #include "buffs.h"
+#include "dots.h"
 #include "monster.h"
 #include "msg.h"
 #include "utils/is_of.hpp"
@@ -347,7 +348,26 @@ void ApplyPowerToMonster(const Player &caster, Monster &monster, SpellID spell, 
 {
 	if (!IsExtendedSpell(spell) || !IsValidSpell(spell) || amount <= 0)
 		return;
-	if (GetSpellData(spell).rider != "Freeze" && GetSpellData(spell).effect != "Freeze")
+	const SpellData &spellData = GetSpellData(spell);
+	if (monster.hasNoLife())
+		return;
+	const auto say = [&](std::string_view text) {
+		AddFloatingNumber(monster.position.tile, { 0, 0 }, std::string(text), GetSpellTextColor(spell) | UiFlags::FontSize12, 1000 + static_cast<int>(monster.getId()));
+	};
+	// "Curse" with the stat "AstralStrip": no Astral resistance or immunity until it dies.
+	if (spellData.effect == "Curse" && spellData.buffStat == "AstralStrip") {
+		StripMonsterAstralResistance(monster);
+		say(spellData.sNameText);
+		return;
+	}
+	// "Curse" with the stat "Accuracy", or the rider "Accuracy" on another effect: the monster
+	// misses more often, for the power's duration or, with none, for as long as it lives.
+	if ((spellData.effect == "Curse" && spellData.buffStat == "Accuracy") || spellData.rider == "Accuracy") {
+		SetMonsterAccuracyPenalty(monster, std::min(amount, 95), spellData.durationSeconds > 0 ? spellData.durationSeconds * 20 : -1);
+		say(spellData.sNameText);
+		return;
+	}
+	if (spellData.rider != "Freeze" && spellData.effect != "Freeze")
 		return;
 	// The game's own Stone Curse does the holding. A few monsters cannot be held.
 	if (monster.hasNoLife() || IsAnyOf(monster.type().type, MT_GOLEM, MT_DIABLO, MT_NAKRUL)
@@ -389,6 +409,13 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 	}
 	if (target.hasNoLife())
 		return;
+
+	// The rider "Leech": the caster draws life from what they cursed. It arrives as the power's
+	// own heal over time, for the power's duration.
+	if (rider == "Leech") {
+		ActivatePowerBuff(target, spell, amount, caster);
+		return;
+	}
 
 	// A rider that names "Cleanse" washes harmful effects off as well as whatever else happens.
 	if (rider.find("Cleanse") != std::string::npos)

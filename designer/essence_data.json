@@ -3715,7 +3715,7 @@
       "id": "p_fc1502cc",
       "name": "Pall of Shadow",
       "description": "Aura. A curse hangs on every enemy within its radius of you: their Astral resistance is lowered for as long as they stay near you, so shadow, holy and other astral damage bites deeper. It does no damage itself.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -3732,13 +3732,17 @@
       "cooldown": 0,
       "radius": 8,
       "growth": 12.5,
-      "potencyNote": "% less Astral resistance for every enemy in the aura"
+      "potencyNote": "% less Astral resistance for every enemy in the aura",
+      "number": 189,
+      "gameKey": "PallOfShadow",
+      "icon": 8,
+      "shortText": "Aura: foes resist less"
     },
     {
       "id": "p_05a36a4c",
       "name": "Corruption",
       "description": "The plain damage over time. No hit up front; it adds to the Corruption on one enemy, which ticks every 2 seconds for 20 seconds. Every new Corruption, from any power, restarts the 20 seconds for all of it. (Already in the mod as a test spell.)",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -3762,7 +3766,7 @@
       "id": "p_16de08f1",
       "name": "Creeping Rot",
       "description": "A thin thread of Corruption on one enemy for very little mana. Each cast adds less than Corruption does, but far more per point of mana. The one to keep piling on through a long fight.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -3781,13 +3785,17 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "Corruption in total over 20 seconds"
+      "potencyNote": "Corruption in total over 20 seconds",
+      "number": 190,
+      "gameKey": "CreepingRot",
+      "icon": 32,
+      "shortText": "Cheap Corruption"
     },
     {
       "id": "p_f7ce4037",
       "name": "Shadow Bolt",
-      "description": "Hurls a bolt of shadow at one enemy. About half its damage lands at once and the rest is left behind as Corruption. Cheap and always available.",
-      "status": "draft",
+      "description": "Hurls a bolt of shadow at one enemy. Like any bolt it can miss. About half its damage lands on the hit and the rest is left behind as Corruption. Cheap and always available.",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -3806,13 +3814,17 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "damage at once, then 4 Corruption over 20 seconds"
+      "potencyNote": "damage at once, then 4 Corruption over 20 seconds",
+      "number": 191,
+      "gameKey": "ShadowBolt",
+      "icon": 35,
+      "shortText": "Hit that leaves Corruption"
     },
     {
       "id": "p_bc1f235a",
       "name": "Blight",
       "description": "Corruption that takes hold of one enemy and everything standing close to it. Each gets less than a single-target cast would give, for more mana. Always available.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -3830,13 +3842,17 @@
       "cooldown": 0,
       "radius": 2,
       "growth": 12.5,
-      "potencyNote": "Corruption in total over 20 seconds to each target"
+      "potencyNote": "Corruption in total over 20 seconds to each target",
+      "number": 192,
+      "gameKey": "Blight",
+      "icon": 46,
+      "shortText": "Corruption, radius 2"
     },
     {
       "id": "p_e2cd329d",
       "name": "Plague Wind",
       "description": "A foul wind blows out from you in the direction you face, widening as it goes. Everything it passes over is left with Corruption. No hit up front. Cooldown of about 10 seconds.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -3854,13 +3870,17 @@
       "cooldown": 10,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "Corruption in total over 20 seconds to each target"
+      "potencyNote": "Corruption in total over 20 seconds to each target",
+      "number": 193,
+      "gameKey": "PlagueWind",
+      "icon": 13,
+      "shortText": "Corruption in a cone"
     },
     {
       "id": "p_72dcc2b4",
       "name": "Contagion",
-      "description": "Corruption that spreads by itself. It takes hold of one enemy, then leaps to the nearest other enemy, and again, leaving a little less with each leap. More leaps as it levels. Cooldown of about 30 seconds.",
-      "status": "draft",
+      "description": "Corruption that spreads by itself. It takes hold of one enemy, then leaps to the nearest other enemy, and again, leaving a little less with each leap. More leaps as it levels. Always available, at a high cost in mana.",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -3871,20 +3891,24 @@
         "t_ec9d55b3",
         "t_78e7dc4a",
         "t_b5fae28d",
-        "t_9048f21b"
+        "t_5462244b"
       ],
       "potency": 24,
-      "manaCost": 14,
-      "cooldown": 30,
+      "manaCost": 22,
+      "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "Corruption over 20 seconds on the first target, a quarter less with each leap"
+      "potencyNote": "Corruption over 20 seconds on the first target, a quarter less with each leap",
+      "number": 194,
+      "gameKey": "Contagion",
+      "icon": 15,
+      "shortText": "Corruption that leaps"
     },
     {
       "id": "p_1f596c77",
       "name": "Drain",
       "description": "Fastens onto one enemy and drinks. It adds Corruption to them, and for those 20 seconds each tick gives you back a little life. Weak as damage and weak as healing, but cheap for both, and always available.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -3904,13 +3928,17 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "Corruption in total over 20 seconds; heals you for 5 over the same time"
+      "potencyNote": "Corruption in total over 20 seconds; heals you for 5 over the same time",
+      "number": 195,
+      "gameKey": "Drain",
+      "icon": 29,
+      "shortText": "Corruption that heals you"
     },
     {
       "id": "p_df2a7e3b",
       "name": "Black Sun",
       "description": "Ultimate. A black sun opens over a very wide area you choose. Every enemy beneath it is struck at once and left with a heavy load of Corruption, far more than any other power lays down in one cast. Cooldown of about 3 minutes.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -3929,13 +3957,17 @@
       "cooldown": 180,
       "radius": 6,
       "growth": 12.5,
-      "potencyNote": "damage at once to each target, then 40 Corruption over 20 seconds"
+      "potencyNote": "damage at once to each target, then 40 Corruption over 20 seconds",
+      "number": 196,
+      "gameKey": "BlackSun",
+      "icon": 24,
+      "shortText": "Hit + Corruption, radius 6"
     },
     {
       "id": "p_8bf5f511",
       "name": "Umbral Strike",
       "description": "A weapon strike wrapped in shadow. The whole hit lands as shadow damage and leaves Corruption on the enemy. Always available.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -3954,13 +3986,17 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "bonus damage on the hit, then 4 Corruption over 20 seconds"
+      "potencyNote": "bonus damage on the hit, then 4 Corruption over 20 seconds",
+      "number": 197,
+      "gameKey": "UmbralStrike",
+      "icon": 22,
+      "shortText": "Strike leaving Corruption"
     },
     {
       "id": "p_1715a78e",
       "name": "Night Blade",
       "description": "A quick, plain weapon strike in shadow, with a small bonus, for almost no mana. No Corruption. The attack to fall back on when mana is short.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -3979,13 +4015,17 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "bonus damage on the hit"
+      "potencyNote": "bonus damage on the hit",
+      "number": 198,
+      "gameKey": "NightBlade",
+      "icon": 47,
+      "shortText": "Cheap shadow strike"
     },
     {
       "id": "p_ced01f09",
       "name": "Rupture",
       "description": "The payoff for stacking. A weapon strike that deals bonus damage for the Corruption already on the enemy: the more that is ticking on them, the harder this hits. It does not use the Corruption up. Cooldown of about 8 seconds.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -4003,13 +4043,17 @@
       "cooldown": 8,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "bonus damage on the hit, plus half of the Corruption still to tick on the enemy"
+      "potencyNote": "bonus damage on the hit, plus half of the Corruption still to tick on the enemy",
+      "number": 199,
+      "gameKey": "Rupture",
+      "icon": 34,
+      "shortText": "Strike: more per Corruption"
     },
     {
       "id": "p_13f8c789",
       "name": "Blind",
       "description": "Shadow fills one enemy's eyes. It misses more often for as long as it lives. A modest effect for very little mana. The cooldown, about 6 seconds, is the wait before blinding the next one.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -4028,13 +4072,17 @@
       "cooldown": 6,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% less chance to hit, until the enemy dies"
+      "potencyNote": "% less chance to hit, until the enemy dies",
+      "number": 200,
+      "gameKey": "Blind",
+      "icon": 30,
+      "shortText": "Foe misses more"
     },
     {
       "id": "p_b28aa153",
       "name": "Murk",
       "description": "Thick darkness swallows one enemy and those close to it. For about 12 seconds they can barely see to strike and miss most of their attacks. Much stronger than Blind, but it wears off. Cooldown of about 40 seconds.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -4052,13 +4100,17 @@
       "cooldown": 40,
       "radius": 2,
       "growth": 12.5,
-      "potencyNote": "% less chance to hit for 12 seconds, for each target"
+      "potencyNote": "% less chance to hit for 12 seconds, for each target",
+      "number": 201,
+      "gameKey": "Murk",
+      "icon": 31,
+      "shortText": "Foes miss a lot for 12s"
     },
     {
       "id": "p_f816f6a0",
       "name": "Night Terrors",
       "description": "Torments one enemy for 20 seconds. It adds Corruption to them, and for as long as that Corruption is ticking they flail and miss more often. Keep the Corruption going and the blindness stays. Cooldown of about 10 seconds.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -4079,13 +4131,17 @@
       "cooldown": 10,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "Corruption in total over 20 seconds; 15% less chance to hit while it ticks"
+      "potencyNote": "Corruption in total over 20 seconds; 15% less chance to hit while it ticks",
+      "number": 202,
+      "gameKey": "NightTerrors",
+      "icon": 33,
+      "shortText": "Corruption; foe misses more"
     },
     {
       "id": "p_c43e3ec6",
       "name": "Wither",
       "description": "A wasting curse on one enemy. It adds a little Corruption, and until the enemy dies every tick of damage over time on it, from anyone, hits harder. The power that makes the rest of the essence worth stacking. Cooldown of about 12 seconds.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -4106,13 +4162,17 @@
       "cooldown": 12,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "Corruption in total over 20 seconds; damage over time on the enemy deals 25% more until it dies"
+      "potencyNote": "Corruption in total over 20 seconds; damage over time on the enemy deals 25% more until it dies",
+      "number": 203,
+      "gameKey": "Wither",
+      "icon": 37,
+      "shortText": "Foe takes more over time"
     },
     {
       "id": "p_6ec7f479",
       "name": "Soul Rend",
       "description": "Tears away one enemy's protection against the astral. Until it dies it has no Astral resistance and no Astral immunity at all. No damage. Far stronger than the aura's curse, on one enemy at a time. Cooldown of about 45 seconds.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -4130,13 +4190,17 @@
       "cooldown": 45,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% of the enemy's Astral resistance and immunity removed, until it dies"
+      "potencyNote": "% of the enemy's Astral resistance and immunity removed, until it dies",
+      "number": 204,
+      "gameKey": "SoulRend",
+      "icon": 36,
+      "shortText": "Removes Astral resistance"
     },
     {
       "id": "p_a669856c",
       "name": "Cloak of Night",
-      "description": "A lasting buff on yourself. Darkness gathers around you: monsters are slower to notice you and prefer other targets. It stays until you die or leave the game.",
-      "status": "draft",
+      "description": "A lasting buff on yourself, with two gifts. Darkness gathers around you: monsters are slower to notice you and prefer other targets. And eyes used to the dark cannot be darkened: you are immune to blindness. It stays until you die or leave the game.",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -4147,20 +4211,25 @@
         "t_be83c5cf",
         "t_08fdec9d",
         "t_6e51786d",
-        "t_5462244b"
+        "t_5462244b",
+        "t_8a021f56"
       ],
       "potency": 150,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% apparent distance: monsters treat you as half again as far away"
+      "potencyNote": "% apparent distance: monsters treat you as half again as far away; also immune to blindness",
+      "number": 205,
+      "gameKey": "CloakOfNight",
+      "icon": 19,
+      "shortText": "Monsters notice you less"
     },
     {
       "id": "p_062b5547",
       "name": "Malice",
       "description": "A lasting buff on yourself. Every tick of damage over time you cause deals a little more. It does nothing for direct hits.",
-      "status": "draft",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -4178,13 +4247,17 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% more damage from your damage over time, lasting"
+      "potencyNote": "% more damage from your damage over time, lasting",
+      "number": 206,
+      "gameKey": "Malice",
+      "icon": 18,
+      "shortText": "Your Corruption hits harder"
     },
     {
       "id": "p_7e1963bf",
       "name": "Night's Edge",
-      "description": "A lasting buff on one ally. Their weapon is edged with shadow: every hit that lands also leaves a trace of Corruption on the enemy. It adds to the same Corruption your own powers build.",
-      "status": "draft",
+      "description": "A lasting buff on yourself. Your weapon is edged with shadow: every hit that lands also leaves a trace of Corruption on the enemy, adding to the same Corruption your other powers build.",
+      "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
       ],
@@ -4192,7 +4265,7 @@
         "t_ef105fcc",
         "t_50a7240a",
         "t_4903280f",
-        "t_b06216ac",
+        "t_be83c5cf",
         "t_08fdec9d",
         "t_6e51786d",
         "t_5462244b"
@@ -4202,7 +4275,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "Corruption added by each weapon hit that lands, lasting"
+      "potencyNote": "Corruption added by each weapon hit that lands, lasting",
+      "number": 207,
+      "gameKey": "NightsEdge",
+      "icon": 44,
+      "shortText": "Weapon hits add Corruption"
     }
   ]
 }

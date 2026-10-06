@@ -1101,7 +1101,6 @@ void RefreshEssenceItems()
 void RefreshAwakeningStoneItems()
 {
 	AwakeningStoneItems.clear();
-	const Player &myPlayer = *MyPlayer;
 
 	// Real awakening stone items come first: every row of the item table with that type.
 	// These are handed over as items and are always listed, known spell or not.
@@ -1118,26 +1117,6 @@ void RefreshAwakeningStoneItems()
 		AwakeningStoneItems.push_back(item);
 	}
 
-	// Then the test entries that teach a spell directly, one per spell not yet learned.
-	for (size_t i = static_cast<size_t>(SpellID::Firebolt); i < LegacySpellCount(); i++) {
-		const auto spell = static_cast<SpellID>(i);
-		if (GetSpellBookLevel(spell) == -1 || myPlayer._pSplLvl[i] != 0 || !IsStoneOnSale(spell))
-			continue;
-		// Only abilities that belong to an essence can be learned at all.
-		if (GetSpellEssence(spell) == EssenceID::None)
-			continue;
-
-		Item item;
-		InitializeItem(item, IDI_BOOK1);
-		item._iSpell = spell;
-		item._iMinMag = 0;
-		item._ivalue = 1;
-		item._iIvalue = 1;
-		item._iIdentified = true;
-		item._iStatFlag = true;
-		item._iCreateInfo = 1; // non-zero so the entry is named "Book of <spell>"
-		AwakeningStoneItems.push_back(item);
-	}
 }
 
 void StartHealer()

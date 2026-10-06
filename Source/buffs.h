@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "engine/surface.hpp"
+#include "tables/misdat.h"
 #include "tables/spelldat.h"
 
 namespace devilution {
@@ -97,6 +98,18 @@ const Player *GetOathGuardian(const Player &player, int &percent);
 
 /** @brief A caster's bond holds one player: takes this buff, cast by them, off everyone else. */
 void RemovePowerBuffFromOthers(SpellID spell, const Player &caster, const Player &keep);
+
+struct Monster;
+
+/**
+ * @brief Damage to a monster after the cursing auras of players near it. So far that is one
+ * kind: an aura with the stat "AstralCurse" makes monsters within its radius take that percentage
+ * more from Astral damage (magic, shadow, holy, death and life). Every PC knows who holds an aura.
+ */
+int ApplyAuraCurses(const Monster &monster, DamageType damageType, int damage);
+
+/** @brief The player's own buff with a given stat, if they have one: which power, and how strong. */
+bool GetPowerBuffWithStat(const Player &player, std::string_view stat, SpellID &spell, int &amount);
 
 /** A buff or heal with this radius or more reaches every player in the game, wherever they are. */
 constexpr int EveryoneRadius = 50;
