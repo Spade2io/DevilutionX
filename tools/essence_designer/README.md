@@ -14,4 +14,8 @@ powers. It is not part of the game; it edits the data file the game's content co
   `docs/MOD_DESIGN.md` ("Rules for drafting powers"); change the two together.
 - **Scripts** in `tools/`: `add-drafts.mjs` adds drafted powers to an essence, and
   `fill-numbers.mjs` fills in first-pass numbers from one model.
+  `export-game.mjs` writes the powers into the files the game reads, and keeps a copy of the
+  data as exported (`designer/last_export.json`). `changes.mjs` is the change log: it lists what
+  has been edited in the designer since that copy, and marks each change as carried over by the
+  export or as needing work by hand. The export prints it first, every time.
 - `SPEC.md` is the original brief for the tool.

@@ -307,7 +307,7 @@ int GetPowerBuffPercent(const Player &player, std::string_view stat)
 		if (spellData.buffStat == stat)
 			percent += buff.amount;
 		// A buff's rider can name a second stat it changes, by the rider's own amount.
-		else if (!spellData.buffStat.empty() && spellData.rider == stat)
+		else if (!spellData.buffStat.empty() && spellData.rider == stat && stat != "Distance")
 			percent += spellData.riderAmount;
 	}
 	return percent;
@@ -318,8 +318,12 @@ int GetPlayerDistanceRatio(const Player &player)
 	int ratio = 100;
 	for (const PowerBuff &buff : PowerBuffs[player.getId()]) {
 		// The one furthest from normal counts.
-		if (GetSpellData(buff.spell).buffStat == "Distance" && std::abs(buff.amount - 100) > std::abs(ratio - 100))
+		const SpellData &spellData = GetSpellData(buff.spell);
+		if (spellData.buffStat == "Distance" && std::abs(buff.amount - 100) > std::abs(ratio - 100))
 			ratio = buff.amount;
+		// A buff that is mainly about something else can carry threat or stealth as its second gift.
+		if (!spellData.buffStat.empty() && spellData.rider == "Distance" && std::abs(spellData.riderAmount - 100) > std::abs(ratio - 100))
+			ratio = spellData.riderAmount;
 	}
 	return ratio;
 }

@@ -1,5 +1,5 @@
 // Writes the designer's powers into the files the game reads.
-// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire, Water, Holy, Nature, Shield and Dark)
+// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire, Water, Holy, Nature, Shield, Dark and Earth)
 //
 // What it writes:
 //   assets/txtdata/spells/essence_powers.tsv  one row per power the game does not already have
@@ -12,6 +12,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { printChanges, readSnapshot, SNAPSHOT_FILE } from './changes.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const REPO = path.resolve(here, '../../..')
@@ -20,7 +21,7 @@ const POWERS_FILE = path.join(REPO, 'assets/txtdata/spells/essence_powers.tsv')
 const ITEMS_FILE = path.join(REPO, 'assets/txtdata/items/itemdat.tsv')
 const check = process.argv.includes('--check')
 const wanted = process.argv.slice(2).filter((a) => !a.startsWith('--'))
-const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy', 'Nature', 'Shield', 'Dark']
+const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy', 'Nature', 'Shield', 'Dark', 'Earth']
 
 // Powers the game already has as hand-written spells. They keep their original numbers and are
 // not exported; the name on the right is the game's own name for the spell.
@@ -50,6 +51,8 @@ const ICONS = {
   'Pall of Shadow': 8, 'Creeping Rot': 32, 'Shadow Bolt': 35, 'Blight': 46, 'Plague Wind': 13, 'Contagion': 15, 'Drain': 29, 'Black Sun': 24,
   'Umbral Strike': 22, 'Night Blade': 47, 'Rupture': 34, 'Blind': 30, 'Murk': 31, 'Night Terrors': 33, 'Wither': 37, 'Soul Rend': 36,
   'Cloak of Night': 19, 'Malice': 18, "Night's Edge": 44,
+  'Bedrock': 8, 'Stone Spike': 10, 'Tremor': 37, 'Earthquake': 45, 'Landslide': 46, 'Upheaval': 24, 'Stone Fist': 47, 'Boulder': 35, 'Shockwave': 22,
+  'Earthshatter': 7, 'Crushing Blow': 34, 'Mire': 31, 'Stoneskin': 12, 'Dig In': 30, 'Stone Wall': 48, 'Earthen Might': 18, 'Monolith': 25, 'Unyielding': 33,
   'Wellspring': 8, 'Tidal Wave': 13, 'Deep Freeze': 7, 'Wash Away': 4, 'Purging Rain': 21, 'Monsoon': 3, 'Great Flood': 24,
 }
 // The short line the spellbook shows under each power. There is room for about 28 letters.
@@ -65,6 +68,12 @@ const SHORT_TEXT = {
   'Wellspring': 'Aura: mana regen, radius 8', 'Tidal Wave': 'Wave of ice damage', 'Deep Freeze': 'Holds foes still 6s, rad 2',
   'Wash Away': 'Cleanses and heals an ally', 'Purging Rain': 'Cleanses allies, radius 4', 'Monsoon': 'Big heal + cleanse, rad 4',
   'Great Flood': 'Hurts foes, heals, radius 6',
+  'Bedrock': 'Aura: -1 physical damage', 'Stone Spike': 'Earth damage, radius 2', 'Tremor': 'Ground shakes 10s, rad 2',
+  'Earthquake': 'Ground shakes 20s, rad 4', 'Landslide': 'Earth damage, radius 4', 'Upheaval': 'Heavy hit + hold, rad 6',
+  'Stone Fist': 'Strike dealing earth damage', 'Boulder': 'Thrown rock, one enemy', 'Shockwave': 'Hits target and neighbours',
+  'Earthshatter': 'Strike; holds foe 2s', 'Crushing Blow': 'Heavy; foe takes more', 'Mire': 'Holds foes 4s, radius 2',
+  'Stoneskin': '-2 physical dmg, +10 armor', 'Dig In': '-5 physical dmg for 20s', 'Stone Wall': 'All allies: -3 phys, 15s',
+  'Earthen Might': '+10 Power', 'Monolith': 'Threat; +10% max life', 'Unyielding': 'Threat; never staggered',
   'Pall of Shadow': 'Aura: foes resist less', 'Creeping Rot': 'Cheap Corruption', 'Shadow Bolt': 'Hit that leaves Corruption',
   'Blight': 'Corruption, radius 2', 'Plague Wind': 'Corruption in a cone', 'Contagion': 'Corruption that leaps',
   'Drain': 'Corruption that heals you', 'Black Sun': 'Hit + Corruption, radius 6', 'Umbral Strike': 'Strike leaving Corruption',
@@ -185,6 +194,14 @@ const SHORT_TEXT = {
 //   Bolt (missile PowerBolt): a projectile like Firebolt, in the power's colour, dealing its
 //         potency in its damage type. It can miss. A rider naming an effect over time leaves
 //         riderTotal of it on whatever the bolt hits.
+//   Buff stat DmgReduction: potency points off every physical hit the player takes (monster
+//         melee and arrows), never below 1. Spells and other elements are not reduced.
+//   DamageZone: ground at the spot chosen that hurts every monster standing on it, every 2
+//         seconds for the duration; the potency is the total over the whole time.
+//   GroundFreeze: a Freeze aimed at a spot instead of a monster. A GroundBurst with the rider
+//         Freeze also holds what it hits, for riderPercent seconds.
+//   More Buff stats: Power (points), NoStagger (hits never interrupt the player). A buff's
+//         rider can also be Distance, giving a buff about something else threat or stealth.
 //   Buff: switches a buff on for the caster, or for the player aimed at if the power is tagged Ally. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10
@@ -219,6 +236,24 @@ const BEHAVIOUR = {
   'Purging Rain': { missile: 'StrengthBuff', effect: 'Cleanse' },
   'Monsoon': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 99 },
   'Great Flood': { missile: 'Corruption', effect: 'GroundBurst', rider: 'HealCleanse', riderHeal: 29 },
+  'Bedrock': { missile: 'StrengthBuff', effect: 'Aura', stat: 'DmgReduction', duration: 0 },
+  'Stone Spike': { missile: 'Corruption', effect: 'GroundBurst' },
+  'Tremor': { missile: 'StrengthBuff', effect: 'DamageZone', duration: 10 },
+  'Earthquake': { missile: 'StrengthBuff', effect: 'DamageZone', duration: 20 },
+  'Landslide': { missile: 'Corruption', effect: 'GroundBurst' },
+  'Upheaval': { missile: 'Corruption', effect: 'GroundBurst', rider: 'Freeze', riderPercent: 4 },
+  'Stone Fist': { effect: 'Strike' },
+  'Boulder': { missile: 'PowerBolt', effect: 'Bolt' },
+  'Shockwave': { effect: 'Strike', spread: true },
+  'Earthshatter': { effect: 'Strike', rider: 'Freeze', riderPercent: 2 },
+  'Crushing Blow': { effect: 'Strike', rider: 'Vulnerable', riderPercent: 15 },
+  'Mire': { missile: 'Corruption', effect: 'GroundFreeze' },
+  'Stoneskin': { missile: 'StrengthBuff', effect: 'Buff', stat: 'DmgReduction', duration: 0, rider: 'Armor', riderPercent: 10 },
+  'Dig In': { missile: 'StrengthBuff', effect: 'Buff', stat: 'DmgReduction', duration: 20 },
+  'Stone Wall': { missile: 'StrengthBuff', effect: 'Buff', stat: 'DmgReduction', duration: 15 },
+  'Earthen Might': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Power', duration: 0 },
+  'Monolith': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'MaxLife', riderPercent: 10 },
+  'Unyielding': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'NoStagger', riderPercent: 1 },
   'Pall of Shadow': { missile: 'StrengthBuff', effect: 'Aura', stat: 'AstralCurse', duration: 0 },
   'Creeping Rot': { missile: 'Corruption', effect: 'Corruption' },
   'Shadow Bolt': { missile: 'PowerBolt', effect: 'Bolt', rider: 'Corruption', riderTotal: 4 },
@@ -301,10 +336,17 @@ const BEHAVIOUR = {
 const FIRST_NUMBER = 100
 // The powers whose awakening stones Pepin's test shelf sells: the ones being tested now. Use the
 // names as the designer shows them. Everything else stays in the game but is not for sale.
-const ON_SALE = []
+const ON_SALE = ['Bedrock', 'Stone Spike', 'Tremor', 'Earthquake', 'Landslide', 'Upheaval', 'Stone Fist', 'Boulder', 'Shockwave', 'Earthshatter',
+  'Crushing Blow', 'Mire', 'Stoneskin', 'Dig In', 'Stone Wall', 'Earthen Might', 'Monolith', 'Unyielding']
 const SHOP_FILE = path.join(REPO, 'assets/txtdata/spells/stone_shop.tsv')
 
 const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))
+// First, the change log: what has been edited in the designer since the last export. Anything
+// marked NEEDS WORK is not carried into the game by this script and has to be done by hand.
+if (readSnapshot()) {
+  printChanges(readSnapshot(), data, 'the last export')
+  console.log('')
+}
 const tagNames = (power) => power.tags.map((id) => data.tags.find((t) => t.id === id)?.name).filter(Boolean)
 const weaponGroup = data.tagGroups.find((g) => g.name === 'Weapon')?.id
 const weaponOf = (power) => power.tags.map((id) => data.tags.find((t) => t.id === id)).find((t) => t && t.groupId === weaponGroup)?.name ?? ''
@@ -346,12 +388,12 @@ const row = ({ power, essence }) => {
   const amount = behaviour?.perTick || ['Burn', 'Corruption', 'Cone', 'Chain'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
     : behaviour?.effect === 'Curse' ? Math.round(power.potency ?? 0)
     : behaviour?.effect === 'Bolt' ? Math.round((power.potency ?? 0) * 64)
-    : behaviour?.overTime || behaviour?.effect === 'Zone' ? Math.round((power.potency ?? 0) * 64 / (behaviour.duration / 2))
+    : behaviour?.overTime || ['Zone', 'DamageZone'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64 / (behaviour.duration / 2))
     : ['HealPulse', 'ShieldPulse'].includes(behaviour?.stat) && behaviour.effect === 'Aura' ? Math.round((power.potency ?? 0) * 64)
     : behaviour?.effect === 'Shield' ? Math.round((power.potency ?? 0) * 64)
     : ['Burst', 'GroundBurst', 'Strike', 'Heal', 'Mana', 'Wave', 'ChainHeal'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64)
     : behaviour?.effect === 'Cleanse' ? Math.round(power.potency ?? 99)
-    : ['Aura', 'Freeze', 'HealPercent', 'Resurrect'].includes(behaviour?.effect) ? Math.round(power.potency ?? 0)
+    : ['Aura', 'Freeze', 'GroundFreeze', 'HealPercent', 'Resurrect'].includes(behaviour?.effect) ? Math.round(power.potency ?? 0)
     : behaviour?.effect === 'Buff' || behaviour?.effect === 'Rebirth' ? Math.round(power.potency ?? 0)
     : 0
   // A strike only reaches past its target when it is marked to spread.
@@ -396,6 +438,8 @@ if (check) {
   console.log('Check only: nothing was written.')
 } else {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2) + '\n')
+  // Keep a copy of the designer's data as exported, for the next change log to compare against.
+  fs.writeFileSync(SNAPSHOT_FILE, JSON.stringify(data, null, 2) + '\n')
   fs.writeFileSync(POWERS_FILE, powersText)
   const saleKeys = ON_SALE.map((name) => {
     const key = ALREADY_IN_GAME[name] ?? data.powers.find((p) => p.name === name)?.gameKey

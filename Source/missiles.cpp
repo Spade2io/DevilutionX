@@ -1192,12 +1192,17 @@ bool PlayerMHit(Player &player, Monster *monster, int dist, int mind, int maxd, 
 				if (HasAnyOf(player._pIFlags, ItemSpecialEffect::HalfTrapDamage))
 					dam /= 2;
 			dam += player._pIGetHit * 64;
+			// Essence Mod: a "DmgReduction" buff only takes points off physical shots (arrows).
+			if (damageType == DamageType::Physical)
+				dam -= GetPowerBuffPercent(player, "DmgReduction") * 64;
 		} else {
 			dam = RandomIntBetween(mind, maxd);
 			if (monster == nullptr)
 				if (HasAnyOf(player._pIFlags, ItemSpecialEffect::HalfTrapDamage))
 					dam /= 2;
 			dam += player._pIGetHit;
+			if (damageType == DamageType::Physical)
+				dam -= GetPowerBuffPercent(player, "DmgReduction");
 		}
 
 		dam = std::max(dam, 64);
@@ -2526,7 +2531,8 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	missile._miDelFlag = true;
 
 	// "GroundBurst" is the exception: it lands on the spot chosen, whether or not anything is there.
-	const bool isGround = IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && GetSpellData(missile.sourceSpell).effect == "GroundBurst";
+	// So does "GroundFreeze", a hold aimed at a spot.
+	const bool isGround = IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && IsAnyOf(GetSpellData(missile.sourceSpell).effect, "GroundBurst", "GroundFreeze");
 	// "Cone" needs no target either: it spreads out from the caster towards the spot chosen.
 	const bool isCone = IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && GetSpellData(missile.sourceSpell).effect == "Cone";
 	const bool isChain = IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && GetSpellData(missile.sourceSpell).effect == "Chain";
@@ -2593,7 +2599,7 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 			}
 		} else if (spellData.effect == "Kindle") {
 			isKindle = true;
-		} else if (spellData.effect == "Freeze") {
+		} else if (IsAnyOf(spellData.effect, "Freeze", "GroundFreeze")) {
 			isFreeze = true;
 		} else if (spellData.effect == "Curse") {
 			isCurse = true;
@@ -2745,6 +2751,10 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 			// Resistance, experience, the damage number and the kill are all handled as for any spell damage.
 			DealSpellTickDamage(monster, spell, burstImmunityMissile, burstDamageType, amount);
 			landedOnAny = true;
+			// The rider "Freeze": whatever survives is held for the rider's amount in seconds. Every
+			// PC has to hold it alike, so they are all told.
+			if (extended != nullptr && extended->rider == "Freeze" && !monster.hasNoLife())
+				NetSendCmdPowerOnMonster(static_cast<uint16_t>(monsterId), spell, static_cast<uint32_t>(extended->riderAmount));
 			// A rider that names an effect over time leaves it behind on whatever survives the hit.
 			if (const std::optional<DotID> left = extended != nullptr ? ParseDotName(extended->rider) : std::nullopt; left && !monster.hasNoLife() && !IsImmuneToDot(monster, *left)) {
 				const int stacks = AddMonsterDot(monster, *left, spell, scaled(extended->riderAmount));
@@ -2839,6 +2849,24 @@ void ProcessHealingZone(Missile &missile)
 	const SpellID spell = missile.sourceSpell;
 	const SpellData &spellData = GetSpellData(spell);
 	const auto amount = static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.effectAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)));
+	// "DamageZone": the ground hurts every monster standing on it, in the power's damage type.
+	// Damage to monsters is dealt by the caster's PC, like every other power's.
+	if (spellData.effect == "DamageZone") {
+		const DamageType damageType = GetSpellDamageType(spell);
+		std::vector<int> standing;
+		for (size_t i = 0; i < ActiveMonsterCount; i++) {
+			const int monsterId = static_cast<int>(ActiveMonsters[i]);
+			const Monster &candidate = Monsters[monsterId];
+			if (candidate.isPossibleToHit() && !candidate.isPlayerMinion() && candidate.position.tile.WalkingDistance(centre) <= spellData.effectRadius)
+				standing.push_back(monsterId);
+		}
+		for (const int monsterId : standing) {
+			Monster &monster = Monsters[monsterId];
+			if (!monster.isImmune(MissileID::PowerBolt, damageType))
+				DealSpellTickDamage(monster, spell, MissileID::PowerBolt, damageType, static_cast<int>(amount));
+		}
+		return;
+	}
 	const bool raises = spellData.rider.find("Raise") != std::string::npos;
 	for (const Player &other : Players) {
 		if (!other.plractive || !other.isOnActiveLevel() || other.position.tile.WalkingDistance(centre) > spellData.effectRadius)
@@ -2863,7 +2891,7 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 	missile._miDelFlag = true;
 	// "Zone": a patch of healing ground is left at the spot chosen. Every PC makes its own copy,
 	// so that everyone sees it.
-	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && GetSpellData(missile.sourceSpell).effect == "Zone") {
+	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && IsAnyOf(GetSpellData(missile.sourceSpell).effect, "Zone", "DamageZone")) {
 		AddMissile(parameter.dst, parameter.dst, Direction::South, MissileID::HealingZone, TARGET_MONSTERS, missile._misource, 0, 0, &missile);
 		return;
 	}

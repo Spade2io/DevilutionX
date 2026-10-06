@@ -2812,8 +2812,9 @@ void StartPlrHit(Player &player, int dam, bool forcehit)
 		return;
 	}
 
-	// Essence Mod: a player who has just risen from death is not staggered for a moment.
-	if (IsRebirthProtected(player))
+	// Essence Mod: a player who has just risen from death is not staggered for a moment, and a
+	// player with a "NoStagger" buff is never staggered at all.
+	if (IsRebirthProtected(player) || GetPowerBuffPercent(player, "NoStagger") > 0)
 		return;
 
 	player.Say(HeroSpeech::ArghClang);

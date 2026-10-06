@@ -1226,7 +1226,7 @@ void MonsterAttackPlayer(Monster &monster, Player &player, int hit, int minDam, 
 		StartPlrBlock(player, dir);
 		if (&player == MyPlayer && player.wReflections > 0) {
 			int dam = GenerateRnd(((maxDam - minDam) << 6) + 1) + (minDam << 6);
-			dam = std::max(dam + (player._pIGetHit << 6), 64);
+			dam = std::max(dam + ((player._pIGetHit - GetPowerBuffPercent(player, "DmgReduction")) << 6), 64);
 			CheckReflect(monster, player, dam);
 		}
 		return;
@@ -1236,7 +1236,9 @@ void MonsterAttackPlayer(Monster &monster, Player &player, int hit, int minDam, 
 
 	// New method fixes a bug which caused the maximum possible damage value to be 63/64ths too low.
 	int dam = RandomIntBetween(minDam << 6, maxDam << 6);
-	dam = std::max(dam + (player._pIGetHit << 6), 64);
+	// Essence Mod: a "DmgReduction" buff takes points off a physical hit, as the item stat does.
+	// A monster's melee blow is always physical. A hit never falls below 1.
+	dam = std::max(dam + ((player._pIGetHit - GetPowerBuffPercent(player, "DmgReduction")) << 6), 64);
 	if (&player == MyPlayer) {
 		if (player.wReflections > 0) {
 			const int reflectedDamage = CheckReflect(monster, player, dam);

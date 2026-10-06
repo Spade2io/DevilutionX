@@ -107,3 +107,21 @@ SoulRend	204	Soul Rend	Dark	CastFire	15	Magic,Targeted	Corruption	0	15	36	45	Rem
 CloakOfNight	205	Cloak of Night	Dark	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	19	0	Monsters notice you less	Buff	150	0		0	Distance	0	0	
 Malice	206	Malice	Dark	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	Your Corruption hits harder	Buff	10	0		0	DotDamage	0	0	
 NightsEdge	207	Night's Edge	Dark	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	44	0	Weapon hits add Corruption	Buff	13	0	Corruption	0	WeaponDot	0	0	
+Bedrock	208	Bedrock	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: -1 physical damage	Aura	1	8		0	DmgReduction	0	0	
+StoneSpike	209	Stone Spike	Earth	CastFire	9	Magic	Corruption	0	9	10	0	Earth damage, radius 2	GroundBurst	256	2		0		0	0	
+Tremor	210	Tremor	Earth	CastFire	9	Magic	StrengthBuff	0	9	37	10	Ground shakes 10s, rad 2	DamageZone	115	2		0		10	0	
+Earthquake	211	Earthquake	Earth	CastFire	18	Magic	StrengthBuff	0	18	45	45	Ground shakes 20s, rad 4	DamageZone	77	4		0		20	0	
+Landslide	212	Landslide	Earth	CastFire	12	Magic	Corruption	0	12	46	0	Earth damage, radius 4	GroundBurst	192	4		0		0	0	
+Upheaval	213	Upheaval	Earth	CastFire	36	Magic	Corruption	0	36	24	180	Heavy hit + hold, rad 6	GroundBurst	1536	6	Freeze	4		0	0	
+StoneFist	214	Stone Fist	Earth	CastFire	2	Magic,Targeted		0	2	47	0	Strike dealing earth damage	Strike	192	0		0		0	0	
+Boulder	215	Boulder	Earth	CastFire	6	Magic,Targeted	PowerBolt	0	6	35	0	Thrown rock, one enemy	Bolt	384	0		0		0	0	
+Shockwave	216	Shockwave	Earth	CastFire	3	Magic,Targeted		0	3	22	0	Hits target and neighbours	Strike	128	2		0		0	0	
+Earthshatter	217	Earthshatter	Earth	CastFire	3	Magic,Targeted		0	3	7	10	Strike; holds foe 2s	Strike	256	0	Freeze	2		0	0	
+CrushingBlow	218	Crushing Blow	Earth	CastFire	3	Magic,Targeted		0	3	34	45	Heavy; foe takes more	Strike	576	0	Vulnerable	15		0	0	
+Mire	219	Mire	Earth	CastFire	12	Magic	Corruption	0	12	31	40	Holds foes 4s, radius 2	GroundFreeze	4	2		0		0	0	
+Stoneskin	220	Stoneskin	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	-2 physical dmg, +10 armor	Buff	2	0	Armor	10	DmgReduction	0	0	
+DigIn	221	Dig In	Earth	CastHealing	15	Magic,AllowedInTown	StrengthBuff	0	15	30	60	-5 physical dmg for 20s	Buff	5	0		0	DmgReduction	20	0	
+StoneWall	222	Stone Wall	Earth	CastHealing	25	Magic,AllowedInTown	StrengthBuff	0	25	48	60	All allies: -3 phys, 15s	Buff	3	99		0	DmgReduction	15	0	
+EarthenMight	223	Earthen Might	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	+10 Power	Buff	10	0		0	Power	0	0	
+Monolith	224	Monolith	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	25	0	Threat; +10% max life	Buff	50	0	MaxLife	10	Distance	0	0	
+Unyielding	225	Unyielding	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	33	0	Threat; never staggered	Buff	50	0	NoStagger	1	Distance	0	0	

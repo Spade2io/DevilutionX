@@ -933,6 +933,12 @@ A power with a Weapon tag only works while that kind of weapon is equipped.
 - Bryan puts them on Never for most essences. **If one is deliberately left off an essence's Never
   line, that is a quiet request for exactly one power with it** (corrected 2026-10-05: Nature left
   Stealth off Never and expected one stealth power). Listing it on Some or Most asks for more.
+- **Never a power by itself** (Bryan 2026-10-06: a power that is only stealth or only threat is
+  painful to spend a slot on). Stealth or threat always comes as one half of a two-part buff: paired
+  with a second, modest effect that suits the essence (Cloak of Night: stealth and immunity to
+  blindness; Unyielding: threat and no stagger). The second effect carries its own Stat Effect tag.
+  Camouflage and Stalwart were made before this rule and are still solo.
+- An essence may have two threat or stealth powers; they do not stack (the strongest wins).
 - A Stealth or Threat buff needs no Stat Effect tag; the Awareness tag already says what it changes.
 - In the game these set the player's distance ratio (see "Threat and stealth"). They do not add
   up: the strongest one active wins (a 50% threat buff beats a 70% one). A stealth buff and a

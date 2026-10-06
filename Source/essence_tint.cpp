@@ -212,6 +212,8 @@ DamageType GetSpellDamageType(SpellID spell)
 		return DamageType::Physical;
 	case EssenceID::Dark:
 		return DamageType::Shadow;
+	case EssenceID::Earth:
+		return DamageType::Earth;
 	case EssenceID::None:
 		break;
 	}
@@ -299,6 +301,8 @@ std::optional<EssenceTint> GetEssenceTint(EssenceID essence)
 		return EssenceTint::DullYellow;
 	case EssenceID::Dark: // Shadow
 		return EssenceTint::DullBlue;
+	case EssenceID::Earth:
+		return EssenceTint::DullBeige;
 	case EssenceID::None:
 		break;
 	}

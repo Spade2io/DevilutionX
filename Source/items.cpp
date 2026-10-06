@@ -2531,7 +2531,7 @@ void CalcPlrPrimaryStats(Player &player, int strength, int &magic, int dexterity
 		vitality -= 2 * playerLevel;
 	}
 
-	strength += GetBuffStrengthBonus(player); // Essence Mod: persistent buffs
+	strength += GetBuffStrengthBonus(player) + GetPowerBuffPercent(player, "Power"); // Essence Mod: persistent buffs
 
 	player._pStrength = std::clamp(strength + player._pBaseStr, 0, 750);
 	player._pMagic = std::clamp(magic + player._pBaseMag, 0, 750);
