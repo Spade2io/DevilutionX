@@ -1364,7 +1364,8 @@
       "potencyNote": "damage",
       "number": 112,
       "gameKey": "GlacialSpike",
-      "icon": 26
+      "icon": 29,
+      "shortText": "Heavy ice hit, one enemy"
     },
     {
       "id": "p_f472ce04",
@@ -1391,7 +1392,8 @@
       "potencyNote": "damage to each target",
       "number": 113,
       "gameKey": "IceBurst",
-      "icon": 26
+      "icon": 10,
+      "shortText": "Ice damage, radius 2"
     },
     {
       "id": "p_978425fa",
@@ -1418,7 +1420,8 @@
       "potencyNote": "damage to each target",
       "number": 114,
       "gameKey": "Hailstorm",
-      "icon": 26
+      "icon": 45,
+      "shortText": "Ice damage, radius 4"
     },
     {
       "id": "p_ac80b658",
@@ -1472,7 +1475,8 @@
       "potencyNote": "bonus damage on the hit",
       "number": 116,
       "gameKey": "Icebreaker",
-      "icon": 26
+      "icon": 35,
+      "shortText": "Strike dealing ice damage"
     },
     {
       "id": "p_63302ca3",
@@ -1500,7 +1504,8 @@
       "potencyNote": "damage to each target; heals 8",
       "number": 117,
       "gameKey": "Riptide",
-      "icon": 26
+      "icon": 13,
+      "shortText": "Hurts foes, heals allies"
     },
     {
       "id": "p_3ecc0dc7",
@@ -1580,7 +1585,8 @@
       "potencyNote": "healing to each target",
       "number": 120,
       "gameKey": "Springwater",
-      "icon": 26
+      "icon": 40,
+      "shortText": "Heals ally, half to nearby"
     },
     {
       "id": "p_36e9df0f",
@@ -1687,7 +1693,8 @@
       "potencyNote": "% faster mana regeneration, lasting",
       "number": 124,
       "gameKey": "Clarity",
-      "icon": 26
+      "icon": 43,
+      "shortText": "Ally regains mana faster"
     },
     {
       "id": "p_ff8e655d",
@@ -1714,7 +1721,8 @@
       "potencyNote": "% faster mana regeneration for 20 seconds, for every ally",
       "number": 125,
       "gameKey": "HighTide",
-      "icon": 26
+      "icon": 50,
+      "shortText": "All allies: mana regen 20s"
     },
     {
       "id": "p_cde0b1ab",
@@ -1741,7 +1749,8 @@
       "potencyNote": "% maximum mana, lasting",
       "number": 126,
       "gameKey": "Reservoir",
-      "icon": 26
+      "icon": 12,
+      "shortText": "Ally has more maximum mana"
     },
     {
       "id": "p_5386da0f",
@@ -1768,7 +1777,8 @@
       "potencyNote": "mana given to the ally (you spend 20)",
       "number": 127,
       "gameKey": "ManaTide",
-      "icon": 26
+      "icon": 28,
+      "shortText": "Gives an ally 15 mana"
     },
     {
       "id": "p_a277929a",

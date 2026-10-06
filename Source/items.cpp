@@ -2646,6 +2646,9 @@ void CalcPlrLifeMana(Player &player, int vitality, int magic, int life, int mana
 
 	magic = (magic * playerClassAttributes.itmMana) >> 6;
 	mana += (magic << 6);
+	// Essence Mod: a "MaxMana" buff raises the whole pool by a percentage. Like mana from an item,
+	// the extra arrives full and leaves with the buff.
+	mana += static_cast<int>(static_cast<int64_t>(mana + player._pMaxManaBase) * GetPowerBuffPercent(player, "MaxMana") / 100);
 
 	player._pMaxHP = std::clamp(life + player._pMaxHPBase, 1 << 6, 2000 << 6);
 	player._pHitPoints = std::min(life + player._pHPBase, player._pMaxHP);

@@ -335,7 +335,23 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 		return;
 	}
 
-	if (GetSpellData(spell).effect == "Heal") {
+	if (GetSpellData(spell).effect == "Mana") {
+		if (target.hasNoLife() || HasAnyOf(target._pIFlags, ItemSpecialEffect::NoMana))
+			return;
+		const int given = std::clamp(target._pMaxMana - target._pMana, 0, amount);
+		target._pMana += given;
+		target._pManaBase += given;
+		if (&target == MyPlayer)
+			RedrawComponent(PanelDrawComponent::Mana);
+		if (target.isOnActiveLevel()) {
+			AddFloatingNumber(target.position.tile, { 0, 0 }, given > 0 ? StrCat("+", (given + 32) >> 6, " mana") : std::string("Full mana"),
+			    GetSpellTextColor(spell) | UiFlags::FontSize12, 2000 + target.getId());
+		}
+		return;
+	}
+
+	// A heal, or the healing half of a burst that hurts enemies and heals allies.
+	if (GetSpellData(spell).effect == "Heal" || GetSpellData(spell).rider == "Heal") {
 		if (target.hasNoLife())
 			return;
 

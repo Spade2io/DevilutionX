@@ -225,7 +225,10 @@ void ActivatePowerBuff(Player &player, SpellID spell, int amount)
 	for (PowerBuff &buff : buffs) {
 		if (buff.spell == spell) {
 			buff.ticksLeft = ticks;
-			buff.amount = amount;
+			if (buff.amount != amount) {
+				buff.amount = amount;
+				CalcPlrInv(player, true);
+			}
 			return;
 		}
 	}
@@ -241,15 +244,19 @@ std::vector<SpellID> GetActivePowerBuffs(const Player &player)
 	return spells;
 }
 
-int ApplyDamageBuffs(const Player &player, int damage)
+int GetPowerBuffPercent(const Player &player, std::string_view stat)
 {
 	int percent = 0;
 	for (const PowerBuff &buff : PowerBuffs[player.getId()]) {
-		const SpellData &spellData = GetSpellData(buff.spell);
-		// Buffs to the same stat do not add up: the strongest one counts.
-		if (spellData.buffStat == "Damage")
+		if (GetSpellData(buff.spell).buffStat == stat)
 			percent = std::max(percent, buff.amount);
 	}
+	return percent;
+}
+
+int ApplyDamageBuffs(const Player &player, int damage)
+{
+	const int percent = GetPowerBuffPercent(player, "Damage");
 	if (percent == 0)
 		return damage;
 	return damage + static_cast<int>(static_cast<int64_t>(damage) * percent / 100);
@@ -257,14 +264,7 @@ int ApplyDamageBuffs(const Player &player, int damage)
 
 int GetBuffSkippedFrames(const Player &player)
 {
-	int percent = 0;
-	for (const PowerBuff &buff : PowerBuffs[player.getId()]) {
-		const SpellData &spellData = GetSpellData(buff.spell);
-		// Buffs to the same stat do not add up: the strongest one counts.
-		if (spellData.buffStat == "Speed")
-			percent = std::max(percent, buff.amount);
-	}
-	return std::clamp(percent / 10, 0, 4);
+	return std::clamp(GetPowerBuffPercent(player, "Speed") / 10, 0, 4);
 }
 
 bool IsPassivePower(SpellID spell)

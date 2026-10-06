@@ -53,6 +53,15 @@ bool IsBuffActive(const Player &player, BuffID buff);
  */
 void ActivatePowerBuff(Player &player, SpellID spell, int amount);
 
+/**
+ * @brief How much a player's data-file buffs raise one stat, as a percentage (30 is +30%).
+ * Buffs to the same stat do not add up: the strongest one counts.
+ */
+int GetPowerBuffPercent(const Player &player, std::string_view stat);
+
+/** A buff or heal with this radius or more reaches every player in the game, wherever they are. */
+constexpr int EveryoneRadius = 50;
+
 /** @brief The spells of the data-file buffs a player has running. */
 std::vector<SpellID> GetActivePowerBuffs(const Player &player);
 

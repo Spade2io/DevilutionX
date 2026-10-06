@@ -11,21 +11,21 @@ Kindling	108	Kindling	Fire	CastFire	15	Fire,Targeted	Corruption	0	15	37	60	Remov
 SearingBrand	109	Searing Brand	Fire	CastFire	2	Fire,Targeted		0	2	31	12	All hits deal extra fire	Strike	192	0	Branded	128		0	0
 FanTheFlames	110	Fan the Flames	Fire	CastFire	10	Fire,AllowedInTown	StrengthBuff	0	10	33	0	Ally acts 10% faster	Buff	10	0		0	Speed	0	1
 Wellspring	111	Wellspring	Water	CastFire	10	Magic		0	10	26	0	15 % faster mana regeneration		0	0		0		0	0
-GlacialSpike	112	Glacial Spike	Water	CastFire	6	Magic,Targeted		0	6	26	10	9 damage		0	0		0		0	0
-IceBurst	113	Ice Burst	Water	CastFire	9	Magic		0	9	26	0	4 damage to each target		0	0		0		0	0
-Hailstorm	114	Hailstorm	Water	CastFire	12	Magic		0	12	26	12	5 damage to each target		0	0		0		0	0
+GlacialSpike	112	Glacial Spike	Water	CastFire	6	Magic,Targeted	Corruption	0	6	29	10	Heavy ice hit, one enemy	Burst	576	0		0		0	0
+IceBurst	113	Ice Burst	Water	CastFire	9	Magic	Corruption	0	9	10	0	Ice damage, radius 2	GroundBurst	256	2		0		0	0
+Hailstorm	114	Hailstorm	Water	CastFire	12	Magic	Corruption	0	12	45	12	Ice damage, radius 4	GroundBurst	320	4		0		0	0
 TidalWave	115	Tidal Wave	Water	CastFire	9	Magic		0	9	26	10	6 damage to each target		0	0		0		0	0
-Icebreaker	116	Icebreaker	Water	CastFire	2	Magic,Targeted		0	2	26	0	3 bonus damage on the hit		0	0		0		0	0
-Riptide	117	Riptide	Water	CastFire	9	Magic		0	9	26	6	4 damage to each target		0	0		0		0	0
+Icebreaker	116	Icebreaker	Water	CastFire	2	Magic,Targeted		0	2	35	0	Strike dealing ice damage	Strike	192	0		0		0	0
+Riptide	117	Riptide	Water	CastFire	9	Magic	Corruption	0	9	13	6	Hurts foes, heals allies	GroundBurst	256	2	Heal	512		0	0
 SoothingWaters	118	Soothing Waters	Water	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	9	0	Heals an ally, or you	Heal	768	0		0		0	1
 HealingRain	119	Healing Rain	Water	CastHealing	16	Magic,AllowedInTown	StrengthBuff	0	16	1	0	Heals allies, radius 4	Heal	384	4		0		0	0
-Springwater	120	Springwater	Water	CastFire	12	Magic		0	12	26	8	13 healing to each target		0	0		0		0	0
+Springwater	120	Springwater	Water	CastHealing	12	Magic,AllowedInTown	StrengthBuff	0	12	40	8	Heals ally, half to nearby	Heal	832	2		0		0	1
 WashAway	121	Wash Away	Water	CastFire	3	Magic		0	3	26	0	5 healing		0	0		0		0	0
 PurgingRain	122	Purging Rain	Water	CastFire	8	Magic		0	8	26	12	1 harmful effect removed from		0	0		0		0	0
 Monsoon	123	Monsoon	Water	CastFire	24	Magic		0	24	26	60	18 healing to each target		0	0		0		0	0
-Clarity	124	Clarity	Water	CastFire	10	Magic		0	10	26	0	30 % faster mana regeneration		0	0		0		0	0
-HighTide	125	High Tide	Water	CastFire	18	Magic		0	18	26	60	45 % faster mana regeneration		0	0		0		0	0
-Reservoir	126	Reservoir	Water	CastFire	10	Magic		0	10	26	0	10 % maximum mana		0	0		0		0	0
-ManaTide	127	Mana Tide	Water	CastFire	20	Magic		0	20	26	10	15 mana given to the ally		0	0		0		0	0
+Clarity	124	Clarity	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	Ally regains mana faster	Buff	30	0		0	ManaRegen	0	1
+HighTide	125	High Tide	Water	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	50	60	All allies: mana regen 20s	Buff	45	99		0	ManaRegen	20	0
+Reservoir	126	Reservoir	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	Ally has more maximum mana	Buff	10	0		0	MaxMana	0	1
+ManaTide	127	Mana Tide	Water	CastHealing	20	Magic,AllowedInTown	StrengthBuff	0	20	28	10	Gives an ally 15 mana	Mana	960	0		0		0	1
 DeepFreeze	128	Deep Freeze	Water	CastFire	18	Magic,Targeted		0	18	26	45	6 seconds held		0	0		0		0	0
 GreatFlood	129	Great Flood	Water	CastFire	36	Magic		0	36	26	180	14 damage to each target		0	0		0		0	0

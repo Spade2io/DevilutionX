@@ -35,7 +35,8 @@ const ALREADY_IN_GAME = {
 const ICONS = {
   'Smolder': 32, 'Wildfire': 46, 'Meteor': 24, 'Ignite': 22, 'Flame Cleave': 47, 'Searing Brand': 31, 'Melt Armor': 30,
   'Stoke the Flames': 18, 'Fan the Flames': 33, 'Kindling': 37, 'Phoenix': 40,
-  'Soothing Waters': 9, 'Healing Rain': 1,
+  'Soothing Waters': 9, 'Healing Rain': 1, 'Glacial Spike': 29, 'Ice Burst': 10, 'Hailstorm': 45, 'Icebreaker': 35,
+  'Riptide': 13, 'Springwater': 40, 'Clarity': 43, 'High Tide': 50, 'Reservoir': 12, 'Mana Tide': 28,
 }
 // The short line the spellbook shows under each power. There is room for about 28 letters.
 const SHORT_TEXT = {
@@ -43,6 +44,10 @@ const SHORT_TEXT = {
   'Stoke the Flames': '+30% damage for 20s', 'Phoenix': 'Rise again on death', 'Smolder': 'Stacking burn from range',
   'Wildfire': 'Burn that spreads', 'Meteor': 'Heavy hit, radius 2', 'Kindling': 'Removes fire resistance',
   'Soothing Waters': 'Heals an ally, or you', 'Healing Rain': 'Heals allies, radius 4',
+  'Glacial Spike': 'Heavy ice hit, one enemy', 'Ice Burst': 'Ice damage, radius 2', 'Hailstorm': 'Ice damage, radius 4',
+  'Icebreaker': 'Strike dealing ice damage', 'Riptide': 'Hurts foes, heals allies', 'Springwater': 'Heals ally, half to nearby',
+  'Clarity': 'Ally regains mana faster', 'High Tide': 'All allies: mana regen 20s', 'Reservoir': 'Ally has more maximum mana',
+  'Mana Tide': 'Gives an ally 15 mana',
   'Searing Brand': 'All hits deal extra fire', 'Fan the Flames': 'Ally acts 10% faster',
 }
 // What each built power does in the game. "missile" is the game projectile that carries the cast;
@@ -67,6 +72,14 @@ const SHORT_TEXT = {
 //   Heal: restores the power's potency in life to the player aimed at, or to the caster if no
 //         player was aimed at. Works on other players in multiplayer. With a radius it falls on
 //         a spot instead and heals every player within the radius of it.
+//   GroundBurst: a Burst that lands on the spot chosen rather than on a monster, so it can be
+//         cast at empty ground. The rider "Heal" also heals every player within the radius;
+//         riderHeal is how much.
+//   Heal on a power tagged Ally with a radius: the ally aimed at is healed in full and every
+//         other player within the radius of them for half.
+//   Mana: gives the power's potency in mana to the player aimed at.
+//   A Buff tagged Everyone reaches every player in the game. Buff stats: Damage, Speed,
+//         ManaRegen, MaxMana.
 //   Buff: switches a buff on for the caster, or for the player aimed at if the power is tagged Ally. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10
@@ -84,6 +97,16 @@ const BEHAVIOUR = {
   'Fan the Flames': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Speed', duration: 0 },
   'Soothing Waters': { missile: 'StrengthBuff', effect: 'Heal' },
   'Healing Rain': { missile: 'StrengthBuff', effect: 'Heal' },
+  'Glacial Spike': { missile: 'Corruption', effect: 'Burst' },
+  'Ice Burst': { missile: 'Corruption', effect: 'GroundBurst' },
+  'Hailstorm': { missile: 'Corruption', effect: 'GroundBurst' },
+  'Icebreaker': { effect: 'Strike' },
+  'Riptide': { missile: 'Corruption', effect: 'GroundBurst', rider: 'Heal', riderHeal: 8 },
+  'Springwater': { missile: 'StrengthBuff', effect: 'Heal' },
+  'Clarity': { missile: 'StrengthBuff', effect: 'Buff', stat: 'ManaRegen', duration: 0 },
+  'High Tide': { missile: 'StrengthBuff', effect: 'Buff', stat: 'ManaRegen', duration: 20 },
+  'Reservoir': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxMana', duration: 0 },
+  'Mana Tide': { missile: 'StrengthBuff', effect: 'Mana' },
 }
 const FIRST_NUMBER = 100
 
@@ -101,7 +124,8 @@ for (const essenceName of essenceNames) {
       power.number = Math.max(FIRST_NUMBER - 1, ...data.powers.map((p) => p.number ?? 0)) + 1
       power.gameKey = keyFor(power.name)
     }
-    if (power.icon == null) power.icon = ICONS[power.name] ?? 26
+    // 26 is the blank stand-in given to a power exported before it had a picture chosen.
+    if (power.icon == null || power.icon === 26) power.icon = ICONS[power.name] ?? 26
     if (power.shortText == null && SHORT_TEXT[power.name]) power.shortText = SHORT_TEXT[power.name]
     exported.push({ power, essence })
   }
@@ -118,29 +142,31 @@ const row = ({ power, essence }) => {
   const tags = tagNames(power)
   const element = tags.includes('Lightning') ? 'Lightning' : tags.includes('Fire') ? 'Fire' : 'Magic'
   // Every buff and heal can be cast in town, cooldown ones included.
-  const inTown = ['Buff', 'Heal'].includes(BEHAVIOUR[power.name]?.effect)
+  const inTown = ['Buff', 'Heal', 'Mana'].includes(BEHAVIOUR[power.name]?.effect)
   const flags = [element, ...(tags.includes('Enemy') ? ['Targeted'] : []), ...(inTown ? ['AllowedInTown'] : [])].join(',')
   const mana = Math.min(250, Math.max(0, Math.round(power.manaCost ?? 0)))
   const behaviour = BEHAVIOUR[power.name]
   // Amounts are in 64ths of a hit point, the unit the game counts damage in.
   const amount = behaviour?.effect === 'Burn' ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
-    : ['Burst', 'Strike', 'Heal'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64)
+    : ['Burst', 'GroundBurst', 'Strike', 'Heal', 'Mana'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64)
     : behaviour?.effect === 'Buff' || behaviour?.effect === 'Rebirth' ? Math.round(power.potency ?? 0)
     : 0
   // A strike only reaches past its target when it is marked to spread.
-  const radius = !behaviour ? 0 : behaviour.effect === 'Strike' && !behaviour.spread ? 0 : Math.round(power.radius ?? 0)
+  // 99 stands for "everyone in the game".
+  const radius = !behaviour ? 0 : behaviour.effect === 'Strike' && !behaviour.spread ? 0 : tags.some((t) => t.startsWith('Everyone')) ? 99 : Math.round(power.radius ?? 0)
   const riderAmount = !behaviour?.rider ? 0
     : behaviour.riderPercent != null ? behaviour.riderPercent
     : behaviour.riderDamage != null ? Math.round(behaviour.riderDamage * 64)
+    : behaviour.riderHeal != null ? Math.round(behaviour.riderHeal * 64)
     : Math.round(behaviour.riderTotal * 64 / TICKS_PER_EFFECT)
   return [
-    power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : behaviour?.effect === 'Heal' ? 'CastHealing' : 'CastFire',
+    power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : element === 'Magic' && ['Heal', 'Mana', 'Buff'].includes(behaviour?.effect) ? 'CastHealing' : 'CastFire',
     mana, flags, behaviour?.missile ?? '', 0, mana, power.icon,
     Math.round(power.cooldown ?? 0), shortLine(power),
     behaviour?.effect ?? '', amount, radius, behaviour?.rider ?? '', riderAmount,
     behaviour?.stat ?? '', behaviour?.duration ?? 0,
     // Heals and buffs tagged Ally can be aimed at another player.
-    ['Heal', 'Buff'].includes(behaviour?.effect) && tags.includes('Ally') ? 1 : 0,
+    ['Heal', 'Buff', 'Mana'].includes(behaviour?.effect) && tags.includes('Ally') ? 1 : 0,
   ].join('\t')
 }
 const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount', 'stat', 'duration', 'ally'].join('\t')

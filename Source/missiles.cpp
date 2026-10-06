@@ -2502,6 +2502,9 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	// Nothing flies through the air: the effect lands directly on the monster under the cursor.
 	missile._miDelFlag = true;
 
+	// "GroundBurst" is the exception: it lands on the spot chosen, whether or not anything is there.
+	const bool isGround = IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && GetSpellData(missile.sourceSpell).effect == "GroundBurst";
+
 	const std::optional<Point> targetMonsterPosition = FindClosestValidPosition(
 	    [](Point target) {
 		    if (!InDungeonBounds(target))
@@ -2514,14 +2517,15 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	    },
 	    parameter.dst, 0, 2);
 
-	if (!targetMonsterPosition) {
+	if (!isGround && !targetMonsterPosition) {
 		parameter.spellFizzled = true;
 		return;
 	}
+	const Point centre = isGround ? Point { parameter.dst.x, parameter.dst.y } : *targetMonsterPosition;
 
 	const Player &player = Players[missile._misource];
-	missile.position.tile = *targetMonsterPosition;
-	missile.position.start = *targetMonsterPosition;
+	missile.position.tile = centre;
+	missile.position.start = centre;
 
 	// What lands, how much, and how far around the target it reaches. Corruption itself is the
 	// original, hand-written case; a power read from essence_powers.tsv says all three in its row.
@@ -2539,7 +2543,7 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	int radius = 0;
 	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell)) {
 		const SpellData &spellData = GetSpellData(missile.sourceSpell);
-		if (spellData.effect == "Burst") {
+		if (IsAnyOf(spellData.effect, "Burst", "GroundBurst")) {
 			isBurst = true;
 			burstDamageType = GetSpellDamageType(missile.sourceSpell);
 			switch (burstDamageType) {
@@ -2572,8 +2576,8 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 
 	// The monster under the cursor, and with a radius every monster standing within it.
 	std::vector<int> targets;
-	for (int y = targetMonsterPosition->y - radius; y <= targetMonsterPosition->y + radius; y++) {
-		for (int x = targetMonsterPosition->x - radius; x <= targetMonsterPosition->x + radius; x++) {
+	for (int y = centre.y - radius; y <= centre.y + radius; y++) {
+		for (int x = centre.x - radius; x <= centre.x + radius; x++) {
 			if (!InDungeonBounds({ x, y }))
 				continue;
 			const int monsterId = std::abs(dMonster[x][y]) - 1;
@@ -2582,6 +2586,21 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 			const Monster &candidate = Monsters[monsterId];
 			if (candidate.isPossibleToHit() && !candidate.isPlayerMinion())
 				targets.push_back(monsterId);
+		}
+	}
+
+	if (isGround) {
+		// The spot itself always shows the burst, so a cast that catches nothing is still seen.
+		AddMissile(centre, { 0, 0 }, Direction::South, MissileID::CorruptionExplosion, missile._micaster, missile._misource, 0, 0, &missile);
+		// The rider "Heal": every living player within the radius is healed for the rider's amount.
+		if (&player == MyPlayer && GetSpellData(spell).rider == "Heal") {
+			const auto heal = static_cast<uint32_t>(ScaleDamageForSpellLevel(GetSpellData(spell).riderAmount, std::max<int>(player.GetBaseSpellLevel(spell), 1)));
+			for (const Player &other : Players) {
+				if (!other.plractive || !other.isOnActiveLevel() || other.hasNoLife())
+					continue;
+				if (other.position.tile.WalkingDistance(centre) <= radius)
+					NetSendCmdPowerOnPlayer(other, spell, heal);
+			}
 		}
 	}
 
@@ -2657,28 +2676,42 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 {
 	// The buff lives on the player, so this effect has done its job the moment it is created.
 	missile._miDelFlag = true;
-	// "Heal" and "Buff" land on a player: the one aimed at if the power allows that, otherwise the
-	// caster. Only the caster's own PC decides who and how much; it then tells every PC, its own
-	// included, and each of them applies it.
-	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && IsAnyOf(GetSpellData(missile.sourceSpell).effect, "Heal", "Buff")) {
+	// "Heal", "Buff" and "Mana" land on players. Only the caster's own PC decides who and how
+	// much; it then tells every PC, its own included, and each of them applies it.
+	const SpellID spell = missile.sourceSpell;
+	if (IsExtendedSpell(spell) && IsValidSpell(spell) && IsAnyOf(GetSpellData(spell).effect, "Heal", "Buff", "Mana")) {
+		const SpellData &spellData = GetSpellData(spell);
 		const Player &caster = Players[missile._misource];
 		if (&caster != MyPlayer)
 			return;
-		const int amount = ScaleDamageForSpellLevel(GetSpellData(missile.sourceSpell).effectAmount, std::max<int>(caster.GetBaseSpellLevel(missile.sourceSpell), 1));
-		// With a radius the heal falls on a spot: every living player within it is healed, the
-		// caster included if they stand there.
-		if (const int radius = GetSpellData(missile.sourceSpell).effectRadius; radius > 0 && GetSpellData(missile.sourceSpell).effect == "Heal") {
+		const auto amount = static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.effectAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)));
+		const int radius = spellData.effectRadius;
+
+		// Everyone: every living player in the game, wherever they are.
+		if (radius >= EveryoneRadius) {
+			for (const Player &other : Players) {
+				if (other.plractive && !other.hasNoLife())
+					NetSendCmdPowerOnPlayer(other, spell, amount);
+			}
+			return;
+		}
+
+		// A spot on the ground: every living player within the radius of it, the caster included
+		// if they stand there.
+		if (!spellData.targetsAlly && radius > 0) {
 			for (const Player &other : Players) {
 				if (!other.plractive || !other.isOnActiveLevel() || other.hasNoLife())
 					continue;
 				if (other.position.tile.WalkingDistance(parameter.dst) <= radius)
-					NetSendCmdPowerOnPlayer(other, missile.sourceSpell, static_cast<uint32_t>(amount));
+					NetSendCmdPowerOnPlayer(other, spell, amount);
 			}
 			return;
 		}
+
+		// One player: the one aimed at if the power allows that, otherwise the caster.
 		const Player *target = &caster;
 		for (const Player &other : Players) {
-			if (!GetSpellData(missile.sourceSpell).targetsAlly)
+			if (!spellData.targetsAlly)
 				break;
 			if (&other == &caster || !other.plractive || !other.isOnActiveLevel() || other.hasNoLife())
 				continue;
@@ -2687,7 +2720,17 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 				break;
 			}
 		}
-		NetSendCmdPowerOnPlayer(*target, missile.sourceSpell, static_cast<uint32_t>(amount));
+		NetSendCmdPowerOnPlayer(*target, spell, amount);
+
+		// With a radius as well, everyone standing near that player receives half as much.
+		if (radius > 0 && amount / 2 > 0) {
+			for (const Player &other : Players) {
+				if (&other == target || !other.plractive || !other.isOnActiveLevel() || other.hasNoLife())
+					continue;
+				if (other.position.tile.WalkingDistance(target->position.tile) <= radius)
+					NetSendCmdPowerOnPlayer(other, spell, amount / 2);
+			}
+		}
 		return;
 	}
 	ActivateBuff(Players[missile._misource], BuffID::Strength);

@@ -3094,7 +3094,8 @@ int GetManaRegenPerSecond(const Player &player)
 {
 	// Base: Recovery (the Vitality stat) / 10 mana per second, in 64ths.
 	// Spells, abilities and buffs that change mana regeneration adjust the result here.
-	return std::max(player._pVitality, 0) * 64 / 10;
+	const int base = std::max(player._pVitality, 0) * 64 / 10;
+	return base + base * GetPowerBuffPercent(player, "ManaRegen") / 100;
 }
 
 /**
