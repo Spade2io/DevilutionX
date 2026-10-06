@@ -1,5 +1,5 @@
 // Writes the designer's powers into the files the game reads.
-// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire and Water)
+// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire, Water and Holy)
 //
 // What it writes:
 //   assets/txtdata/spells/essence_powers.tsv  one row per power the game does not already have
@@ -20,7 +20,7 @@ const POWERS_FILE = path.join(REPO, 'assets/txtdata/spells/essence_powers.tsv')
 const ITEMS_FILE = path.join(REPO, 'assets/txtdata/items/itemdat.tsv')
 const check = process.argv.includes('--check')
 const wanted = process.argv.slice(2).filter((a) => !a.startsWith('--'))
-const essenceNames = wanted.length ? wanted : ['Fire', 'Water']
+const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy']
 
 // Powers the game already has as hand-written spells. They keep their original numbers and are
 // not exported; the name on the right is the game's own name for the spell.
@@ -37,6 +37,10 @@ const ICONS = {
   'Stoke the Flames': 18, 'Fan the Flames': 33, 'Kindling': 37, 'Phoenix': 40,
   'Soothing Waters': 9, 'Healing Rain': 1, 'Glacial Spike': 29, 'Ice Burst': 10, 'Hailstorm': 45, 'Icebreaker': 35,
   'Riptide': 13, 'Springwater': 40, 'Clarity': 43, 'High Tide': 50, 'Reservoir': 12, 'Mana Tide': 28,
+  'Radiance': 8, 'Mend': 1, 'Divine Light': 3, 'Patient Prayer': 9, 'Lay on Hands': 40, 'Purify': 4, 'Absolution': 21,
+  'Chorus of Light': 15, 'Second Dawn': 40, 'Guardian Angel': 44, 'Miracle': 24, 'Ward of Purity': 12, 'Vigil': 43, 'Benediction': 18,
+  'Smite': 41, 'Judgment': 34, 'Atonement': 33, 'Searing Light': 10, 'Dawnburst': 37,
+  'Wellspring': 8, 'Tidal Wave': 13, 'Deep Freeze': 7, 'Wash Away': 4, 'Purging Rain': 21, 'Monsoon': 3, 'Great Flood': 24,
 }
 // The short line the spellbook shows under each power. There is room for about 28 letters.
 const SHORT_TEXT = {
@@ -48,6 +52,16 @@ const SHORT_TEXT = {
   'Icebreaker': 'Strike dealing ice damage', 'Riptide': 'Hurts foes, heals allies', 'Springwater': 'Heals ally, half to nearby',
   'Clarity': 'Ally regains mana faster', 'High Tide': 'All allies: mana regen 20s', 'Reservoir': 'Ally has more maximum mana',
   'Mana Tide': 'Gives an ally 15 mana',
+  'Wellspring': 'Aura: mana regen, radius 8', 'Tidal Wave': 'Wave of ice damage', 'Deep Freeze': 'Holds foes still 6s, rad 2',
+  'Wash Away': 'Cleanses and heals an ally', 'Purging Rain': 'Cleanses allies, radius 4', 'Monsoon': 'Big heal + cleanse, rad 4',
+  'Great Flood': 'Hurts foes, heals, radius 6',
+  'Radiance': 'Aura: heals allies, rad 8', 'Mend': 'Small, cheap heal', 'Divine Light': 'Huge heal, huge cost',
+  'Patient Prayer': 'Cheap medium heal', 'Lay on Hands': 'Restores 70% of ally life', 'Purify': 'Cleanses and heals an ally',
+  'Absolution': 'Cleanses ally and nearby', 'Chorus of Light': 'Heal that leaps to others', 'Second Dawn': 'Raises a fallen ally',
+  'Guardian Angel': 'Ally rises once on death', 'Miracle': 'Raises and heals everyone', 'Ward of Purity': 'Cleanse; wards for 20s',
+  'Vigil': 'Ally regains life faster', 'Benediction': 'Ally has more maximum life', 'Smite': 'Strike dealing holy damage',
+  'Judgment': 'Heavy; more to undead/demon', 'Atonement': 'Strike that heals an ally', 'Searing Light': 'Holy damage, radius 2',
+  'Dawnburst': 'Hurts foes, heals, radius 4',
   'Searing Brand': 'All hits deal extra fire', 'Fan the Flames': 'Ally acts 10% faster',
 }
 // What each built power does in the game. "missile" is the game projectile that carries the cast;
@@ -80,6 +94,25 @@ const SHORT_TEXT = {
 //   Mana: gives the power's potency in mana to the player aimed at.
 //   A Buff tagged Everyone reaches every player in the game. Buff stats: Damage, Speed,
 //         ManaRegen, MaxMana.
+//   Aura: a lasting buff on the caster that also helps every living player within the power's
+//         radius of them, for as long as they stay there. It takes a stat like a Buff.
+//   Wave: the game's Flame Wave, in the power's colour and damage type, dealing its potency.
+//   Freeze: holds the target and every monster within the radius still for the potency in
+//         seconds (the game's Stone Curse). The time does not grow with the power's level.
+//   Cleanse: removes harmful effects from every player within the radius of the spot. As a
+//         rider on a Heal ("Cleanse") or a GroundBurst ("HealCleanse") it is added to the heal.
+//         Monsters put nothing harmful on players yet, so there is nothing for it to remove.
+//   HealPercent: a Heal whose potency is a percentage of the target's maximum life.
+//   ChainHeal: a Heal that then leaps to the nearest wounded player, and again, a quarter less
+//         each time. Two leaps, one more for every two levels.
+//   Resurrect: raises the fallen player nearest the spot chosen, with the potency as a percentage
+//         of their life. Tagged Everyone it raises every fallen player, and the living are healed
+//         for riderHeal.
+//   An Aura with the stat HealPulse heals everyone it reaches for its potency every 2 seconds.
+//   More Buff stats: LifeRegen, MaxLife, Rebirth (the player rises once when they would die,
+//         with the potency as a percentage of their life), Ward (nothing yet).
+//   More Strike riders: Bane (riderPercent more damage to undead and demons), HealAlly (the most
+//         wounded player within 8 tiles is healed for riderHeal).
 //   Buff: switches a buff on for the caster, or for the player aimed at if the power is tagged Ally. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10
@@ -107,6 +140,32 @@ const BEHAVIOUR = {
   'High Tide': { missile: 'StrengthBuff', effect: 'Buff', stat: 'ManaRegen', duration: 20 },
   'Reservoir': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxMana', duration: 0 },
   'Mana Tide': { missile: 'StrengthBuff', effect: 'Mana' },
+  'Wellspring': { missile: 'StrengthBuff', effect: 'Aura', stat: 'ManaRegen', duration: 0 },
+  'Tidal Wave': { missile: 'FlameWaveControl', effect: 'Wave' },
+  'Deep Freeze': { missile: 'Corruption', effect: 'Freeze' },
+  'Wash Away': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 1 },
+  'Purging Rain': { missile: 'StrengthBuff', effect: 'Cleanse' },
+  'Monsoon': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 99 },
+  'Great Flood': { missile: 'Corruption', effect: 'GroundBurst', rider: 'HealCleanse', riderHeal: 29 },
+  'Radiance': { missile: 'StrengthBuff', effect: 'Aura', stat: 'HealPulse', duration: 0 },
+  'Mend': { missile: 'StrengthBuff', effect: 'Heal' },
+  'Divine Light': { missile: 'StrengthBuff', effect: 'Heal' },
+  'Patient Prayer': { missile: 'StrengthBuff', effect: 'Heal' },
+  'Lay on Hands': { missile: 'StrengthBuff', effect: 'HealPercent', rider: 'Cleanse', riderPercent: 99 },
+  'Purify': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 1 },
+  'Absolution': { missile: 'StrengthBuff', effect: 'Cleanse' },
+  'Chorus of Light': { missile: 'StrengthBuff', effect: 'ChainHeal' },
+  'Second Dawn': { missile: 'StrengthBuff', effect: 'Resurrect' },
+  'Guardian Angel': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Rebirth', duration: 0 },
+  'Miracle': { missile: 'StrengthBuff', effect: 'Resurrect', rider: 'HealCleanse', riderHeal: 15 },
+  'Ward of Purity': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Ward', duration: 20, rider: 'Cleanse', riderPercent: 1 },
+  'Vigil': { missile: 'StrengthBuff', effect: 'Buff', stat: 'LifeRegen', duration: 0 },
+  'Benediction': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0 },
+  'Smite': { effect: 'Strike' },
+  'Judgment': { effect: 'Strike', rider: 'Bane', riderPercent: 50 },
+  'Atonement': { effect: 'Strike', rider: 'HealAlly', riderHeal: 11 },
+  'Searing Light': { missile: 'Corruption', effect: 'Burst' },
+  'Dawnburst': { missile: 'Corruption', effect: 'GroundBurst', rider: 'Heal', riderHeal: 11 },
 }
 const FIRST_NUMBER = 100
 
@@ -142,13 +201,16 @@ const row = ({ power, essence }) => {
   const tags = tagNames(power)
   const element = tags.includes('Lightning') ? 'Lightning' : tags.includes('Fire') ? 'Fire' : 'Magic'
   // Every buff and heal can be cast in town, cooldown ones included.
-  const inTown = ['Buff', 'Heal', 'Mana'].includes(BEHAVIOUR[power.name]?.effect)
+  const inTown = ['Buff', 'Heal', 'Mana', 'Aura', 'Cleanse', 'HealPercent', 'ChainHeal', 'Resurrect'].includes(BEHAVIOUR[power.name]?.effect)
   const flags = [element, ...(tags.includes('Enemy') ? ['Targeted'] : []), ...(inTown ? ['AllowedInTown'] : [])].join(',')
   const mana = Math.min(250, Math.max(0, Math.round(power.manaCost ?? 0)))
   const behaviour = BEHAVIOUR[power.name]
   // Amounts are in 64ths of a hit point, the unit the game counts damage in.
   const amount = behaviour?.effect === 'Burn' ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
-    : ['Burst', 'GroundBurst', 'Strike', 'Heal', 'Mana'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64)
+    : behaviour?.stat === 'HealPulse' ? Math.round((power.potency ?? 0) * 64)
+    : ['Burst', 'GroundBurst', 'Strike', 'Heal', 'Mana', 'Wave', 'ChainHeal'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64)
+    : behaviour?.effect === 'Cleanse' ? Math.round(power.potency ?? 99)
+    : ['Aura', 'Freeze', 'HealPercent', 'Resurrect'].includes(behaviour?.effect) ? Math.round(power.potency ?? 0)
     : behaviour?.effect === 'Buff' || behaviour?.effect === 'Rebirth' ? Math.round(power.potency ?? 0)
     : 0
   // A strike only reaches past its target when it is marked to spread.
@@ -160,13 +222,13 @@ const row = ({ power, essence }) => {
     : behaviour.riderHeal != null ? Math.round(behaviour.riderHeal * 64)
     : Math.round(behaviour.riderTotal * 64 / TICKS_PER_EFFECT)
   return [
-    power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : element === 'Magic' && ['Heal', 'Mana', 'Buff'].includes(behaviour?.effect) ? 'CastHealing' : 'CastFire',
+    power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : element === 'Magic' && ['Heal', 'Mana', 'Buff', 'Aura', 'Cleanse', 'HealPercent', 'ChainHeal', 'Resurrect'].includes(behaviour?.effect) ? 'CastHealing' : 'CastFire',
     mana, flags, behaviour?.missile ?? '', 0, mana, power.icon,
     Math.round(power.cooldown ?? 0), shortLine(power),
     behaviour?.effect ?? '', amount, radius, behaviour?.rider ?? '', riderAmount,
     behaviour?.stat ?? '', behaviour?.duration ?? 0,
     // Heals and buffs tagged Ally can be aimed at another player.
-    ['Heal', 'Buff', 'Mana'].includes(behaviour?.effect) && tags.includes('Ally') ? 1 : 0,
+    ['Heal', 'Buff', 'Mana', 'Cleanse', 'HealPercent', 'ChainHeal'].includes(behaviour?.effect) && tags.includes('Ally') ? 1 : 0,
   ].join('\t')
 }
 const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount', 'stat', 'duration', 'ally'].join('\t')

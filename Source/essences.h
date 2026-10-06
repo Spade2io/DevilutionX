@@ -24,7 +24,8 @@ enum class EssenceID : uint8_t {
 	Fire,
 	Lightning,
 	Water,
-	LAST = Water,
+	Holy,
+	LAST = Holy,
 };
 
 /** Essence tabs in the spellbook: tabs 2, 3 and 4. */
@@ -61,7 +62,12 @@ enum class LearnResult : uint8_t {
 	EssenceMissing,
 	/** The essence already holds five abilities. */
 	EssenceFull,
+	/** The ability is an aura and the player already knows one. A player has one aura at most. */
+	AuraAlreadyKnown,
 };
+
+/** @brief Whether an ability is an aura. A player can learn only one, whatever essences they hold. */
+bool IsAuraPower(SpellID spell);
 
 /** @brief Whether the player may learn an ability now. */
 LearnResult CheckCanLearn(SpellID spell);

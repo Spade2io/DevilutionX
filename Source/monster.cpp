@@ -4944,8 +4944,7 @@ bool Monster::isImmune(MissileID missileType, DamageType missileElement) const
 	    || ((resistance & IMMUNE_LIGHTNING) != 0 && missileElement == DamageType::Lightning)
 	    || ((resistance & IMMUNE_ACID) != 0 && missileElement == DamageType::Acid))
 		return true;
-	if (missileType == MissileID::HolyBolt && type().type != MT_DIABLO && data().monsterClass != MonsterClass::Undead)
-		return true;
+	// Essence Mod: Holy Bolt harms every kind of monster. (It used to pass through all but the undead.)
 	return false;
 }
 

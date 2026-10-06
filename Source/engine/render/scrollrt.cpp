@@ -360,6 +360,9 @@ void DrawMissilePrivate(const Surface &out, const Missile &missile, Point target
 		// Essence Mod: this burst reuses Firebolt's art, drawn in the colour of the power that made it.
 		// Corruption itself is shadow.
 		ClxDrawTRN(out, missileRenderPosition, sprite, GetEssenceTintTrn(GetSpellTint(missile.sourceSpell).value_or(EssenceTint::Shadow)));
+	} else if (IsExtendedSpell(missile.sourceSpell) && GetSpellTint(missile.sourceSpell) && !IsAnyOf(missile._mitype, MissileID::StoneCurse)) {
+		// Essence Mod: anything else thrown by a power read from essence_powers.tsv is drawn in that power's colour.
+		ClxDrawTRN(out, missileRenderPosition, sprite, GetEssenceTintTrn(*GetSpellTint(missile.sourceSpell)));
 	} else if (missile._miLightFlag) {
 		ClxDrawLight(out, missileRenderPosition, sprite, lightTableIndex);
 	} else {

@@ -10,22 +10,41 @@ Meteor	107	Meteor	Fire	CastFire	20	Fire,Targeted	Corruption	0	20	24	45	Heavy hit
 Kindling	108	Kindling	Fire	CastFire	15	Fire,Targeted	Corruption	0	15	37	60	Removes fire resistance	Kindle	0	2		0		0	0
 SearingBrand	109	Searing Brand	Fire	CastFire	2	Fire,Targeted		0	2	31	12	All hits deal extra fire	Strike	192	0	Branded	128		0	0
 FanTheFlames	110	Fan the Flames	Fire	CastFire	10	Fire,AllowedInTown	StrengthBuff	0	10	33	0	Ally acts 10% faster	Buff	10	0		0	Speed	0	1
-Wellspring	111	Wellspring	Water	CastFire	10	Magic		0	10	26	0	15 % faster mana regeneration		0	0		0		0	0
+Wellspring	111	Wellspring	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: mana regen, radius 8	Aura	15	8		0	ManaRegen	0	0
 GlacialSpike	112	Glacial Spike	Water	CastFire	6	Magic,Targeted	Corruption	0	6	29	10	Heavy ice hit, one enemy	Burst	576	0		0		0	0
 IceBurst	113	Ice Burst	Water	CastFire	9	Magic	Corruption	0	9	10	0	Ice damage, radius 2	GroundBurst	256	2		0		0	0
 Hailstorm	114	Hailstorm	Water	CastFire	12	Magic	Corruption	0	12	45	12	Ice damage, radius 4	GroundBurst	320	4		0		0	0
-TidalWave	115	Tidal Wave	Water	CastFire	9	Magic		0	9	26	10	6 damage to each target		0	0		0		0	0
+TidalWave	115	Tidal Wave	Water	CastFire	9	Magic	FlameWaveControl	0	9	13	10	Wave of ice damage	Wave	384	0		0		0	0
 Icebreaker	116	Icebreaker	Water	CastFire	2	Magic,Targeted		0	2	35	0	Strike dealing ice damage	Strike	192	0		0		0	0
 Riptide	117	Riptide	Water	CastFire	9	Magic	Corruption	0	9	13	6	Hurts foes, heals allies	GroundBurst	256	2	Heal	512		0	0
 SoothingWaters	118	Soothing Waters	Water	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	9	0	Heals an ally, or you	Heal	768	0		0		0	1
 HealingRain	119	Healing Rain	Water	CastHealing	16	Magic,AllowedInTown	StrengthBuff	0	16	1	0	Heals allies, radius 4	Heal	384	4		0		0	0
 Springwater	120	Springwater	Water	CastHealing	12	Magic,AllowedInTown	StrengthBuff	0	12	40	8	Heals ally, half to nearby	Heal	832	2		0		0	1
-WashAway	121	Wash Away	Water	CastFire	3	Magic		0	3	26	0	5 healing		0	0		0		0	0
-PurgingRain	122	Purging Rain	Water	CastFire	8	Magic		0	8	26	12	1 harmful effect removed from		0	0		0		0	0
-Monsoon	123	Monsoon	Water	CastFire	24	Magic		0	24	26	60	18 healing to each target		0	0		0		0	0
+WashAway	121	Wash Away	Water	CastHealing	3	Magic,AllowedInTown	StrengthBuff	0	3	4	0	Cleanses and heals an ally	Heal	320	0	Cleanse	1		0	1
+PurgingRain	122	Purging Rain	Water	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	21	12	Cleanses allies, radius 4	Cleanse	1	4		0		0	0
+Monsoon	123	Monsoon	Water	CastHealing	24	Magic,AllowedInTown	StrengthBuff	0	24	3	60	Big heal + cleanse, rad 4	Heal	1152	4	Cleanse	99		0	0
 Clarity	124	Clarity	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	Ally regains mana faster	Buff	30	0		0	ManaRegen	0	1
 HighTide	125	High Tide	Water	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	50	60	All allies: mana regen 20s	Buff	45	99		0	ManaRegen	20	0
 Reservoir	126	Reservoir	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	Ally has more maximum mana	Buff	10	0		0	MaxMana	0	1
 ManaTide	127	Mana Tide	Water	CastHealing	20	Magic,AllowedInTown	StrengthBuff	0	20	28	10	Gives an ally 15 mana	Mana	960	0		0		0	1
-DeepFreeze	128	Deep Freeze	Water	CastFire	18	Magic,Targeted		0	18	26	45	6 seconds held		0	0		0		0	0
-GreatFlood	129	Great Flood	Water	CastFire	36	Magic		0	36	26	180	14 damage to each target		0	0		0		0	0
+DeepFreeze	128	Deep Freeze	Water	CastFire	18	Magic,Targeted	Corruption	0	18	7	45	Holds foes still 6s, rad 2	Freeze	6	2		0		0	0
+GreatFlood	129	Great Flood	Water	CastFire	36	Magic	Corruption	0	36	24	180	Hurts foes, heals, radius 6	GroundBurst	896	6	HealCleanse	1856		0	0
+Radiance	130	Radiance	Holy	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: heals allies, rad 8	Aura	128	8		0	HealPulse	0	0
+Mend	131	Mend	Holy	CastHealing	5	Magic,AllowedInTown	StrengthBuff	0	5	1	0	Small, cheap heal	Heal	448	0		0		0	1
+DivineLight	132	Divine Light	Holy	CastHealing	20	Magic,AllowedInTown	StrengthBuff	0	20	3	0	Huge heal, huge cost	Heal	1920	0		0		0	1
+PatientPrayer	133	Patient Prayer	Holy	CastHealing	5	Magic,AllowedInTown	StrengthBuff	0	5	9	10	Cheap medium heal	Heal	1024	0		0		0	1
+LayOnHands	134	Lay on Hands	Holy	CastHealing	6	Magic,AllowedInTown	StrengthBuff	0	6	40	60	Restores 70% of ally life	HealPercent	70	0	Cleanse	99		0	1
+Purify	135	Purify	Holy	CastHealing	3	Magic,AllowedInTown	StrengthBuff	0	3	4	0	Cleanses and heals an ally	Heal	320	0	Cleanse	1		0	1
+Absolution	136	Absolution	Holy	CastHealing	6	Magic,AllowedInTown	StrengthBuff	0	6	21	12	Cleanses ally and nearby	Cleanse	99	2		0		0	1
+ChorusOfLight	137	Chorus of Light	Holy	CastHealing	12	Magic,AllowedInTown	StrengthBuff	0	12	15	10	Heal that leaps to others	ChainHeal	896	0		0		0	1
+SecondDawn	138	Second Dawn	Holy	CastHealing	30	Magic,AllowedInTown	StrengthBuff	0	30	40	60	Raises a fallen ally	Resurrect	30	0		0		0	0
+GuardianAngel	139	Guardian Angel	Holy	CastHealing	30	Magic,AllowedInTown	StrengthBuff	0	30	44	60	Ally rises once on death	Buff	30	0		0	Rebirth	0	1
+Miracle	140	Miracle	Holy	CastHealing	60	Magic,AllowedInTown	StrengthBuff	0	60	24	240	Raises and heals everyone	Resurrect	30	99	HealCleanse	960		0	0
+WardOfPurity	141	Ward of Purity	Holy	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	12	60	Cleanse; wards for 20s	Buff	20	0	Cleanse	1	Ward	20	1
+Vigil	142	Vigil	Holy	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	Ally regains life faster	Buff	30	0		0	LifeRegen	0	1
+Benediction	143	Benediction	Holy	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	Ally has more maximum life	Buff	10	0		0	MaxLife	0	1
+Smite	144	Smite	Holy	CastFire	2	Magic,Targeted		0	2	41	0	Strike dealing holy damage	Strike	192	0		0		0	0
+Judgment	145	Judgment	Holy	CastFire	4	Magic,Targeted		0	4	34	10	Heavy; more to undead/demon	Strike	576	0	Bane	50		0	0
+Atonement	146	Atonement	Holy	CastFire	3	Magic,Targeted		0	3	33	0	Strike that heals an ally	Strike	192	0	HealAlly	704		0	0
+SearingLight	147	Searing Light	Holy	CastFire	9	Magic,Targeted	Corruption	0	9	10	0	Holy damage, radius 2	Burst	256	2		0		0	0
+Dawnburst	148	Dawnburst	Holy	CastFire	18	Magic	Corruption	0	18	37	30	Hurts foes, heals, radius 4	GroundBurst	320	4	Heal	704		0	0

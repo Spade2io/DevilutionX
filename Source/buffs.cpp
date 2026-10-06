@@ -17,7 +17,10 @@
 #include "dots.h"
 #include "engine/point.hpp"
 #include "engine/rectangle.hpp"
+#include "engine/backbuffer_state.hpp"
 #include "engine/render/text_render.hpp"
+#include "essence_tint.h"
+#include "qol/floatingnumbers.h"
 #include "items.h"
 #include "missiles.h"
 #include "monster.h"
@@ -57,6 +60,8 @@ struct PowerBuff {
 	int ticksLeft;
 	/** Its strength, as given by the caster's PC. The buffed player need not know the power. */
 	int amount;
+	/** Who cast it. A buff from someone else is drawn in a different colour. */
+	uint8_t caster;
 };
 
 /** The data-file buffs each player has running. Memory only; never saved. */
@@ -215,25 +220,30 @@ void ClearBuffs(Player &player)
 	}
 }
 
-void ActivatePowerBuff(Player &player, SpellID spell, int amount)
+bool ActivatePowerBuff(Player &player, SpellID spell, int amount, const Player &caster)
 {
 	if (!IsValidSpell(spell))
-		return;
+		return false;
 	const int seconds = GetSpellData(spell).durationSeconds;
 	const int ticks = seconds > 0 ? seconds * TicksPerSecond : -1;
 	std::vector<PowerBuff> &buffs = PowerBuffs[player.getId()];
 	for (PowerBuff &buff : buffs) {
-		if (buff.spell == spell) {
-			buff.ticksLeft = ticks;
-			if (buff.amount != amount) {
-				buff.amount = amount;
-				CalcPlrInv(player, true);
-			}
-			return;
+		if (buff.spell != spell)
+			continue;
+		// A lasting buff keeps the stronger cast. A timed one takes the newest, weaker or not.
+		if (ticks < 0 && amount < buff.amount)
+			return false;
+		buff.ticksLeft = ticks;
+		buff.caster = caster.getId();
+		if (buff.amount != amount) {
+			buff.amount = amount;
+			CalcPlrInv(player, true);
 		}
+		return true;
 	}
-	buffs.push_back(PowerBuff { spell, ticks, amount });
+	buffs.push_back(PowerBuff { spell, ticks, amount, caster.getId() });
 	CalcPlrInv(player, true);
+	return true;
 }
 
 std::vector<SpellID> GetActivePowerBuffs(const Player &player)
@@ -244,12 +254,57 @@ std::vector<SpellID> GetActivePowerBuffs(const Player &player)
 	return spells;
 }
 
+/** Whether another player is somewhere their auras could reach this player: alive and on the same level. */
+bool AuraOwnerReaches(const Player &owner, const Player &player)
+{
+	return &owner != &player && owner.plractive && !owner.hasNoLife()
+	    && owner.plrlevel == player.plrlevel && owner.plrIsOnSetLevel == player.plrIsOnSetLevel;
+}
+
+/** A buff or aura that is acting on a player, wherever it comes from. */
+struct ReachingBuff {
+	SpellID spell;
+	int amount;
+	/** Game ticks left, or -1 for one that does not run out. */
+	int ticksLeft;
+	/** Whether another player is the source: they cast it on this player, or it is their aura. */
+	bool fromOther;
+};
+
+/**
+ * Everything acting on a player: their own buffs, then the auras of other players in reach.
+ * Each buff appears once. Where the same aura arrives from several players the strongest is kept.
+ */
+std::vector<ReachingBuff> GetReachingBuffs(const Player &player)
+{
+	std::vector<ReachingBuff> reaching;
+	for (const PowerBuff &buff : PowerBuffs[player.getId()])
+		reaching.push_back({ buff.spell, buff.amount, buff.ticksLeft, buff.caster != player.getId() });
+	for (const Player &other : Players) {
+		if (!AuraOwnerReaches(other, player))
+			continue;
+		for (const PowerBuff &buff : PowerBuffs[other.getId()]) {
+			const SpellData &spellData = GetSpellData(buff.spell);
+			if (spellData.effect != "Aura" || other.position.tile.WalkingDistance(player.position.tile) > spellData.effectRadius)
+				continue;
+			const auto held = std::find_if(reaching.begin(), reaching.end(), [&](const ReachingBuff &entry) { return entry.spell == buff.spell; });
+			if (held == reaching.end()) {
+				reaching.push_back({ buff.spell, buff.amount, -1, true });
+			} else if (buff.amount > held->amount) {
+				held->amount = buff.amount;
+				held->fromOther = true;
+			}
+		}
+	}
+	return reaching;
+}
+
 int GetPowerBuffPercent(const Player &player, std::string_view stat)
 {
 	int percent = 0;
-	for (const PowerBuff &buff : PowerBuffs[player.getId()]) {
+	for (const ReachingBuff &buff : GetReachingBuffs(player)) {
 		if (GetSpellData(buff.spell).buffStat == stat)
-			percent = std::max(percent, buff.amount);
+			percent += buff.amount;
 	}
 	return percent;
 }
@@ -299,6 +354,21 @@ bool TryRebirth(Player &player)
 		RebirthProtectionLeft = RebirthProtectionTicks;
 		return true;
 	}
+	// A buff with the stat "Rebirth" (an ally's Guardian Angel) does the same once, and is used up.
+	std::vector<PowerBuff> &buffs = PowerBuffs[player.getId()];
+	for (auto it = buffs.begin(); it != buffs.end(); ++it) {
+		if (GetSpellData(it->spell).buffStat != "Rebirth")
+			continue;
+		const SpellID spell = it->spell;
+		const int percent = std::clamp(it->amount, 1, 100);
+		buffs.erase(it);
+		SetPlayerHitPoints(player, std::max<int>(static_cast<int>(static_cast<int64_t>(player._pMaxHP) * percent / 100), 64));
+		EventPlrMsg(StrCat(GetSpellData(spell).sNameText, ": you rise again"), UiFlags::ColorWhitegold);
+		PendingCastMotion = spell;
+		PendingCastMotionTicks = 2 * TicksPerSecond;
+		RebirthProtectionLeft = RebirthProtectionTicks;
+		return true;
+	}
 	return false;
 }
 
@@ -307,8 +377,50 @@ bool IsRebirthProtected(const Player &player)
 	return &player == MyPlayer && RebirthProtectionLeft > 0;
 }
 
+/** Game ticks between the pulses of healing auras: every 2 seconds. */
+constexpr int HealPulseInterval = 2 * TicksPerSecond;
+int HealPulseCountdown = HealPulseInterval;
+
+/**
+ * Auras with the stat "HealPulse" restore life to everyone they reach every 2 seconds. Each PC
+ * heals only its own player, who knows best how much life they have; the others see it arrive.
+ */
+void PulseHealingAuras()
+{
+	if (--HealPulseCountdown > 0)
+		return;
+	HealPulseCountdown = HealPulseInterval;
+	if (MyPlayer == nullptr)
+		return;
+	for (Player &player : Players) {
+		if (!player.plractive || !player.isOnActiveLevel() || player.hasNoLife() || player._pHitPoints >= player._pMaxHP)
+			continue;
+		int amount = 0;
+		SpellID source = SpellID::Invalid;
+		for (const ReachingBuff &buff : GetReachingBuffs(player)) {
+			if (GetSpellData(buff.spell).buffStat != "HealPulse")
+				continue;
+			amount += buff.amount;
+			source = buff.spell;
+		}
+		if (amount <= 0)
+			continue;
+		const int healed = std::min(amount, player._pMaxHP - player._pHitPoints);
+		// Only a player's own PC changes their life. The others show the number, and see the
+		// life itself arrive a moment later.
+		if (&player == MyPlayer) {
+			player._pHitPoints += healed;
+			player._pHPBase = std::min(player._pHPBase + healed, player._pMaxHPBase);
+			RedrawComponent(PanelDrawComponent::Health);
+		}
+		AddFloatingNumber(player.position.tile, { 0, 0 }, StrCat("+", std::max((healed + 32) >> 6, 1)), GetSpellTextColor(source) | UiFlags::FontSize12, 2000 + player.getId());
+	}
+}
+
 void ProcessBuffTimers()
 {
+	PulseHealingAuras();
+
 	if (RebirthProtectionLeft > 0)
 		RebirthProtectionLeft--;
 
@@ -376,6 +488,9 @@ void DrawBuffBar(const Surface &out)
 	// The party portraits run down the left edge of the screen in multiplayer; the icons start
 	// just to the right of them, in every game, so they are always found in the same place.
 	constexpr int Left = 68;
+	// The description under the icons runs onto further lines when it is too long for one.
+	constexpr int DescriptionWidth = 420;
+	constexpr int DescriptionLineHeight = 14;
 
 	// Icons are drawn from their bottom-left corner.
 	Point position { Left, Margin + IconHeight - 1 };
@@ -389,17 +504,19 @@ void DrawBuffBar(const Surface &out)
 
 		const Rectangle iconArea { Point { position.x, position.y - IconHeight + 1 }, Size { IconWidth, IconHeight } };
 		if (iconArea.contains(MousePosition)) {
-			DrawString(out, DescribeBuff(player, buff),
-			    Rectangle { Point { Left, Margin + IconHeight + 2 }, Size { 420, 16 } },
-			    { .flags = UiFlags::ColorWhitegold });
+			DrawString(out, WordWrapString(DescribeBuff(player, buff), DescriptionWidth),
+			    Rectangle { Point { Left, Margin + IconHeight + 2 }, Size { DescriptionWidth, 3 * DescriptionLineHeight } },
+			    { .flags = UiFlags::ColorWhitegold, .lineHeight = DescriptionLineHeight });
 		}
 
 		position.x += IconWidth + Gap;
 	}
 
-	// Buffs read from essence_powers.tsv follow, with the seconds left on those that run out.
-	for (const PowerBuff &buff : PowerBuffs[player.getId()]) {
-		SetSpellTrans(SpellType::Spell);
+	// Buffs read from essence_powers.tsv follow, with the seconds left on those that run out, and
+	// the auras of other players that are reaching this player now. One that comes from another
+	// player is drawn in yellow rather than blue.
+	for (const ReachingBuff &buff : GetReachingBuffs(player)) {
+		SetSpellTrans(buff.fromOther ? SpellType::Skill : SpellType::Spell);
 		DrawSmallSpellIcon(out, position, buff.spell);
 
 		const Rectangle iconArea { Point { position.x, position.y - IconHeight + 1 }, Size { IconWidth, IconHeight } };
@@ -413,13 +530,14 @@ void DrawBuffBar(const Surface &out)
 			std::string text = StrCat(spellData.sNameText, ": ", spellData.description);
 			if (buff.ticksLeft > 0)
 				StrAppend(text, " (", secondsLeft, "s left)");
-			DrawString(out, text,
-			    Rectangle { Point { Left, Margin + IconHeight + 2 }, Size { 420, 16 } },
-			    { .flags = UiFlags::ColorWhitegold });
+			DrawString(out, WordWrapString(text, DescriptionWidth),
+			    Rectangle { Point { Left, Margin + IconHeight + 2 }, Size { DescriptionWidth, 3 * DescriptionLineHeight } },
+			    { .flags = UiFlags::ColorWhitegold, .lineHeight = DescriptionLineHeight });
 		}
 
 		position.x += IconWidth + Gap;
 	}
+	SetSpellTrans(SpellType::Spell);
 }
 
 } // namespace devilution

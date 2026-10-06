@@ -50,12 +50,20 @@ bool IsBuffActive(const Player &player, BuffID buff);
  * @brief Switches on a buff that is read from essence_powers.tsv (effect "Buff"). Casting it again
  * while it is running starts its time again. Such buffs are held in memory only, like the others.
  * The amount is the buff's strength (30 is +30%), worked out by the PC of whoever cast it.
+ *
+ * A player never has the same buff twice. Cast again on someone who has it, a lasting buff keeps
+ * whichever cast is stronger, and a timed one takes the new cast and starts its time again.
+ * @return false if the player already had a stronger lasting one, so nothing changed.
  */
-void ActivatePowerBuff(Player &player, SpellID spell, int amount);
+bool ActivatePowerBuff(Player &player, SpellID spell, int amount, const Player &caster);
 
 /**
  * @brief How much a player's data-file buffs raise one stat, as a percentage (30 is +30%).
- * Buffs to the same stat do not add up: the strongest one counts.
+ * Different buffs to the same stat add up. The very same buff or aura never counts twice: if it
+ * reaches the player from several places (their own aura and an ally's, say) the strongest counts.
+ *
+ * This counts the player's own buffs and every aura (effect "Aura") that reaches them: their own,
+ * and those of other living players on the same level standing within the aura's radius.
  */
 int GetPowerBuffPercent(const Player &player, std::string_view stat);
 

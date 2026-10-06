@@ -52,6 +52,8 @@ std::string_view GetEssenceName(EssenceID essence)
 		return "Lightning";
 	case EssenceID::Water:
 		return "Water";
+	case EssenceID::Holy:
+		return "Holy";
 	case EssenceID::None:
 		break;
 	}
@@ -79,6 +81,8 @@ EssenceID GetSpellEssence(SpellID spell)
 		return EssenceID::Lightning;
 	case SpellID::Frostbolt:
 		return EssenceID::Water;
+	case SpellID::HolyBolt:
+		return EssenceID::Holy;
 	default:
 		break;
 	}
@@ -122,10 +126,26 @@ void AbsorbEssence(EssenceID essence)
 	Slots[SlotOf(EssenceID::None)] = essence;
 }
 
+bool IsAuraPower(SpellID spell)
+{
+	if (spell == SpellID::FireAura)
+		return true;
+	return IsExtendedSpell(spell) && IsValidSpell(spell) && GetSpellData(spell).effect == "Aura";
+}
+
 LearnResult CheckCanLearn(SpellID spell)
 {
 	if (MyPlayer != nullptr && MyPlayer->GetBaseSpellLevel(spell) != 0)
 		return LearnResult::AlreadyKnown;
+
+	// One aura for each player. Abilities are only ever learned into essence slots, so the
+	// slots hold every aura the player could know.
+	if (IsAuraPower(spell)) {
+		for (const auto &row : Abilities) {
+			if (std::any_of(row.begin(), row.end(), [](SpellID held) { return held != SpellID::Invalid && IsAuraPower(held); }))
+				return LearnResult::AuraAlreadyKnown;
+		}
+	}
 
 	const EssenceID essence = GetSpellEssence(spell);
 	if (essence == EssenceID::None)
@@ -155,6 +175,8 @@ std::string_view DescribeLearnResult(LearnResult result)
 		return "You do not have the essence for this ability";
 	case LearnResult::EssenceFull:
 		return "That essence already holds five abilities";
+	case LearnResult::AuraAlreadyKnown:
+		return "You already have an aura; you can only ever have one";
 	}
 	return "";
 }

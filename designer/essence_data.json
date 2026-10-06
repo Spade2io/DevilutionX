@@ -830,7 +830,11 @@
       "cooldown": 0,
       "radius": 8,
       "growth": 12.5,
-      "potencyNote": "healing to each ally every 2 seconds"
+      "potencyNote": "healing to each ally every 2 seconds",
+      "number": 130,
+      "gameKey": "Radiance",
+      "icon": 8,
+      "shortText": "Aura: heals allies, rad 8"
     },
     {
       "id": "p_d0fb8fc2",
@@ -853,7 +857,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "healing"
+      "potencyNote": "healing",
+      "number": 131,
+      "gameKey": "Mend",
+      "icon": 1,
+      "shortText": "Small, cheap heal"
     },
     {
       "id": "p_650400a4",
@@ -876,7 +884,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "healing"
+      "potencyNote": "healing",
+      "number": 132,
+      "gameKey": "DivineLight",
+      "icon": 3,
+      "shortText": "Huge heal, huge cost"
     },
     {
       "id": "p_b38ebede",
@@ -900,7 +912,11 @@
       "cooldown": 10,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "healing"
+      "potencyNote": "healing",
+      "number": 133,
+      "gameKey": "PatientPrayer",
+      "icon": 9,
+      "shortText": "Cheap medium heal"
     },
     {
       "id": "p_c56a9c9b",
@@ -924,7 +940,11 @@
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% of the ally's maximum life restored"
+      "potencyNote": "% of the ally's maximum life restored",
+      "number": 134,
+      "gameKey": "LayOnHands",
+      "icon": 40,
+      "shortText": "Restores 70% of ally life"
     },
     {
       "id": "p_1d11a66d",
@@ -948,7 +968,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "healing; also removes harmful effects"
+      "potencyNote": "healing; also removes harmful effects",
+      "number": 135,
+      "gameKey": "Purify",
+      "icon": 4,
+      "shortText": "Cleanses and heals an ally"
     },
     {
       "id": "p_78c994b0",
@@ -971,7 +995,11 @@
       "cooldown": 12,
       "radius": 2,
       "growth": 12.5,
-      "potencyNote": "removes every harmful effect from each target"
+      "potencyNote": "removes every harmful effect from each target",
+      "number": 136,
+      "gameKey": "Absolution",
+      "icon": 21,
+      "shortText": "Cleanses ally and nearby"
     },
     {
       "id": "p_7e745e55",
@@ -994,7 +1022,11 @@
       "cooldown": 10,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "healing to the first target, less with each leap"
+      "potencyNote": "healing to the first target, less with each leap",
+      "number": 137,
+      "gameKey": "ChorusOfLight",
+      "icon": 15,
+      "shortText": "Heal that leaps to others"
     },
     {
       "id": "p_9e35f51d",
@@ -1017,7 +1049,11 @@
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% of life the ally returns with"
+      "potencyNote": "% of life the ally returns with",
+      "number": 138,
+      "gameKey": "SecondDawn",
+      "icon": 40,
+      "shortText": "Raises a fallen ally"
     },
     {
       "id": "p_b86d2f28",
@@ -1042,7 +1078,11 @@
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% of life the ally rises with"
+      "potencyNote": "% of life the ally rises with",
+      "number": 139,
+      "gameKey": "GuardianAngel",
+      "icon": 44,
+      "shortText": "Ally rises once on death"
     },
     {
       "id": "p_98ff884c",
@@ -1067,7 +1107,11 @@
       "cooldown": 240,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% of life the fallen return with; everyone else is healed for 15"
+      "potencyNote": "% of life the fallen return with; everyone else is healed for 15",
+      "number": 140,
+      "gameKey": "Miracle",
+      "icon": 24,
+      "shortText": "Raises and heals everyone"
     },
     {
       "id": "p_33d0fdd4",
@@ -1092,7 +1136,11 @@
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "seconds of immunity to new harmful effects"
+      "potencyNote": "seconds of immunity to new harmful effects",
+      "number": 141,
+      "gameKey": "WardOfPurity",
+      "icon": 12,
+      "shortText": "Cleanse; wards for 20s"
     },
     {
       "id": "p_5096457e",
@@ -1117,7 +1165,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% faster life regeneration, lasting"
+      "potencyNote": "% faster life regeneration, lasting",
+      "number": 142,
+      "gameKey": "Vigil",
+      "icon": 43,
+      "shortText": "Ally regains life faster"
     },
     {
       "id": "p_b7f8eba6",
@@ -1141,7 +1193,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% maximum life, lasting"
+      "potencyNote": "% maximum life, lasting",
+      "number": 143,
+      "gameKey": "Benediction",
+      "icon": 18,
+      "shortText": "Ally has more maximum life"
     },
     {
       "id": "p_370be2d3",
@@ -1165,7 +1221,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "bonus damage on the hit"
+      "potencyNote": "bonus damage on the hit",
+      "number": 144,
+      "gameKey": "Smite",
+      "icon": 41,
+      "shortText": "Strike dealing holy damage"
     },
     {
       "id": "p_fe0e91a2",
@@ -1189,7 +1249,11 @@
       "cooldown": 10,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "bonus damage on the hit"
+      "potencyNote": "bonus damage on the hit",
+      "number": 145,
+      "gameKey": "Judgment",
+      "icon": 34,
+      "shortText": "Heavy; more to undead/demon"
     },
     {
       "id": "p_2a047669",
@@ -1214,7 +1278,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "bonus damage on the hit; heals 11"
+      "potencyNote": "bonus damage on the hit; heals 11",
+      "number": 146,
+      "gameKey": "Atonement",
+      "icon": 33,
+      "shortText": "Strike that heals an ally"
     },
     {
       "id": "p_f9452a85",
@@ -1262,7 +1330,11 @@
       "cooldown": 0,
       "radius": 2,
       "growth": 12.5,
-      "potencyNote": "damage to each target"
+      "potencyNote": "damage to each target",
+      "number": 147,
+      "gameKey": "SearingLight",
+      "icon": 10,
+      "shortText": "Holy damage, radius 2"
     },
     {
       "id": "p_800b5513",
@@ -1287,7 +1359,11 @@
       "cooldown": 30,
       "radius": 4,
       "growth": 12.5,
-      "potencyNote": "damage to each target; heals 11"
+      "potencyNote": "damage to each target; heals 11",
+      "number": 148,
+      "gameKey": "Dawnburst",
+      "icon": 37,
+      "shortText": "Hurts foes, heals, radius 4"
     },
     {
       "id": "p_4451c3e2",
@@ -1313,7 +1389,8 @@
       "potencyNote": "% faster mana regeneration, lasting, for allies in the aura",
       "number": 111,
       "gameKey": "Wellspring",
-      "icon": 26
+      "icon": 8,
+      "shortText": "Aura: mana regen, radius 8"
     },
     {
       "id": "p_b97a530e",
@@ -1448,7 +1525,8 @@
       "potencyNote": "damage to each target",
       "number": 115,
       "gameKey": "TidalWave",
-      "icon": 26
+      "icon": 13,
+      "shortText": "Wave of ice damage"
     },
     {
       "id": "p_2ed39808",
@@ -1613,7 +1691,8 @@
       "potencyNote": "healing; also removes harmful effects",
       "number": 121,
       "gameKey": "WashAway",
-      "icon": 26
+      "icon": 4,
+      "shortText": "Cleanses and heals an ally"
     },
     {
       "id": "p_eced14f6",
@@ -1639,7 +1718,8 @@
       "potencyNote": "harmful effect removed from each target",
       "number": 122,
       "gameKey": "PurgingRain",
-      "icon": 26
+      "icon": 21,
+      "shortText": "Cleanses allies, radius 4"
     },
     {
       "id": "p_5a44f112",
@@ -1666,7 +1746,8 @@
       "potencyNote": "healing to each target; also removes harmful effects",
       "number": 123,
       "gameKey": "Monsoon",
-      "icon": 26
+      "icon": 3,
+      "shortText": "Big heal + cleanse, rad 4"
     },
     {
       "id": "p_af84f201",
@@ -1805,7 +1886,8 @@
       "potencyNote": "seconds held",
       "number": 128,
       "gameKey": "DeepFreeze",
-      "icon": 26
+      "icon": 7,
+      "shortText": "Holds foes still 6s, rad 2"
     },
     {
       "id": "p_f7e8e746",
@@ -1834,7 +1916,8 @@
       "potencyNote": "damage to each target; heals 29; also removes harmful effects",
       "number": 129,
       "gameKey": "GreatFlood",
-      "icon": 26
+      "icon": 24,
+      "shortText": "Hurts foes, heals, radius 6"
     },
     {
       "id": "p_6fb6bab4",

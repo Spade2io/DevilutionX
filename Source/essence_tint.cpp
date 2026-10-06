@@ -161,6 +161,8 @@ DamageType GetSpellDamageType(SpellID spell)
 		return DamageType::Lightning;
 	case EssenceID::Water:
 		return DamageType::Ice;
+	case EssenceID::Holy:
+		return DamageType::Holy;
 	case EssenceID::None:
 		break;
 	}
@@ -194,6 +196,8 @@ UiFlags GetDamageTypeTextColor(DamageType damageType)
 		return UiFlags::ColorBlue;
 	case DamageType::Ice:
 		return UiFlags::ColorIce;
+	case DamageType::Holy:
+		return UiFlags::ColorYellow;
 	}
 	return UiFlags::ColorWhitegold;
 }
@@ -224,6 +228,8 @@ std::optional<EssenceTint> GetEssenceTint(EssenceID essence)
 		return EssenceTint::VividYellow;
 	case EssenceID::Water:
 		return EssenceTint::VividBlue;
+	case EssenceID::Holy:
+		return EssenceTint::VividYellow;
 	case EssenceID::None:
 		break;
 	}

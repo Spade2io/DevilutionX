@@ -2643,6 +2643,8 @@ void CalcPlrLifeMana(Player &player, int vitality, int magic, int life, int mana
 	const ClassAttributes &playerClassAttributes = player.getClassAttributes();
 	vitality = (vitality * playerClassAttributes.itmLife) >> 6;
 	life += (vitality << 6);
+	// Essence Mod: a "MaxLife" buff raises the whole pool by a percentage, as "MaxMana" does below.
+	life += static_cast<int>(static_cast<int64_t>(life + player._pMaxHPBase) * GetPowerBuffPercent(player, "MaxLife") / 100);
 
 	magic = (magic * playerClassAttributes.itmMana) >> 6;
 	mana += (magic << 6);

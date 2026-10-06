@@ -46,6 +46,7 @@
 #include "levels/gendung_defs.hpp"
 #include "msg.h"
 #include "multi.h"
+#include "plrmsg.h"
 #include "objects.h"
 #include "player.h"
 #include "qol/floatingnumbers.h"
@@ -2196,6 +2197,11 @@ void AddManaShield(Missile &missile, AddMissileParameter &parameter)
 void AddFlameWave(Missile &missile, AddMissileParameter &parameter)
 {
 	missile._midam = GenerateRnd(10) + Players[missile._misource].getCharacterLevel() + 1;
+	// Essence Mod: a wave cast by a power read from essence_powers.tsv deals that power's amount.
+	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell)) {
+		const Player &caster = Players[missile._misource];
+		missile._midam = std::max(ScaleDamageForSpellLevel(GetSpellData(missile.sourceSpell).effectAmount, std::max<int>(caster.GetBaseSpellLevel(missile.sourceSpell), 1)) >> 6, 1);
+	}
 	UpdateMissileVelocity(missile, parameter.dst, 16);
 	missile.duration = 255;
 
@@ -2537,6 +2543,7 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	DotID dot = DotID::Corruption;
 	bool isBurst = false;
 	bool isKindle = false;
+	bool isFreeze = false;
 	DamageType burstDamageType = DamageType::Fire;
 	MissileID burstImmunityMissile = MissileID::Firebolt;
 	int amount = 1 * 64;
@@ -2553,6 +2560,9 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 			case DamageType::Ice:
 				burstImmunityMissile = MissileID::Frostbolt;
 				break;
+			case DamageType::Holy:
+				burstImmunityMissile = MissileID::HolyBolt;
+				break;
 			case DamageType::Fire:
 				break;
 			default:
@@ -2561,6 +2571,8 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 			}
 		} else if (spellData.effect == "Kindle") {
 			isKindle = true;
+		} else if (spellData.effect == "Freeze") {
+			isFreeze = true;
 		} else if (const std::optional<DotID> named = ParseDotName(spellData.effect); named) {
 			dot = *named;
 		} else {
@@ -2571,6 +2583,9 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 		amount = spellData.effectAmount;
 		radius = spellData.effectRadius;
 	}
+	// "Freeze" holds monsters still for the power's amount in seconds. The same number on every PC,
+	// whatever the caster's level, because every PC must agree on when the monster moves again.
+	const int freezeSeconds = amount;
 	amount = ScaleDamageForSpellLevel(amount, std::max<int>(player.GetBaseSpellLevel(spell), 1));
 	const UiFlags textColor = isKindle ? GetSpellTextColor(spell) : GetDamageTypeTextColor(dot == DotID::Corruption ? DamageType::Shadow : DamageType::Fire);
 
@@ -2593,7 +2608,7 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 		// The spot itself always shows the burst, so a cast that catches nothing is still seen.
 		AddMissile(centre, { 0, 0 }, Direction::South, MissileID::CorruptionExplosion, missile._micaster, missile._misource, 0, 0, &missile);
 		// The rider "Heal": every living player within the radius is healed for the rider's amount.
-		if (&player == MyPlayer && GetSpellData(spell).rider == "Heal") {
+		if (&player == MyPlayer && GetSpellData(spell).rider.starts_with("Heal")) {
 			const auto heal = static_cast<uint32_t>(ScaleDamageForSpellLevel(GetSpellData(spell).riderAmount, std::max<int>(player.GetBaseSpellLevel(spell), 1)));
 			for (const Player &other : Players) {
 				if (!other.plractive || !other.isOnActiveLevel() || other.hasNoLife())
@@ -2613,6 +2628,17 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 		if (monster.activeForTicks == 0) {
 			monster.activeForTicks = UINT8_MAX;
 			monster.position.last = player.position.tile;
+		}
+
+		if (isFreeze) {
+			// The game's own Stone Curse does the holding, for a set time. A few monsters cannot be held.
+			if (IsAnyOf(monster.type().type, MT_GOLEM, MT_DIABLO, MT_NAKRUL)
+			    || IsAnyOf(monster.mode, MonsterMode::FadeIn, MonsterMode::FadeOut, MonsterMode::Charge, MonsterMode::Petrified))
+				continue;
+			Missile *hold = AddMissile(monster.position.tile, monster.position.tile, Direction::South, MissileID::StoneCurse, missile._micaster, missile._misource, 0, 0, &missile);
+			if (hold != nullptr && !hold->_miDelFlag)
+				hold->duration = freezeSeconds * 20; // 20 game ticks to the second
+			continue;
 		}
 
 		// The effect itself is kept and run only on the caster's own PC.
@@ -2679,13 +2705,56 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 	// "Heal", "Buff" and "Mana" land on players. Only the caster's own PC decides who and how
 	// much; it then tells every PC, its own included, and each of them applies it.
 	const SpellID spell = missile.sourceSpell;
-	if (IsExtendedSpell(spell) && IsValidSpell(spell) && IsAnyOf(GetSpellData(spell).effect, "Heal", "Buff", "Mana")) {
+	if (IsExtendedSpell(spell) && IsValidSpell(spell) && IsAnyOf(GetSpellData(spell).effect, "Heal", "Buff", "Mana", "Aura", "Cleanse", "HealPercent", "ChainHeal", "Resurrect")) {
 		const SpellData &spellData = GetSpellData(spell);
 		const Player &caster = Players[missile._misource];
 		if (&caster != MyPlayer)
 			return;
 		const auto amount = static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.effectAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)));
 		const int radius = spellData.effectRadius;
+
+		const auto isLivingAllyHere = [](const Player &other) {
+			return other.plractive && other.isOnActiveLevel() && !other.hasNoLife();
+		};
+
+		// "Resurrect" raises the fallen. Aimed at a spot, it raises the fallen player nearest to
+		// it. Reaching everyone, it raises every fallen player and gives the living the rider's
+		// amount as healing. If there is nobody to raise, the cast is not spent.
+		if (spellData.effect == "Resurrect") {
+			if (radius >= EveryoneRadius) {
+				const auto heal = static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.riderAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)));
+				for (const Player &other : Players) {
+					if (!other.plractive)
+						continue;
+					if (other.hasNoLife())
+						NetSendCmdPowerOnPlayer(other, spell, amount);
+					else if (heal > 0)
+						NetSendCmdPowerOnPlayer(other, spell, heal);
+				}
+				return;
+			}
+			const Player *fallen = nullptr;
+			for (const Player &other : Players) {
+				if (&other == &caster || !other.plractive || !other.isOnActiveLevel() || !other.hasNoLife())
+					continue;
+				const int distance = other.position.tile.WalkingDistance(parameter.dst);
+				if (distance <= 3 && (fallen == nullptr || distance < fallen->position.tile.WalkingDistance(parameter.dst)))
+					fallen = &other;
+			}
+			if (fallen == nullptr) {
+				EventPlrMsg("There is no fallen ally there", UiFlags::ColorWhite);
+				parameter.spellFizzled = true;
+				return;
+			}
+			NetSendCmdPowerOnPlayer(*fallen, spell, amount);
+			return;
+		}
+
+		// An aura belongs to the caster. Who it helps is worked out from where players stand.
+		if (spellData.effect == "Aura") {
+			NetSendCmdPowerOnPlayer(caster, spell, amount);
+			return;
+		}
 
 		// Everyone: every living player in the game, wherever they are.
 		if (radius >= EveryoneRadius) {
@@ -2721,6 +2790,30 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 			}
 		}
 		NetSendCmdPowerOnPlayer(*target, spell, amount);
+
+		// "ChainHeal" leaps on from there to the nearest wounded player, and again, healing a
+		// quarter less each time. Two leaps, and one more for every two levels of the power.
+		if (spellData.effect == "ChainHeal") {
+			std::vector<const Player *> healed { target };
+			uint32_t leapAmount = amount;
+			const int leaps = 2 + caster.GetBaseSpellLevel(spell) / 2;
+			for (int leap = 0; leap < leaps; leap++) {
+				const Player *next = nullptr;
+				for (const Player &other : Players) {
+					if (!isLivingAllyHere(other) || other._pHitPoints >= other._pMaxHP || std::find(healed.begin(), healed.end(), &other) != healed.end())
+						continue;
+					const int distance = other.position.tile.WalkingDistance(healed.back()->position.tile);
+					if (distance <= 10 && (next == nullptr || distance < next->position.tile.WalkingDistance(healed.back()->position.tile)))
+						next = &other;
+				}
+				leapAmount = leapAmount * 3 / 4;
+				if (next == nullptr || leapAmount == 0)
+					break;
+				NetSendCmdPowerOnPlayer(*next, spell, leapAmount);
+				healed.push_back(next);
+			}
+			return;
+		}
 
 		// With a radius as well, everyone standing near that player receives half as much.
 		if (radius > 0 && amount / 2 > 0) {
@@ -3754,7 +3847,9 @@ void ProcessFlameWave(Missile &missile)
 		missile._miAnimFrame = GenerateRnd(11) + 1;
 	}
 	const int j = missile.duration;
-	MoveMissileAndCheckMissileCol(missile, GetMissileData(missile._mitype).damageType(), missile._midam, missile._midam, false, false);
+	// Essence Mod: a wave cast by a data-file power deals that power's kind of damage.
+	const DamageType waveDamageType = IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) ? GetSpellDamageType(missile.sourceSpell) : GetMissileData(missile._mitype).damageType();
+	MoveMissileAndCheckMissileCol(missile, waveDamageType, missile._midam, missile._midam, false, false);
 	if (missile._miHitFlag)
 		missile.duration = j;
 	if (missile.duration == 0) {
@@ -4144,9 +4239,13 @@ void ProcessFlameWaveControl(Missile &missile)
 	const Point src = missile.position.tile;
 	const Direction sd = GetDirection(src, { missile.var1, missile.var2 });
 	const Point start = src + sd;
+	// Essence Mod: the pieces of the wave belong to the power that was cast, so they deal its damage,
+	// earn it experience and are drawn in its colour. A data-file power's wave is one set width,
+	// because other PCs do not know how far the caster has trained it.
+	SpellBeingCast = missile.sourceSpell;
 	if (CanPlaceWall(start)) {
 		PlaceWall(id, MissileID::FlameWave, start, pdir, missile._mispllvl, 0);
-		int segmentsToAdd = (missile._mispllvl / 2) + 2;
+		int segmentsToAdd = IsExtendedSpell(missile.sourceSpell) ? 3 : (missile._mispllvl / 2) + 2;
 		Point left = start;
 		const Direction dirLeft = Left(Left(sd));
 		for (int j = 0; j < segmentsToAdd; j++) {
@@ -4162,6 +4261,7 @@ void ProcessFlameWaveControl(Missile &missile)
 				break;
 		}
 	}
+	SpellBeingCast = SpellID::Invalid;
 
 	missile.duration--;
 	if (missile.duration == 0)

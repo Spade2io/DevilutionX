@@ -21,6 +21,8 @@
 #include "missiles.h"
 #include "spell_xp.h"
 #include "buffs.h"
+#include "msg.h"
+#include "utils/is_of.hpp"
 #include "essence_tint.h"
 #include "qol/floatingnumbers.h"
 #include "utils/str_cat.hpp"
@@ -245,6 +247,9 @@ void CastSpell(Player &player, SpellID spl, WorldTilePosition src, WorldTilePosi
 	}
 }
 
+/** Essence Mod: the share of their life the local player returns with, set by the power raising them. */
+int PendingRevivePercent = 0;
+
 void SpawnResurrectBeam(Player &caster, Player &target)
 {
 	AddMissile(
@@ -275,6 +280,11 @@ void ApplyResurrect(Player &target)
 	int hp = 10 << 6;
 	if (target._pMaxHPBase < (10 << 6)) {
 		hp = target._pMaxHPBase;
+	}
+	// Essence Mod: a power that raises the fallen brings them back with a share of their life.
+	if (&target == MyPlayer && PendingRevivePercent > 0) {
+		hp = std::max(hp, static_cast<int>(static_cast<int64_t>(target._pMaxHP) * PendingRevivePercent / 100));
+		PendingRevivePercent = 0;
 	}
 	SetPlayerHitPoints(target, hp);
 
@@ -321,40 +331,80 @@ bool IsAllyTargetedPower(SpellID spell)
 	return IsExtendedSpell(spell) && IsValidSpell(spell) && GetSpellData(spell).targetsAlly;
 }
 
+/**
+ * Removes up to a number of harmful effects from a player and says how many went.
+ *
+ * Monsters put no harmful effects on players yet, so there is never anything to remove. This is
+ * the one place cleansing happens, ready for when they do.
+ */
+int CleansePlayer(Player & /*target*/, int /*count*/)
+{
+	return 0;
+}
+
 void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int amount)
 {
 	if (!IsExtendedSpell(spell) || !IsValidSpell(spell) || amount <= 0)
 		return;
+	const SpellData &spellData = GetSpellData(spell);
+	const std::string &effect = spellData.effect;
+	const std::string &rider = spellData.rider;
+	const UiFlags textStyle = GetSpellTextColor(spell) | UiFlags::FontSize12;
+	// A separate id from the damage numbers, so the game does not merge the two.
+	const int textId = 2000 + target.getId();
 
-	if (GetSpellData(spell).effect == "Buff") {
-		if (target.hasNoLife())
-			return;
-		ActivatePowerBuff(target, spell, amount);
+	// "Resurrect": a fallen player is raised with the amount as a percentage of their life. The
+	// player's own PC does the rising, as with the game's Resurrect, and tells the others.
+	if (effect == "Resurrect" && target.hasNoLife()) {
 		if (target.isOnActiveLevel())
-			AddFloatingNumber(target.position.tile, { 0, 0 }, std::string(GetSpellData(spell).sNameText), GetSpellTextColor(spell) | UiFlags::FontSize12, 2000 + target.getId());
+			AddMissile(target.position.tile, target.position.tile, Direction::South, MissileID::ResurrectBeam, TARGET_MONSTERS, caster.getId(), 0, 0);
+		if (&target == MyPlayer) {
+			PendingRevivePercent = std::clamp(amount, 1, 100);
+			NetSendCmd(true, CMD_PLRALIVE);
+		}
+		return;
+	}
+	if (target.hasNoLife())
+		return;
+
+	// A rider that names "Cleanse" washes harmful effects off as well as whatever else happens.
+	if (rider.find("Cleanse") != std::string::npos)
+		CleansePlayer(target, 99);
+
+	if (IsAnyOf(effect, "Buff", "Aura")) {
+		const bool applied = ActivatePowerBuff(target, spell, amount, caster);
+		if (target.isOnActiveLevel())
+			AddFloatingNumber(target.position.tile, { 0, 0 }, applied ? std::string(spellData.sNameText) : std::string("Already has a stronger one"), textStyle, textId);
 		return;
 	}
 
-	if (GetSpellData(spell).effect == "Mana") {
-		if (target.hasNoLife() || HasAnyOf(target._pIFlags, ItemSpecialEffect::NoMana))
+	if (effect == "Mana") {
+		if (HasAnyOf(target._pIFlags, ItemSpecialEffect::NoMana))
 			return;
 		const int given = std::clamp(target._pMaxMana - target._pMana, 0, amount);
 		target._pMana += given;
 		target._pManaBase += given;
 		if (&target == MyPlayer)
 			RedrawComponent(PanelDrawComponent::Mana);
-		if (target.isOnActiveLevel()) {
-			AddFloatingNumber(target.position.tile, { 0, 0 }, given > 0 ? StrCat("+", (given + 32) >> 6, " mana") : std::string("Full mana"),
-			    GetSpellTextColor(spell) | UiFlags::FontSize12, 2000 + target.getId());
-		}
+		if (target.isOnActiveLevel())
+			AddFloatingNumber(target.position.tile, { 0, 0 }, given > 0 ? StrCat("+", (given + 32) >> 6, " mana") : std::string("Full mana"), textStyle, textId);
 		return;
 	}
 
-	// A heal, or the healing half of a burst that hurts enemies and heals allies.
-	if (GetSpellData(spell).effect == "Heal" || GetSpellData(spell).rider == "Heal") {
-		if (target.hasNoLife())
-			return;
+	// "Cleanse" by itself: removes harmful effects and nothing else.
+	if (effect == "Cleanse") {
+		const int removed = CleansePlayer(target, amount);
+		if (target.isOnActiveLevel())
+			AddFloatingNumber(target.position.tile, { 0, 0 }, removed > 0 ? std::string("Cleansed") : std::string("Nothing to cleanse"), textStyle, textId);
+		return;
+	}
 
+	// Everything else that reaches a player is healing: a heal of any kind, the healing half of
+	// a burst or a strike, or what the living receive from a power that raises the fallen.
+	// "HealPercent" gives the amount as a percentage of the player's maximum life.
+	if (effect == "HealPercent")
+		amount = static_cast<int>(static_cast<int64_t>(target._pMaxHP) * std::min(amount, 100) / 100);
+	if (IsAnyOf(effect, "Heal", "HealPercent", "ChainHeal", "Resurrect") || rider.starts_with("Heal")) {
 		const int healed = std::clamp(target._pMaxHP - target._pHitPoints, 0, amount);
 		AddSpellExperienceForHealing(caster, target, spell, healed);
 		target._pHitPoints = std::min(target._pHitPoints + amount, target._pMaxHP);
@@ -362,11 +412,8 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 
 		if (&target == MyPlayer)
 			RedrawComponent(PanelDrawComponent::Health);
-		if (target.isOnActiveLevel()) {
-			// A separate id from the damage numbers, so the game does not merge the two.
-			AddFloatingNumber(target.position.tile, { 0, 0 }, healed > 0 ? StrCat("+", (healed + 32) >> 6) : std::string("Full health"),
-			    GetSpellTextColor(spell) | UiFlags::FontSize12, 2000 + target.getId());
-		}
+		if (target.isOnActiveLevel())
+			AddFloatingNumber(target.position.tile, { 0, 0 }, healed > 0 ? StrCat("+", (healed + 32) >> 6) : std::string("Full health"), textStyle, textId);
 	}
 }
 

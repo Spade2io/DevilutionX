@@ -208,3 +208,24 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Mana Tide	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ManaTide	true	1
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Deep Freeze	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	DeepFreeze	true	1
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Great Flood	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	GreatFlood	true	1
+	0	Misc	Unequippable	ESSENCE	Misc	NONE	Holy Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	HolyBolt	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Holy Bolt	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	HolyBolt	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Radiance	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Radiance	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Mend	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Mend	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Divine Light	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	DivineLight	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Patient Prayer	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	PatientPrayer	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Lay on Hands	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	LayOnHands	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Purify	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Purify	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Absolution	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Absolution	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Chorus of Light	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ChorusOfLight	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Second Dawn	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	SecondDawn	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Guardian Angel	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	GuardianAngel	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Miracle	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Miracle	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Ward of Purity	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	WardOfPurity	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Vigil	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Vigil	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Benediction	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Benediction	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Smite	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Smite	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Judgment	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Judgment	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Atonement	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Atonement	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Searing Light	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	SearingLight	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Dawnburst	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Dawnburst	true	1

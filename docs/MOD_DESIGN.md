@@ -945,3 +945,12 @@ A power with a Weapon tag only works while that kind of weapon is equipped.
   a slow timer (about every 10 seconds).
 - Game rule, not built: a character can hold only one aura power. The first aura a character
   unlocks locks them out of every other aura.
+
+## Buff stacking (decided 2026-10-06)
+
+- Different buffs to the same stat add up.
+- The very same buff can never be on a player twice. Cast again, a lasting buff keeps whichever cast is stronger; a timed buff takes the newest cast, weaker or not, and starts its time again.
+- The very same aura from two players does not double: the stronger one counts, and only that one is shown.
+- Damaging auras are separate sources of damage, so two players' copies both tick.
+- In the buff bar, a buff or aura that came from another player is drawn yellow; your own are blue. Where debuffs from enemies are shown is not decided.
+- A player can learn only one aura power, whatever essences they hold. Once they know one, every other aura stone is refused. (Decided 2026-10-06.)

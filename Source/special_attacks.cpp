@@ -18,6 +18,7 @@
 #include "dots.h"
 #include "levels/gendung.h"
 #include "missiles.h"
+#include "msg.h"
 #include "qol/floatingnumbers.h"
 #include "utils/str_cat.hpp"
 #include "engine/backbuffer_state.hpp"
@@ -190,6 +191,29 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 		const int extra = ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack));
 		BrandMonster(target, attack, extra);
 		AddFloatingNumber(target.position.tile, { 0, 0 }, "Branded", GetSpellTextColor(attack) | UiFlags::FontSize12, 1000 + static_cast<int>(target.getId()));
+	}
+
+	// "Bane": the hit deals more to the undead and to demons. The rider's amount is the percentage.
+	if (spellData.rider == "Bane" && !target.hasNoLife() && IsAnyOf(target.data().monsterClass, MonsterClass::Undead, MonsterClass::Demon)) {
+		const int extra = static_cast<int>(static_cast<int64_t>(damage) * spellData.riderAmount / 100);
+		if (extra > 0)
+			DealSpellTickDamage(target, attack, MissileID::WeaponExplosion, damageType, extra);
+	}
+
+	// "HealAlly": the most badly wounded living player within 8 tiles, the striker included, is
+	// healed for the rider's amount.
+	if (spellData.rider == "HealAlly") {
+		const Player *wounded = nullptr;
+		for (const Player &other : Players) {
+			if (!other.plractive || !other.isOnActiveLevel() || other.hasNoLife() || other._pMaxHP <= 0 || other._pHitPoints >= other._pMaxHP)
+				continue;
+			if (other.position.tile.WalkingDistance(player.position.tile) > 8)
+				continue;
+			if (wounded == nullptr || static_cast<int64_t>(other._pHitPoints) * wounded->_pMaxHP < static_cast<int64_t>(wounded->_pHitPoints) * other._pMaxHP)
+				wounded = &other;
+		}
+		if (wounded != nullptr)
+			NetSendCmdPowerOnPlayer(*wounded, attack, static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack))));
 	}
 
 	// "Vulnerable": the target takes more damage from then on. The rider's amount is the percentage.

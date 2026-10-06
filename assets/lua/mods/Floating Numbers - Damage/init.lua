@@ -12,6 +12,7 @@ local DAMAGE_TYPE = {
     ACID = 4,
     SHADOW = 5, -- Essence Mod
     ICE = 6, -- Essence Mod
+    HOLY = 7, -- Essence Mod
 }
 
 local function get_damage_style(damage_val, damage_type)
@@ -35,6 +36,7 @@ local function get_damage_style(damage_val, damage_type)
         -- Essence Mod: the game's "blue" text is drawn in the same slate-blue colours as the shadow tint.
         [DAMAGE_TYPE.SHADOW] = render.UiFlags.ColorBlue,
         [DAMAGE_TYPE.ICE] = render.UiFlags.ColorIce,
+        [DAMAGE_TYPE.HOLY] = render.UiFlags.ColorYellow,
     }
 
     local type_style = damage_type_styles[damage_type]

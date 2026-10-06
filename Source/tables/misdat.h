@@ -34,6 +34,7 @@ enum class DamageType : uint8_t {
 	// see GetResistanceCategory. At most 8 types fit in the projectile table's flags.
 	Shadow,
 	Ice,
+	Holy,
 };
 
 /**
@@ -47,6 +48,7 @@ constexpr DamageType GetResistanceCategory(DamageType type)
 {
 	switch (type) {
 	case DamageType::Shadow:
+	case DamageType::Holy:
 		return DamageType::Magic; // Astral
 	case DamageType::Ice:
 	case DamageType::Lightning:
@@ -149,6 +151,7 @@ enum class MissileDataFlags : uint8_t {
 	Acid = static_cast<uint8_t>(DamageType::Acid),
 	Shadow = static_cast<uint8_t>(DamageType::Shadow),
 	Ice = static_cast<uint8_t>(DamageType::Ice),
+	Holy = static_cast<uint8_t>(DamageType::Holy),
 	Arrow = 1 << 4,
 	Invisible = 1 << 5,
 };
