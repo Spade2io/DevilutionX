@@ -352,7 +352,8 @@ void DrawMissilePrivate(const Surface &out, const Missile &missile, Point target
 	} else if (IsAnyOf(missile._mitype, MissileID::FireAuraPulse, MissileID::FireAuraPulseBack)) {
 		// Essence Mod: the aura pulse reuses the Flash burst, turned red and lowered from waist height to the feet.
 		constexpr int FeetOffset = 24;
-		ClxDrawTRN(out, missileRenderPosition + Displacement { 0, FeetOffset }, sprite, GetEssenceTintTrn(EssenceTint::VividRed));
+		// A pulse made by a power read from essence_powers.tsv takes that power's colour instead.
+		ClxDrawTRN(out, missileRenderPosition + Displacement { 0, FeetOffset }, sprite, GetEssenceTintTrn(GetSpellTint(missile.sourceSpell).value_or(EssenceTint::VividRed)));
 	} else if (IsAnyOf(missile._mitype, MissileID::Frostbolt, MissileID::FrostboltExplosion)) {
 		// Essence Mod: Frostbolt reuses Firebolt's art, drawn through a blue tint.
 		ClxDrawTRN(out, missileRenderPosition, sprite, GetEssenceTintTrn(EssenceTint::VividBlue));

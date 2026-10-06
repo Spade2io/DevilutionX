@@ -163,6 +163,8 @@ DamageType GetSpellDamageType(SpellID spell)
 		return DamageType::Ice;
 	case EssenceID::Holy:
 		return DamageType::Holy;
+	case EssenceID::Nature: // deals no damage; this only keeps the list complete
+		break;
 	case EssenceID::None:
 		break;
 	}
@@ -204,6 +206,9 @@ UiFlags GetDamageTypeTextColor(DamageType damageType)
 
 UiFlags GetSpellTextColor(SpellID spell)
 {
+	// Nature has no damage type of its own; its words and numbers are a duller gold.
+	if (GetSpellEssence(spell) == EssenceID::Nature)
+		return UiFlags::ColorUiGold;
 	return GetDamageTypeTextColor(GetSpellDamageType(spell));
 }
 
@@ -229,6 +234,7 @@ std::optional<EssenceTint> GetEssenceTint(EssenceID essence)
 	case EssenceID::Water:
 		return EssenceTint::VividBlue;
 	case EssenceID::Holy:
+	case EssenceID::Nature: // until there is a duller yellow or a green
 		return EssenceTint::VividYellow;
 	case EssenceID::None:
 		break;

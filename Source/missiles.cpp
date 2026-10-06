@@ -2698,10 +2698,71 @@ void ProcessAuraPulseVisual(Missile &missile)
 	PutMissile(missile);
 }
 
+void AddHealingZone(Missile &missile, AddMissileParameter &parameter)
+{
+	// A patch of ground that heals whoever stands on it for as long as it lasts. It is never
+	// drawn itself; a burst of light at its centre marks every pulse.
+	missile.position.tile = parameter.dst;
+	missile.position.start = parameter.dst;
+	missile._miDrawFlag = false;
+	const int seconds = IsValidSpell(missile.sourceSpell) ? GetSpellData(missile.sourceSpell).durationSeconds : 0;
+	missile.duration = std::max(seconds, 2) * 20; // 20 game ticks to the second
+	missile.var1 = 1; // ticks until the next pulse
+	missile.var2 = 0; // one bit for each fallen player it has already raised
+}
+
+void ProcessHealingZone(Missile &missile)
+{
+	constexpr int PulseTicks = 40; // every 2 seconds
+
+	if (--missile.duration <= 0 || !IsExtendedSpell(missile.sourceSpell) || !IsValidSpell(missile.sourceSpell)) {
+		missile._miDelFlag = true;
+		return;
+	}
+	if (--missile.var1 > 0)
+		return;
+	missile.var1 = PulseTicks;
+
+	// Every player sees the pulse.
+	const Point centre = missile.position.tile;
+	AddMissile(centre, centre, Direction::South, MissileID::FireAuraPulse, TARGET_MONSTERS, missile._misource, 0, 0, &missile);
+	AddMissile(centre, centre, Direction::South, MissileID::FireAuraPulseBack, TARGET_MONSTERS, missile._misource, 0, 0, &missile);
+
+	// Only the caster's own PC decides who it reaches, and tells every PC.
+	const Player &caster = Players[missile._misource];
+	if (&caster != MyPlayer)
+		return;
+	const SpellID spell = missile.sourceSpell;
+	const SpellData &spellData = GetSpellData(spell);
+	const auto amount = static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.effectAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)));
+	const bool raises = spellData.rider.find("Raise") != std::string::npos;
+	for (const Player &other : Players) {
+		if (!other.plractive || !other.isOnActiveLevel() || other.position.tile.WalkingDistance(centre) > spellData.effectRadius)
+			continue;
+		if (other.hasNoLife()) {
+			// A fallen player lying in it is raised, once for each zone.
+			const int bit = 1 << other.getId();
+			if (raises && (missile.var2 & bit) == 0) {
+				missile.var2 |= bit;
+				NetSendCmdPowerOnPlayer(other, spell, amount);
+			}
+			continue;
+		}
+		if (other._pHitPoints < other._pMaxHP)
+			NetSendCmdPowerOnPlayer(other, spell, amount);
+	}
+}
+
 void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 {
 	// The buff lives on the player, so this effect has done its job the moment it is created.
 	missile._miDelFlag = true;
+	// "Zone": a patch of healing ground is left at the spot chosen. Every PC makes its own copy,
+	// so that everyone sees it.
+	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && GetSpellData(missile.sourceSpell).effect == "Zone") {
+		AddMissile(parameter.dst, parameter.dst, Direction::South, MissileID::HealingZone, TARGET_MONSTERS, missile._misource, 0, 0, &missile);
+		return;
+	}
 	// "Heal", "Buff" and "Mana" land on players. Only the caster's own PC decides who and how
 	// much; it then tells every PC, its own included, and each of them applies it.
 	const SpellID spell = missile.sourceSpell;
@@ -2710,7 +2771,7 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 		const Player &caster = Players[missile._misource];
 		if (&caster != MyPlayer)
 			return;
-		const auto amount = static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.effectAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)));
+		auto amount = static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.effectAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)));
 		const int radius = spellData.effectRadius;
 
 		const auto isLivingAllyHere = [](const Player &other) {
@@ -2789,6 +2850,10 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 				break;
 			}
 		}
+		// The rider "Nourish": more healing if the player already has one of the caster's heals
+		// over time on them. The rider's amount is how much more, as a percentage.
+		if (spellData.rider == "Nourish" && HasHealOverTimeFrom(*target, caster))
+			amount += amount * spellData.riderAmount / 100;
 		NetSendCmdPowerOnPlayer(*target, spell, amount);
 
 		// "ChainHeal" leaps on from there to the nearest wounded player, and again, healing a

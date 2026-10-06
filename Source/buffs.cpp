@@ -309,6 +309,36 @@ int GetPowerBuffPercent(const Player &player, std::string_view stat)
 	return percent;
 }
 
+int GetPlayerDistanceRatio(const Player &player)
+{
+	int ratio = 100;
+	for (const PowerBuff &buff : PowerBuffs[player.getId()]) {
+		// The one furthest from normal counts.
+		if (GetSpellData(buff.spell).buffStat == "Distance" && std::abs(buff.amount - 100) > std::abs(ratio - 100))
+			ratio = buff.amount;
+	}
+	return ratio;
+}
+
+int GetPlayerNoticeRange(const Player &player)
+{
+	const int ratio = GetPlayerDistanceRatio(player);
+	if (ratio <= 100)
+		return 255; // as far as they can be seen, as in the original game
+	// Normal sight reaches about 10 tiles. A stealthy player is noticed from proportionally
+	// closer, but never from less than 3 tiles.
+	return std::max(10 * 100 / ratio, 3);
+}
+
+bool HasHealOverTimeFrom(const Player &target, const Player &caster)
+{
+	for (const PowerBuff &buff : PowerBuffs[target.getId()]) {
+		if (buff.ticksLeft > 0 && buff.caster == caster.getId() && GetSpellData(buff.spell).buffStat == "HealPulse")
+			return true;
+	}
+	return false;
+}
+
 int ApplyDamageBuffs(const Player &player, int damage)
 {
 	const int percent = GetPowerBuffPercent(player, "Damage");
@@ -417,9 +447,36 @@ void PulseHealingAuras()
 	}
 }
 
+/** What each player's item-calculated stats last received from buffs and auras. */
+std::array<int, MAX_PLRS> LastStatBuffs {};
+int StatCheckCountdown = TicksPerSecond;
+
+/**
+ * Resistances, armor and the life and mana pools are worked out with the player's items, not
+ * every tick. An aura's share of them comes and goes as players walk, so once a second each
+ * player whose share has changed has those stats worked out again.
+ */
+void RefreshAuraStats()
+{
+	if (--StatCheckCountdown > 0)
+		return;
+	StatCheckCountdown = TicksPerSecond;
+	for (Player &player : Players) {
+		if (!player.plractive || player.hasNoLife())
+			continue;
+		const int now = GetPowerBuffPercent(player, "Resist") + 1000 * GetPowerBuffPercent(player, "Armor")
+		    + 1000000 * (GetPowerBuffPercent(player, "MaxLife") + GetPowerBuffPercent(player, "MaxMana"));
+		if (now == LastStatBuffs[player.getId()])
+			continue;
+		LastStatBuffs[player.getId()] = now;
+		CalcPlrInv(player, true);
+	}
+}
+
 void ProcessBuffTimers()
 {
 	PulseHealingAuras();
+	RefreshAuraStats();
 
 	if (RebirthProtectionLeft > 0)
 		RebirthProtectionLeft--;

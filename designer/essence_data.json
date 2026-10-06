@@ -2600,7 +2600,11 @@
       "cooldown": 0,
       "radius": 8,
       "growth": 12.5,
-      "potencyNote": "% to all three resistances, lasting, for allies in the aura"
+      "potencyNote": "% to all three resistances, lasting, for allies in the aura",
+      "number": 149,
+      "gameKey": "Ironbark",
+      "icon": 8,
+      "shortText": "Aura: resistances, rad 8"
     },
     {
       "id": "p_89373e9c",
@@ -2623,7 +2627,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "healing"
+      "potencyNote": "healing",
+      "number": 150,
+      "gameKey": "HealingTouch",
+      "icon": 1,
+      "shortText": "Heals an ally, or you"
     },
     {
       "id": "p_78d475b3",
@@ -2647,7 +2655,11 @@
       "cooldown": 6,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "healing"
+      "potencyNote": "healing",
+      "number": 151,
+      "gameKey": "Nourish",
+      "icon": 9,
+      "shortText": "Cheap heal; more with a HoT"
     },
     {
       "id": "p_2efb8377",
@@ -2670,7 +2682,11 @@
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% of the ally's maximum life restored"
+      "potencyNote": "% of the ally's maximum life restored",
+      "number": 152,
+      "gameKey": "FullBloom",
+      "icon": 40,
+      "shortText": "Restores 70% of ally life"
     },
     {
       "id": "p_1aae8849",
@@ -2693,7 +2709,11 @@
       "cooldown": 10,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "healing to the first target, less with each leap"
+      "potencyNote": "healing to the first target, less with each leap",
+      "number": 153,
+      "gameKey": "Pollinate",
+      "icon": 15,
+      "shortText": "Heal that leaps to others"
     },
     {
       "id": "p_d3af12b6",
@@ -2716,7 +2736,11 @@
       "cooldown": 45,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "healing to each ally"
+      "potencyNote": "healing to each ally",
+      "number": 154,
+      "gameKey": "VerdantTide",
+      "icon": 3,
+      "shortText": "Heals every ally anywhere"
     },
     {
       "id": "p_73ae2db5",
@@ -2740,7 +2764,11 @@
       "cooldown": 0,
       "radius": 2,
       "growth": 12.5,
-      "potencyNote": "healing to each target"
+      "potencyNote": "healing to each target",
+      "number": 155,
+      "gameKey": "FairyRing",
+      "icon": 10,
+      "shortText": "Heals allies, radius 2"
     },
     {
       "id": "p_75e44a04",
@@ -2763,7 +2791,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "healing in total over 12 seconds"
+      "potencyNote": "healing in total over 12 seconds",
+      "number": 156,
+      "gameKey": "Rejuvenation",
+      "icon": 43,
+      "shortText": "Heals an ally over 12s"
     },
     {
       "id": "p_9a3d3513",
@@ -2787,7 +2819,11 @@
       "cooldown": 12,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "healing in total over 10 seconds to each ally"
+      "potencyNote": "healing in total over 10 seconds to each ally",
+      "number": 157,
+      "gameKey": "SpringShower",
+      "icon": 50,
+      "shortText": "Heals all allies over 10s"
     },
     {
       "id": "p_e9251d47",
@@ -2811,7 +2847,11 @@
       "cooldown": 60,
       "radius": 4,
       "growth": 12.5,
-      "potencyNote": "healing in total over 20 seconds to each target; also removes harmful effects"
+      "potencyNote": "healing in total over 20 seconds to each target; also removes harmful effects",
+      "number": 158,
+      "gameKey": "SacredGrove",
+      "icon": 37,
+      "shortText": "Healing ground, 20s, rad 4"
     },
     {
       "id": "p_54827e32",
@@ -2835,7 +2875,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "healing; also removes harmful effects"
+      "potencyNote": "healing; also removes harmful effects",
+      "number": 159,
+      "gameKey": "Remedy",
+      "icon": 4,
+      "shortText": "Cleanses and heals an ally"
     },
     {
       "id": "p_8138f4a7",
@@ -2858,7 +2902,11 @@
       "cooldown": 12,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "harmful effects removed in all, one every 2 seconds"
+      "potencyNote": "harmful effects removed in all, one every 2 seconds",
+      "number": 160,
+      "gameKey": "Renewal",
+      "icon": 21,
+      "shortText": "Cleanses an ally over 10s"
     },
     {
       "id": "p_d5c0105f",
@@ -2881,7 +2929,11 @@
       "cooldown": 45,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "harmful effect removed from each ally"
+      "potencyNote": "harmful effect removed from each ally",
+      "number": 161,
+      "gameKey": "FreshBreeze",
+      "icon": 27,
+      "shortText": "Cleanses every ally"
     },
     {
       "id": "p_9cbea68d",
@@ -2906,7 +2958,11 @@
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% of life on return; regrows a further 60% over 15 seconds"
+      "potencyNote": "% of life on return; regrows a further 60% over 15 seconds",
+      "number": 162,
+      "gameKey": "NewGrowth",
+      "icon": 44,
+      "shortText": "Raises ally, then regrows"
     },
     {
       "id": "p_a61d038f",
@@ -2930,7 +2986,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% to all three resistances, lasting"
+      "potencyNote": "% to all three resistances, lasting",
+      "number": 163,
+      "gameKey": "Barkskin",
+      "icon": 12,
+      "shortText": "Ally: +10 resistances"
     },
     {
       "id": "p_2be4e5fa",
@@ -2954,7 +3014,11 @@
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% to all three resistances for 20 seconds, for every ally"
+      "potencyNote": "% to all three resistances for 20 seconds, for every ally",
+      "number": 164,
+      "gameKey": "Canopy",
+      "icon": 45,
+      "shortText": "All allies: resist for 20s"
     },
     {
       "id": "p_0ad1ca63",
@@ -2978,7 +3042,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "armor, lasting"
+      "potencyNote": "armor, lasting",
+      "number": 165,
+      "gameKey": "Ironwood",
+      "icon": 7,
+      "shortText": "Ally has more armor"
     },
     {
       "id": "p_f9476753",
@@ -3002,7 +3070,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% maximum life, lasting"
+      "potencyNote": "% maximum life, lasting",
+      "number": 166,
+      "gameKey": "Oakheart",
+      "icon": 18,
+      "shortText": "Ally has more maximum life"
     },
     {
       "id": "p_2d21a0b3",
@@ -3026,7 +3098,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% apparent distance: monsters treat you as half again as far away"
+      "potencyNote": "% apparent distance: monsters treat you as half again as far away",
+      "number": 167,
+      "gameKey": "Camouflage",
+      "icon": 19,
+      "shortText": "Monsters notice you less"
     },
     {
       "id": "p_89bbc864",
@@ -3051,7 +3127,11 @@
       "cooldown": 240,
       "radius": 6,
       "growth": 12.5,
-      "potencyNote": "healing in total over 30 seconds, to each ally in its shade"
+      "potencyNote": "healing in total over 30 seconds, to each ally in its shade",
+      "number": 168,
+      "gameKey": "WorldTree",
+      "icon": 24,
+      "shortText": "Healing ground, 30s, rad 6"
     },
     {
       "id": "p_45d01c7c",

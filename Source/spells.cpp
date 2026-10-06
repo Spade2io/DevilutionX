@@ -355,11 +355,18 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 
 	// "Resurrect": a fallen player is raised with the amount as a percentage of their life. The
 	// player's own PC does the rising, as with the game's Resurrect, and tells the others.
-	if (effect == "Resurrect" && target.hasNoLife()) {
+	// A "Zone" whose rider names "Raise" does the same for a fallen player lying in it, with 30%.
+	if (target.hasNoLife() && (effect == "Resurrect" || (effect == "Zone" && rider.find("Raise") != std::string::npos))) {
 		if (target.isOnActiveLevel())
 			AddMissile(target.position.tile, target.position.tile, Direction::South, MissileID::ResurrectBeam, TARGET_MONSTERS, caster.getId(), 0, 0);
+		// The rider "Regrow": once risen, the player regains the rider's amount, a percentage of
+		// their life, over the power's duration. It arrives as a heal over time.
+		if (rider == "Regrow" && spellData.durationSeconds >= 2) {
+			const int pulses = spellData.durationSeconds / 2;
+			ActivatePowerBuff(target, spell, std::max(static_cast<int>(static_cast<int64_t>(target._pMaxHP) * spellData.riderAmount / 100 / pulses), 1), caster);
+		}
 		if (&target == MyPlayer) {
-			PendingRevivePercent = std::clamp(amount, 1, 100);
+			PendingRevivePercent = effect == "Zone" ? 30 : std::clamp(amount, 1, 100);
 			NetSendCmd(true, CMD_PLRALIVE);
 		}
 		return;
@@ -404,7 +411,7 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 	// "HealPercent" gives the amount as a percentage of the player's maximum life.
 	if (effect == "HealPercent")
 		amount = static_cast<int>(static_cast<int64_t>(target._pMaxHP) * std::min(amount, 100) / 100);
-	if (IsAnyOf(effect, "Heal", "HealPercent", "ChainHeal", "Resurrect") || rider.starts_with("Heal")) {
+	if (IsAnyOf(effect, "Heal", "HealPercent", "ChainHeal", "Resurrect", "Zone") || rider.starts_with("Heal")) {
 		const int healed = std::clamp(target._pMaxHP - target._pHitPoints, 0, amount);
 		AddSpellExperienceForHealing(caster, target, spell, healed);
 		target._pHitPoints = std::min(target._pHitPoints + amount, target._pMaxHP);

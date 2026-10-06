@@ -54,6 +54,8 @@ std::string_view GetEssenceName(EssenceID essence)
 		return "Water";
 	case EssenceID::Holy:
 		return "Holy";
+	case EssenceID::Nature:
+		return "Nature";
 	case EssenceID::None:
 		break;
 	}

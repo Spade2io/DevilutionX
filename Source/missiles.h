@@ -399,6 +399,8 @@ void AddFireAuraBuff(Missile &missile, AddMissileParameter &parameter);
 /** Essence Mod: the burst shown at a player's feet when their aura pulses. It has no effect of its own. */
 void AddAuraPulseVisual(Missile &missile, AddMissileParameter &parameter);
 void ProcessAuraPulseVisual(Missile &missile);
+void AddHealingZone(Missile &missile, AddMissileParameter &parameter);
+void ProcessHealingZone(Missile &missile);
 /** Essence Mod: switches the caster's Strength buff on. */
 void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter);
 void AddHealOther(Missile &missile, AddMissileParameter &parameter);

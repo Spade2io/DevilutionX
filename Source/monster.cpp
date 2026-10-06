@@ -32,6 +32,7 @@
 #endif
 
 #include "automap.h"
+#include "buffs.h"
 #include "control/control.hpp"
 #include "crawl.hpp"
 #include "cursor.h"
@@ -677,6 +678,21 @@ DVL_ALWAYS_INLINE bool IsRanged(Monster &monster)
 	return IsAnyOf(monster.ai, MonsterAIID::SkeletonRanged, MonsterAIID::GoatRanged, MonsterAIID::Succubus, MonsterAIID::LazarusSuccubus);
 }
 
+/** Essence Mod: whether any living player on the level is close enough for a monster to notice them. */
+bool IsNoticedByAPlayer(const Monster &monster)
+{
+	for (const Player &player : Players) {
+		if (!player.plractive || !player.isOnActiveLevel() || player._pLvlChanging || player.hasNoLife())
+			continue;
+		if (monster.position.tile.WalkingDistance(player.position.tile) <= GetPlayerNoticeRange(player))
+			return true;
+	}
+	// With nobody alive on the level the original behaviour stands.
+	return std::none_of(Players.begin(), Players.end(), [](const Player &player) {
+		return player.plractive && player.isOnActiveLevel() && !player.hasNoLife();
+	});
+}
+
 void UpdateEnemy(Monster &monster)
 {
 	WorldTilePosition target;
@@ -692,7 +708,8 @@ void UpdateEnemy(Monster &monster)
 			    || (player.hasNoLife() && gbIsMultiplayer))
 				continue;
 			const bool sameroom = (dTransVal[position.x][position.y] == dTransVal[player.position.tile.x][player.position.tile.y]);
-			const int dist = position.WalkingDistance(player.position.tile);
+			// Essence Mod: a stealthy player seems farther away than they are, a threatening one closer.
+			const int dist = std::max(position.WalkingDistance(player.position.tile) * GetPlayerDistanceRatio(player) / 100, 1);
 			if ((sameroom && !bestsameroom)
 			    || ((sameroom || !bestsameroom) && dist < bestDist)
 			    || (menemy == -1)) {
@@ -4278,7 +4295,9 @@ void ProcessMonsters()
 			monster.hitPoints = std::min(monster.hitPoints, monster.maxHitPoints); // prevent going over max HP with part of a single regen tick
 		}
 
-		const bool isMonsterVisible = IsTileVisible(monster.position.tile);
+		// Essence Mod: being in sight is not enough if every player near enough to see the monster
+		// is stealthy. Somebody must also be within the range at which they are noticed.
+		const bool isMonsterVisible = IsTileVisible(monster.position.tile) && IsNoticedByAPlayer(monster);
 		if (isMonsterVisible && monster.activeForTicks == 0) {
 			if (monster.type().type == MT_CLEAVER) {
 				PlaySFX(SfxID::ButcherGreeting);

@@ -240,6 +240,7 @@ std::expected<MissileData::AddFn, std::string> ParseMissileAddFn(std::string_vie
 	if (value == "AddFireAuraBuff") return AddFireAuraBuff;
 	if (value == "AddFlamingWeaponBuff") return AddFlamingWeaponBuff;
 	if (value == "AddAuraPulseVisual") return AddAuraPulseVisual;
+	if (value == "AddHealingZone") return AddHealingZone;
 	if (value == "AddHealOther") return AddHealOther;
 	if (value == "AddElemental") return AddElemental;
 	if (value == "AddIdentify") return AddIdentify;
@@ -296,6 +297,7 @@ std::expected<MissileData::ProcessFn, std::string> ParseMissileProcessFn(std::st
 	if (value == "ProcessWeaponExplosion") return ProcessWeaponExplosion;
 	if (value == "ProcessMissileExplosion") return ProcessMissileExplosion;
 	if (value == "ProcessAuraPulseVisual") return ProcessAuraPulseVisual;
+	if (value == "ProcessHealingZone") return ProcessHealingZone;
 	if (value == "ProcessAcidSplate") return ProcessAcidSplate;
 	if (value == "ProcessTeleport") return ProcessTeleport;
 	if (value == "ProcessStoneCurse") return ProcessStoneCurse;

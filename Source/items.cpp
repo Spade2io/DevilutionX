@@ -2626,6 +2626,12 @@ void CalcPlrResistances(Player &player, ItemSpecialEffect iflgs, int fire, int l
 		lightning -= playerLevel;
 	}
 
+	// Essence Mod: a "Resist" buff or aura adds its amount to all three resistances.
+	const int resistBuff = GetPowerBuffPercent(player, "Resist");
+	magic += resistBuff;
+	fire += resistBuff;
+	lightning += resistBuff;
+
 	if (HasAnyOf(iflgs, ItemSpecialEffect::ZeroResistance)) {
 		// reset resistances to zero if the respective special effect is active
 		magic = 0;
@@ -2881,7 +2887,7 @@ void CalcPlrItemVals(Player &player, bool loadgfx)
 
 	CalcPlrDamage(player, minDamage, maxDamage);
 	CalcPlrPrimaryStats(player, strength, magic, dexterity, vitality);
-	player._pIAC = ac;
+	player._pIAC = ac + GetPowerBuffPercent(player, "Armor"); // Essence Mod: "Armor" buffs add points of armor
 	player._pIBonusDam = dam;
 	player._pIBonusToHit = toHit;
 	player._pIBonusAC = bonusAc;

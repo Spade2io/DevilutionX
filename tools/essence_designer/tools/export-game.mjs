@@ -1,5 +1,5 @@
 // Writes the designer's powers into the files the game reads.
-// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire, Water and Holy)
+// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire, Water, Holy and Nature)
 //
 // What it writes:
 //   assets/txtdata/spells/essence_powers.tsv  one row per power the game does not already have
@@ -20,7 +20,7 @@ const POWERS_FILE = path.join(REPO, 'assets/txtdata/spells/essence_powers.tsv')
 const ITEMS_FILE = path.join(REPO, 'assets/txtdata/items/itemdat.tsv')
 const check = process.argv.includes('--check')
 const wanted = process.argv.slice(2).filter((a) => !a.startsWith('--'))
-const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy']
+const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy', 'Nature']
 
 // Powers the game already has as hand-written spells. They keep their original numbers and are
 // not exported; the name on the right is the game's own name for the spell.
@@ -40,6 +40,9 @@ const ICONS = {
   'Radiance': 8, 'Mend': 1, 'Divine Light': 3, 'Patient Prayer': 9, 'Lay on Hands': 40, 'Purify': 4, 'Absolution': 21,
   'Chorus of Light': 15, 'Second Dawn': 40, 'Guardian Angel': 44, 'Miracle': 24, 'Ward of Purity': 12, 'Vigil': 43, 'Benediction': 18,
   'Smite': 41, 'Judgment': 34, 'Atonement': 33, 'Searing Light': 10, 'Dawnburst': 37,
+  'Ironbark': 8, 'Healing Touch': 1, 'Nourish': 9, 'Full Bloom': 40, 'Pollinate': 15, 'Verdant Tide': 3, 'Fairy Ring': 10,
+  'Rejuvenation': 43, 'Spring Shower': 50, 'Sacred Grove': 37, 'Remedy': 4, 'Renewal': 21, 'Fresh Breeze': 27, 'New Growth': 44,
+  'Barkskin': 12, 'Canopy': 45, 'Ironwood': 7, 'Oakheart': 18, 'Camouflage': 19, 'World Tree': 24,
   'Wellspring': 8, 'Tidal Wave': 13, 'Deep Freeze': 7, 'Wash Away': 4, 'Purging Rain': 21, 'Monsoon': 3, 'Great Flood': 24,
 }
 // The short line the spellbook shows under each power. There is room for about 28 letters.
@@ -55,6 +58,13 @@ const SHORT_TEXT = {
   'Wellspring': 'Aura: mana regen, radius 8', 'Tidal Wave': 'Wave of ice damage', 'Deep Freeze': 'Holds foes still 6s, rad 2',
   'Wash Away': 'Cleanses and heals an ally', 'Purging Rain': 'Cleanses allies, radius 4', 'Monsoon': 'Big heal + cleanse, rad 4',
   'Great Flood': 'Hurts foes, heals, radius 6',
+  'Ironbark': 'Aura: resistances, rad 8', 'Healing Touch': 'Heals an ally, or you', 'Nourish': 'Cheap heal; more with a HoT',
+  'Full Bloom': 'Restores 70% of ally life', 'Pollinate': 'Heal that leaps to others', 'Verdant Tide': 'Heals every ally anywhere',
+  'Fairy Ring': 'Heals allies, radius 2', 'Rejuvenation': 'Heals an ally over 12s', 'Spring Shower': 'Heals all allies over 10s',
+  'Sacred Grove': 'Healing ground, 20s, rad 4', 'Remedy': 'Cleanses and heals an ally', 'Renewal': 'Cleanses an ally over 10s',
+  'Fresh Breeze': 'Cleanses every ally', 'New Growth': 'Raises ally, then regrows', 'Barkskin': 'Ally: +10 resistances',
+  'Canopy': 'All allies: resist for 20s', 'Ironwood': 'Ally has more armor', 'Oakheart': 'Ally has more maximum life',
+  'Camouflage': 'Monsters notice you less', 'World Tree': 'Healing ground, 30s, rad 6',
   'Radiance': 'Aura: heals allies, rad 8', 'Mend': 'Small, cheap heal', 'Divine Light': 'Huge heal, huge cost',
   'Patient Prayer': 'Cheap medium heal', 'Lay on Hands': 'Restores 70% of ally life', 'Purify': 'Cleanses and heals an ally',
   'Absolution': 'Cleanses ally and nearby', 'Chorus of Light': 'Heal that leaps to others', 'Second Dawn': 'Raises a fallen ally',
@@ -113,6 +123,16 @@ const SHORT_TEXT = {
 //         with the potency as a percentage of their life), Ward (nothing yet).
 //   More Strike riders: Bane (riderPercent more damage to undead and demons), HealAlly (the most
 //         wounded player within 8 tiles is healed for riderHeal).
+//   A Buff with the stat HealPulse and "overTime" is a heal over time: the potency is the total,
+//         spread over one pulse every 2 seconds of the duration.
+//   Zone: healing ground at the spot chosen, for the duration. Every 2 seconds each wounded
+//         player within the radius is healed; the potency is the total over the whole time. A
+//         rider naming "Raise" also raises each fallen player lying in it, once, with 30% life.
+//   More Buff stats: Resist (points on all three resistances), Armor (points), Distance (how far
+//         away the player seems to monsters, as a percentage: above 100 is stealth), Renewal
+//         (nothing yet).
+//   More riders: Nourish on a Heal (riderPercent more if the target has one of the caster's heals
+//         over time), Regrow on a Resurrect (riderPercent of life regained over the duration).
 //   Buff: switches a buff on for the caster, or for the player aimed at if the power is tagged Ally. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10
@@ -147,6 +167,26 @@ const BEHAVIOUR = {
   'Purging Rain': { missile: 'StrengthBuff', effect: 'Cleanse' },
   'Monsoon': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 99 },
   'Great Flood': { missile: 'Corruption', effect: 'GroundBurst', rider: 'HealCleanse', riderHeal: 29 },
+  'Ironbark': { missile: 'StrengthBuff', effect: 'Aura', stat: 'Resist', duration: 0 },
+  'Healing Touch': { missile: 'StrengthBuff', effect: 'Heal' },
+  'Nourish': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Nourish', riderPercent: 50 },
+  'Full Bloom': { missile: 'StrengthBuff', effect: 'HealPercent' },
+  'Pollinate': { missile: 'StrengthBuff', effect: 'ChainHeal' },
+  'Verdant Tide': { missile: 'StrengthBuff', effect: 'Heal' },
+  'Fairy Ring': { missile: 'StrengthBuff', effect: 'Heal' },
+  'Rejuvenation': { missile: 'StrengthBuff', effect: 'Buff', stat: 'HealPulse', duration: 12, overTime: true },
+  'Spring Shower': { missile: 'StrengthBuff', effect: 'Buff', stat: 'HealPulse', duration: 10, overTime: true },
+  'Sacred Grove': { missile: 'StrengthBuff', effect: 'Zone', duration: 20, rider: 'Cleanse', riderPercent: 1 },
+  'Remedy': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 1 },
+  'Renewal': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Renewal', duration: 10 },
+  'Fresh Breeze': { missile: 'StrengthBuff', effect: 'Cleanse' },
+  'New Growth': { missile: 'StrengthBuff', effect: 'Resurrect', stat: 'HealPulse', duration: 15, rider: 'Regrow', riderPercent: 60 },
+  'Barkskin': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Resist', duration: 0 },
+  'Canopy': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Resist', duration: 20 },
+  'Ironwood': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Armor', duration: 0 },
+  'Oakheart': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0 },
+  'Camouflage': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0 },
+  'World Tree': { missile: 'StrengthBuff', effect: 'Zone', duration: 30, rider: 'CleanseRaise', riderPercent: 1 },
   'Radiance': { missile: 'StrengthBuff', effect: 'Aura', stat: 'HealPulse', duration: 0 },
   'Mend': { missile: 'StrengthBuff', effect: 'Heal' },
   'Divine Light': { missile: 'StrengthBuff', effect: 'Heal' },
@@ -201,13 +241,14 @@ const row = ({ power, essence }) => {
   const tags = tagNames(power)
   const element = tags.includes('Lightning') ? 'Lightning' : tags.includes('Fire') ? 'Fire' : 'Magic'
   // Every buff and heal can be cast in town, cooldown ones included.
-  const inTown = ['Buff', 'Heal', 'Mana', 'Aura', 'Cleanse', 'HealPercent', 'ChainHeal', 'Resurrect'].includes(BEHAVIOUR[power.name]?.effect)
+  const inTown = ['Buff', 'Heal', 'Mana', 'Aura', 'Cleanse', 'HealPercent', 'ChainHeal', 'Resurrect', 'Zone'].includes(BEHAVIOUR[power.name]?.effect)
   const flags = [element, ...(tags.includes('Enemy') ? ['Targeted'] : []), ...(inTown ? ['AllowedInTown'] : [])].join(',')
   const mana = Math.min(250, Math.max(0, Math.round(power.manaCost ?? 0)))
   const behaviour = BEHAVIOUR[power.name]
   // Amounts are in 64ths of a hit point, the unit the game counts damage in.
   const amount = behaviour?.effect === 'Burn' ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
-    : behaviour?.stat === 'HealPulse' ? Math.round((power.potency ?? 0) * 64)
+    : behaviour?.overTime || behaviour?.effect === 'Zone' ? Math.round((power.potency ?? 0) * 64 / (behaviour.duration / 2))
+    : behaviour?.stat === 'HealPulse' && behaviour.effect === 'Aura' ? Math.round((power.potency ?? 0) * 64)
     : ['Burst', 'GroundBurst', 'Strike', 'Heal', 'Mana', 'Wave', 'ChainHeal'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64)
     : behaviour?.effect === 'Cleanse' ? Math.round(power.potency ?? 99)
     : ['Aura', 'Freeze', 'HealPercent', 'Resurrect'].includes(behaviour?.effect) ? Math.round(power.potency ?? 0)
@@ -222,7 +263,7 @@ const row = ({ power, essence }) => {
     : behaviour.riderHeal != null ? Math.round(behaviour.riderHeal * 64)
     : Math.round(behaviour.riderTotal * 64 / TICKS_PER_EFFECT)
   return [
-    power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : element === 'Magic' && ['Heal', 'Mana', 'Buff', 'Aura', 'Cleanse', 'HealPercent', 'ChainHeal', 'Resurrect'].includes(behaviour?.effect) ? 'CastHealing' : 'CastFire',
+    power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : element === 'Magic' && ['Heal', 'Mana', 'Buff', 'Aura', 'Cleanse', 'HealPercent', 'ChainHeal', 'Resurrect', 'Zone'].includes(behaviour?.effect) ? 'CastHealing' : 'CastFire',
     mana, flags, behaviour?.missile ?? '', 0, mana, power.icon,
     Math.round(power.cooldown ?? 0), shortLine(power),
     behaviour?.effect ?? '', amount, radius, behaviour?.rider ?? '', riderAmount,

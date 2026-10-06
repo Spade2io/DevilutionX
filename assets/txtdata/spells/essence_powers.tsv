@@ -48,3 +48,23 @@ Judgment	145	Judgment	Holy	CastFire	4	Magic,Targeted		0	4	34	10	Heavy; more to u
 Atonement	146	Atonement	Holy	CastFire	3	Magic,Targeted		0	3	33	0	Strike that heals an ally	Strike	192	0	HealAlly	704		0	0
 SearingLight	147	Searing Light	Holy	CastFire	9	Magic,Targeted	Corruption	0	9	10	0	Holy damage, radius 2	Burst	256	2		0		0	0
 Dawnburst	148	Dawnburst	Holy	CastFire	18	Magic	Corruption	0	18	37	30	Hurts foes, heals, radius 4	GroundBurst	320	4	Heal	704		0	0
+Ironbark	149	Ironbark	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: resistances, rad 8	Aura	5	8		0	Resist	0	0
+HealingTouch	150	Healing Touch	Nature	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	1	0	Heals an ally, or you	Heal	768	0		0		0	1
+Nourish	151	Nourish	Nature	CastHealing	5	Magic,AllowedInTown	StrengthBuff	0	5	9	6	Cheap heal; more with a HoT	Heal	1024	0	Nourish	50		0	1
+FullBloom	152	Full Bloom	Nature	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	40	60	Restores 70% of ally life	HealPercent	70	0		0		0	1
+Pollinate	153	Pollinate	Nature	CastHealing	12	Magic,AllowedInTown	StrengthBuff	0	12	15	10	Heal that leaps to others	ChainHeal	896	0		0		0	1
+VerdantTide	154	Verdant Tide	Nature	CastHealing	30	Magic,AllowedInTown	StrengthBuff	0	30	3	45	Heals every ally anywhere	Heal	896	99		0		0	0
+FairyRing	155	Fairy Ring	Nature	CastHealing	7	Magic,AllowedInTown	StrengthBuff	0	7	10	0	Heals allies, radius 2	Heal	512	2		0		0	0
+Rejuvenation	156	Rejuvenation	Nature	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	43	0	Heals an ally over 12s	Buff	171	0		0	HealPulse	12	1
+SpringShower	157	Spring Shower	Nature	CastHealing	12	Magic,AllowedInTown	StrengthBuff	0	12	50	12	Heals all allies over 10s	Buff	102	99		0	HealPulse	10	0
+SacredGrove	158	Sacred Grove	Nature	CastHealing	24	Magic,AllowedInTown	StrengthBuff	0	24	37	60	Healing ground, 20s, rad 4	Zone	147	4	Cleanse	1		20	0
+Remedy	159	Remedy	Nature	CastHealing	3	Magic,AllowedInTown	StrengthBuff	0	3	4	0	Cleanses and heals an ally	Heal	320	0	Cleanse	1		0	1
+Renewal	160	Renewal	Nature	CastHealing	6	Magic,AllowedInTown	StrengthBuff	0	6	21	12	Cleanses an ally over 10s	Buff	5	0		0	Renewal	10	1
+FreshBreeze	161	Fresh Breeze	Nature	CastHealing	15	Magic,AllowedInTown	StrengthBuff	0	15	27	45	Cleanses every ally	Cleanse	1	99		0		0	0
+NewGrowth	162	New Growth	Nature	CastHealing	30	Magic,AllowedInTown	StrengthBuff	0	30	44	60	Raises ally, then regrows	Resurrect	10	0	Regrow	60	HealPulse	15	0
+Barkskin	163	Barkskin	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	Ally: +10 resistances	Buff	10	0		0	Resist	0	1
+Canopy	164	Canopy	Nature	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	45	60	All allies: resist for 20s	Buff	15	99		0	Resist	20	0
+Ironwood	165	Ironwood	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	7	0	Ally has more armor	Buff	10	0		0	Armor	0	1
+Oakheart	166	Oakheart	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	Ally has more maximum life	Buff	10	0		0	MaxLife	0	1
+Camouflage	167	Camouflage	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	19	0	Monsters notice you less	Buff	150	0		0	Distance	0	0
+WorldTree	168	World Tree	Nature	CastHealing	60	Magic,AllowedInTown	StrengthBuff	0	60	24	240	Healing ground, 30s, rad 6	Zone	256	6	CleanseRaise	1		30	0

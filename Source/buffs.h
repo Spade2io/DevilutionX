@@ -67,6 +67,19 @@ bool ActivatePowerBuff(Player &player, SpellID spell, int amount, const Player &
  */
 int GetPowerBuffPercent(const Player &player, std::string_view stat);
 
+/**
+ * @brief How far away a player seems to monsters, as a percentage of the real distance.
+ * 100 is normal. Above it the player is stealthy: monsters prefer other targets and notice the
+ * player only from closer. A buff with the stat "Distance" sets it; such buffs do not add up.
+ */
+int GetPlayerDistanceRatio(const Player &player);
+
+/** @brief How close a monster must be to a player before it can notice them, in tiles. */
+int GetPlayerNoticeRange(const Player &player);
+
+/** @brief Whether a player has a heal over time on them that another player cast. */
+bool HasHealOverTimeFrom(const Player &target, const Player &caster);
+
 /** A buff or heal with this radius or more reaches every player in the game, wherever they are. */
 constexpr int EveryoneRadius = 50;
 

@@ -229,3 +229,24 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Atonement	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Atonement	true	1
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Searing Light	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	SearingLight	true	1
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Dawnburst	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Dawnburst	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Ironbark	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Ironbark	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Healing Touch	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	HealingTouch	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Nourish	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Nourish	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Full Bloom	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	FullBloom	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Pollinate	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Pollinate	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Verdant Tide	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	VerdantTide	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Fairy Ring	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	FairyRing	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Rejuvenation	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Rejuvenation	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Spring Shower	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	SpringShower	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Sacred Grove	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	SacredGrove	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Remedy	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Remedy	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Renewal	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Renewal	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Fresh Breeze	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	FreshBreeze	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of New Growth	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	NewGrowth	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Barkskin	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Barkskin	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Canopy	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Canopy	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Ironwood	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Ironwood	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Oakheart	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Oakheart	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Camouflage	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Camouflage	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of World Tree	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	WorldTree	true	1
+	0	Misc	Unequippable	ESSENCE	Misc	NONE	Nature Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	HealingTouch	true	1

@@ -176,6 +176,7 @@ std::expected<MissileID, std::string> ParseMissileId(std::string_view value)
 	if (value == "FireAuraPulse") return MissileID::FireAuraPulse;
 	if (value == "FireAuraPulseBack") return MissileID::FireAuraPulseBack;
 	if (value == "FlamingWeaponBuff") return MissileID::FlamingWeaponBuff;
+	if (value == "HealingZone") return MissileID::HealingZone;
 	return std::unexpected("Unknown enum value");
 }
 

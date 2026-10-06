@@ -256,8 +256,15 @@ player_graphic GetPlayerGraphicForSpell(SpellID spellId)
 	}
 }
 
+/** Essence Mod: the player going through a casting motion that casts nothing. See StartCastMotion. */
+const Player *MotionOnlyPlayer = nullptr;
+
 void StartSpell(Player &player, Direction d, WorldTileCoord cx, WorldTileCoord cy)
 {
+	// A real cast is starting, so any casting motion that was cut short is forgotten.
+	if (&player == MotionOnlyPlayer)
+		MotionOnlyPlayer = nullptr;
+
 	if (player._pInvincible && player.hasNoLife() && &player == MyPlayer) {
 		SyncPlrKill(player, DeathReason::Unknown);
 		return;
@@ -1056,7 +1063,10 @@ void DamageArmor(Player &player)
 
 bool DoSpell(Player &player)
 {
-	if (player.AnimInfo.currentFrame == player._pSFNum) {
+	if (player.AnimInfo.currentFrame == player._pSFNum && &player == MotionOnlyPlayer) {
+		// Essence Mod: this is only the casting motion (see StartCastMotion). Nothing is cast.
+		MotionOnlyPlayer = nullptr;
+	} else if (player.AnimInfo.currentFrame == player._pSFNum) {
 		CastSpell(
 		    player,
 		    player.executedSpell.spellId,
@@ -1603,9 +1613,11 @@ bool StartCastMotion(Player &player, SpellID spell)
 	if (player.hasNoLife() || !IsAnyOf(player._pmode, PM_STAND, PM_GOTHIT, PM_ATTACK, PM_RATTACK, PM_BLOCK, PM_SPELL))
 		return false;
 
-	// The motion runs through the game's own casting state, which casts the "executed" spell part
-	// way through. A passive power has no missiles and costs nothing, so that cast does nothing.
+	// The motion runs through the game's own casting state, which would cast the "executed" spell
+	// part way through. Marking the player stops that: the power has already done its work, and
+	// casting it here would, for a buff like Guardian Angel, put it straight back on.
 	player.executedSpell = { spell, SpellType::Spell, 0, player.GetSpellLevel(spell) };
+	MotionOnlyPlayer = &player;
 	NewPlrAnim(player, GetPlayerGraphicForSpell(spell), player._pdir, AnimationDistributionFlags::ProcessAnimationPending, 0, player._pSFNum);
 	PlaySfxLoc(GetSpellData(spell).sSFX, player.position.tile);
 	player._pmode = PM_SPELL;
