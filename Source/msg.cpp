@@ -195,6 +195,7 @@ std::string_view CmdIdString(_cmd_id cmd)
 	case CMD_OPENHIVE: return "CMD_OPENHIVE";
 	case CMD_OPENGRAVE: return "CMD_OPENGRAVE";
 	case CMD_SPAWNMONSTER: return "CMD_SPAWNMONSTER";
+	case CMD_POWERONPLAYER: return "CMD_POWERONPLAYER";
 	case FAKE_CMD_SETID: return "FAKE_CMD_SETID";
 	case FAKE_CMD_DROPID: return "FAKE_CMD_DROPID";
 	case CMD_INVALID: return "CMD_INVALID";
@@ -2603,6 +2604,20 @@ size_t OnOpenGrave(const TCmd &cmd)
 	return sizeof(cmd);
 }
 
+size_t OnPowerOnPlayer(const TCmdPowerOnPlayer &message, const Player &caster)
+{
+	const uint32_t amount = Swap32LE(message.dwAmount);
+	const SpellID spell = static_cast<SpellID>(Swap16LE(message.wSpell));
+
+	if (gbBufferMsgs != 1 && message.bPlr < Players.size() && amount <= 192000) {
+		Player &target = Players[message.bPlr];
+		if (target.plractive)
+			ApplyPowerToPlayer(caster, target, spell, static_cast<int>(amount));
+	}
+
+	return sizeof(message);
+}
+
 size_t OnSpawnMonster(const TCmdSpawnMonster &message, const Player &player)
 {
 	if (gbBufferMsgs == 1)
@@ -3302,6 +3317,17 @@ void NetSendCmdDamage(bool bHiPri, const Player &player, uint32_t dwDam, DamageT
 		NetSendLoPri(MyPlayerId, reinterpret_cast<std::byte *>(&cmd), sizeof(cmd));
 }
 
+void NetSendCmdPowerOnPlayer(const Player &target, SpellID spell, uint32_t amount)
+{
+	TCmdPowerOnPlayer cmd;
+
+	cmd.bCmd = CMD_POWERONPLAYER;
+	cmd.bPlr = target.getId();
+	cmd.wSpell = Swap16LE(static_cast<uint16_t>(spell));
+	cmd.dwAmount = Swap32LE(amount);
+	NetSendHiPri(MyPlayerId, reinterpret_cast<std::byte *>(&cmd), sizeof(cmd));
+}
+
 void NetSendCmdMonDmg(bool bHiPri, uint16_t wMon, uint32_t dwDam)
 {
 	TCmdMonDamage cmd;
@@ -3499,6 +3525,8 @@ size_t ParseCmd(uint8_t pnum, const TCmd *pCmd, size_t maxCmdSize)
 		return OnOpenGrave(*pCmd);
 	case CMD_SPAWNMONSTER:
 		return HandleCmd(OnSpawnMonster, player, pCmd, maxCmdSize);
+	case CMD_POWERONPLAYER:
+		return HandleCmd(OnPowerOnPlayer, player, pCmd, maxCmdSize);
 	default:
 		break;
 	}

@@ -23,7 +23,8 @@ enum class EssenceID : uint8_t {
 	None,
 	Fire,
 	Lightning,
-	LAST = Lightning,
+	Water,
+	LAST = Water,
 };
 
 /** Essence tabs in the spellbook: tabs 2, 3 and 4. */

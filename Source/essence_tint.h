@@ -12,7 +12,9 @@
 #include <cstdint>
 #include <optional>
 
+#include "DiabloUI/ui_flags.hpp"
 #include "essences.h"
+#include "tables/misdat.h"
 #include "tables/spelldat.h"
 
 namespace devilution {
@@ -41,6 +43,22 @@ std::optional<EssenceTint> GetSpellTint(SpellID spell);
 
 /** @brief The colour that belongs to an essence, used for its item and its page of the spellbook. */
 std::optional<EssenceTint> GetEssenceTint(EssenceID essence);
+
+/**
+ * @brief The damage type a power belongs to. Its damage is dealt as this type, and every word or
+ * number the power puts on screen (damage, healing, debuffs, damage over time) is drawn in this
+ * type's colour.
+ */
+DamageType GetSpellDamageType(SpellID spell);
+
+/**
+ * @brief The text colour of a damage type. The damage numbers themselves are coloured by the
+ * "Floating Numbers - Damage" script, which holds the same list; keep the two in step.
+ */
+UiFlags GetDamageTypeTextColor(DamageType damageType);
+
+/** @brief The text colour of a power: that of its damage type. */
+UiFlags GetSpellTextColor(SpellID spell);
 
 struct Item;
 

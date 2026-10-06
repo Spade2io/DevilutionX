@@ -1,5 +1,5 @@
 // Writes the designer's powers into the files the game reads.
-// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire)
+// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire and Water)
 //
 // What it writes:
 //   assets/txtdata/spells/essence_powers.tsv  one row per power the game does not already have
@@ -20,7 +20,7 @@ const POWERS_FILE = path.join(REPO, 'assets/txtdata/spells/essence_powers.tsv')
 const ITEMS_FILE = path.join(REPO, 'assets/txtdata/items/itemdat.tsv')
 const check = process.argv.includes('--check')
 const wanted = process.argv.slice(2).filter((a) => !a.startsWith('--'))
-const essenceNames = wanted.length ? wanted : ['Fire']
+const essenceNames = wanted.length ? wanted : ['Fire', 'Water']
 
 // Powers the game already has as hand-written spells. They keep their original numbers and are
 // not exported; the name on the right is the game's own name for the spell.
@@ -35,12 +35,14 @@ const ALREADY_IN_GAME = {
 const ICONS = {
   'Smolder': 32, 'Wildfire': 46, 'Meteor': 24, 'Ignite': 22, 'Flame Cleave': 47, 'Searing Brand': 31, 'Melt Armor': 30,
   'Stoke the Flames': 18, 'Fan the Flames': 33, 'Kindling': 37, 'Phoenix': 40,
+  'Soothing Waters': 9, 'Healing Rain': 1,
 }
 // The short line the spellbook shows under each power. There is room for about 28 letters.
 const SHORT_TEXT = {
   'Ignite': 'Strike that leaves a burn', 'Flame Cleave': 'Hits target and neighbours', 'Melt Armor': 'Target takes more damage',
   'Stoke the Flames': '+30% damage for 20s', 'Phoenix': 'Rise again on death', 'Smolder': 'Stacking burn from range',
   'Wildfire': 'Burn that spreads', 'Meteor': 'Heavy hit, radius 2', 'Kindling': 'Removes fire resistance',
+  'Soothing Waters': 'Heals an ally, or you', 'Healing Rain': 'Heals allies, radius 4',
   'Searing Brand': 'All hits deal extra fire', 'Fan the Flames': 'Ally acts 10% faster',
 }
 // What each built power does in the game. "missile" is the game projectile that carries the cast;
@@ -62,7 +64,10 @@ const SHORT_TEXT = {
 //         immunity to fire until they die.
 //   Rebirth: passive. When the player would die they rise at once with the power's potency as a
 //         percentage of their life, and the power goes on cooldown. It is never cast.
-//   Buff: switches a buff on for the caster. "stat" is what it changes; the power's potency is how
+//   Heal: restores the power's potency in life to the player aimed at, or to the caster if no
+//         player was aimed at. Works on other players in multiplayer. With a radius it falls on
+//         a spot instead and heals every player within the radius of it.
+//   Buff: switches a buff on for the caster, or for the player aimed at if the power is tagged Ally. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10
 const BEHAVIOUR = {
@@ -77,6 +82,8 @@ const BEHAVIOUR = {
   'Phoenix': { effect: 'Rebirth' },
   'Stoke the Flames': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Damage', duration: 20 },
   'Fan the Flames': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Speed', duration: 0 },
+  'Soothing Waters': { missile: 'StrengthBuff', effect: 'Heal' },
+  'Healing Rain': { missile: 'StrengthBuff', effect: 'Heal' },
 }
 const FIRST_NUMBER = 100
 
@@ -110,14 +117,14 @@ const shortLine = (power) => {
 const row = ({ power, essence }) => {
   const tags = tagNames(power)
   const element = tags.includes('Lightning') ? 'Lightning' : tags.includes('Fire') ? 'Fire' : 'Magic'
-  // Every buff can be cast in town, cooldown ones included.
-  const inTown = BEHAVIOUR[power.name]?.effect === 'Buff'
+  // Every buff and heal can be cast in town, cooldown ones included.
+  const inTown = ['Buff', 'Heal'].includes(BEHAVIOUR[power.name]?.effect)
   const flags = [element, ...(tags.includes('Enemy') ? ['Targeted'] : []), ...(inTown ? ['AllowedInTown'] : [])].join(',')
   const mana = Math.min(250, Math.max(0, Math.round(power.manaCost ?? 0)))
   const behaviour = BEHAVIOUR[power.name]
   // Amounts are in 64ths of a hit point, the unit the game counts damage in.
   const amount = behaviour?.effect === 'Burn' ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
-    : behaviour?.effect === 'Burst' || behaviour?.effect === 'Strike' ? Math.round((power.potency ?? 0) * 64)
+    : ['Burst', 'Strike', 'Heal'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64)
     : behaviour?.effect === 'Buff' || behaviour?.effect === 'Rebirth' ? Math.round(power.potency ?? 0)
     : 0
   // A strike only reaches past its target when it is marked to spread.
@@ -127,14 +134,16 @@ const row = ({ power, essence }) => {
     : behaviour.riderDamage != null ? Math.round(behaviour.riderDamage * 64)
     : Math.round(behaviour.riderTotal * 64 / TICKS_PER_EFFECT)
   return [
-    power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : 'CastFire',
+    power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : behaviour?.effect === 'Heal' ? 'CastHealing' : 'CastFire',
     mana, flags, behaviour?.missile ?? '', 0, mana, power.icon,
     Math.round(power.cooldown ?? 0), shortLine(power),
     behaviour?.effect ?? '', amount, radius, behaviour?.rider ?? '', riderAmount,
     behaviour?.stat ?? '', behaviour?.duration ?? 0,
+    // Heals and buffs tagged Ally can be aimed at another player.
+    ['Heal', 'Buff'].includes(behaviour?.effect) && tags.includes('Ally') ? 1 : 0,
   ].join('\t')
 }
-const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount', 'stat', 'duration'].join('\t')
+const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount', 'stat', 'duration', 'ally'].join('\t')
 const powersText = [header, ...exported.map(row)].join('\r\n') + '\r\n'
 
 // Stones. Keep every existing row exactly where it is; drop the stand-in test stone if it is

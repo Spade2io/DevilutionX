@@ -49,8 +49,9 @@ bool IsBuffActive(const Player &player, BuffID buff);
 /**
  * @brief Switches on a buff that is read from essence_powers.tsv (effect "Buff"). Casting it again
  * while it is running starts its time again. Such buffs are held in memory only, like the others.
+ * The amount is the buff's strength (30 is +30%), worked out by the PC of whoever cast it.
  */
-void ActivatePowerBuff(Player &player, SpellID spell);
+void ActivatePowerBuff(Player &player, SpellID spell, int amount);
 
 /** @brief The spells of the data-file buffs a player has running. */
 std::vector<SpellID> GetActivePowerBuffs(const Player &player);

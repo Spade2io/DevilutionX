@@ -188,3 +188,23 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Kindling	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Kindling	true	1
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Searing Brand	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	SearingBrand	true	1
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Fan the Flames	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	FanTheFlames	true	1
+	0	Misc	Unequippable	ESSENCE	Misc	NONE	Water Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Frostbolt	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Wellspring	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Wellspring	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Glacial Spike	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	GlacialSpike	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Ice Burst	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	IceBurst	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Hailstorm	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Hailstorm	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Tidal Wave	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	TidalWave	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Icebreaker	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Icebreaker	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Riptide	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Riptide	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Soothing Waters	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	SoothingWaters	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Healing Rain	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	HealingRain	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Springwater	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Springwater	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Wash Away	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	WashAway	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Purging Rain	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	PurgingRain	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Monsoon	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Monsoon	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Clarity	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Clarity	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of High Tide	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	HighTide	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Reservoir	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Reservoir	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Mana Tide	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ManaTide	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Deep Freeze	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	DeepFreeze	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Great Flood	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	GreatFlood	true	1

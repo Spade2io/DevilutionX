@@ -1,12 +1,31 @@
-id	number	name	essence	soundId	manaCost	flags	missiles	manaMultiplier	minMana	icon	cooldown	description	effect	amount	radius	rider	riderAmount	stat	duration
-Ignite	100	Ignite	Fire	CastFire	2	Fire,Targeted		0	2	22	0	Strike that leaves a burn	Strike	128	0	Burn	32		0
-FlameCleave	101	Flame Cleave	Fire	CastFire	3	Fire,Targeted		0	3	47	8	Hits target and neighbours	Strike	192	2		0		0
-MeltArmor	102	Melt Armor	Fire	CastFire	2	Fire,Targeted		0	2	30	60	Target takes more damage	Strike	448	0	Vulnerable	15		0
-StokeTheFlames	103	Stoke the Flames	Fire	CastFire	18	Fire,AllowedInTown	StrengthBuff	0	18	18	60	+30% damage for 20s	Buff	30	0		0	Damage	20
-Phoenix	104	Phoenix	Fire	CastFire	0	Fire		0	0	40	900	Rise again on death	Rebirth	50	0		0		0
-Smolder	105	Smolder	Fire	CastFire	6	Fire,Targeted	Corruption	0	6	32	0	Stacking burn from range	Burn	64	0		0		0
-Wildfire	106	Wildfire	Fire	CastFire	9	Fire,Targeted	Corruption	0	9	46	10	Burn that spreads	Burn	64	2		0		0
-Meteor	107	Meteor	Fire	CastFire	20	Fire,Targeted	Corruption	0	20	24	45	Heavy hit, radius 2	Burst	1216	2		0		0
-Kindling	108	Kindling	Fire	CastFire	15	Fire,Targeted	Corruption	0	15	37	60	Removes fire resistance	Kindle	0	2		0		0
-SearingBrand	109	Searing Brand	Fire	CastFire	2	Fire,Targeted		0	2	31	12	All hits deal extra fire	Strike	192	0	Branded	128		0
-FanTheFlames	110	Fan the Flames	Fire	CastFire	10	Fire,AllowedInTown	StrengthBuff	0	10	33	0	Ally acts 10% faster	Buff	10	0		0	Speed	0
+id	number	name	essence	soundId	manaCost	flags	missiles	manaMultiplier	minMana	icon	cooldown	description	effect	amount	radius	rider	riderAmount	stat	duration	ally
+Ignite	100	Ignite	Fire	CastFire	2	Fire,Targeted		0	2	22	0	Strike that leaves a burn	Strike	128	0	Burn	32		0	0
+FlameCleave	101	Flame Cleave	Fire	CastFire	3	Fire,Targeted		0	3	47	8	Hits target and neighbours	Strike	192	2		0		0	0
+MeltArmor	102	Melt Armor	Fire	CastFire	2	Fire,Targeted		0	2	30	60	Target takes more damage	Strike	448	0	Vulnerable	15		0	0
+StokeTheFlames	103	Stoke the Flames	Fire	CastFire	18	Fire,AllowedInTown	StrengthBuff	0	18	18	60	+30% damage for 20s	Buff	30	0		0	Damage	20	0
+Phoenix	104	Phoenix	Fire	CastFire	0	Fire		0	0	40	900	Rise again on death	Rebirth	50	0		0		0	0
+Smolder	105	Smolder	Fire	CastFire	6	Fire,Targeted	Corruption	0	6	32	0	Stacking burn from range	Burn	64	0		0		0	0
+Wildfire	106	Wildfire	Fire	CastFire	9	Fire,Targeted	Corruption	0	9	46	10	Burn that spreads	Burn	64	2		0		0	0
+Meteor	107	Meteor	Fire	CastFire	20	Fire,Targeted	Corruption	0	20	24	45	Heavy hit, radius 2	Burst	1216	2		0		0	0
+Kindling	108	Kindling	Fire	CastFire	15	Fire,Targeted	Corruption	0	15	37	60	Removes fire resistance	Kindle	0	2		0		0	0
+SearingBrand	109	Searing Brand	Fire	CastFire	2	Fire,Targeted		0	2	31	12	All hits deal extra fire	Strike	192	0	Branded	128		0	0
+FanTheFlames	110	Fan the Flames	Fire	CastFire	10	Fire,AllowedInTown	StrengthBuff	0	10	33	0	Ally acts 10% faster	Buff	10	0		0	Speed	0	1
+Wellspring	111	Wellspring	Water	CastFire	10	Magic		0	10	26	0	15 % faster mana regeneration		0	0		0		0	0
+GlacialSpike	112	Glacial Spike	Water	CastFire	6	Magic,Targeted		0	6	26	10	9 damage		0	0		0		0	0
+IceBurst	113	Ice Burst	Water	CastFire	9	Magic		0	9	26	0	4 damage to each target		0	0		0		0	0
+Hailstorm	114	Hailstorm	Water	CastFire	12	Magic		0	12	26	12	5 damage to each target		0	0		0		0	0
+TidalWave	115	Tidal Wave	Water	CastFire	9	Magic		0	9	26	10	6 damage to each target		0	0		0		0	0
+Icebreaker	116	Icebreaker	Water	CastFire	2	Magic,Targeted		0	2	26	0	3 bonus damage on the hit		0	0		0		0	0
+Riptide	117	Riptide	Water	CastFire	9	Magic		0	9	26	6	4 damage to each target		0	0		0		0	0
+SoothingWaters	118	Soothing Waters	Water	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	9	0	Heals an ally, or you	Heal	768	0		0		0	1
+HealingRain	119	Healing Rain	Water	CastHealing	16	Magic,AllowedInTown	StrengthBuff	0	16	1	0	Heals allies, radius 4	Heal	384	4		0		0	0
+Springwater	120	Springwater	Water	CastFire	12	Magic		0	12	26	8	13 healing to each target		0	0		0		0	0
+WashAway	121	Wash Away	Water	CastFire	3	Magic		0	3	26	0	5 healing		0	0		0		0	0
+PurgingRain	122	Purging Rain	Water	CastFire	8	Magic		0	8	26	12	1 harmful effect removed from		0	0		0		0	0
+Monsoon	123	Monsoon	Water	CastFire	24	Magic		0	24	26	60	18 healing to each target		0	0		0		0	0
+Clarity	124	Clarity	Water	CastFire	10	Magic		0	10	26	0	30 % faster mana regeneration		0	0		0		0	0
+HighTide	125	High Tide	Water	CastFire	18	Magic		0	18	26	60	45 % faster mana regeneration		0	0		0		0	0
+Reservoir	126	Reservoir	Water	CastFire	10	Magic		0	10	26	0	10 % maximum mana		0	0		0		0	0
+ManaTide	127	Mana Tide	Water	CastFire	20	Magic		0	20	26	10	15 mana given to the ally		0	0		0		0	0
+DeepFreeze	128	Deep Freeze	Water	CastFire	18	Magic,Targeted		0	18	26	45	6 seconds held		0	0		0		0	0
+GreatFlood	129	Great Flood	Water	CastFire	36	Magic		0	36	26	180	14 damage to each target		0	0		0		0	0

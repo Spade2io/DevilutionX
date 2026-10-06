@@ -55,6 +55,8 @@ struct PowerBuff {
 	SpellID spell;
 	/** Game ticks left, or -1 for a lasting buff that does not run out. */
 	int ticksLeft;
+	/** Its strength, as given by the caster's PC. The buffed player need not know the power. */
+	int amount;
 };
 
 /** The data-file buffs each player has running. Memory only; never saved. */
@@ -213,7 +215,7 @@ void ClearBuffs(Player &player)
 	}
 }
 
-void ActivatePowerBuff(Player &player, SpellID spell)
+void ActivatePowerBuff(Player &player, SpellID spell, int amount)
 {
 	if (!IsValidSpell(spell))
 		return;
@@ -223,10 +225,11 @@ void ActivatePowerBuff(Player &player, SpellID spell)
 	for (PowerBuff &buff : buffs) {
 		if (buff.spell == spell) {
 			buff.ticksLeft = ticks;
+			buff.amount = amount;
 			return;
 		}
 	}
-	buffs.push_back(PowerBuff { spell, ticks });
+	buffs.push_back(PowerBuff { spell, ticks, amount });
 	CalcPlrInv(player, true);
 }
 
@@ -245,7 +248,7 @@ int ApplyDamageBuffs(const Player &player, int damage)
 		const SpellData &spellData = GetSpellData(buff.spell);
 		// Buffs to the same stat do not add up: the strongest one counts.
 		if (spellData.buffStat == "Damage")
-			percent = std::max(percent, ScaleDamageForSpellLevel(spellData.effectAmount, SpellLevelOf(player, buff.spell)));
+			percent = std::max(percent, buff.amount);
 	}
 	if (percent == 0)
 		return damage;
@@ -259,7 +262,7 @@ int GetBuffSkippedFrames(const Player &player)
 		const SpellData &spellData = GetSpellData(buff.spell);
 		// Buffs to the same stat do not add up: the strongest one counts.
 		if (spellData.buffStat == "Speed")
-			percent = std::max(percent, ScaleDamageForSpellLevel(spellData.effectAmount, SpellLevelOf(player, buff.spell)));
+			percent = std::max(percent, buff.amount);
 	}
 	return std::clamp(percent / 10, 0, 4);
 }
@@ -370,9 +373,12 @@ void DrawBuffBar(const Surface &out)
 	constexpr int IconHeight = 38;
 	constexpr int Margin = 8;
 	constexpr int Gap = 4;
+	// The party portraits run down the left edge of the screen in multiplayer; the icons start
+	// just to the right of them, in every game, so they are always found in the same place.
+	constexpr int Left = 68;
 
 	// Icons are drawn from their bottom-left corner.
-	Point position { Margin, Margin + IconHeight - 1 };
+	Point position { Left, Margin + IconHeight - 1 };
 	for (size_t i = 0; i < BuffCount; i++) {
 		const auto buff = static_cast<BuffID>(i);
 		if (!IsBuffActive(player, buff))
@@ -384,7 +390,7 @@ void DrawBuffBar(const Surface &out)
 		const Rectangle iconArea { Point { position.x, position.y - IconHeight + 1 }, Size { IconWidth, IconHeight } };
 		if (iconArea.contains(MousePosition)) {
 			DrawString(out, DescribeBuff(player, buff),
-			    Rectangle { Point { Margin, Margin + IconHeight + 2 }, Size { 420, 16 } },
+			    Rectangle { Point { Left, Margin + IconHeight + 2 }, Size { 420, 16 } },
 			    { .flags = UiFlags::ColorWhitegold });
 		}
 
@@ -408,7 +414,7 @@ void DrawBuffBar(const Surface &out)
 			if (buff.ticksLeft > 0)
 				StrAppend(text, " (", secondsLeft, "s left)");
 			DrawString(out, text,
-			    Rectangle { Point { Margin, Margin + IconHeight + 2 }, Size { 420, 16 } },
+			    Rectangle { Point { Left, Margin + IconHeight + 2 }, Size { 420, 16 } },
 			    { .flags = UiFlags::ColorWhitegold });
 		}
 

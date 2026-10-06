@@ -49,6 +49,7 @@
 #include "qol/chatlog.h"
 #include "qol/stash.h"
 #include "qol/visual_store.h"
+#include "spells.h"
 #include "stores.h"
 #include "towners.h"
 #include "track.h"
@@ -393,7 +394,7 @@ void CheckPlayerNearby()
 	const Player &myPlayer = *MyPlayer;
 
 	const SpellID spl = myPlayer._pRSpell;
-	if (myPlayer.friendlyMode && spl != SpellID::Resurrect && spl != SpellID::HealOther)
+	if (myPlayer.friendlyMode && spl != SpellID::Resurrect && spl != SpellID::HealOther && !IsAllyTargetedPower(spl))
 		return;
 
 	for (const Player &player : Players) {
@@ -406,7 +407,7 @@ void CheckPlayerNearby()
 		    || (player.hasNoLife() && spl != SpellID::Resurrect))
 			continue;
 
-		if (myPlayer.UsesRangedWeapon() || HasRangedSpell() || spl == SpellID::HealOther) {
+		if (myPlayer.UsesRangedWeapon() || HasRangedSpell() || spl == SpellID::HealOther || IsAllyTargetedPower(spl)) {
 			newDdistance = GetDistanceRanged(player.position.future);
 		} else {
 			newDdistance = GetDistance(player.position.future, distance);

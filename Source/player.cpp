@@ -3394,7 +3394,7 @@ void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 	} else if (pcursmonst != -1 && !isShiftHeld) {
 		LastPlayerAction = PlayerActionType::SpellMonsterTarget;
 		NetSendCmdParam4(true, CMD_SPELLID, pcursmonst, static_cast<uint16_t>(spellID), static_cast<uint8_t>(spellType), spellFrom);
-	} else if (PlayerUnderCursor != nullptr && !PlayerUnderCursor->hasNoLife() && !isShiftHeld && !myPlayer.friendlyMode) {
+	} else if (PlayerUnderCursor != nullptr && !PlayerUnderCursor->hasNoLife() && !isShiftHeld && (!myPlayer.friendlyMode || IsAllyTargetedPower(spellID))) {
 		LastPlayerAction = PlayerActionType::SpellPlayerTarget;
 		NetSendCmdParam4(true, CMD_SPELLPID, PlayerUnderCursor->getId(), static_cast<uint16_t>(spellID), static_cast<uint8_t>(spellType), spellFrom);
 	} else {

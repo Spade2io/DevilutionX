@@ -137,10 +137,70 @@ std::optional<EssenceTint> GetSpellTint(SpellID spell)
 		case MagicType::Lightning:
 			return EssenceTint::VividBlue;
 		default:
-			break;
+			// Anything else takes its essence's colour.
+			return GetEssenceTint(GetSpellEssence(spell));
 		}
 	}
 	return std::nullopt;
+}
+
+DamageType GetSpellDamageType(SpellID spell)
+{
+	switch (spell) {
+	case SpellID::Frostbolt:
+		return DamageType::Ice;
+	case SpellID::Corruption:
+		return DamageType::Shadow;
+	default:
+		break;
+	}
+	switch (GetSpellEssence(spell)) {
+	case EssenceID::Fire:
+		return DamageType::Fire;
+	case EssenceID::Lightning:
+		return DamageType::Lightning;
+	case EssenceID::Water:
+		return DamageType::Ice;
+	case EssenceID::None:
+		break;
+	}
+	if (static_cast<size_t>(spell) < SpellsData.size()) {
+		switch (GetSpellData(spell).type()) {
+		case MagicType::Fire:
+			return DamageType::Fire;
+		case MagicType::Lightning:
+			return DamageType::Lightning;
+		default:
+			break;
+		}
+	}
+	return DamageType::Magic;
+}
+
+UiFlags GetDamageTypeTextColor(DamageType damageType)
+{
+	switch (damageType) {
+	case DamageType::Physical:
+		return UiFlags::ColorGold;
+	case DamageType::Fire:
+		return UiFlags::ColorUiSilver; // drawn dark red in the game
+	case DamageType::Lightning:
+		return UiFlags::ColorBlue;
+	case DamageType::Magic:
+		return UiFlags::ColorOrange;
+	case DamageType::Acid:
+		return UiFlags::ColorYellow;
+	case DamageType::Shadow:
+		return UiFlags::ColorBlue;
+	case DamageType::Ice:
+		return UiFlags::ColorIce;
+	}
+	return UiFlags::ColorWhitegold;
+}
+
+UiFlags GetSpellTextColor(SpellID spell)
+{
+	return GetDamageTypeTextColor(GetSpellDamageType(spell));
 }
 
 std::optional<EssenceTint> GetItemTint(const Item &item)
@@ -162,6 +222,8 @@ std::optional<EssenceTint> GetEssenceTint(EssenceID essence)
 		return EssenceTint::VividRed;
 	case EssenceID::Lightning:
 		return EssenceTint::VividYellow;
+	case EssenceID::Water:
+		return EssenceTint::VividBlue;
 	case EssenceID::None:
 		break;
 	}

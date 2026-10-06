@@ -30,6 +30,7 @@
 #include "cooldowns.h"
 #include "dots.h"
 #include "effects.h"
+#include "essence_tint.h"
 #include "engine/clx_sprite.hpp"
 #include "engine/direction.hpp"
 #include "engine/displacement.hpp"
@@ -2540,16 +2541,18 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 		const SpellData &spellData = GetSpellData(missile.sourceSpell);
 		if (spellData.effect == "Burst") {
 			isBurst = true;
-			switch (spellData.type()) {
-			case MagicType::Lightning:
-				burstDamageType = DamageType::Lightning;
+			burstDamageType = GetSpellDamageType(missile.sourceSpell);
+			switch (burstDamageType) {
+			case DamageType::Lightning:
 				burstImmunityMissile = MissileID::Lightning;
 				break;
-			case MagicType::Magic:
-				burstDamageType = DamageType::Magic;
-				burstImmunityMissile = MissileID::BloodStar;
+			case DamageType::Ice:
+				burstImmunityMissile = MissileID::Frostbolt;
+				break;
+			case DamageType::Fire:
 				break;
 			default:
+				burstImmunityMissile = MissileID::BloodStar;
 				break;
 			}
 		} else if (spellData.effect == "Kindle") {
@@ -2565,7 +2568,7 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 		radius = spellData.effectRadius;
 	}
 	amount = ScaleDamageForSpellLevel(amount, std::max<int>(player.GetBaseSpellLevel(spell), 1));
-	const UiFlags textColor = dot == DotID::Corruption ? UiFlags::ColorBlue : UiFlags::ColorRed;
+	const UiFlags textColor = isKindle ? GetSpellTextColor(spell) : GetDamageTypeTextColor(dot == DotID::Corruption ? DamageType::Shadow : DamageType::Fire);
 
 	// The monster under the cursor, and with a radius every monster standing within it.
 	std::vector<int> targets;
@@ -2602,7 +2605,7 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 		if (isKindle) {
 			// "Kindle": strip its resistance and immunity to fire until it dies. Nothing resists this.
 			const bool hadAny = KindleMonster(monster);
-			AddFloatingNumber(monster.position.tile, { 0, 0 }, hadAny ? "Kindled" : "Kindled (no resistance)", UiFlags::ColorRed | UiFlags::FontSize12, textId);
+			AddFloatingNumber(monster.position.tile, { 0, 0 }, hadAny ? "Kindled" : "Kindled (no resistance)", textColor | UiFlags::FontSize12, textId);
 			continue;
 		}
 		if (isBurst ? monster.isImmune(burstImmunityMissile, burstDamageType) : IsImmuneToDot(monster, dot)) {
@@ -2650,13 +2653,41 @@ void ProcessAuraPulseVisual(Missile &missile)
 	PutMissile(missile);
 }
 
-void AddStrengthBuff(Missile &missile, AddMissileParameter & /*parameter*/)
+void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 {
 	// The buff lives on the player, so this effect has done its job the moment it is created.
 	missile._miDelFlag = true;
-	// A power read from essence_powers.tsv names its own buff; otherwise this is Strength itself.
-	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && GetSpellData(missile.sourceSpell).effect == "Buff") {
-		ActivatePowerBuff(Players[missile._misource], missile.sourceSpell);
+	// "Heal" and "Buff" land on a player: the one aimed at if the power allows that, otherwise the
+	// caster. Only the caster's own PC decides who and how much; it then tells every PC, its own
+	// included, and each of them applies it.
+	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && IsAnyOf(GetSpellData(missile.sourceSpell).effect, "Heal", "Buff")) {
+		const Player &caster = Players[missile._misource];
+		if (&caster != MyPlayer)
+			return;
+		const int amount = ScaleDamageForSpellLevel(GetSpellData(missile.sourceSpell).effectAmount, std::max<int>(caster.GetBaseSpellLevel(missile.sourceSpell), 1));
+		// With a radius the heal falls on a spot: every living player within it is healed, the
+		// caster included if they stand there.
+		if (const int radius = GetSpellData(missile.sourceSpell).effectRadius; radius > 0 && GetSpellData(missile.sourceSpell).effect == "Heal") {
+			for (const Player &other : Players) {
+				if (!other.plractive || !other.isOnActiveLevel() || other.hasNoLife())
+					continue;
+				if (other.position.tile.WalkingDistance(parameter.dst) <= radius)
+					NetSendCmdPowerOnPlayer(other, missile.sourceSpell, static_cast<uint32_t>(amount));
+			}
+			return;
+		}
+		const Player *target = &caster;
+		for (const Player &other : Players) {
+			if (!GetSpellData(missile.sourceSpell).targetsAlly)
+				break;
+			if (&other == &caster || !other.plractive || !other.isOnActiveLevel() || other.hasNoLife())
+				continue;
+			if (other.position.future.WalkingDistance(parameter.dst) <= 1 || other.position.tile.WalkingDistance(parameter.dst) <= 1) {
+				target = &other;
+				break;
+			}
+		}
+		NetSendCmdPowerOnPlayer(*target, missile.sourceSpell, static_cast<uint32_t>(amount));
 		return;
 	}
 	ActivateBuff(Players[missile._misource], BuffID::Strength);

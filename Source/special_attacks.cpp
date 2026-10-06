@@ -5,6 +5,8 @@
  */
 #include "special_attacks.h"
 
+#include "essence_tint.h"
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -140,14 +142,7 @@ int ApplySpecialAttackDamage(const Player &player, SpellID attack, int weaponDam
 DamageType GetSpecialAttackDamageType(SpellID attack)
 {
 	if (IsExtendedSpell(attack) && IsValidSpell(attack)) {
-		switch (GetSpellData(attack).type()) {
-		case MagicType::Lightning:
-			return DamageType::Lightning;
-		case MagicType::Magic:
-			return DamageType::Magic;
-		default:
-			break;
-		}
+		return GetSpellDamageType(attack);
 	}
 	return DamageType::Fire;
 }
@@ -186,7 +181,7 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 	if (const std::optional<DotID> dot = ParseDotName(spellData.rider); dot && !target.hasNoLife() && !IsImmuneToDot(target, *dot)) {
 		const int stacks = AddMonsterDot(target, *dot, attack, ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack)));
 		// A separate id from the damage numbers, so the game does not merge the two.
-		AddFloatingNumber(target.position.tile, { 0, 0 }, StrCat(GetDotName(*dot), " x", stacks), (*dot == DotID::Corruption ? UiFlags::ColorBlue : UiFlags::ColorRed) | UiFlags::FontSize12, 1000 + static_cast<int>(target.getId()));
+		AddFloatingNumber(target.position.tile, { 0, 0 }, StrCat(GetDotName(*dot), " x", stacks), GetDamageTypeTextColor(*dot == DotID::Corruption ? DamageType::Shadow : DamageType::Fire) | UiFlags::FontSize12, 1000 + static_cast<int>(target.getId()));
 	}
 
 	// "Branded": every direct hit on the target deals extra fire from then on. The rider's amount
@@ -194,14 +189,14 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 	if (spellData.rider == "Branded" && !target.hasNoLife()) {
 		const int extra = ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack));
 		BrandMonster(target, attack, extra);
-		AddFloatingNumber(target.position.tile, { 0, 0 }, "Branded", UiFlags::ColorRed | UiFlags::FontSize12, 1000 + static_cast<int>(target.getId()));
+		AddFloatingNumber(target.position.tile, { 0, 0 }, "Branded", GetSpellTextColor(attack) | UiFlags::FontSize12, 1000 + static_cast<int>(target.getId()));
 	}
 
 	// "Vulnerable": the target takes more damage from then on. The rider's amount is the percentage.
 	if (spellData.rider == "Vulnerable" && !target.hasNoLife()) {
 		const int percent = ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack));
 		MakeMonsterVulnerable(target, percent);
-		AddFloatingNumber(target.position.tile, { 0, 0 }, StrCat("Vulnerable +", percent, "%"), UiFlags::ColorRed | UiFlags::FontSize12, 1000 + static_cast<int>(target.getId()));
+		AddFloatingNumber(target.position.tile, { 0, 0 }, StrCat("Vulnerable +", percent, "%"), GetSpellTextColor(attack) | UiFlags::FontSize12, 1000 + static_cast<int>(target.getId()));
 	}
 }
 

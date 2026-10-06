@@ -302,6 +302,8 @@ struct SpellData {
 	 */
 	std::string buffStat;
 	uint16_t durationSeconds = 0;
+	/** Whether the power can be aimed at another player. Without one under the cursor it lands on the caster. */
+	bool targetsAlly = false;
 
 	[[nodiscard]] MagicType type() const
 	{

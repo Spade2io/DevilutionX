@@ -39,6 +39,16 @@ void CastSpell(Player &player, SpellID spl, WorldTilePosition src, WorldTilePosi
 void SpawnResurrectBeam(Player &caster, Player &target);
 void ApplyResurrect(Player &target);
 void DoHealOther(const Player &caster, Player &target);
+/**
+ * @brief Essence Mod: whether a power is aimed at a friendly player rather than a monster or a
+ * spot on the ground. Such a power can be cast on a player whether or not "player friendly" is on.
+ */
+bool IsAllyTargetedPower(SpellID spell);
+/**
+ * @brief Essence Mod: a power read from essence_powers.tsv lands on a player. Runs on every PC,
+ * with the amount the caster's PC worked out.
+ */
+void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int amount);
 int GetSpellBookLevel(SpellID s);
 int GetSpellStaffLevel(SpellID s);
 

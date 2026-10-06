@@ -416,6 +416,10 @@ enum _cmd_id : uint8_t {
 	//
 	// body (TCmdSpawnMonster)
 	CMD_SPAWNMONSTER,
+	// Essence Mod: a power's effect lands on a player (a heal, so far).
+	//
+	// body (TCmdPowerOnPlayer)
+	CMD_POWERONPLAYER,
 	// Fake command; set current player for succeeding mega pkt buffer messages.
 	//
 	// body (TFakeCmdPlr)
@@ -501,6 +505,17 @@ struct TCmdParam4 {
 	uint16_t wParam2;
 	uint16_t wParam3;
 	uint16_t wParam4;
+};
+
+/**
+ * Essence Mod: one power landing on one player. The caster's PC works out the amount, because
+ * only it knows how far the caster has trained the power; every other PC just applies it.
+ */
+struct TCmdPowerOnPlayer {
+	_cmd_id bCmd;
+	uint8_t bPlr;
+	uint16_t wSpell;
+	uint32_t dwAmount;
 };
 
 struct TCmdSpawnMonster {
@@ -757,6 +772,8 @@ void NetSendCmdDelItem(bool bHiPri, uint8_t bLoc);
 void NetSendCmdChInvItem(bool bHiPri, int invGridIndex);
 void NetSendCmdChBeltItem(bool bHiPri, int beltIndex);
 void NetSendCmdDamage(bool bHiPri, const Player &player, uint32_t dwDam, DamageType damageType);
+/** Essence Mod: tells every PC that the local player's power has landed on a player. */
+void NetSendCmdPowerOnPlayer(const Player &target, SpellID spell, uint32_t amount);
 void NetSendCmdMonDmg(bool bHiPri, uint16_t wMon, uint32_t dwDam);
 void NetSendCmdString(uint32_t pmask, const char *pszStr);
 void delta_close_portal(const Player &player);

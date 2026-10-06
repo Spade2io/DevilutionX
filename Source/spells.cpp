@@ -20,6 +20,10 @@
 #include "cooldowns.h"
 #include "missiles.h"
 #include "spell_xp.h"
+#include "buffs.h"
+#include "essence_tint.h"
+#include "qol/floatingnumbers.h"
+#include "utils/str_cat.hpp"
 
 namespace devilution {
 
@@ -309,6 +313,44 @@ void DoHealOther(const Player &caster, Player &target)
 
 	if (&target == MyPlayer) {
 		RedrawComponent(PanelDrawComponent::Health);
+	}
+}
+
+bool IsAllyTargetedPower(SpellID spell)
+{
+	return IsExtendedSpell(spell) && IsValidSpell(spell) && GetSpellData(spell).targetsAlly;
+}
+
+void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int amount)
+{
+	if (!IsExtendedSpell(spell) || !IsValidSpell(spell) || amount <= 0)
+		return;
+
+	if (GetSpellData(spell).effect == "Buff") {
+		if (target.hasNoLife())
+			return;
+		ActivatePowerBuff(target, spell, amount);
+		if (target.isOnActiveLevel())
+			AddFloatingNumber(target.position.tile, { 0, 0 }, std::string(GetSpellData(spell).sNameText), GetSpellTextColor(spell) | UiFlags::FontSize12, 2000 + target.getId());
+		return;
+	}
+
+	if (GetSpellData(spell).effect == "Heal") {
+		if (target.hasNoLife())
+			return;
+
+		const int healed = std::clamp(target._pMaxHP - target._pHitPoints, 0, amount);
+		AddSpellExperienceForHealing(caster, target, spell, healed);
+		target._pHitPoints = std::min(target._pHitPoints + amount, target._pMaxHP);
+		target._pHPBase = std::min(target._pHPBase + amount, target._pMaxHPBase);
+
+		if (&target == MyPlayer)
+			RedrawComponent(PanelDrawComponent::Health);
+		if (target.isOnActiveLevel()) {
+			// A separate id from the damage numbers, so the game does not merge the two.
+			AddFloatingNumber(target.position.tile, { 0, 0 }, healed > 0 ? StrCat("+", (healed + 32) >> 6) : std::string("Full health"),
+			    GetSpellTextColor(spell) | UiFlags::FontSize12, 2000 + target.getId());
+		}
 	}
 }
 
