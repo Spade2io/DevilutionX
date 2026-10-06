@@ -54,7 +54,14 @@ const SHORT_TEXT = {
 //   Strike: a weapon attack. The power's potency is added to the swing, and the whole hit lands in
 //         the power's element. "spread" carries the same hit to every other enemy within the
 //         power's radius of the target. "rider" adds a damage-over-time effect to the target;
-//         riderTotal is that effect's total over its 20 seconds.
+//         riderTotal is that effect's total over its 20 seconds. The rider "Vulnerable" makes the
+//         target take more damage until it dies; riderPercent is how much more.
+//         The rider "Branded" makes every direct hit on the target deal extra fire damage until
+//         it dies; riderDamage is how much.
+//   Kindle: the target and everything within the power's radius lose their resistance and
+//         immunity to fire until they die.
+//   Rebirth: passive. When the player would die they rise at once with the power's potency as a
+//         percentage of their life, and the power goes on cooldown. It is never cast.
 //   Buff: switches a buff on for the caster. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10
@@ -64,6 +71,10 @@ const BEHAVIOUR = {
   'Meteor': { missile: 'Corruption', effect: 'Burst' },
   'Ignite': { effect: 'Strike', rider: 'Burn', riderTotal: 5 },
   'Flame Cleave': { effect: 'Strike', spread: true },
+  'Melt Armor': { effect: 'Strike', rider: 'Vulnerable', riderPercent: 15 },
+  'Searing Brand': { effect: 'Strike', rider: 'Branded', riderDamage: 2 },
+  'Kindling': { missile: 'Corruption', effect: 'Kindle' },
+  'Phoenix': { effect: 'Rebirth' },
   'Stoke the Flames': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Damage', duration: 20 },
   'Fan the Flames': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Speed', duration: 0 },
 }
@@ -107,11 +118,14 @@ const row = ({ power, essence }) => {
   // Amounts are in 64ths of a hit point, the unit the game counts damage in.
   const amount = behaviour?.effect === 'Burn' ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
     : behaviour?.effect === 'Burst' || behaviour?.effect === 'Strike' ? Math.round((power.potency ?? 0) * 64)
-    : behaviour?.effect === 'Buff' ? Math.round(power.potency ?? 0)
+    : behaviour?.effect === 'Buff' || behaviour?.effect === 'Rebirth' ? Math.round(power.potency ?? 0)
     : 0
   // A strike only reaches past its target when it is marked to spread.
   const radius = !behaviour ? 0 : behaviour.effect === 'Strike' && !behaviour.spread ? 0 : Math.round(power.radius ?? 0)
-  const riderAmount = behaviour?.rider ? Math.round(behaviour.riderTotal * 64 / TICKS_PER_EFFECT) : 0
+  const riderAmount = !behaviour?.rider ? 0
+    : behaviour.riderPercent != null ? behaviour.riderPercent
+    : behaviour.riderDamage != null ? Math.round(behaviour.riderDamage * 64)
+    : Math.round(behaviour.riderTotal * 64 / TICKS_PER_EFFECT)
   return [
     power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : 'CastFire',
     mana, flags, behaviour?.missile ?? '', 0, mana, power.icon,

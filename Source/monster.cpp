@@ -4936,6 +4936,8 @@ bool Monster::isWalking() const
 
 bool Monster::isImmune(MissileID missileType, DamageType missileElement) const
 {
+	if (missileElement == DamageType::Fire && IsMonsterKindled(*this)) // Essence Mod
+		return false;
 	missileElement = GetResistanceCategory(missileElement); // Essence Mod: many damage types, three resistances
 	if (((resistance & IMMUNE_MAGIC) != 0 && missileElement == DamageType::Magic)
 	    || ((resistance & IMMUNE_FIRE) != 0 && missileElement == DamageType::Fire)
@@ -4949,6 +4951,8 @@ bool Monster::isImmune(MissileID missileType, DamageType missileElement) const
 
 bool Monster::isResistant(MissileID missileType, DamageType missileElement) const
 {
+	if (missileElement == DamageType::Fire && IsMonsterKindled(*this)) // Essence Mod
+		return false;
 	missileElement = GetResistanceCategory(missileElement); // Essence Mod: many damage types, three resistances
 	if (((resistance & RESIST_MAGIC) != 0 && missileElement == DamageType::Magic)
 	    || ((resistance & RESIST_FIRE) != 0 && missileElement == DamageType::Fire)

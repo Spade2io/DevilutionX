@@ -149,6 +149,12 @@ void ShareExperienceWithActiveBuffs(Player &player, uint32_t gained, std::string
 		if (buffGain != 0)
 			StrAppend(message, message.empty() ? "" : ", ", DescribeGain(buffSpell, buffGain));
 	}
+	// The same share for passive powers the player knows, which can earn experience no other way.
+	for (const SpellID passive : GetPassivePowers(player)) {
+		const uint32_t passiveGain = AwardSpellExperience(player, passive, gained / BuffExperienceDivisor, 0);
+		if (passiveGain != 0)
+			StrAppend(message, message.empty() ? "" : ", ", DescribeGain(passive, passiveGain));
+	}
 	// The same share for buffs read from essence_powers.tsv.
 	for (const SpellID buffSpell : GetActivePowerBuffs(player)) {
 		if (player.GetBaseSpellLevel(buffSpell) == 0)

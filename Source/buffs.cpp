@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "cooldowns.h"
 #include "diablo.h"
 #include "dots.h"
 #include "engine/point.hpp"
@@ -23,6 +24,7 @@
 #include "multi.h"
 #include "panels/spell_icons.hpp"
 #include "player.h"
+#include "plrmsg.h"
 #include "spells.h"
 #include "tables/misdat.h"
 #include "utils/str_cat.hpp"
@@ -57,6 +59,16 @@ struct PowerBuff {
 
 /** The data-file buffs each player has running. Memory only; never saved. */
 std::array<std::vector<PowerBuff>, MAX_PLRS> PowerBuffs;
+
+/** A passive power that has just acted for the local player and still owes its casting motion. */
+SpellID PendingCastMotion = SpellID::Invalid;
+/** Game ticks left to find a moment for that motion before giving up on it. */
+int PendingCastMotionTicks = 0;
+
+/** How long the local player is protected after rising: a second and a half. */
+constexpr int RebirthProtectionTicks = 30;
+/** Game ticks of that protection left. */
+int RebirthProtectionLeft = 0;
 
 /** Game ticks until each player's auras next pulse. */
 std::array<int, MAX_PLRS> AuraPulseCountdown {};
@@ -195,6 +207,10 @@ void ClearBuffs(Player &player)
 {
 	BuffsOf(player).fill(false);
 	PowerBuffs[player.getId()].clear();
+	if (&player == MyPlayer) {
+		RebirthProtectionLeft = 0;
+		PendingCastMotion = SpellID::Invalid;
+	}
 }
 
 void ActivatePowerBuff(Player &player, SpellID spell)
@@ -248,8 +264,56 @@ int GetBuffSkippedFrames(const Player &player)
 	return std::clamp(percent / 10, 0, 4);
 }
 
+bool IsPassivePower(SpellID spell)
+{
+	return IsExtendedSpell(spell) && IsValidSpell(spell) && GetSpellData(spell).effect == "Rebirth";
+}
+
+std::vector<SpellID> GetPassivePowers(const Player &player)
+{
+	std::vector<SpellID> spells;
+	for (const auto &[spell, level] : player.extendedSpellLevels) {
+		if (level != 0 && IsPassivePower(spell))
+			spells.push_back(spell);
+	}
+	return spells;
+}
+
+bool TryRebirth(Player &player)
+{
+	for (const SpellID spell : GetPassivePowers(player)) {
+		if (IsSpellOnCooldown(spell))
+			continue;
+		// The power's amount is the percentage of maximum life the player rises with.
+		const int percent = std::clamp(ScaleDamageForSpellLevel(GetSpellData(spell).effectAmount, SpellLevelOf(player, spell)), 1, 100);
+		SetPlayerHitPoints(player, std::max<int>(static_cast<int>(static_cast<int64_t>(player._pMaxHP) * percent / 100), 64));
+		StartSpellCooldown(spell);
+		EventPlrMsg(StrCat(GetSpellData(spell).sNameText, ": you rise again"), UiFlags::ColorWhitegold);
+		// The casting motion starts on the next tick: the blow that would have killed the player
+		// is still being dealt, and it may yet throw them into a stagger that would cut it short.
+		PendingCastMotion = spell;
+		PendingCastMotionTicks = 2 * TicksPerSecond;
+		RebirthProtectionLeft = RebirthProtectionTicks;
+		return true;
+	}
+	return false;
+}
+
+bool IsRebirthProtected(const Player &player)
+{
+	return &player == MyPlayer && RebirthProtectionLeft > 0;
+}
+
 void ProcessBuffTimers()
 {
+	if (RebirthProtectionLeft > 0)
+		RebirthProtectionLeft--;
+
+	if (PendingCastMotion != SpellID::Invalid && MyPlayer != nullptr) {
+		if (StartCastMotion(*MyPlayer, PendingCastMotion) || --PendingCastMotionTicks <= 0)
+			PendingCastMotion = SpellID::Invalid;
+	}
+
 	for (Player &player : Players) {
 		if (!player.plractive)
 			continue;

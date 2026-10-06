@@ -66,6 +66,41 @@ bool IsImmuneToDot(const Monster &monster, DotID dot);
  */
 int AddMonsterDot(Monster &monster, DotID dot, SpellID spell, int damagePerTick);
 
+/**
+ * @brief Makes a monster take more damage from the local player, for as long as it lives.
+ * Applying it again does not add up: the larger percentage counts.
+ * Like the effects above, it is held on this PC only.
+ * @return true if this made the monster more vulnerable than it already was.
+ */
+bool MakeMonsterVulnerable(Monster &monster, int percent);
+
+/**
+ * @brief Strips a monster's resistance and immunity to fire, for as long as it lives.
+ * @return true if the monster had any to lose.
+ */
+bool KindleMonster(Monster &monster);
+
+/** @brief Whether a monster has had its fire resistance and immunity stripped. */
+bool IsMonsterKindled(const Monster &monster);
+
+/**
+ * @brief Brands a monster: from then on every direct hit the local player lands on it (a weapon
+ * hit or a spell hit, not a tick of an effect over time) also deals this much fire damage, for as
+ * long as it lives. Applying it again does not add up: the larger amount counts.
+ * @param spell The power that applied it, which earns the experience for the extra damage.
+ * @param damage Extra damage per hit, in 64ths of a hit point.
+ */
+void BrandMonster(Monster &monster, SpellID spell, int damage);
+
+/**
+ * @brief Deals a branded monster its extra fire damage. Call it once for each direct hit, after
+ * the hit's own damage. Does not start the monster's death; the caller's usual check does.
+ */
+void TriggerMonsterBrand(Monster &monster);
+
+/** @brief Damage to a monster after its "takes more damage" debuff, if it has one. */
+int ApplyMonsterVulnerability(const Monster &monster, int damage);
+
 /** @brief Runs every effect for one game tick: counts down, deals damage when due, and expires. */
 void ProcessMonsterDots();
 

@@ -338,6 +338,8 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 		if (resist)
 			dam >>= 2;
 		dam = ApplyDamageBuffs(player, dam); // Essence Mod
+		if (&player == MyPlayer)
+			dam = ApplyMonsterVulnerability(monster, dam);
 
 		if (&player == MyPlayer) {
 			// The spell that was cast earns the experience; without one, go by the kind of projectile.
@@ -345,6 +347,8 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 			ApplyMonsterDamage(damageType, monster, dam);
 		}
 	}
+	if (&player == MyPlayer)
+		TriggerMonsterBrand(monster); // Essence Mod: a branded monster takes extra fire on every direct hit
 
 	if (monster.hasNoLife()) {
 		M_StartKill(monster, player);
@@ -2527,6 +2531,7 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	SpellID spell = SpellID::Corruption;
 	DotID dot = DotID::Corruption;
 	bool isBurst = false;
+	bool isKindle = false;
 	DamageType burstDamageType = DamageType::Fire;
 	MissileID burstImmunityMissile = MissileID::Firebolt;
 	int amount = 1 * 64;
@@ -2547,6 +2552,8 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 			default:
 				break;
 			}
+		} else if (spellData.effect == "Kindle") {
+			isKindle = true;
 		} else if (const std::optional<DotID> named = ParseDotName(spellData.effect); named) {
 			dot = *named;
 		} else {
@@ -2592,6 +2599,12 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 
 		// A separate id from the damage numbers, so the game does not merge the two.
 		const int textId = 1000 + monsterId;
+		if (isKindle) {
+			// "Kindle": strip its resistance and immunity to fire until it dies. Nothing resists this.
+			const bool hadAny = KindleMonster(monster);
+			AddFloatingNumber(monster.position.tile, { 0, 0 }, hadAny ? "Kindled" : "Kindled (no resistance)", UiFlags::ColorRed | UiFlags::FontSize12, textId);
+			continue;
+		}
 		if (isBurst ? monster.isImmune(burstImmunityMissile, burstDamageType) : IsImmuneToDot(monster, dot)) {
 			AddFloatingNumber(monster.position.tile, { 0, 0 }, "Immune", UiFlags::ColorWhite | UiFlags::FontSize12, textId);
 			continue;

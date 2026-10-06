@@ -677,9 +677,14 @@ bool PlrHitMonst(Player &player, Monster &monster, bool adjacentDamage = false)
 			ApplySpecialAttackExtras(player, monster, specialAttack, dam);
 		} else {
 			dam = ApplyDamageBuffs(player, dam);                                   // Essence Mod
+			if (&player == MyPlayer)
+				dam = ApplyMonsterVulnerability(monster, dam);
 			AddAttackExperienceForDamage(player, monster, dam, monster.hitPoints); // Essence Mod
 			ApplyMonsterDamage(DamageType::Physical, monster, dam);
 		}
+		// Essence Mod: a branded monster takes extra fire on every direct hit.
+		if (&player == MyPlayer)
+			TriggerMonsterBrand(monster);
 	}
 
 	int skdam = 0;
@@ -1592,6 +1597,23 @@ void GetPlayerGraphicsPath(std::string_view path, std::string_view prefix, std::
 }
 
 } // namespace
+
+bool StartCastMotion(Player &player, SpellID spell)
+{
+	if (player.hasNoLife() || !IsAnyOf(player._pmode, PM_STAND, PM_GOTHIT, PM_ATTACK, PM_RATTACK, PM_BLOCK, PM_SPELL))
+		return false;
+
+	// The motion runs through the game's own casting state, which casts the "executed" spell part
+	// way through. A passive power has no missiles and costs nothing, so that cast does nothing.
+	player.executedSpell = { spell, SpellType::Spell, 0, player.GetSpellLevel(spell) };
+	NewPlrAnim(player, GetPlayerGraphicForSpell(spell), player._pdir, AnimationDistributionFlags::ProcessAnimationPending, 0, player._pSFNum);
+	PlaySfxLoc(GetSpellData(spell).sSFX, player.position.tile);
+	player._pmode = PM_SPELL;
+	FixPlayerLocation(player, player._pdir);
+	SetPlayerOld(player);
+	player.position.temp = player.position.tile;
+	return true;
+}
 
 void Player::CalcScrolls()
 {
@@ -2704,6 +2726,10 @@ void StartPlrHit(Player &player, int dam, bool forcehit)
 		return;
 	}
 
+	// Essence Mod: a player who has just risen from death is not staggered for a moment.
+	if (IsRebirthProtected(player))
+		return;
+
 	player.Say(HeroSpeech::ArghClang);
 
 	RedrawComponent(PanelDrawComponent::Health);
@@ -2889,6 +2915,10 @@ void StripTopGold(Player &player)
 
 void ApplyPlrDamage(DamageType damageType, Player &player, int dam, int minHP /*= 0*/, int frac /*= 0*/, DeathReason deathReason /*= DeathReason::MonsterOrTrap*/)
 {
+	// Essence Mod: a player who has just risen from death takes no damage for a moment.
+	if (IsRebirthProtected(player))
+		return;
+
 	int totalDamage = (dam << 6) + frac;
 	if (&player == MyPlayer && !player.hasNoLife()) {
 		lua::OnPlayerTakeDamage(&player, totalDamage, static_cast<int>(damageType));
@@ -2931,6 +2961,9 @@ void ApplyPlrDamage(DamageType damageType, Player &player, int dam, int minHP /*
 		SetPlayerHitPoints(player, minHitPoints);
 	}
 	if (player.hasNoLife()) {
+		// Essence Mod: a "Rebirth" power that is ready saves the player instead.
+		if (&player == MyPlayer && TryRebirth(player))
+			return;
 		SyncPlrKill(player, deathReason);
 	}
 }
@@ -3266,6 +3299,10 @@ void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 
 	// Essence Mod: a power read from essence_powers.tsv with no behaviour yet. It can be learned
 	// and readied, but casting it only says so, and costs nothing.
+	if (IsPassivePower(spellID)) {
+		EventPlrMsg(StrCat(GetSpellData(spellID).sNameText, " is passive; it acts by itself when it is needed"), UiFlags::ColorWhite);
+		return;
+	}
 	if (IsExtendedSpell(spellID) && GetSpellData(spellID).sMissiles[0] == MissileID::Null && GetSpellData(spellID).effect.empty()) {
 		EventPlrMsg(StrCat(GetSpellData(spellID).sNameText, " is not built yet"), UiFlags::ColorWhite);
 		return;

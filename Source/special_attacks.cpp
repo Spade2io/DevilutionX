@@ -188,6 +188,21 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 		// A separate id from the damage numbers, so the game does not merge the two.
 		AddFloatingNumber(target.position.tile, { 0, 0 }, StrCat(GetDotName(*dot), " x", stacks), (*dot == DotID::Corruption ? UiFlags::ColorBlue : UiFlags::ColorRed) | UiFlags::FontSize12, 1000 + static_cast<int>(target.getId()));
 	}
+
+	// "Branded": every direct hit on the target deals extra fire from then on. The rider's amount
+	// is that extra damage, in 64ths of a hit point. The strike that applies it sets it off as well.
+	if (spellData.rider == "Branded" && !target.hasNoLife()) {
+		const int extra = ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack));
+		BrandMonster(target, attack, extra);
+		AddFloatingNumber(target.position.tile, { 0, 0 }, "Branded", UiFlags::ColorRed | UiFlags::FontSize12, 1000 + static_cast<int>(target.getId()));
+	}
+
+	// "Vulnerable": the target takes more damage from then on. The rider's amount is the percentage.
+	if (spellData.rider == "Vulnerable" && !target.hasNoLife()) {
+		const int percent = ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack));
+		MakeMonsterVulnerable(target, percent);
+		AddFloatingNumber(target.position.tile, { 0, 0 }, StrCat("Vulnerable +", percent, "%"), UiFlags::ColorRed | UiFlags::FontSize12, 1000 + static_cast<int>(target.getId()));
+	}
 }
 
 } // namespace devilution

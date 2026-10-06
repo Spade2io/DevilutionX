@@ -993,6 +993,14 @@ void ResetPlayerGFX(Player &player);
  * @param numSkippedFrames Number of Frames that will be skipped (for example with modifier "faster attack")
  * @param distributeFramesBeforeFrame Distribute the numSkippedFrames only before this frame
  */
+/**
+ * @brief Essence Mod: makes a player go through the casting motion for a power without casting
+ * anything, with the power's cast sound. Used when a passive power acts by itself.
+ * @return false if the player is in the middle of something that cannot be interrupted (a step
+ * between tiles, or dying); try again on a later tick.
+ */
+bool StartCastMotion(Player &player, SpellID spell);
+
 void NewPlrAnim(Player &player, player_graphic graphic, Direction dir, AnimationDistributionFlags flags = AnimationDistributionFlags::None, int8_t numSkippedFrames = 0, int8_t distributeFramesBeforeFrame = 0);
 void SetPlrAnims(Player &player);
 void CreatePlayer(Player &player, HeroClass c);

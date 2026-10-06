@@ -82,6 +82,21 @@ struct Pulse {
 std::array<std::vector<ActiveDot>, MaxMonsters> MonsterDots;
 std::array<Pulse, MaxMonsters> MonsterPulses;
 
+/** Extra damage each monster takes from the local player, in percent. Lasts until the monster dies. */
+std::array<int, MaxMonsters> MonsterVulnerability {};
+
+/** Monsters whose fire resistance and immunity have been stripped. Lasts until the monster dies. */
+std::array<bool, MaxMonsters> MonsterKindled {};
+
+struct Brand {
+	SpellID spell = SpellID::Invalid;
+	/** Extra fire damage on each direct hit, in 64ths of a hit point. Zero means not branded. */
+	int damage = 0;
+};
+
+/** The brand on each monster. Lasts until the monster dies. */
+std::array<Brand, MaxMonsters> MonsterBrands {};
+
 void FlashMonster(const Monster &monster, EssenceTint tint)
 {
 	Pulse &pulse = MonsterPulses[monster.getId()];
@@ -122,7 +137,7 @@ void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, Dam
 		return;
 
 	const Player &player = *MyPlayer;
-	damage = ApplyDamageBuffs(player, damage);
+	damage = ApplyMonsterVulnerability(monster, ApplyDamageBuffs(player, damage));
 	AddSpellExperienceForDamage(player, monster, spell, damage, monster.hitPoints);
 	ApplyMonsterDamage(damageType, monster, damage);
 	if (monster.hasNoLife()) {
@@ -193,6 +208,54 @@ int AddMonsterDot(Monster &monster, DotID dot, SpellID spell, int damagePerTick)
 	return active->stacks;
 }
 
+bool MakeMonsterVulnerable(Monster &monster, int percent)
+{
+	int &current = MonsterVulnerability[monster.getId()];
+	FlashMonster(monster, EssenceTint::VividRed);
+	if (percent <= current)
+		return false;
+	current = percent;
+	return true;
+}
+
+bool KindleMonster(Monster &monster)
+{
+	FlashMonster(monster, EssenceTint::VividRed);
+	// Checked before the flag is set, since the flag is what makes these two answer "no".
+	const bool hadAny = monster.isImmune(MissileID::Firebolt, DamageType::Fire) || monster.isResistant(MissileID::Firebolt, DamageType::Fire);
+	MonsterKindled[monster.getId()] = true;
+	return hadAny;
+}
+
+bool IsMonsterKindled(const Monster &monster)
+{
+	return MonsterKindled[monster.getId()];
+}
+
+void BrandMonster(Monster &monster, SpellID spell, int damage)
+{
+	FlashMonster(monster, EssenceTint::VividRed);
+	Brand &brand = MonsterBrands[monster.getId()];
+	if (damage > brand.damage)
+		brand = Brand { spell, damage };
+}
+
+void TriggerMonsterBrand(Monster &monster)
+{
+	const Brand &brand = MonsterBrands[monster.getId()];
+	if (brand.damage == 0 || monster.hasNoLife())
+		return;
+	DealSpellTickDamage(monster, brand.spell, MissileID::WeaponExplosion, DamageType::Fire, brand.damage, /*finishKill=*/false);
+}
+
+int ApplyMonsterVulnerability(const Monster &monster, int damage)
+{
+	const int percent = MonsterVulnerability[monster.getId()];
+	if (percent == 0)
+		return damage;
+	return damage + static_cast<int>(static_cast<int64_t>(damage) * percent / 100);
+}
+
 void ProcessMonsterDots()
 {
 	if (MyPlayer == nullptr)
@@ -202,6 +265,13 @@ void ProcessMonsterDots()
 		Pulse &pulse = MonsterPulses[i];
 		if (pulse.ticksLeft > 0)
 			pulse.ticksLeft--;
+
+		// A debuff ends with the monster, so a new monster in the same slot starts clean.
+		if ((MonsterVulnerability[i] != 0 || MonsterKindled[i] || MonsterBrands[i].damage != 0) && Monsters[i].hasNoLife()) {
+			MonsterVulnerability[i] = 0;
+			MonsterKindled[i] = false;
+			MonsterBrands[i] = {};
+		}
 
 		std::vector<ActiveDot> &dots = MonsterDots[i];
 		if (dots.empty())
@@ -237,6 +307,9 @@ void ClearAllMonsterDots()
 	for (std::vector<ActiveDot> &dots : MonsterDots)
 		dots.clear();
 	MonsterPulses.fill(Pulse {});
+	MonsterVulnerability.fill(0);
+	MonsterKindled.fill(false);
+	MonsterBrands.fill(Brand {});
 }
 
 const uint8_t *GetMonsterDotPulseTrn(const Monster &monster)

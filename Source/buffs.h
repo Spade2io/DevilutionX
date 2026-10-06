@@ -68,6 +68,30 @@ int ApplyDamageBuffs(const Player &player, int damage);
  */
 int GetBuffSkippedFrames(const Player &player);
 
+/**
+ * @brief Whether a power read from essence_powers.tsv is passive: it is never cast, and acts by
+ * itself when its moment comes. So far that is "Rebirth".
+ */
+bool IsPassivePower(SpellID spell);
+
+/** @brief The passive powers a player knows. Like passive buffs, they earn a share of other experience. */
+std::vector<SpellID> GetPassivePowers(const Player &player);
+
+/**
+ * @brief Called when the local player's life has just reached zero. If they know a "Rebirth"
+ * power that is off cooldown, they rise at once with part of their life and the power goes on
+ * cooldown.
+ * @return true if the player was saved and must not be killed.
+ */
+bool TryRebirth(Player &player);
+
+/**
+ * @brief Whether the player has just risen through a "Rebirth" power and is still protected.
+ * For that moment they take no damage and cannot be staggered, so the rising can be seen and
+ * is not undone by the very next blow.
+ */
+bool IsRebirthProtected(const Player &player);
+
 /** @brief Counts down the buffs that run out. Runs every game tick, in town as well as the dungeon. */
 void ProcessBuffTimers();
 
