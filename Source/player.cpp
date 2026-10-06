@@ -200,6 +200,8 @@ void StartAttack(Player &player, Direction d, bool includesFirstFrame)
 	} else if (HasAnyOf(flags, ItemSpecialEffect::QuickAttack)) {
 		skippedAnimationFrames = includesFirstFrame ? 1 : 0;
 	}
+	// Essence Mod: a speed buff shaves frames off as well, on top of any from items.
+	skippedAnimationFrames = static_cast<int8_t>(std::min(skippedAnimationFrames + GetBuffSkippedFrames(player), 4));
 
 	auto animationFlags = AnimationDistributionFlags::ProcessAnimationPending;
 	if (player._pmode == PM_ATTACK)
@@ -228,6 +230,8 @@ void StartRangeAttack(Player &player, Direction d, WorldTileCoord cx, WorldTileC
 			skippedAnimationFrames += 1;
 		}
 	}
+	// Essence Mod: a speed buff shaves frames off as well, on top of any from items.
+	skippedAnimationFrames = static_cast<int8_t>(std::min(skippedAnimationFrames + GetBuffSkippedFrames(player), 4));
 
 	auto animationFlags = AnimationDistributionFlags::ProcessAnimationPending;
 	if (player._pmode == PM_RATTACK)
@@ -281,7 +285,8 @@ void StartSpell(Player &player, Direction d, WorldTileCoord cx, WorldTileCoord c
 	auto animationFlags = AnimationDistributionFlags::ProcessAnimationPending;
 	if (player._pmode == PM_SPELL)
 		animationFlags = static_cast<AnimationDistributionFlags>(animationFlags | AnimationDistributionFlags::RepeatedAction);
-	NewPlrAnim(player, GetPlayerGraphicForSpell(player.queuedSpell.spellId), d, animationFlags, 0, player._pSFNum);
+	// Essence Mod: a speed buff shaves frames off the start of a cast, as it does for an attack.
+	NewPlrAnim(player, GetPlayerGraphicForSpell(player.queuedSpell.spellId), d, animationFlags, static_cast<int8_t>(GetBuffSkippedFrames(player)), player._pSFNum);
 
 	PlaySfxLoc(GetSpellData(player.queuedSpell.spellId).sSFX, player.position.tile);
 

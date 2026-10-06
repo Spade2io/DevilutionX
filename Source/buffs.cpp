@@ -236,6 +236,18 @@ int ApplyDamageBuffs(const Player &player, int damage)
 	return damage + static_cast<int>(static_cast<int64_t>(damage) * percent / 100);
 }
 
+int GetBuffSkippedFrames(const Player &player)
+{
+	int percent = 0;
+	for (const PowerBuff &buff : PowerBuffs[player.getId()]) {
+		const SpellData &spellData = GetSpellData(buff.spell);
+		// Buffs to the same stat do not add up: the strongest one counts.
+		if (spellData.buffStat == "Speed")
+			percent = std::max(percent, ScaleDamageForSpellLevel(spellData.effectAmount, SpellLevelOf(player, buff.spell)));
+	}
+	return std::clamp(percent / 10, 0, 4);
+}
+
 void ProcessBuffTimers()
 {
 	for (Player &player : Players) {

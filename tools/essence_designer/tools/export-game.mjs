@@ -65,6 +65,7 @@ const BEHAVIOUR = {
   'Ignite': { effect: 'Strike', rider: 'Burn', riderTotal: 5 },
   'Flame Cleave': { effect: 'Strike', spread: true },
   'Stoke the Flames': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Damage', duration: 20 },
+  'Fan the Flames': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Speed', duration: 0 },
 }
 const FIRST_NUMBER = 100
 
@@ -98,7 +99,9 @@ const shortLine = (power) => {
 const row = ({ power, essence }) => {
   const tags = tagNames(power)
   const element = tags.includes('Lightning') ? 'Lightning' : tags.includes('Fire') ? 'Fire' : 'Magic'
-  const flags = [element, ...(tags.includes('Enemy') ? ['Targeted'] : [])].join(',')
+  // Every buff can be cast in town, cooldown ones included.
+  const inTown = BEHAVIOUR[power.name]?.effect === 'Buff'
+  const flags = [element, ...(tags.includes('Enemy') ? ['Targeted'] : []), ...(inTown ? ['AllowedInTown'] : [])].join(',')
   const mana = Math.min(250, Math.max(0, Math.round(power.manaCost ?? 0)))
   const behaviour = BEHAVIOUR[power.name]
   // Amounts are in 64ths of a hit point, the unit the game counts damage in.

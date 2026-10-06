@@ -854,6 +854,7 @@ Says *what a buff or debuff changes*. Every buff and debuff should carry one; no
     for attacks, and only occasionally for buffs.
   - Of those, **favour Self buffs**. At most **one or two Timed buffs per essence that go on other
     people** (Ally or Everyone), the Ultimate included.
+- **Every buff can be cast in town**, cooldown ones included (Bryan 2026-10-05).
 - **Debuffs also tend towards Permanent** (Bryan 2026-10-05): once on a monster it stays until
   the monster dies. Unlike a lasting buff, a lasting debuff *may* have a cooldown, and often
   should: the cooldown is the wait before it can be put on the next enemy or group. (A lasting

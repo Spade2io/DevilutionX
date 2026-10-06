@@ -61,6 +61,13 @@ std::vector<SpellID> GetActivePowerBuffs(const Player &player);
  */
 int ApplyDamageBuffs(const Player &player, int damage);
 
+/**
+ * @brief How many frames a player's "Speed" buffs shave off the start of each attack and cast.
+ * One frame for every 10% of speed, four at most. A warrior's swing is 16 frames, so one frame is
+ * roughly 6% faster; the game has no finer step than a frame.
+ */
+int GetBuffSkippedFrames(const Player &player);
+
 /** @brief Counts down the buffs that run out. Runs every game tick, in town as well as the dungeon. */
 void ProcessBuffTimers();
 
