@@ -1,5 +1,5 @@
 // Writes the designer's powers into the files the game reads.
-// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire, Water, Holy and Nature)
+// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire, Water, Holy, Nature and Shield)
 //
 // What it writes:
 //   assets/txtdata/spells/essence_powers.tsv  one row per power the game does not already have
@@ -20,7 +20,7 @@ const POWERS_FILE = path.join(REPO, 'assets/txtdata/spells/essence_powers.tsv')
 const ITEMS_FILE = path.join(REPO, 'assets/txtdata/items/itemdat.tsv')
 const check = process.argv.includes('--check')
 const wanted = process.argv.slice(2).filter((a) => !a.startsWith('--'))
-const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy', 'Nature']
+const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy', 'Nature', 'Shield']
 
 // Powers the game already has as hand-written spells. They keep their original numbers and are
 // not exported; the name on the right is the game's own name for the spell.
@@ -43,6 +43,9 @@ const ICONS = {
   'Ironbark': 8, 'Healing Touch': 1, 'Nourish': 9, 'Full Bloom': 40, 'Pollinate': 15, 'Verdant Tide': 3, 'Fairy Ring': 10,
   'Rejuvenation': 43, 'Spring Shower': 50, 'Sacred Grove': 37, 'Remedy': 4, 'Renewal': 21, 'Fresh Breeze': 27, 'New Growth': 44,
   'Barkskin': 12, 'Canopy': 45, 'Ironwood': 7, 'Oakheart': 18, 'Camouflage': 19, 'World Tree': 24,
+  'Aegis': 8, 'Shield Bash': 47, 'Shield Slam': 22, 'Shield Sweep': 46, 'Concussive Blow': 7, 'Guarded Strike': 44, 'Bulwark Slam': 24,
+  'Barrier': 12, 'Reinforce': 16, 'Shield Wall': 45, 'Phalanx': 48, 'Bulwark': 25, 'Spell Ward': 21, 'Hold the Line': 33, 'Stout Heart': 18,
+  'Resilience': 43, 'Oathbound': 40, 'Stalwart': 31, 'Brace': 30, 'Unbreakable': 34,
   'Wellspring': 8, 'Tidal Wave': 13, 'Deep Freeze': 7, 'Wash Away': 4, 'Purging Rain': 21, 'Monsoon': 3, 'Great Flood': 24,
 }
 // The short line the spellbook shows under each power. There is room for about 28 letters.
@@ -58,6 +61,13 @@ const SHORT_TEXT = {
   'Wellspring': 'Aura: mana regen, radius 8', 'Tidal Wave': 'Wave of ice damage', 'Deep Freeze': 'Holds foes still 6s, rad 2',
   'Wash Away': 'Cleanses and heals an ally', 'Purging Rain': 'Cleanses allies, radius 4', 'Monsoon': 'Big heal + cleanse, rad 4',
   'Great Flood': 'Hurts foes, heals, radius 6',
+  'Aegis': 'Aura: small shield per 10s', 'Shield Bash': 'Shield strike', 'Shield Slam': 'Heavy; armor adds damage',
+  'Shield Sweep': 'Hits target and neighbours', 'Concussive Blow': 'Strike; holds foe 3s', 'Guarded Strike': 'Strike; +15 armor for 5s',
+  'Bulwark Slam': 'Shield per enemy struck', 'Barrier': 'Shield of 14 on an ally', 'Reinforce': 'Big shield and +15 armor',
+  'Shield Wall': 'Shields ally and nearby', 'Phalanx': 'Shields every ally', 'Bulwark': 'You have more armor',
+  'Spell Ward': 'Ally: +10 resistances', 'Hold the Line': 'All allies: +5 armor', 'Stout Heart': 'Ally has more maximum life',
+  'Resilience': 'You regain life faster', 'Oathbound': 'You take 30% of ally damage', 'Stalwart': 'Monsters prefer you',
+  'Brace': '+30 armor and resist, 20s', 'Unbreakable': 'All allies: half damage 12s',
   'Ironbark': 'Aura: resistances, rad 8', 'Healing Touch': 'Heals an ally, or you', 'Nourish': 'Cheap heal; more with a HoT',
   'Full Bloom': 'Restores 70% of ally life', 'Pollinate': 'Heal that leaps to others', 'Verdant Tide': 'Heals every ally anywhere',
   'Fairy Ring': 'Heals allies, radius 2', 'Rejuvenation': 'Heals an ally over 12s', 'Spring Shower': 'Heals all allies over 10s',
@@ -133,6 +143,18 @@ const SHORT_TEXT = {
 //         (nothing yet).
 //   More riders: Nourish on a Heal (riderPercent more if the target has one of the caster's heals
 //         over time), Regrow on a Resurrect (riderPercent of life regained over the duration).
+//   Shield: temporary health on the player aimed at (or around them, or on everyone, as a Heal
+//         would reach), for the duration. It takes damage before their own life does.
+//   An Aura with the stat ShieldPulse renews a shield of its potency on everyone it reaches
+//         every 10 seconds.
+//   More Buff stats: DamageTaken (the percentage less damage the player takes), Oath (the caster
+//         takes that percentage of the player's damage instead; one player at a time).
+//         Distance below 100 is threat. A buff's rider can name a second stat it changes, by
+//         riderPercent (Brace: Armor and Resist; Reinforce: a Shield and Armor while it lasts).
+//   More Strike riders: Freeze (holds the target riderPercent seconds), ArmorBonus (riderPercent
+//         of the striker's armor as extra damage), Guard (the striker gains the power's buff, at
+//         riderPercent strength), ShieldPerHit (a shield of riderHeal for each monster struck).
+//   A power with a Weapon tag needs that weapon in hand. Only Shield is checked by the game.
 //   Buff: switches a buff on for the caster, or for the player aimed at if the power is tagged Ally. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10
@@ -167,6 +189,26 @@ const BEHAVIOUR = {
   'Purging Rain': { missile: 'StrengthBuff', effect: 'Cleanse' },
   'Monsoon': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 99 },
   'Great Flood': { missile: 'Corruption', effect: 'GroundBurst', rider: 'HealCleanse', riderHeal: 29 },
+  'Aegis': { missile: 'StrengthBuff', effect: 'Aura', stat: 'ShieldPulse', duration: 0 },
+  'Shield Bash': { effect: 'Strike' },
+  'Shield Slam': { effect: 'Strike', rider: 'ArmorBonus', riderPercent: 25 },
+  'Shield Sweep': { effect: 'Strike', spread: true },
+  'Concussive Blow': { effect: 'Strike', rider: 'Freeze', riderPercent: 3 },
+  'Guarded Strike': { effect: 'Strike', rider: 'Guard', riderPercent: 15, stat: 'Armor', duration: 5 },
+  'Bulwark Slam': { effect: 'Strike', spread: true, rider: 'ShieldPerHit', riderHeal: 18, stat: 'Shield', duration: 15 },
+  'Barrier': { missile: 'StrengthBuff', effect: 'Shield', stat: 'Shield', duration: 15 },
+  'Reinforce': { missile: 'StrengthBuff', effect: 'Shield', stat: 'Shield', duration: 20, rider: 'Armor', riderPercent: 15 },
+  'Shield Wall': { missile: 'StrengthBuff', effect: 'Shield', stat: 'Shield', duration: 15 },
+  'Phalanx': { missile: 'StrengthBuff', effect: 'Shield', stat: 'Shield', duration: 15 },
+  'Bulwark': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Armor', duration: 0 },
+  'Spell Ward': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Resist', duration: 0 },
+  'Hold the Line': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Armor', duration: 0 },
+  'Stout Heart': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0 },
+  'Resilience': { missile: 'StrengthBuff', effect: 'Buff', stat: 'LifeRegen', duration: 0 },
+  'Oathbound': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Oath', duration: 0 },
+  'Stalwart': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0 },
+  'Brace': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Armor', duration: 20, rider: 'Resist', riderPercent: 30 },
+  'Unbreakable': { missile: 'StrengthBuff', effect: 'Buff', stat: 'DamageTaken', duration: 12 },
   'Ironbark': { missile: 'StrengthBuff', effect: 'Aura', stat: 'Resist', duration: 0 },
   'Healing Touch': { missile: 'StrengthBuff', effect: 'Heal' },
   'Nourish': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Nourish', riderPercent: 50 },
@@ -208,9 +250,15 @@ const BEHAVIOUR = {
   'Dawnburst': { missile: 'Corruption', effect: 'GroundBurst', rider: 'Heal', riderHeal: 11 },
 }
 const FIRST_NUMBER = 100
+// The powers whose awakening stones Pepin's test shelf sells: the ones being tested now. Use the
+// names as the designer shows them. Everything else stays in the game but is not for sale.
+const ON_SALE = ['Flaming Weapon', 'Flame Strike', 'Inferno Strike']
+const SHOP_FILE = path.join(REPO, 'assets/txtdata/spells/stone_shop.tsv')
 
 const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))
 const tagNames = (power) => power.tags.map((id) => data.tags.find((t) => t.id === id)?.name).filter(Boolean)
+const weaponGroup = data.tagGroups.find((g) => g.name === 'Weapon')?.id
+const weaponOf = (power) => power.tags.map((id) => data.tags.find((t) => t.id === id)).find((t) => t && t.groupId === weaponGroup)?.name ?? ''
 const keyFor = (name) => name.replace(/[^A-Za-z0-9 ]/g, '').split(' ').filter(Boolean).map((w) => w[0].toUpperCase() + w.slice(1)).join('')
 
 const exported = []
@@ -241,14 +289,15 @@ const row = ({ power, essence }) => {
   const tags = tagNames(power)
   const element = tags.includes('Lightning') ? 'Lightning' : tags.includes('Fire') ? 'Fire' : 'Magic'
   // Every buff and heal can be cast in town, cooldown ones included.
-  const inTown = ['Buff', 'Heal', 'Mana', 'Aura', 'Cleanse', 'HealPercent', 'ChainHeal', 'Resurrect', 'Zone'].includes(BEHAVIOUR[power.name]?.effect)
+  const inTown = ['Buff', 'Heal', 'Mana', 'Aura', 'Cleanse', 'HealPercent', 'ChainHeal', 'Resurrect', 'Zone', 'Shield'].includes(BEHAVIOUR[power.name]?.effect)
   const flags = [element, ...(tags.includes('Enemy') ? ['Targeted'] : []), ...(inTown ? ['AllowedInTown'] : [])].join(',')
   const mana = Math.min(250, Math.max(0, Math.round(power.manaCost ?? 0)))
   const behaviour = BEHAVIOUR[power.name]
   // Amounts are in 64ths of a hit point, the unit the game counts damage in.
   const amount = behaviour?.effect === 'Burn' ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
     : behaviour?.overTime || behaviour?.effect === 'Zone' ? Math.round((power.potency ?? 0) * 64 / (behaviour.duration / 2))
-    : behaviour?.stat === 'HealPulse' && behaviour.effect === 'Aura' ? Math.round((power.potency ?? 0) * 64)
+    : ['HealPulse', 'ShieldPulse'].includes(behaviour?.stat) && behaviour.effect === 'Aura' ? Math.round((power.potency ?? 0) * 64)
+    : behaviour?.effect === 'Shield' ? Math.round((power.potency ?? 0) * 64)
     : ['Burst', 'GroundBurst', 'Strike', 'Heal', 'Mana', 'Wave', 'ChainHeal'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64)
     : behaviour?.effect === 'Cleanse' ? Math.round(power.potency ?? 99)
     : ['Aura', 'Freeze', 'HealPercent', 'Resurrect'].includes(behaviour?.effect) ? Math.round(power.potency ?? 0)
@@ -263,16 +312,18 @@ const row = ({ power, essence }) => {
     : behaviour.riderHeal != null ? Math.round(behaviour.riderHeal * 64)
     : Math.round(behaviour.riderTotal * 64 / TICKS_PER_EFFECT)
   return [
-    power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : element === 'Magic' && ['Heal', 'Mana', 'Buff', 'Aura', 'Cleanse', 'HealPercent', 'ChainHeal', 'Resurrect', 'Zone'].includes(behaviour?.effect) ? 'CastHealing' : 'CastFire',
+    power.gameKey, power.number, power.name, essence.name, element === 'Lightning' ? 'CastLightning' : element === 'Magic' && ['Heal', 'Mana', 'Buff', 'Aura', 'Cleanse', 'HealPercent', 'ChainHeal', 'Resurrect', 'Zone', 'Shield'].includes(behaviour?.effect) ? 'CastHealing' : 'CastFire',
     mana, flags, behaviour?.missile ?? '', 0, mana, power.icon,
     Math.round(power.cooldown ?? 0), shortLine(power),
     behaviour?.effect ?? '', amount, radius, behaviour?.rider ?? '', riderAmount,
     behaviour?.stat ?? '', behaviour?.duration ?? 0,
     // Heals and buffs tagged Ally can be aimed at another player.
-    ['Heal', 'Buff', 'Mana', 'Cleanse', 'HealPercent', 'ChainHeal'].includes(behaviour?.effect) && tags.includes('Ally') ? 1 : 0,
+    ['Heal', 'Buff', 'Mana', 'Cleanse', 'HealPercent', 'ChainHeal', 'Shield'].includes(behaviour?.effect) && tags.includes('Ally') ? 1 : 0,
+    // The weapon the power needs in hand, from its Weapon tag.
+    behaviour ? weaponOf(power) : '',
   ].join('\t')
 }
-const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount', 'stat', 'duration', 'ally'].join('\t')
+const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount', 'stat', 'duration', 'ally', 'weapon'].join('\t')
 const powersText = [header, ...exported.map(row)].join('\r\n') + '\r\n'
 
 // Stones. Keep every existing row exactly where it is; drop the stand-in test stone if it is
@@ -295,6 +346,13 @@ if (check) {
 } else {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2) + '\n')
   fs.writeFileSync(POWERS_FILE, powersText)
+  const saleKeys = ON_SALE.map((name) => {
+    const key = ALREADY_IN_GAME[name] ?? data.powers.find((p) => p.name === name)?.gameKey
+    if (!key) throw new Error('ON_SALE names a power the game does not have: ' + name)
+    return key
+  })
+  fs.writeFileSync(SHOP_FILE, ['id', ...saleKeys].join('\r\n') + '\r\n')
+  console.log('Stones on sale: ' + (ON_SALE.join(', ') || 'none'))
   fs.writeFileSync(ITEMS_FILE, itemLines.join('\r\n') + '\r\n')
   console.log('Written.')
 }

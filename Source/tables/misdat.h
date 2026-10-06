@@ -31,28 +31,42 @@ enum class DamageType : uint8_t {
 	Magic,
 	Acid,
 	// Essence Mod: new damage types go below. Each belongs to one resistance category;
-	// see GetResistanceCategory. At most 8 types fit in the projectile table's flags.
+	// see GetResistanceCategory. There is room for 32 in the projectile table's flags.
 	Shadow,
 	Ice,
 	Holy,
+	Earth,
+	Bleed,
+	Poison,
+	Death,
+	Life,
+	Nature,
 };
 
 /**
  * @brief Essence Mod: the resistance category a damage type is checked against.
  *
  * There are many damage types but only three resistances. The original three types stand for the
- * categories: the Fire slot is Elemental (fire, lightning, ice), the Lightning slot is Natural
- * (acid, for players) and the Magic slot is Astral (magic, shadow).
+ * categories: the Fire slot is Elemental (fire, lightning, ice, earth), the Lightning slot is
+ * Natural (bleed, poison, nature; acid, for players) and the Magic slot is Astral (magic, shadow,
+ * holy, death, life). Physical damage belongs to none.
  */
 constexpr DamageType GetResistanceCategory(DamageType type)
 {
 	switch (type) {
 	case DamageType::Shadow:
 	case DamageType::Holy:
+	case DamageType::Death:
+	case DamageType::Life:
 		return DamageType::Magic; // Astral
 	case DamageType::Ice:
+	case DamageType::Earth:
 	case DamageType::Lightning:
 		return DamageType::Fire; // Elemental
+	case DamageType::Bleed:
+	case DamageType::Poison:
+	case DamageType::Nature:
+		return DamageType::Lightning; // Natural
 	default:
 		return type;
 	}
@@ -143,7 +157,7 @@ struct Missile;
 struct AddMissileParameter;
 
 enum class MissileDataFlags : uint8_t {
-	// The lower 3 bytes are used to store DamageType.
+	// The lower 5 bits are used to store DamageType.
 	Physical = static_cast<uint8_t>(DamageType::Physical),
 	Fire = static_cast<uint8_t>(DamageType::Fire),
 	Lightning = static_cast<uint8_t>(DamageType::Lightning),
@@ -152,8 +166,14 @@ enum class MissileDataFlags : uint8_t {
 	Shadow = static_cast<uint8_t>(DamageType::Shadow),
 	Ice = static_cast<uint8_t>(DamageType::Ice),
 	Holy = static_cast<uint8_t>(DamageType::Holy),
-	Arrow = 1 << 4,
-	Invisible = 1 << 5,
+	Earth = static_cast<uint8_t>(DamageType::Earth),
+	Bleed = static_cast<uint8_t>(DamageType::Bleed),
+	Poison = static_cast<uint8_t>(DamageType::Poison),
+	Death = static_cast<uint8_t>(DamageType::Death),
+	Life = static_cast<uint8_t>(DamageType::Life),
+	Nature = static_cast<uint8_t>(DamageType::Nature),
+	Arrow = 1 << 5,
+	Invisible = 1 << 6,
 };
 use_enum_as_flags(MissileDataFlags);
 
@@ -223,7 +243,7 @@ struct MissileData {
 
 	[[nodiscard]] DamageType damageType() const
 	{
-		return static_cast<DamageType>(static_cast<std::underlying_type<MissileDataFlags>::type>(flags) & 0b111U);
+		return static_cast<DamageType>(static_cast<std::underlying_type<MissileDataFlags>::type>(flags) & 0b11111U);
 	}
 };
 

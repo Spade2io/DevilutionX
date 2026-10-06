@@ -49,6 +49,12 @@ bool IsAllyTargetedPower(SpellID spell);
  * with the amount the caster's PC worked out.
  */
 void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int amount);
+struct Monster;
+/**
+ * @brief Essence Mod: a power lands on a monster in a way every PC has to carry out the same.
+ * So far that is a hold: the rider "Freeze" keeps the monster still for the amount in seconds.
+ */
+void ApplyPowerToMonster(const Player &caster, Monster &monster, SpellID spell, int amount);
 int GetSpellBookLevel(SpellID s);
 int GetSpellStaffLevel(SpellID s);
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { AddBox, DeleteButton, NameInput, NumberInput, TextArea, newId, sameName } from './parts.jsx'
 import { TINTS, orbStyle } from './palette.js'
-import TagInput from './TagInput.jsx'
+import TagInput, { DRAG_TYPE } from './TagInput.jsx'
 import { RARITIES, rarityOf } from './rarity.js'
 import { essenceSummary } from './rules.js'
 
@@ -104,9 +104,59 @@ export default function EssencesPage({ data, update }) {
             </ul>
             <Editor key={selected.id} essence={selected} data={data} nameTaken={nameTaken} change={change}
               addTag={addTag} removeTag={removeTag} onDelete={() => { remove(selected.id); setSelectedId(null) }} />
+            <TagShelf essence={selected} data={data} change={change} />
           </div>
         )}
     </>
+  )
+}
+
+// Every tag not yet on one of the essence's five lines, laid out by group, so none has to be
+// remembered. Drag one onto a line to use it; it then leaves the shelf. Drag a tag from a line
+// back onto the shelf to take it off that line. A tag barred by an "All other ..." entry stays
+// on the shelf, struck through, because it can still be dragged onto a line to bring it back.
+function TagShelf({ essence, data, change }) {
+  const [dropping, setDropping] = useState(false)
+  const onLine = new Set(TAG_LINES.flatMap((line) => essence[line.field] ?? []))
+  const sweptGroups = essence.neverOtherGroups ?? []
+  const groups = data.tagGroups
+    .map((group) => ({ group, tags: data.tags.filter((t) => t.groupId === group.id && !onLine.has(t.id)) }))
+    .filter((entry) => entry.tags.length > 0)
+  const takeOff = (e) => {
+    setDropping(false)
+    const id = e.dataTransfer.getData(DRAG_TYPE)
+    if (!id || !onLine.has(id)) return
+    e.preventDefault()
+    const fields = {}
+    for (const line of TAG_LINES) fields[line.field] = (essence[line.field] ?? []).filter((t) => t !== id)
+    change(essence.id, fields)
+  }
+  return (
+    <aside className={dropping ? 'tag-shelf dropping' : 'tag-shelf'}
+      onDragOver={(e) => { if (e.dataTransfer.types.includes(DRAG_TYPE)) { e.preventDefault(); setDropping(true) } }}
+      onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setDropping(false) }}
+      onDrop={takeOff}>
+      <p className="note">Tags not on a line yet. Drag one onto a line; drag one back here to take it off.</p>
+      {groups.length === 0
+        ? <p className="note">Every tag is on a line.</p>
+        : (
+          <div className="shelf-columns">
+            {groups.map(({ group, tags }) => (
+              <div key={group.id} className="shelf-group">
+                <div className="shelf-title">{group.name}</div>
+                {tags.map((tag) => (
+                  <span key={tag.id} draggable
+                    className={sweptGroups.includes(group.id) ? 'shelf-tag swept' : 'shelf-tag'}
+                    title={sweptGroups.includes(group.id) ? 'Barred by "All other ' + plural(group.name) + '". Drag onto a line to bring it back.' : 'Drag onto a line'}
+                    onDragStart={(e) => { e.dataTransfer.setData(DRAG_TYPE, tag.id); e.dataTransfer.effectAllowed = 'move' }}>
+                    {tag.name}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+    </aside>
   )
 }
 

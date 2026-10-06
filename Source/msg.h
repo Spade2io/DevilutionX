@@ -420,6 +420,14 @@ enum _cmd_id : uint8_t {
 	//
 	// body (TCmdPowerOnPlayer)
 	CMD_POWERONPLAYER,
+	// Essence Mod: a power's effect lands on a monster and every PC must act on it (a hold).
+	//
+	// body (TCmdPowerOnMonster)
+	CMD_POWERONMONSTER,
+	// Essence Mod: the sender's next melee attack is made with the shield, so show that swing.
+	//
+	// body (TCmd)
+	CMD_SHIELDSTRIKE,
 	// Fake command; set current player for succeeding mega pkt buffer messages.
 	//
 	// body (TFakeCmdPlr)
@@ -514,6 +522,14 @@ struct TCmdParam4 {
 struct TCmdPowerOnPlayer {
 	_cmd_id bCmd;
 	uint8_t bPlr;
+	uint16_t wSpell;
+	uint32_t dwAmount;
+};
+
+/** Essence Mod: one power landing on one monster, where every PC has to do the same thing. */
+struct TCmdPowerOnMonster {
+	_cmd_id bCmd;
+	uint16_t wMonster;
 	uint16_t wSpell;
 	uint32_t dwAmount;
 };
@@ -774,6 +790,8 @@ void NetSendCmdChBeltItem(bool bHiPri, int beltIndex);
 void NetSendCmdDamage(bool bHiPri, const Player &player, uint32_t dwDam, DamageType damageType);
 /** Essence Mod: tells every PC that the local player's power has landed on a player. */
 void NetSendCmdPowerOnPlayer(const Player &target, SpellID spell, uint32_t amount);
+/** Essence Mod: tells every PC that the local player's power has landed on a monster. */
+void NetSendCmdPowerOnMonster(uint16_t monsterId, SpellID spell, uint32_t amount);
 void NetSendCmdMonDmg(bool bHiPri, uint16_t wMon, uint32_t dwDam);
 void NetSendCmdString(uint32_t pmask, const char *pszStr);
 void delta_close_portal(const Player &player);

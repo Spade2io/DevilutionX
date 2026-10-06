@@ -175,6 +175,12 @@ std::expected<MissileDataFlags, std::string> ParseMissileDataFlag(std::string_vi
 	if (value == "Shadow") return MissileDataFlags::Shadow;
 	if (value == "Ice") return MissileDataFlags::Ice;
 	if (value == "Holy") return MissileDataFlags::Holy;
+	if (value == "Earth") return MissileDataFlags::Earth;
+	if (value == "Bleed") return MissileDataFlags::Bleed;
+	if (value == "Poison") return MissileDataFlags::Poison;
+	if (value == "Death") return MissileDataFlags::Death;
+	if (value == "Life") return MissileDataFlags::Life;
+	if (value == "Nature") return MissileDataFlags::Nature;
 	if (value == "Arrow") return MissileDataFlags::Arrow;
 	if (value == "Invisible") return MissileDataFlags::Invisible;
 	return std::unexpected("Unknown enum value");

@@ -115,6 +115,13 @@ constexpr bool IsExtendedSpell(SpellID spell)
 
 std::expected<SpellID, std::string> ParseSpellId(std::string_view value);
 
+/**
+ * @brief Essence Mod: whether Pepin's test shelf sells the awakening stone for a power.
+ * The powers on sale are listed in txtdata/spells/stone_shop.tsv, written by the Essence
+ * Designer's export. Without that file every stone is on sale.
+ */
+bool IsStoneOnSale(SpellID spell);
+
 enum class MagicType : uint8_t {
 	Fire,
 	Lightning,
@@ -305,6 +312,8 @@ struct SpellData {
 	uint16_t durationSeconds = 0;
 	/** Whether the power can be aimed at another player. Without one under the cursor it lands on the caster. */
 	bool targetsAlly = false;
+	/** The kind of weapon the power needs in hand ("Shield"), or empty for none. */
+	std::string requiredWeapon;
 
 	[[nodiscard]] MagicType type() const
 	{

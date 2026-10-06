@@ -196,6 +196,8 @@ std::string_view CmdIdString(_cmd_id cmd)
 	case CMD_OPENGRAVE: return "CMD_OPENGRAVE";
 	case CMD_SPAWNMONSTER: return "CMD_SPAWNMONSTER";
 	case CMD_POWERONPLAYER: return "CMD_POWERONPLAYER";
+	case CMD_POWERONMONSTER: return "CMD_POWERONMONSTER";
+	case CMD_SHIELDSTRIKE: return "CMD_SHIELDSTRIKE";
 	case FAKE_CMD_SETID: return "FAKE_CMD_SETID";
 	case FAKE_CMD_DROPID: return "FAKE_CMD_DROPID";
 	case CMD_INVALID: return "CMD_INVALID";
@@ -2604,6 +2606,26 @@ size_t OnOpenGrave(const TCmd &cmd)
 	return sizeof(cmd);
 }
 
+size_t OnShieldStrike(const TCmd &message, Player &player)
+{
+	if (gbBufferMsgs != 1)
+		MarkShieldStrikeComing(player);
+
+	return sizeof(message);
+}
+
+size_t OnPowerOnMonster(const TCmdPowerOnMonster &message, const Player &caster)
+{
+	const uint16_t monsterId = Swap16LE(message.wMonster);
+	const uint32_t amount = Swap32LE(message.dwAmount);
+	const SpellID spell = static_cast<SpellID>(Swap16LE(message.wSpell));
+
+	if (gbBufferMsgs != 1 && caster.isOnActiveLevel() && leveltype != DTYPE_TOWN && monsterId < MaxMonsters && amount <= 192000)
+		ApplyPowerToMonster(caster, Monsters[monsterId], spell, static_cast<int>(amount));
+
+	return sizeof(message);
+}
+
 size_t OnPowerOnPlayer(const TCmdPowerOnPlayer &message, const Player &caster)
 {
 	const uint32_t amount = Swap32LE(message.dwAmount);
@@ -3317,6 +3339,17 @@ void NetSendCmdDamage(bool bHiPri, const Player &player, uint32_t dwDam, DamageT
 		NetSendLoPri(MyPlayerId, reinterpret_cast<std::byte *>(&cmd), sizeof(cmd));
 }
 
+void NetSendCmdPowerOnMonster(uint16_t monsterId, SpellID spell, uint32_t amount)
+{
+	TCmdPowerOnMonster cmd;
+
+	cmd.bCmd = CMD_POWERONMONSTER;
+	cmd.wMonster = Swap16LE(monsterId);
+	cmd.wSpell = Swap16LE(static_cast<uint16_t>(spell));
+	cmd.dwAmount = Swap32LE(amount);
+	NetSendHiPri(MyPlayerId, reinterpret_cast<std::byte *>(&cmd), sizeof(cmd));
+}
+
 void NetSendCmdPowerOnPlayer(const Player &target, SpellID spell, uint32_t amount)
 {
 	TCmdPowerOnPlayer cmd;
@@ -3527,6 +3560,10 @@ size_t ParseCmd(uint8_t pnum, const TCmd *pCmd, size_t maxCmdSize)
 		return HandleCmd(OnSpawnMonster, player, pCmd, maxCmdSize);
 	case CMD_POWERONPLAYER:
 		return HandleCmd(OnPowerOnPlayer, player, pCmd, maxCmdSize);
+	case CMD_POWERONMONSTER:
+		return HandleCmd(OnPowerOnMonster, player, pCmd, maxCmdSize);
+	case CMD_SHIELDSTRIKE:
+		return HandleCmd(OnShieldStrike, player, pCmd, maxCmdSize);
 	default:
 		break;
 	}

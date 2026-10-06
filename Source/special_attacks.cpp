@@ -66,6 +66,11 @@ bool IsSpecialAttack(SpellID spell)
 	return IsExtendedSpell(spell) && IsValidSpell(spell) && GetSpellData(spell).effect == "Strike";
 }
 
+bool IsShieldStrikeQueued()
+{
+	return QueuedAttack != SpellID::Invalid && IsValidSpell(QueuedAttack) && GetSpellData(QueuedAttack).requiredWeapon == "Shield";
+}
+
 void QueueSpecialAttack(SpellID spell, int monsterId)
 {
 	QueuedAttack = spell;
@@ -155,6 +160,9 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 	const SpellData &spellData = GetSpellData(attack);
 	const DamageType damageType = GetSpecialAttackDamageType(attack);
 
+	// How many monsters the strike landed on, for riders that count them.
+	int monstersStruck = 1;
+
 	// With a radius, every other monster near the target takes the same damage as the target did.
 	if (const int radius = spellData.effectRadius; radius > 0) {
 		const Point centre = target.position.tile;
@@ -171,6 +179,7 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 					others.push_back(monsterId);
 			}
 		}
+		monstersStruck += static_cast<int>(others.size());
 		for (const int monsterId : others) {
 			Monster &other = Monsters[monsterId];
 			DealSpellTickDamage(other, attack, MissileID::WeaponExplosion, damageType, damage);
@@ -192,6 +201,26 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 		BrandMonster(target, attack, extra);
 		AddFloatingNumber(target.position.tile, { 0, 0 }, "Branded", GetSpellTextColor(attack) | UiFlags::FontSize12, 1000 + static_cast<int>(target.getId()));
 	}
+
+	// "Freeze": the target is held still for the rider's amount in seconds. Every PC has to do
+	// this alike, so they are all told.
+	if (spellData.rider == "Freeze" && !target.hasNoLife())
+		NetSendCmdPowerOnMonster(static_cast<uint16_t>(target.getId()), attack, static_cast<uint32_t>(spellData.riderAmount));
+
+	// "ArmorBonus": the hit deals extra damage from the striker's armor. The rider's amount is
+	// the percentage of their armor that is added, as hit points.
+	if (spellData.rider == "ArmorBonus" && !target.hasNoLife()) {
+		const int extra = static_cast<int>(static_cast<int64_t>(std::max(player.GetArmor(), 0)) * 64 * spellData.riderAmount / 100);
+		if (extra > 0)
+			DealSpellTickDamage(target, attack, MissileID::WeaponExplosion, damageType, extra);
+	}
+
+	// "Guard": the striker gains the power's buff, with the rider's amount as its strength.
+	// "ShieldPerHit": the striker gains a shield of the rider's amount for each monster struck.
+	if (spellData.rider == "Guard")
+		NetSendCmdPowerOnPlayer(player, attack, static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack))));
+	if (spellData.rider == "ShieldPerHit")
+		NetSendCmdPowerOnPlayer(player, attack, static_cast<uint32_t>(monstersStruck * ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack))));
 
 	// "Bane": the hit deals more to the undead and to demons. The rider's amount is the percentage.
 	if (spellData.rider == "Bane" && !target.hasNoLife() && IsAnyOf(target.data().monsterClass, MonsterClass::Undead, MonsterClass::Demon)) {

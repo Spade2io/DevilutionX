@@ -267,3 +267,27 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   background: var(--danger); color: #fff; font-weight: 700; font-size: 16px;
 }
 .numbers-text { font-size: 13px; min-width: 200px; }
+
+/* The shelf of unused tags beside an essence. Groups flow into as many narrow columns as fit. */
+.tag-shelf {
+  flex: 2 1 300px; min-width: 260px; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+}
+.tag-shelf.dropping { border-color: var(--accent); }
+.tag-shelf > .note { margin: 0 0 8px; }
+.shelf-columns { column-count: 3; column-gap: 16px; }
+.shelf-group { break-inside: avoid; margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 5px; }
+.shelf-title {
+  font-size: 12px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--line); padding-bottom: 2px; margin-bottom: 2px; flex-basis: 100%;
+}
+/* Each tag is a pill, the same as on the lines, big enough to grab easily. */
+.shelf-tag {
+  font-size: 14px; line-height: 1.2; padding: 4px 11px; border-radius: 999px; cursor: grab; user-select: none;
+  background: var(--panel-2); border: 1px solid var(--line);
+}
+.shelf-tag:hover { border-color: var(--accent); color: var(--accent); }
+.shelf-tag:active { cursor: grabbing; }
+.shelf-tag.swept { color: var(--muted); text-decoration: line-through; }
+/* Beside the shelf the editor keeps the larger share, and never shrinks too far to use. */
+.split > .editor:has(+ .tag-shelf) { flex: 3 1 520px; min-width: 460px; }

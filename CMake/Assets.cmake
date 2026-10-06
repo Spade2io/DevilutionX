@@ -215,6 +215,7 @@ set(devilutionx_assets
   txtdata/quests/questdat.tsv
   txtdata/sound/effects.tsv
   txtdata/spells/essence_powers.tsv
+  txtdata/spells/stone_shop.tsv
   txtdata/spells/spelldat.tsv
   txtdata/text/textdat.tsv
   txtdata/towners/quest_dialog.tsv

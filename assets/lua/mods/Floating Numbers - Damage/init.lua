@@ -13,6 +13,12 @@ local DAMAGE_TYPE = {
     SHADOW = 5, -- Essence Mod
     ICE = 6, -- Essence Mod
     HOLY = 7, -- Essence Mod
+    EARTH = 8, -- Essence Mod, as are the rest
+    BLEED = 9,
+    POISON = 10,
+    DEATH = 11,
+    LIFE = 12,
+    NATURE = 13,
 }
 
 local function get_damage_style(damage_val, damage_type)
@@ -29,7 +35,7 @@ local function get_damage_style(damage_val, damage_type)
 
     local damage_type_styles = {
         [DAMAGE_TYPE.PHYSICAL] = render.UiFlags.ColorGold,
-        [DAMAGE_TYPE.FIRE] = render.UiFlags.ColorUiSilver, -- shows as DarkRed in game
+        [DAMAGE_TYPE.FIRE] = render.UiFlags.ColorBrightRed,
         [DAMAGE_TYPE.LIGHTNING] = render.UiFlags.ColorBlue,
         [DAMAGE_TYPE.MAGIC] = render.UiFlags.ColorOrange,
         [DAMAGE_TYPE.ACID] = render.UiFlags.ColorYellow,
@@ -37,6 +43,12 @@ local function get_damage_style(damage_val, damage_type)
         [DAMAGE_TYPE.SHADOW] = render.UiFlags.ColorBlue,
         [DAMAGE_TYPE.ICE] = render.UiFlags.ColorIce,
         [DAMAGE_TYPE.HOLY] = render.UiFlags.ColorYellow,
+        [DAMAGE_TYPE.EARTH] = render.UiFlags.ColorDullBeige,
+        [DAMAGE_TYPE.BLEED] = render.UiFlags.ColorUiSilver, -- shows as dull red in the game
+        [DAMAGE_TYPE.POISON] = render.UiFlags.ColorYellow,
+        [DAMAGE_TYPE.DEATH] = render.UiFlags.ColorBlue,
+        [DAMAGE_TYPE.LIFE] = render.UiFlags.ColorOrange,
+        [DAMAGE_TYPE.NATURE] = render.UiFlags.ColorGold,
     }
 
     local type_style = damage_type_styles[damage_type]

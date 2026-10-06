@@ -21,6 +21,7 @@
 #include "missiles.h"
 #include "spell_xp.h"
 #include "buffs.h"
+#include "monster.h"
 #include "msg.h"
 #include "utils/is_of.hpp"
 #include "essence_tint.h"
@@ -342,6 +343,21 @@ int CleansePlayer(Player & /*target*/, int /*count*/)
 	return 0;
 }
 
+void ApplyPowerToMonster(const Player &caster, Monster &monster, SpellID spell, int amount)
+{
+	if (!IsExtendedSpell(spell) || !IsValidSpell(spell) || amount <= 0)
+		return;
+	if (GetSpellData(spell).rider != "Freeze" && GetSpellData(spell).effect != "Freeze")
+		return;
+	// The game's own Stone Curse does the holding. A few monsters cannot be held.
+	if (monster.hasNoLife() || IsAnyOf(monster.type().type, MT_GOLEM, MT_DIABLO, MT_NAKRUL)
+	    || IsAnyOf(monster.mode, MonsterMode::FadeIn, MonsterMode::FadeOut, MonsterMode::Charge, MonsterMode::Petrified))
+		return;
+	Missile *hold = AddMissile(monster.position.tile, monster.position.tile, Direction::South, MissileID::StoneCurse, TARGET_MONSTERS, caster.getId(), 0, 0);
+	if (hold != nullptr && !hold->_miDelFlag)
+		hold->duration = std::min(amount, 60) * 20; // 20 game ticks to the second
+}
+
 void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int amount)
 {
 	if (!IsExtendedSpell(spell) || !IsValidSpell(spell) || amount <= 0)
@@ -378,7 +394,20 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 	if (rider.find("Cleanse") != std::string::npos)
 		CleansePlayer(target, 99);
 
+	// "Shield": temporary health that takes damage before the player's own life does. It is kept
+	// as a timed buff whose strength is what is left of it. A strike that carries a buff (armor
+	// after the blow, a shield for each enemy struck) arrives here too.
+	if (effect == "Shield" || (effect == "Strike" && !spellData.buffStat.empty())) {
+		ActivatePowerBuff(target, spell, amount, caster);
+		if (target.isOnActiveLevel())
+			AddFloatingNumber(target.position.tile, { 0, 0 }, spellData.buffStat == "Shield" ? StrCat("Shield ", std::max((amount + 32) >> 6, 1)) : std::string(spellData.sNameText), textStyle, textId);
+		return;
+	}
+
 	if (IsAnyOf(effect, "Buff", "Aura")) {
+		// A bond holds one player at a time: casting it on someone else moves it.
+		if (spellData.buffStat == "Oath")
+			RemovePowerBuffFromOthers(spell, caster, target);
 		const bool applied = ActivatePowerBuff(target, spell, amount, caster);
 		if (target.isOnActiveLevel())
 			AddFloatingNumber(target.position.tile, { 0, 0 }, applied ? std::string(spellData.sNameText) : std::string("Already has a stronger one"), textStyle, textId);

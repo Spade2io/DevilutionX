@@ -2766,7 +2766,7 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 	// "Heal", "Buff" and "Mana" land on players. Only the caster's own PC decides who and how
 	// much; it then tells every PC, its own included, and each of them applies it.
 	const SpellID spell = missile.sourceSpell;
-	if (IsExtendedSpell(spell) && IsValidSpell(spell) && IsAnyOf(GetSpellData(spell).effect, "Heal", "Buff", "Mana", "Aura", "Cleanse", "HealPercent", "ChainHeal", "Resurrect")) {
+	if (IsExtendedSpell(spell) && IsValidSpell(spell) && IsAnyOf(GetSpellData(spell).effect, "Heal", "Buff", "Mana", "Aura", "Cleanse", "HealPercent", "ChainHeal", "Resurrect", "Shield")) {
 		const SpellData &spellData = GetSpellData(spell);
 		const Player &caster = Players[missile._misource];
 		if (&caster != MyPlayer)
@@ -2885,8 +2885,9 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 			for (const Player &other : Players) {
 				if (&other == target || !other.plractive || !other.isOnActiveLevel() || other.hasNoLife())
 					continue;
+				// A heal splashes for half. A shield is given to each of them in full.
 				if (other.position.tile.WalkingDistance(target->position.tile) <= radius)
-					NetSendCmdPowerOnPlayer(other, spell, amount / 2);
+					NetSendCmdPowerOnPlayer(other, spell, spellData.effect == "Shield" ? amount : amount / 2);
 			}
 		}
 		return;

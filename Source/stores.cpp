@@ -1106,7 +1106,7 @@ void RefreshAwakeningStoneItems()
 	// Real awakening stone items come first: every row of the item table with that type.
 	// These are handed over as items and are always listed, known spell or not.
 	for (size_t i = 0; i < AllItemsList.size(); i++) {
-		if (AllItemsList[i].iMiscId != IMISC_AWAKENINGSTONE)
+		if (AllItemsList[i].iMiscId != IMISC_AWAKENINGSTONE || !IsStoneOnSale(AllItemsList[i].iSpell))
 			continue;
 		Item item;
 		InitializeItem(item, static_cast<_item_indexes>(i));
@@ -1121,7 +1121,7 @@ void RefreshAwakeningStoneItems()
 	// Then the test entries that teach a spell directly, one per spell not yet learned.
 	for (size_t i = static_cast<size_t>(SpellID::Firebolt); i < LegacySpellCount(); i++) {
 		const auto spell = static_cast<SpellID>(i);
-		if (GetSpellBookLevel(spell) == -1 || myPlayer._pSplLvl[i] != 0)
+		if (GetSpellBookLevel(spell) == -1 || myPlayer._pSplLvl[i] != 0 || !IsStoneOnSale(spell))
 			continue;
 		// Only abilities that belong to an essence can be learned at all.
 		if (GetSpellEssence(spell) == EssenceID::None)

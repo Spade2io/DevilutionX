@@ -49,6 +49,9 @@ sol::table LuaRenderModule(sol::state_view &lua)
 	uiFlags["ColorButtonface"] = UiFlags::ColorButtonface;
 	uiFlags["ColorButtonpushed"] = UiFlags::ColorButtonpushed;
 	uiFlags["ColorIce"] = UiFlags::ColorIce;
+	uiFlags["ColorBrightRed"] = UiFlags::ColorBrightRed;
+	uiFlags["ColorDullOrange"] = UiFlags::ColorDullOrange;
+	uiFlags["ColorDullBeige"] = UiFlags::ColorDullBeige;
 
 	uiFlags["AlignCenter"] = UiFlags::AlignCenter;
 	uiFlags["AlignRight"] = UiFlags::AlignRight;

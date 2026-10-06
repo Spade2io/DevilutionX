@@ -45,6 +45,27 @@ const FIXED = {
   'Renewal': { potency: 5, note: 'harmful effects removed in all, one every 2 seconds', mana: 6 },
   'Aegis': { potency: 2, note: 'shield on each ally every 10 seconds', mana: 10 },
   'Radiance': { potency: 2, note: 'healing to each ally every 2 seconds', mana: 10 },
+  // Dark. Its damage over time is Corruption: every 2 seconds for 20 seconds, like every such effect.
+  "Pall of Shadow": { potency: 10, note: "% less Astral resistance for every enemy in the aura", mana: 10 },
+  "Corruption": { potency: 10, note: "Corruption in total over 20 seconds (as built in the game)", mana: 6 },
+  "Creeping Rot": { potency: 9, note: "Corruption in total over 20 seconds", mana: 4 },
+  "Shadow Bolt": { potency: 3, note: "damage at once, then 4 Corruption over 20 seconds", mana: 6 },
+  "Blight": { potency: 7, note: "Corruption in total over 20 seconds to each target", mana: 9 },
+  "Plague Wind": { potency: 10, note: "Corruption in total over 20 seconds to each target", mana: 9, cooldown: 10 },
+  "Contagion": { potency: 24, note: "Corruption over 20 seconds on the first target, a quarter less with each leap", mana: 14, cooldown: 30 },
+  "Drain": { potency: 5, note: "Corruption in total over 20 seconds; heals you for 5 over the same time", mana: 4 },
+  "Black Sun": { potency: 24, note: "damage at once to each target, then 40 Corruption over 20 seconds", mana: 36, cooldown: 180 },
+  "Umbral Strike": { potency: 3, note: "bonus damage on the hit, then 4 Corruption over 20 seconds", mana: 2 },
+  "Night Blade": { potency: 3, note: "bonus damage on the hit", mana: 1 },
+  "Rupture": { potency: 5, note: "bonus damage on the hit, plus half of the Corruption still to tick on the enemy", mana: 2, cooldown: 8 },
+  "Blind": { potency: 10, note: "% less chance to hit, until the enemy dies", mana: 6, cooldown: 6 },
+  "Murk": { potency: 30, note: "% less chance to hit for 12 seconds, for each target", mana: 18, cooldown: 40 },
+  "Night Terrors": { potency: 10, note: "Corruption in total over 20 seconds; 15% less chance to hit while it ticks", mana: 6, cooldown: 10 },
+  "Wither": { potency: 5, note: "Corruption in total over 20 seconds; damage over time on the enemy deals 25% more until it dies", mana: 6, cooldown: 12 },
+  "Soul Rend": { potency: 100, note: "% of the enemy's Astral resistance and immunity removed, until it dies", mana: 15, cooldown: 45 },
+  "Cloak of Night": { potency: 150, note: "% apparent distance: monsters treat you as half again as far away", mana: 10 },
+  "Malice": { potency: 10, note: "% more damage from your damage over time, lasting", mana: 10 },
+  "Night's Edge": { potency: 2, note: "Corruption added by each weapon hit that lands, lasting", mana: 10 },
 }
 // What a lasting buff on one person gives, by the stat it changes.
 const STAT = {

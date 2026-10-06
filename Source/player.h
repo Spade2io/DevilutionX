@@ -979,6 +979,14 @@ ClxSprite GetPlayerPortraitSprite(Player &player);
 bool IsPlayerUnarmed(Player &player);
 
 void LoadPlrGFX(Player &player, player_graphic graphic);
+/**
+ * @brief Essence Mod: the attack animation of this player holding a shield and no weapon, the
+ * swing made with the shield itself, facing one way. It is kept beside the player's usual
+ * graphics, so it can be shown while they hold a weapon as well.
+ */
+OptionalClxSpriteList LoadShieldStrikeSprites(Player &player, Direction dir);
+/** @brief Essence Mod: notes that a player's next melee attack is made with the shield. Every PC is told, so all show the swing. */
+void MarkShieldStrikeComing(Player &player);
 void InitPlayerGFX(Player &player);
 void ResetPlayerGFX(Player &player);
 

@@ -28,6 +28,15 @@ enum class EssenceTint : uint8_t {
 	VividBlue,
 	/** The darkest, most purple the shared palette offers: deep slate-indigo. Shadow. */
 	Shadow,
+	// The "dull" colours are the palette's soft 16-shade ramps, named as in the Essence Designer.
+	DullRed,
+	DullOrange,
+	DullYellow,
+	DullBlue,
+	DullBeige,
+	DullGray,
+	/** Bright orange. */
+	VividOrange,
 };
 
 /** @brief The lookup table for a tint, for use with ClxDrawTRN. */

@@ -794,6 +794,21 @@ Words used below: an **attack** is any power that deals damage and is not an aur
 - Aura: its own special area (moved into this group by Bryan 2026-10-05). It has a radius, always
   targets Self and is always Permanent. See Aura below.
 
+**Balance targets for new powers** (given by Bryan 2026-10-06; they apply going forward and do not
+call for changing powers already accepted)
+- **Attacks: half with no cooldown, half with one.** Count every attack in the essence, special and
+  spell attacks together. Aim for an even split and lean toward a few more with no cooldown, so a
+  player always has a good choice of attacks that are simply available. (When he asked, the
+  essences other than Fire had clearly more cooldown attacks than not.)
+- **Lasting buffs: half self-only, half for others.** Count the lasting, no-cooldown buffs, leaving
+  auras out. About half should be castable on yourself only. The other half are the ones that can
+  go on an ally or on the whole party; those two kinds count together. His worry is everyone
+  carrying a great pile of buffs at all times.
+- **Buffs with a cooldown are outside that count.** A buff you can put on yourself or one ally, but
+  only every so often, is a choice about who gets it, which he likes. Leave those out of the
+  balance entirely.
+- He may go back over the existing buffs himself and make some self-only. Leave that to him.
+
 **Purpose** (several allowed): the basic idea of the power
 - Attack (deals damage; this tag was called Damage until 2026-10-05); Healing; Shielding
   (preemptive, temporary health); Buff (strengthens players); Debuff (weakens enemies).

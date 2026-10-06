@@ -80,6 +80,24 @@ int GetPlayerNoticeRange(const Player &player);
 /** @brief Whether a player has a heal over time on them that another player cast. */
 bool HasHealOverTimeFrom(const Player &target, const Player &caster);
 
+/**
+ * @brief Takes incoming damage off the local player's shields of temporary health, oldest first,
+ * and returns what is left to hurt them. Damage is in 64ths of a hit point.
+ */
+int AbsorbDamageWithShields(Player &player, int damage);
+
+/** @brief Incoming damage after the player's "DamageTaken" buffs (50 is half damage). */
+int ReduceDamageTaken(const Player &player, int damage);
+
+/**
+ * @brief The player who has bound themselves to take part of this player's damage (the stat
+ * "Oath"), and the share they take as a percentage. nullptr if nobody can take it now.
+ */
+const Player *GetOathGuardian(const Player &player, int &percent);
+
+/** @brief A caster's bond holds one player: takes this buff, cast by them, off everyone else. */
+void RemovePowerBuffFromOthers(SpellID spell, const Player &caster, const Player &keep);
+
 /** A buff or heal with this radius or more reaches every player in the game, wherever they are. */
 constexpr int EveryoneRadius = 50;
 

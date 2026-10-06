@@ -26,6 +26,9 @@ bool IsSpecialAttack(SpellID spell);
  */
 void QueueSpecialAttack(SpellID spell, int monsterId);
 
+/** @brief Whether the local player's next swing is a special attack made with the shield. */
+bool IsShieldStrikeQueued();
+
 /**
  * @brief Called when the local player's weapon swing at a monster resolves, hit or miss.
  *

@@ -11,6 +11,9 @@ import { useRef, useState } from 'react'
 //
 // Props: allTags and groups come straight from the data file; value is the list of tag ids on
 // this line; onAdd(id) and onRemove(id) report changes.
+// Dragging: a tag carries its id under a label only this app uses, so stray drops are ignored.
+export const DRAG_TYPE = 'application/x-essence-tag'
+
 export default function TagInput({ allTags, groups, value, onAdd, onRemove, placeholder }) {
   const [text, setText] = useState('')
   const [highlight, setHighlight] = useState(0)
@@ -37,9 +40,7 @@ export default function TagInput({ allTags, groups, value, onAdd, onRemove, plac
     input.current?.focus()
   }
 
-  // Dragging: a tag carries its id under a label only this app uses, so stray drops are ignored.
   // A line only accepts a tag it could have offered in its own lookup.
-  const DRAG_TYPE = 'application/x-essence-tag'
   const canDrop = (e) => e.dataTransfer.types.includes(DRAG_TYPE)
   const onDrop = (e) => {
     setDropping(false)

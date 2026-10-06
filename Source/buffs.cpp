@@ -303,8 +303,12 @@ int GetPowerBuffPercent(const Player &player, std::string_view stat)
 {
 	int percent = 0;
 	for (const ReachingBuff &buff : GetReachingBuffs(player)) {
-		if (GetSpellData(buff.spell).buffStat == stat)
+		const SpellData &spellData = GetSpellData(buff.spell);
+		if (spellData.buffStat == stat)
 			percent += buff.amount;
+		// A buff's rider can name a second stat it changes, by the rider's own amount.
+		else if (!spellData.buffStat.empty() && spellData.rider == stat)
+			percent += spellData.riderAmount;
 	}
 	return percent;
 }
@@ -337,6 +341,95 @@ bool HasHealOverTimeFrom(const Player &target, const Player &caster)
 			return true;
 	}
 	return false;
+}
+
+/** What the local player has left of the shield an aura gave them. It is renewed every pulse. */
+int AuraShieldLeft = 0;
+
+int AbsorbDamageWithShields(Player &player, int damage)
+{
+	if (&player != MyPlayer || damage <= 0)
+		return damage;
+	const int before = damage;
+
+	const int fromAura = std::min(AuraShieldLeft, damage);
+	AuraShieldLeft -= fromAura;
+	damage -= fromAura;
+
+	std::vector<PowerBuff> &buffs = PowerBuffs[player.getId()];
+	bool emptied = false;
+	for (PowerBuff &buff : buffs) {
+		if (damage <= 0)
+			break;
+		if (GetSpellData(buff.spell).buffStat != "Shield")
+			continue;
+		const int taken = std::min(buff.amount, damage);
+		buff.amount -= taken;
+		damage -= taken;
+		emptied |= buff.amount <= 0;
+	}
+	if (emptied) {
+		std::erase_if(buffs, [](const PowerBuff &buff) { return buff.amount <= 0 && GetSpellData(buff.spell).buffStat == "Shield"; });
+		CalcPlrInv(player, true);
+	}
+
+	if (before > damage)
+		AddFloatingNumber(player.position.tile, { 0, 0 }, StrCat("Shield -", std::max((before - damage + 32) >> 6, 1)), UiFlags::ColorGold | UiFlags::FontSize12, 3000 + player.getId());
+	return damage;
+}
+
+int ReduceDamageTaken(const Player &player, int damage)
+{
+	const int percent = std::clamp(GetPowerBuffPercent(player, "DamageTaken"), 0, 90);
+	return damage - static_cast<int>(static_cast<int64_t>(damage) * percent / 100);
+}
+
+const Player *GetOathGuardian(const Player &player, int &percent)
+{
+	for (const PowerBuff &buff : PowerBuffs[player.getId()]) {
+		if (GetSpellData(buff.spell).buffStat != "Oath" || buff.caster == player.getId() || buff.caster >= Players.size())
+			continue;
+		const Player &guardian = Players[buff.caster];
+		if (!guardian.plractive || guardian.hasNoLife() || guardian.plrlevel != player.plrlevel || guardian.plrIsOnSetLevel != player.plrIsOnSetLevel)
+			continue;
+		percent = std::clamp(buff.amount, 0, 90);
+		return &guardian;
+	}
+	return nullptr;
+}
+
+void RemovePowerBuffFromOthers(SpellID spell, const Player &caster, const Player &keep)
+{
+	for (Player &other : Players) {
+		if (&other == &keep)
+			continue;
+		std::vector<PowerBuff> &buffs = PowerBuffs[other.getId()];
+		if (std::erase_if(buffs, [&](const PowerBuff &buff) { return buff.spell == spell && buff.caster == caster.getId(); }) > 0)
+			CalcPlrInv(other, true);
+	}
+}
+
+/** Game ticks between the pulses of shield auras: every 10 seconds. */
+constexpr int ShieldPulseInterval = 10 * TicksPerSecond;
+int ShieldPulseCountdown = ShieldPulseInterval;
+
+/**
+ * Auras with the stat "ShieldPulse" give everyone they reach a small shield every 10 seconds.
+ * It is renewed, not added to: what is left of the last one is replaced. Out of reach at a
+ * pulse, it is gone. Each PC looks after its own player's.
+ */
+void PulseShieldAuras()
+{
+	if (--ShieldPulseCountdown > 0)
+		return;
+	ShieldPulseCountdown = ShieldPulseInterval;
+	if (MyPlayer == nullptr || MyPlayer->hasNoLife()) {
+		AuraShieldLeft = 0;
+		return;
+	}
+	AuraShieldLeft = std::max(GetPowerBuffPercent(*MyPlayer, "ShieldPulse"), 0);
+	if (AuraShieldLeft > 0)
+		AddFloatingNumber(MyPlayer->position.tile, { 0, 0 }, StrCat("Shield ", std::max((AuraShieldLeft + 32) >> 6, 1)), UiFlags::ColorGold | UiFlags::FontSize12, 3000 + MyPlayer->getId());
 }
 
 int ApplyDamageBuffs(const Player &player, int damage)
@@ -476,6 +569,7 @@ void RefreshAuraStats()
 void ProcessBuffTimers()
 {
 	PulseHealingAuras();
+	PulseShieldAuras();
 	RefreshAuraStats();
 
 	if (RebirthProtectionLeft > 0)
@@ -585,6 +679,8 @@ void DrawBuffBar(const Surface &out)
 		}
 		if (iconArea.contains(MousePosition)) {
 			std::string text = StrCat(spellData.sNameText, ": ", spellData.description);
+			if (spellData.buffStat == "Shield")
+				StrAppend(text, " (", std::max((buff.amount + 32) >> 6, 1), " shield left)");
 			if (buff.ticksLeft > 0)
 				StrAppend(text, " (", secondsLeft, "s left)");
 			DrawString(out, WordWrapString(text, DescriptionWidth),

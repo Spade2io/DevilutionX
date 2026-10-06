@@ -60,6 +60,10 @@ enum text_color : uint8_t {
 	ColorInGameDialogRed,    // Dialog red in-game
 
 	ColorIce, // Essence Mod: bright blue
+	// Essence Mod: these three have no file; their tables are worked out when first used.
+	ColorBrightRed,
+	ColorDullOrange,
+	ColorDullBeige,
 };
 
 constexpr GameFontTables GetFontSizeFromUiFlags(UiFlags flags)

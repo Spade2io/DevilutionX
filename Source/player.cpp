@@ -178,6 +178,13 @@ void ClearStateVariables(Player &player)
 	player.queuedSpell.spellLevel = 0;
 }
 
+/** Essence Mod: the player whose current swing is made with the shield. See StartAttack. */
+std::array<bool, MAX_PLRS> IsShieldStriking {};
+/** The frame of that swing on which it lands. */
+std::array<int, MAX_PLRS> ShieldStrikeActionFrame {};
+/** Game ticks for which each player's next melee attack is still expected to be a shield strike. */
+std::array<int, MAX_PLRS> ShieldStrikeComingTicks {};
+
 void StartAttack(Player &player, Direction d, bool includesFirstFrame)
 {
 	if (player._pInvincible && player.hasNoLife() && &player == MyPlayer) {
@@ -206,7 +213,25 @@ void StartAttack(Player &player, Direction d, bool includesFirstFrame)
 	auto animationFlags = AnimationDistributionFlags::ProcessAnimationPending;
 	if (player._pmode == PM_ATTACK)
 		animationFlags = static_cast<AnimationDistributionFlags>(animationFlags | AnimationDistributionFlags::RepeatedAction);
-	NewPlrAnim(player, player_graphic::Attack, d, animationFlags, skippedAnimationFrames, player._pAFNum);
+	// Essence Mod: an attack made with the shield is shown by the real shield swing, the attack
+	// animation of a character holding a shield and no weapon. The striker's own PC knows from
+	// its queue which attack is coming; it has told the others (see MarkShieldStrikeComing).
+	const size_t playerId = player.getId();
+	OptionalClxSpriteList shieldSwing;
+	const bool isComing = &player == MyPlayer ? IsShieldStrikeQueued() : ShieldStrikeComingTicks[playerId] > 0;
+	ShieldStrikeComingTicks[playerId] = 0;
+	if (isComing && player.isHoldingItem(ItemType::Shield))
+		shieldSwing = LoadShieldStrikeSprites(player, d);
+	if (shieldSwing) {
+		const PlayerAnimData &animData = GetPlayerAnimDataForClass(player._pClass);
+		IsShieldStriking[playerId] = true;
+		ShieldStrikeActionFrame[playerId] = animData.unarmedShieldActionFrame;
+		LoadPlrGFX(player, player_graphic::Attack);
+		player.AnimInfo.setNewAnimation(shieldSwing, animData.unarmedShieldFrames, 1, animationFlags, skippedAnimationFrames, animData.unarmedShieldActionFrame);
+	} else {
+		IsShieldStriking[playerId] = false;
+		NewPlrAnim(player, player_graphic::Attack, d, animationFlags, skippedAnimationFrames, player._pAFNum);
+	}
 	player._pmode = PM_ATTACK;
 	FixPlayerLocation(player, d);
 	SetPlayerOld(player);
@@ -829,13 +854,17 @@ bool PlrHitObj(const Player &player, Object &targetObject)
 
 bool DoAttack(Player &player)
 {
-	if (player.AnimInfo.currentFrame == player._pAFNum - 2) {
-		PlaySfxLoc(SfxID::Swing, player.position.tile);
+	// Essence Mod: a shield strike is a different animation, with its own frame for the hit.
+	const bool isShieldStrike = IsShieldStriking[player.getId()];
+	const int actionFrame = isShieldStrike ? ShieldStrikeActionFrame[player.getId()] : player._pAFNum;
+	if (player.AnimInfo.currentFrame == actionFrame - 2) {
+		// A shield strike makes the clang of a block rather than the whoosh of a swing.
+		PlaySfxLoc(isShieldStrike ? SfxID::ItemSword : SfxID::Swing, player.position.tile);
 	}
 
 	bool didhit = false;
 
-	if (player.AnimInfo.currentFrame == player._pAFNum - 1) {
+	if (player.AnimInfo.currentFrame == actionFrame - 1) {
 		Point position = player.position.tile + player._pdir;
 		Monster *monster = FindMonsterAtPosition(position);
 
@@ -2268,6 +2297,41 @@ void LoadPlrGFX(Player &player, player_graphic graphic)
 	}
 }
 
+/** The shield swing last loaded, and the look (class, armor) it was loaded for. */
+std::array<OptionalOwnedClxSpriteSheet, MAX_PLRS> ShieldStrikeSheets;
+std::array<int, MAX_PLRS> ShieldStrikeSheetLooks {};
+
+void MarkShieldStrikeComing(Player &player)
+{
+	// Long enough to walk over to the monster; after that an ordinary attack is ordinary again.
+	ShieldStrikeComingTicks[player.getId()] = 200;
+}
+
+OptionalClxSpriteList LoadShieldStrikeSprites(Player &player, Direction dir)
+{
+	if (HeadlessMode || leveltype == DTYPE_TOWN)
+		return std::nullopt;
+
+	const HeroClass cls = GetPlayerSpriteClass(player._pClass);
+	// One more than the look itself, so that zero means "nothing loaded".
+	const int look = 1 + ((static_cast<int>(cls) << 8) | (player._pgfxnum >> 4));
+	OptionalOwnedClxSpriteSheet &ShieldStrikeSheet = ShieldStrikeSheets[player.getId()];
+	int &ShieldStrikeSheetLook = ShieldStrikeSheetLooks[player.getId()];
+	if (!ShieldStrikeSheet || ShieldStrikeSheetLook != look) {
+		const PlayerSpriteData &spriteData = GetPlayerSpriteDataForClass(cls);
+		const char prefixBuf[3] = { spriteData.classChar, ArmourChar[player._pgfxnum >> 4], WepChar[static_cast<std::size_t>(PlayerWeaponGraphic::UnarmedShield)] };
+		char pszName[256];
+		GetPlayerGraphicsPath(spriteData.classPath.c_str(), std::string_view(prefixBuf, 3), "at", pszName);
+		ShieldStrikeSheet = LoadCl2Sheet(pszName, GetPlayerSpriteWidth(cls, player_graphic::Attack, PlayerWeaponGraphic::UnarmedShield));
+		if (const std::optional<std::array<uint8_t, 256>> graphicTRN = GetPlayerGraphicTRN(pszName); graphicTRN)
+			ClxApplyTrans(*ShieldStrikeSheet, graphicTRN->data());
+		if (const std::optional<std::array<uint8_t, 256>> classTRN = GetClassTRN(player); classTRN)
+			ClxApplyTrans(*ShieldStrikeSheet, classTRN->data());
+		ShieldStrikeSheetLook = look;
+	}
+	return (*ShieldStrikeSheet)[static_cast<size_t>(dir)];
+}
+
 void InitPlayerGFX(Player &player)
 {
 	if (HeadlessMode)
@@ -2932,6 +2996,22 @@ void ApplyPlrDamage(DamageType damageType, Player &player, int dam, int minHP /*
 		return;
 
 	int totalDamage = (dam << 6) + frac;
+	// Essence Mod: what the local player's powers do to damage coming in, in this order: buffs
+	// that make them take less; a bonded ally taking a share of it; shields of temporary health.
+	if (&player == MyPlayer && !player.hasNoLife() && totalDamage > 0) {
+		totalDamage = ReduceDamageTaken(player, totalDamage);
+		int oathPercent = 0;
+		if (const Player *guardian = GetOathGuardian(player, oathPercent); guardian != nullptr) {
+			const int shared = static_cast<int>(static_cast<int64_t>(totalDamage) * oathPercent / 100);
+			if (shared > 0) {
+				totalDamage -= shared;
+				NetSendCmdDamage(true, *guardian, static_cast<uint32_t>(shared), damageType);
+			}
+		}
+		totalDamage = AbsorbDamageWithShields(player, totalDamage);
+		if (totalDamage <= 0)
+			return;
+	}
 	if (&player == MyPlayer && !player.hasNoLife()) {
 		lua::OnPlayerTakeDamage(&player, totalDamage, static_cast<int>(damageType));
 	}
@@ -3177,6 +3257,8 @@ void ProcessPlayers()
 
 	for (size_t pnum = 0; pnum < Players.size(); pnum++) {
 		Player &player = Players[pnum];
+		if (ShieldStrikeComingTicks[pnum] > 0)
+			ShieldStrikeComingTicks[pnum]--;
 		if (player.plractive && player.isOnActiveLevel() && (&player == MyPlayer || !player._pLvlChanging)) {
 			if (!PlrDeathModeOK(player) && player.hasNoLife()) {
 				SyncPlrKill(player, DeathReason::Unknown);
@@ -3386,6 +3468,13 @@ void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 		return;
 	}
 
+	// Essence Mod: some powers need a particular kind of weapon in hand.
+	if (IsExtendedSpell(spellID) && GetSpellData(spellID).requiredWeapon == "Shield" && !myPlayer.isHoldingItem(ItemType::Shield)) {
+		EventPlrMsg(StrCat(GetSpellData(spellID).sNameText, " needs a shield in hand"), UiFlags::ColorWhite);
+		LastPlayerAction = PlayerActionType::None;
+		return;
+	}
+
 	if (IsSpecialAttack(spellID)) {
 		if (pcursmonst == -1) {
 			myPlayer.Say(HeroSpeech::ICantDoThat);
@@ -3395,6 +3484,9 @@ void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 		// Any weapon will do. A melee weapon walks over and swings; a ranged one shoots from
 		// where the character stands, and the shot carries the attack.
 		QueueSpecialAttack(spellID, pcursmonst);
+		// A shield attack is announced first, so every PC shows the shield swing for it.
+		if (IsShieldStrikeQueued())
+			NetSendCmd(true, CMD_SHIELDSTRIKE);
 		LastPlayerAction = PlayerActionType::AttackMonsterTarget;
 		NetSendCmdParam1(true, myPlayer.UsesRangedWeapon() ? CMD_RATTACKID : CMD_ATTACKID, pcursmonst);
 		return;

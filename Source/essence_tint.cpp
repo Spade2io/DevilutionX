@@ -91,10 +91,36 @@ TintTable MakeEverythingToEightShadeRamp(uint8_t targetRamp)
 	return table;
 }
 
+/**
+ * @brief Builds a table that moves every shared ramp onto one of the soft 16-shade ramps.
+ * An 8-shade ramp has half the shading steps, so its shades land on every other target shade.
+ */
+TintTable MakeEverythingToSixteenShadeRamp(uint8_t targetRamp)
+{
+	TintTable table = MakeIdentity();
+
+	for (const uint8_t ramp : { PAL8_BLUE, PAL8_RED, PAL8_YELLOW, PAL8_ORANGE }) {
+		for (uint8_t shade = 0; shade < 8; shade++)
+			table[ramp + shade] = targetRamp + shade * 2;
+	}
+	for (const uint8_t ramp : { PAL16_BEIGE, PAL16_BLUE, PAL16_YELLOW, PAL16_ORANGE, PAL16_RED, PAL16_GRAY }) {
+		for (uint8_t shade = 0; shade < 16; shade++)
+			table[ramp + shade] = targetRamp + shade;
+	}
+	return table;
+}
+
 } // namespace
 
 const uint8_t *GetEssenceTintTrn(EssenceTint tint)
 {
+	static const TintTable DullRed = MakeEverythingToSixteenShadeRamp(PAL16_RED);
+	static const TintTable DullOrange = MakeEverythingToSixteenShadeRamp(PAL16_ORANGE);
+	static const TintTable DullYellow = MakeEverythingToSixteenShadeRamp(PAL16_YELLOW);
+	static const TintTable DullBlue = MakeEverythingToSixteenShadeRamp(PAL16_BLUE);
+	static const TintTable DullBeige = MakeEverythingToSixteenShadeRamp(PAL16_BEIGE);
+	static const TintTable DullGray = MakeEverythingToSixteenShadeRamp(PAL16_GRAY);
+	static const TintTable VividOrange = MakeEverythingToEightShadeRamp(PAL8_ORANGE);
 	static const TintTable VividRed = MakeEverythingToEightShadeRamp(PAL8_RED);
 	static const TintTable VividYellow = MakeEverythingToEightShadeRamp(PAL8_YELLOW);
 	static const TintTable VividBlue = MakeWarmToEightShadeRamp(PAL8_BLUE);
@@ -110,6 +136,20 @@ const uint8_t *GetEssenceTintTrn(EssenceTint tint)
 		return VividBlue.data();
 	case EssenceTint::Shadow:
 		return Shadow.data();
+	case EssenceTint::DullRed:
+		return DullRed.data();
+	case EssenceTint::DullOrange:
+		return DullOrange.data();
+	case EssenceTint::DullYellow:
+		return DullYellow.data();
+	case EssenceTint::DullBlue:
+		return DullBlue.data();
+	case EssenceTint::DullBeige:
+		return DullBeige.data();
+	case EssenceTint::DullGray:
+		return DullGray.data();
+	case EssenceTint::VividOrange:
+		return VividOrange.data();
 	}
 	return VividBlue.data();
 }
@@ -163,8 +203,10 @@ DamageType GetSpellDamageType(SpellID spell)
 		return DamageType::Ice;
 	case EssenceID::Holy:
 		return DamageType::Holy;
-	case EssenceID::Nature: // deals no damage; this only keeps the list complete
-		break;
+	case EssenceID::Nature:
+		return DamageType::Nature;
+	case EssenceID::Shield:
+		return DamageType::Physical;
 	case EssenceID::None:
 		break;
 	}
@@ -187,7 +229,7 @@ UiFlags GetDamageTypeTextColor(DamageType damageType)
 	case DamageType::Physical:
 		return UiFlags::ColorGold;
 	case DamageType::Fire:
-		return UiFlags::ColorUiSilver; // drawn dark red in the game
+		return UiFlags::ColorBrightRed;
 	case DamageType::Lightning:
 		return UiFlags::ColorBlue;
 	case DamageType::Magic:
@@ -200,15 +242,24 @@ UiFlags GetDamageTypeTextColor(DamageType damageType)
 		return UiFlags::ColorIce;
 	case DamageType::Holy:
 		return UiFlags::ColorYellow;
+	case DamageType::Earth:
+		return UiFlags::ColorDullBeige;
+	case DamageType::Bleed:
+		return UiFlags::ColorUiSilver; // drawn dull red in the game
+	case DamageType::Poison:
+		return UiFlags::ColorYellow;
+	case DamageType::Death:
+		return UiFlags::ColorBlue;
+	case DamageType::Life:
+		return UiFlags::ColorOrange;
+	case DamageType::Nature:
+		return UiFlags::ColorGold; // the lettering's own dull yellow
 	}
 	return UiFlags::ColorWhitegold;
 }
 
 UiFlags GetSpellTextColor(SpellID spell)
 {
-	// Nature has no damage type of its own; its words and numbers are a duller gold.
-	if (GetSpellEssence(spell) == EssenceID::Nature)
-		return UiFlags::ColorUiGold;
 	return GetDamageTypeTextColor(GetSpellDamageType(spell));
 }
 
@@ -218,10 +269,11 @@ std::optional<EssenceTint> GetItemTint(const Item &item)
 		return GetEssenceTint(GetSpellEssence(item._iSpell));
 	if (item._iMiscId != IMISC_AWAKENINGSTONE)
 		return std::nullopt;
-	// A stone takes its ability's own colour, or failing that its essence's.
-	if (const std::optional<EssenceTint> tint = GetSpellTint(item._iSpell); tint)
+	// A stone is the colour of its essence, the same as the essence's own item. Only a stone
+	// whose ability has no essence yet falls back on the ability's own colour.
+	if (const std::optional<EssenceTint> tint = GetEssenceTint(GetSpellEssence(item._iSpell)); tint)
 		return tint;
-	return GetEssenceTint(GetSpellEssence(item._iSpell));
+	return GetSpellTint(item._iSpell);
 }
 
 std::optional<EssenceTint> GetEssenceTint(EssenceID essence)
@@ -229,13 +281,17 @@ std::optional<EssenceTint> GetEssenceTint(EssenceID essence)
 	switch (essence) {
 	case EssenceID::Fire:
 		return EssenceTint::VividRed;
+	// These are the item colours the Essence Designer gives each essence's damage type.
 	case EssenceID::Lightning:
-		return EssenceTint::VividYellow;
+		return EssenceTint::DullBlue;
 	case EssenceID::Water:
 		return EssenceTint::VividBlue;
 	case EssenceID::Holy:
-	case EssenceID::Nature: // until there is a duller yellow or a green
 		return EssenceTint::VividYellow;
+	case EssenceID::Nature:
+		return EssenceTint::DullYellow;
+	case EssenceID::Shield: // Physical
+		return EssenceTint::DullYellow;
 	case EssenceID::None:
 		break;
 	}

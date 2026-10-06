@@ -31,6 +31,7 @@
 #include "game_mode.hpp"
 #include "utils/algorithm/container.hpp"
 #include "utils/format.hpp"
+#include "engine/palette.h"
 #include "utils/is_of.hpp"
 #include "utils/language.h"
 #include "utils/log.hpp"
@@ -84,7 +85,7 @@ constexpr std::array<int, 6> LineHeights = { 12, 26, 38, 42, 50, 22 };
 constexpr int SmallFontTallLineHeight = 16;
 std::array<int, 6> BaseLineOffset = { -3, -2, -3, -6, -7, 3 };
 
-std::array<const char *, 20> ColorTranslations = {
+std::array<const char *, 23> ColorTranslations = {
 	"fonts\\goldui.trn",
 	"fonts\\grayui.trn",
 	"fonts\\golduis.trn",
@@ -110,14 +111,24 @@ std::array<const char *, 20> ColorTranslations = {
 	"fonts\\gamedialogred.trn",
 
 	"fonts\\ice.trn",
+
+	nullptr, // ColorBrightRed: made in LoadFont
+	nullptr, // ColorDullOrange
+	nullptr, // ColorDullBeige
 };
 
-std::array<std::optional<std::array<uint8_t, 256>>, 20> ColorTranslationsData;
+std::array<std::optional<std::array<uint8_t, 256>>, 23> ColorTranslationsData;
 
 text_color GetColorFromFlags(UiFlags flags)
 {
 	if (HasAllOf(flags, UiFlags::ColorIce))
 		return ColorIce;
+	if (HasAllOf(flags, UiFlags::ColorBrightRed))
+		return ColorBrightRed;
+	if (HasAllOf(flags, UiFlags::ColorDullOrange))
+		return ColorDullOrange;
+	if (HasAllOf(flags, UiFlags::ColorDullBeige))
+		return ColorDullBeige;
 	if (HasAnyOf(flags, UiFlags::ColorWhite))
 		return ColorWhite;
 	if (HasAnyOf(flags, UiFlags::ColorBlue))
@@ -191,6 +202,22 @@ uint32_t GetFontId(GameFontTables size, uint16_t row)
 
 FontStack LoadFont(GameFontTables size, text_color color, uint16_t row)
 {
+	// Essence Mod: the lettering is drawn in the palette's 16 dull-yellow shades (192 to 207). A
+	// colour is a table that moves those onto another of the palette's ramps. These three are
+	// worked out here instead of being read from a file: an 8-shade ramp takes two of the
+	// lettering's shades for each of its own.
+	if (IsAnyOf(color, ColorBrightRed, ColorDullOrange, ColorDullBeige) && !ColorTranslationsData[color]) {
+		std::array<uint8_t, 256> &table = ColorTranslationsData[color].emplace();
+		for (size_t i = 0; i < table.size(); i++)
+			table[i] = static_cast<uint8_t>(i);
+		for (uint8_t shade = 0; shade < 16; shade++) {
+			if (color == ColorBrightRed)
+				table[PAL16_YELLOW + shade] = PAL8_RED + shade / 2;
+			else
+				table[PAL16_YELLOW + shade] = (color == ColorDullOrange ? PAL16_ORANGE : PAL16_BEIGE) + shade;
+		}
+	}
+
 	if (ColorTranslations[color] != nullptr && !ColorTranslationsData[color]) {
 		ColorTranslationsData[color].emplace();
 		LoadFileInMem(ColorTranslations[color], *ColorTranslationsData[color]);

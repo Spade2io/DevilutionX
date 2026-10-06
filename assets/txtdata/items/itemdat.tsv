@@ -250,3 +250,24 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Camouflage	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Camouflage	true	1
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of World Tree	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	WorldTree	true	1
 	0	Misc	Unequippable	ESSENCE	Misc	NONE	Nature Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	HealingTouch	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Aegis	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Aegis	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Shield Bash	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ShieldBash	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Shield Slam	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ShieldSlam	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Shield Sweep	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ShieldSweep	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Concussive Blow	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ConcussiveBlow	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Guarded Strike	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	GuardedStrike	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Bulwark Slam	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	BulwarkSlam	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Barrier	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Barrier	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Reinforce	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Reinforce	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Shield Wall	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ShieldWall	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Phalanx	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Phalanx	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Bulwark	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Bulwark	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Spell Ward	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	SpellWard	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Hold the Line	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	HoldTheLine	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Stout Heart	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	StoutHeart	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Resilience	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Resilience	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Oathbound	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Oathbound	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Stalwart	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Stalwart	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Brace	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Brace	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Unbreakable	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Unbreakable	true	1
+	0	Misc	Unequippable	ESSENCE	Misc	NONE	Shield Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Barrier	true	1

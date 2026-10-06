@@ -195,6 +195,30 @@ void AddGapSpell()
  * Essence Mod: reads the powers that live beyond the original 64. Each row carries its own number,
  * so numbers stay fixed however the file is sorted. The file is optional.
  */
+/** The powers whose stones Pepin's test shelf sells, and whether the list was found at all. */
+std::vector<SpellID> StonesOnSale;
+bool HasStoneShopList = false;
+
+void LoadStoneShopList()
+{
+	StonesOnSale.clear();
+	HasStoneShopList = false;
+	const std::string_view filename = "txtdata\\spells\\stone_shop.tsv";
+	std::expected<DataFile, DataFile::Error> dataFileResult = DataFile::load(filename);
+	if (!dataFileResult.has_value())
+		return;
+	HasStoneShopList = true;
+	DataFile &dataFile = dataFileResult.value();
+	dataFile.skipHeaderOrDie(filename);
+	for (DataFileRecord record : dataFile) {
+		RecordReader reader { record, filename };
+		std::string key;
+		reader.readString("id", key);
+		if (const std::expected<SpellID, std::string> spell = ParseSpellId(key); spell.has_value())
+			StonesOnSale.push_back(*spell);
+	}
+}
+
 void LoadExtendedSpellData()
 {
 	ExtendedSpellKeys.clear();
@@ -238,12 +262,18 @@ void LoadExtendedSpellData()
 		int ally = 0;
 		reader.readInt("ally", ally);
 		item.targetsAlly = ally != 0;
+		reader.readString("weapon", item.requiredWeapon);
 		item.sBookLvl = 1;
 		ExtendedSpellKeys.emplace_back(std::move(key), static_cast<SpellID>(number));
 	}
 }
 
 } // namespace
+
+bool IsStoneOnSale(SpellID spell)
+{
+	return !HasStoneShopList || std::find(StonesOnSale.begin(), StonesOnSale.end(), spell) != StonesOnSale.end();
+}
 
 /** Data related to each spell ID. */
 std::vector<SpellData> SpellsData;
@@ -349,6 +379,7 @@ void LoadSpellData()
 		reader.readInt("staffMax", item.sStaffMax);
 	}
 	LoadExtendedSpellData();
+	LoadStoneShopList();
 	SpellsData.shrink_to_fit();
 }
 
