@@ -222,6 +222,11 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 	if (spellData.rider == "ShieldPerHit")
 		NetSendCmdPowerOnPlayer(player, attack, static_cast<uint32_t>(monstersStruck * ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack))));
 
+	// "Arc": the shock leaps from the target to the two nearest other monsters, each taking the
+	// rider's amount in the power's damage type.
+	if (spellData.rider == "Arc")
+		ChainSpellDamage(target, attack, damageType, ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack)), 100, 2);
+
 	// "Rupture": the hit deals extra damage for the Corruption still ticking on the target. The
 	// rider's amount is the share of it, as a percentage. The Corruption is not used up.
 	if (spellData.rider == "Rupture" && !target.hasNoLife()) {

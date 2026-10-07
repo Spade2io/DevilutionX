@@ -210,7 +210,9 @@ void LoadStoneShopList()
 		return;
 	HasStoneShopList = true;
 	DataFile &dataFile = dataFileResult.value();
-	dataFile.skipHeaderOrDie(filename);
+	// A list with a heading and nothing under it is a shelf with nothing on it, not a broken file.
+	if (!dataFile.skipHeader().has_value())
+		return;
 	for (DataFileRecord record : dataFile) {
 		RecordReader reader { record, filename };
 		std::string key;

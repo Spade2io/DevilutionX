@@ -75,13 +75,11 @@ int AddMonsterDot(Monster &monster, DotID dot, SpellID spell, int damagePerTick)
 bool MakeMonsterVulnerable(Monster &monster, int percent);
 
 /**
- * @brief Strips a monster's resistance and immunity to fire, for as long as it lives.
+ * @brief The old name for stripping a monster's Elemental resistance and immunity; see
+ * StripMonsterResistance. Kept for the "Kindle" effect, which only the caster's PC applies.
  * @return true if the monster had any to lose.
  */
 bool KindleMonster(Monster &monster);
-
-/** @brief Whether a monster has had its fire resistance and immunity stripped. */
-bool IsMonsterKindled(const Monster &monster);
 
 /**
  * @brief Brands a monster: from then on every direct hit the local player lands on it (a weapon
@@ -109,11 +107,49 @@ void SetMonsterAccuracyPenalty(Monster &monster, int percent, int ticks);
 /** @brief What is taken off a monster's chance to hit a player, in percentage points. */
 int GetMonsterAccuracyPenalty(const Monster &monster);
 
-/** @brief Strips a monster's resistance and immunity to Astral damage, for as long as it lives. Every PC keeps this. */
-void StripMonsterAstralResistance(Monster &monster);
+/** How much of the damage a resistant monster shrugs off before anything reduces it: three quarters. */
+constexpr int BaseMonsterResistancePercent = 75;
 
-/** @brief Whether a monster has had its Astral resistance and immunity stripped. */
-bool IsMonsterAstralStripped(const Monster &monster);
+/**
+ * @brief Which resistances a stat name reduces: "ElementalResistCut", "NaturalResistCut",
+ * "AstralResistCut" or "AllResistCut". One bit for each of the three; zero for any other stat.
+ */
+uint8_t GetResistCutCategories(std::string_view stat);
+
+/**
+ * @brief Puts a curse on a monster that takes points off its resistance, for as long as it
+ * lives or for a set time. Every PC keeps this. Curses from different powers add up; the same
+ * power cast again keeps whichever is stronger.
+ * @param categories As returned by GetResistCutCategories.
+ * @param ticks How long it lasts in game ticks, or -1 for as long as the monster lives.
+ */
+void CutMonsterResistance(Monster &monster, SpellID spell, uint8_t categories, int points, int ticks);
+
+/**
+ * @brief Damage of a kind to a monster after its resistance. A resistant monster shrugs off 75%;
+ * curses on it and cursing auras near it take points off that, never below none. An immune
+ * monster is not handled here: this is for damage that is known to get through.
+ */
+int ApplyMonsterResistance(const Monster &monster, MissileID missile, DamageType damageType, int damage);
+
+/** @brief The bit for the resistance a kind of damage is checked against: 1 Elemental, 2 Natural, 4 Astral, or 0 if nothing resists it. */
+uint8_t GetResistanceBit(DamageType damageType);
+
+/**
+ * @brief Which resistances a stat name strips outright: "ElementalStrip", "NaturalStrip",
+ * "AstralStrip" or "AllStrip". One bit for each; zero for any other stat.
+ */
+uint8_t GetStripCategories(std::string_view stat);
+
+/**
+ * @brief Strips a monster's resistance and its immunity in the categories given, for as long as
+ * it lives. This is the one thing that removes immunity. Every PC keeps it.
+ * @return true if the monster had anything there to lose.
+ */
+bool StripMonsterResistance(Monster &monster, uint8_t categories);
+
+/** @brief Whether a monster has had its resistance and immunity to a kind of damage stripped. */
+bool IsMonsterStripped(const Monster &monster, DamageType damageType);
 
 /**
  * @brief Makes every effect over time on a monster deal more, for as long as it lives. Held on
@@ -123,6 +159,22 @@ void WitherMonster(Monster &monster, int percent);
 
 /** @brief The damage an effect over time on a monster still has to deal, in 64ths of a hit point. */
 int GetMonsterDotRemaining(const Monster &monster, DotID dot);
+
+/**
+ * @brief Damage from one of the local player's spell attacks after their "SpellDamage" buffs and
+ * auras. Weapon attacks made through a power (special attacks) are not spell attacks and are
+ * left as they are.
+ */
+int ApplySpellDamageBuffs(SpellID spell, int damage);
+
+/**
+ * @brief Lightning that leaps on from a monster already struck: to the nearest other monster in
+ * reach, and again, each time for the share of the last amount that is kept. Dealt by the local
+ * player; call it only on the caster's own PC.
+ * @param amount What the first leap deals, in 64ths of a hit point.
+ * @param keepPercent How much of the amount each further leap keeps (100 loses nothing).
+ */
+void ChainSpellDamage(Monster &from, SpellID spell, DamageType damageType, int amount, int keepPercent, int leaps);
 
 /** @brief Damage to a monster after its "takes more damage" debuff, if it has one. */
 int ApplyMonsterVulnerability(const Monster &monster, int damage);

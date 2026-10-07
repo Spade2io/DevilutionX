@@ -84,8 +84,7 @@ EssenceID GetSpellEssence(SpellID spell)
 	case SpellID::Lightning:
 	case SpellID::ChainLightning:
 	case SpellID::ChargedBolt:
-	case SpellID::Flash:
-	case SpellID::Nova:
+	case SpellID::Teleport: // a Lightning power in this mod; Flash and Nova are not in the essence
 		return EssenceID::Lightning;
 	case SpellID::Frostbolt:
 		return EssenceID::Water;

@@ -1,5 +1,5 @@
 // Writes the designer's powers into the files the game reads.
-// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire, Water, Holy, Nature, Shield, Dark and Earth)
+// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire, Water, Holy, Nature, Shield, Dark, Earth and Lightning)
 //
 // What it writes:
 //   assets/txtdata/spells/essence_powers.tsv  one row per power the game does not already have
@@ -21,7 +21,7 @@ const POWERS_FILE = path.join(REPO, 'assets/txtdata/spells/essence_powers.tsv')
 const ITEMS_FILE = path.join(REPO, 'assets/txtdata/items/itemdat.tsv')
 const check = process.argv.includes('--check')
 const wanted = process.argv.slice(2).filter((a) => !a.startsWith('--'))
-const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy', 'Nature', 'Shield', 'Dark', 'Earth']
+const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy', 'Nature', 'Shield', 'Dark', 'Earth', 'Lightning']
 
 // Powers the game already has as hand-written spells. They keep their original numbers and are
 // not exported; the name on the right is the game's own name for the spell.
@@ -30,7 +30,7 @@ const ALREADY_IN_GAME = {
   'Fire Aura': 'FireAura', 'Flaming Weapon': 'FlamingWeapon', 'Flame Strike': 'FlameStrike', 'Inferno Strike': 'InfernoStrike',
   'Guardian': 'Guardian', 'Elemental': 'Elemental', 'Immolation': 'Immolation', 'Ring of Fire': 'RingOfFire',
   'Rune of Fire': 'RuneOfFire', 'Rune of Immolation': 'RuneOfImmolation', 'Frostbolt': 'Frostbolt', 'Holy Bolt': 'HolyBolt',
-  'Corruption': 'Corruption',
+  'Corruption': 'Corruption', 'Lightning': 'Lightning', 'Chain Lightning': 'ChainLightning', 'Charged Bolt': 'ChargedBolt', 'Teleport': 'Teleport',
 }
 // Which picture each power borrows from the game's sheet of spell icons, until it has its own.
 // The numbers are positions in that sheet (see SpellIcon in Source/panels/spell_icons.hpp).
@@ -53,13 +53,15 @@ const ICONS = {
   'Cloak of Night': 19, 'Malice': 18, "Night's Edge": 44,
   'Bedrock': 8, 'Stone Spike': 10, 'Tremor': 37, 'Earthquake': 45, 'Landslide': 46, 'Upheaval': 24, 'Stone Fist': 47, 'Boulder': 35, 'Shockwave': 22,
   'Earthshatter': 7, 'Crushing Blow': 34, 'Mire': 31, 'Stoneskin': 12, 'Dig In': 30, 'Stone Wall': 48, 'Earthen Might': 18, 'Monolith': 25, 'Unyielding': 33,
+  'Charged Air': 8, 'Spark': 38, 'Arc': 2, 'Forked Lightning': 15, 'Thunderstrike': 24, 'Ball Lightning': 10, 'Tempest': 45, 'Shocking Grasp': 22,
+  "Storm's Focus": 18, 'Amplify': 30, 'Overcharge': 34, 'Quickening': 27, 'Dynamo': 50,
   'Wellspring': 8, 'Tidal Wave': 13, 'Deep Freeze': 7, 'Wash Away': 4, 'Purging Rain': 21, 'Monsoon': 3, 'Great Flood': 24,
 }
 // The short line the spellbook shows under each power. There is room for about 28 letters.
 const SHORT_TEXT = {
   'Ignite': 'Strike that leaves a burn', 'Flame Cleave': 'Hits target and neighbours', 'Melt Armor': 'Target takes more damage',
-  'Stoke the Flames': '+30% damage for 20s', 'Phoenix': 'Rise again on death', 'Smolder': 'Stacking burn from range',
-  'Wildfire': 'Burn that spreads', 'Meteor': 'Heavy hit, radius 2', 'Kindling': 'Removes fire resistance',
+  'Stoke the Flames': '+20% damage for 20s', 'Phoenix': 'Rise again on death', 'Smolder': 'Stacking burn from range',
+  'Wildfire': 'Burn that spreads', 'Meteor': 'Heavy hit, radius 2', 'Kindling': 'Strips Elemental resistance',
   'Soothing Waters': 'Heals an ally, or you', 'Healing Rain': 'Heals allies, radius 4',
   'Glacial Spike': 'Heavy ice hit, one enemy', 'Ice Burst': 'Ice damage, radius 2', 'Hailstorm': 'Ice damage, radius 4',
   'Icebreaker': 'Strike dealing ice damage', 'Riptide': 'Hurts foes, heals allies', 'Springwater': 'Heals ally, half to nearby',
@@ -68,6 +70,10 @@ const SHORT_TEXT = {
   'Wellspring': 'Aura: mana regen, radius 8', 'Tidal Wave': 'Wave of ice damage', 'Deep Freeze': 'Holds foes still 6s, rad 2',
   'Wash Away': 'Cleanses and heals an ally', 'Purging Rain': 'Cleanses allies, radius 4', 'Monsoon': 'Big heal + cleanse, rad 4',
   'Great Flood': 'Hurts foes, heals, radius 6',
+  'Charged Air': 'Aura: +5% spell damage', 'Spark': 'Cheap little bolt', 'Arc': 'Lightning that leaps',
+  'Forked Lightning': 'Hits three at full power', 'Thunderstrike': 'Heavy hit, cannot miss', 'Ball Lightning': 'Bolt that bursts and leaps',
+  'Tempest': 'Leaps through the room', 'Shocking Grasp': 'Strike; shock arcs to two', "Storm's Focus": '+10 Spirit',
+  'Amplify': '+10% damage dealt', 'Overcharge': '+20% damage for 20s', 'Quickening': 'You walk faster', 'Dynamo': 'Mana comes back faster',
   'Bedrock': 'Aura: -1 physical damage', 'Stone Spike': 'Earth damage, radius 2', 'Tremor': 'Ground shakes 10s, rad 2',
   'Earthquake': 'Ground shakes 20s, rad 4', 'Landslide': 'Earth damage, radius 4', 'Upheaval': 'Heavy hit + hold, rad 6',
   'Stone Fist': 'Strike dealing earth damage', 'Boulder': 'Thrown rock, one enemy', 'Shockwave': 'Hits target and neighbours',
@@ -185,9 +191,12 @@ const SHORT_TEXT = {
 //         then on the nearest other monster, and again, a quarter less each leap.
 //   Curse: a debuff on the target, and on monsters within the radius, that every PC is told of.
 //         Stat Accuracy: potency percent less chance to hit, for the duration, or with none
-//         until it dies. Stat AstralStrip: no Astral resistance or immunity until it dies.
-//   An Aura with the stat AstralCurse makes monsters within it take potency percent more from
-//         Astral damage.
+//         until it dies. Stat ElementalStrip, NaturalStrip, AstralStrip or AllStrip: no resistance or immunity
+//         of that kind until it dies (Kindling, Soul Rend). The only thing that removes immunity.
+//   Reducing resistance: a resistant monster shrugs off 75% of the damage. An Aura or a Curse
+//         with the stat ElementalResistCut, NaturalResistCut, AstralResistCut or AllResistCut
+//         takes its potency in points off that (10 makes it 65%), never below none. Different
+//         powers add up. Immunity is not touched; only AstralStrip and Kindle remove immunity.
 //   More Buff stats: DotDamage (percent more from the caster's effects over time), WeaponDot
 //         (each weapon hit adds the effect over time its rider names; potency is the total).
 //   The Strike rider Rupture adds riderPercent of the Corruption still to tick on the target.
@@ -202,6 +211,15 @@ const SHORT_TEXT = {
 //         Freeze also holds what it hits, for riderPercent seconds.
 //   More Buff stats: Power (points), NoStagger (hits never interrupt the player). A buff's
 //         rider can also be Distance, giving a buff about something else threat or stealth.
+//   ChainBurst: damage that leaps. The target takes the potency, then the nearest other monster
+//         within 5 tiles, and again. The rider "Keep" says what share each leap keeps
+//         (riderPercent; 75 without it). "duration" fixes the number of leaps; left at 0 it is
+//         two, and one more for every two levels.
+//   A Bolt with the rider "Chain" leaps on the same way from whatever it hits.
+//   The Strike rider "Arc" sends riderDamage to each of the two nearest other monsters.
+//   More Buff stats: Spirit (points), WalkSpeed (frames off each step; 1 is about an eighth
+//         faster and 2 is the most allowed), SpellDamage (percent more from spell attacks, not
+//         from weapon attacks made through a power).
 //   Buff: switches a buff on for the caster, or for the player aimed at if the power is tagged Ally. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10
@@ -213,7 +231,7 @@ const BEHAVIOUR = {
   'Flame Cleave': { effect: 'Strike', spread: true },
   'Melt Armor': { effect: 'Strike', rider: 'Vulnerable', riderPercent: 15 },
   'Searing Brand': { effect: 'Strike', rider: 'Branded', riderDamage: 2 },
-  'Kindling': { missile: 'Corruption', effect: 'Kindle' },
+  'Kindling': { missile: 'Corruption', effect: 'Curse', stat: 'ElementalStrip', duration: 0 },
   'Phoenix': { effect: 'Rebirth' },
   'Stoke the Flames': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Damage', duration: 20 },
   'Fan the Flames': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Speed', duration: 0 },
@@ -236,6 +254,19 @@ const BEHAVIOUR = {
   'Purging Rain': { missile: 'StrengthBuff', effect: 'Cleanse' },
   'Monsoon': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 99 },
   'Great Flood': { missile: 'Corruption', effect: 'GroundBurst', rider: 'HealCleanse', riderHeal: 29 },
+  'Charged Air': { missile: 'StrengthBuff', effect: 'Aura', stat: 'SpellDamage', duration: 0 },
+  'Spark': { missile: 'PowerBolt', effect: 'Bolt' },
+  'Arc': { missile: 'Corruption', effect: 'ChainBurst', rider: 'Keep', riderPercent: 75 },
+  'Forked Lightning': { missile: 'Corruption', effect: 'ChainBurst', rider: 'Keep', riderPercent: 100, duration: 2 },
+  'Thunderstrike': { missile: 'Corruption', effect: 'Burst' },
+  'Ball Lightning': { missile: 'PowerBolt', effect: 'Bolt', rider: 'Chain', riderPercent: 75 },
+  'Tempest': { missile: 'Corruption', effect: 'ChainBurst', rider: 'Keep', riderPercent: 90, duration: 8 },
+  'Shocking Grasp': { effect: 'Strike', rider: 'Arc', riderDamage: 3 },
+  "Storm's Focus": { missile: 'StrengthBuff', effect: 'Buff', stat: 'Spirit', duration: 0 },
+  'Amplify': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Damage', duration: 0 },
+  'Overcharge': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Damage', duration: 20 },
+  'Quickening': { missile: 'StrengthBuff', effect: 'Buff', stat: 'WalkSpeed', duration: 0 },
+  'Dynamo': { missile: 'StrengthBuff', effect: 'Buff', stat: 'ManaRegen', duration: 0 },
   'Bedrock': { missile: 'StrengthBuff', effect: 'Aura', stat: 'DmgReduction', duration: 0 },
   'Stone Spike': { missile: 'Corruption', effect: 'GroundBurst' },
   'Tremor': { missile: 'StrengthBuff', effect: 'DamageZone', duration: 10 },
@@ -254,7 +285,7 @@ const BEHAVIOUR = {
   'Earthen Might': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Power', duration: 0 },
   'Monolith': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'MaxLife', riderPercent: 10 },
   'Unyielding': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'NoStagger', riderPercent: 1 },
-  'Pall of Shadow': { missile: 'StrengthBuff', effect: 'Aura', stat: 'AstralCurse', duration: 0 },
+  'Pall of Shadow': { missile: 'StrengthBuff', effect: 'Aura', stat: 'AstralResistCut', duration: 0 },
   'Creeping Rot': { missile: 'Corruption', effect: 'Corruption' },
   'Shadow Bolt': { missile: 'PowerBolt', effect: 'Bolt', rider: 'Corruption', riderTotal: 4 },
   'Blight': { missile: 'Corruption', effect: 'Corruption' },
@@ -336,8 +367,8 @@ const BEHAVIOUR = {
 const FIRST_NUMBER = 100
 // The powers whose awakening stones Pepin's test shelf sells: the ones being tested now. Use the
 // names as the designer shows them. Everything else stays in the game but is not for sale.
-const ON_SALE = ['Bedrock', 'Stone Spike', 'Tremor', 'Earthquake', 'Landslide', 'Upheaval', 'Stone Fist', 'Boulder', 'Shockwave', 'Earthshatter',
-  'Crushing Blow', 'Mire', 'Stoneskin', 'Dig In', 'Stone Wall', 'Earthen Might', 'Monolith', 'Unyielding']
+const ON_SALE = ['Lightning', 'Chain Lightning', 'Charged Bolt', 'Teleport', 'Spark', 'Arc', 'Forked Lightning', 'Thunderstrike', 'Ball Lightning', 'Tempest',
+  'Shocking Grasp', "Storm's Focus", 'Amplify', 'Overcharge', 'Quickening', 'Dynamo', 'Charged Air']
 const SHOP_FILE = path.join(REPO, 'assets/txtdata/spells/stone_shop.tsv')
 
 const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))
@@ -386,12 +417,13 @@ const row = ({ power, essence }) => {
   const behaviour = BEHAVIOUR[power.name]
   // Amounts are in 64ths of a hit point, the unit the game counts damage in.
   const amount = behaviour?.perTick || ['Burn', 'Corruption', 'Cone', 'Chain'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
-    : behaviour?.effect === 'Curse' ? Math.round(power.potency ?? 0)
+    // A curse with no number of its own (a strip) still needs one, to be sent at all.
+    : behaviour?.effect === 'Curse' ? Math.max(1, Math.round(power.potency ?? 1))
     : behaviour?.effect === 'Bolt' ? Math.round((power.potency ?? 0) * 64)
     : behaviour?.overTime || ['Zone', 'DamageZone'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64 / (behaviour.duration / 2))
     : ['HealPulse', 'ShieldPulse'].includes(behaviour?.stat) && behaviour.effect === 'Aura' ? Math.round((power.potency ?? 0) * 64)
     : behaviour?.effect === 'Shield' ? Math.round((power.potency ?? 0) * 64)
-    : ['Burst', 'GroundBurst', 'Strike', 'Heal', 'Mana', 'Wave', 'ChainHeal'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64)
+    : ['Burst', 'GroundBurst', 'ChainBurst', 'Strike', 'Heal', 'Mana', 'Wave', 'ChainHeal'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64)
     : behaviour?.effect === 'Cleanse' ? Math.round(power.potency ?? 99)
     : ['Aura', 'Freeze', 'GroundFreeze', 'HealPercent', 'Resurrect'].includes(behaviour?.effect) ? Math.round(power.potency ?? 0)
     : behaviour?.effect === 'Buff' || behaviour?.effect === 'Rebirth' ? Math.round(power.potency ?? 0)

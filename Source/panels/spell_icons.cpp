@@ -10,6 +10,7 @@
 #include "engine/load_cel.hpp"
 #include "engine/load_clx.hpp"
 #include "engine/palette.h"
+#include "spells.h"
 #include "engine/render/clx_render.hpp"
 #include "engine/render/primitive_render.hpp"
 #include "game_mode.hpp"
@@ -268,6 +269,28 @@ void DrawLargeSpellIconBorder(const Surface &out, Point position, uint8_t color)
 	const int width = (*LargeSpellIcons)[0].width();
 	const int height = (*LargeSpellIcons)[0].height();
 	UnsafeDrawBorder2px(out, Rectangle { Point { position.x, position.y - height + 1 }, Size { width, height } }, color);
+}
+
+void DrawSmallSpellIconFrame(const Surface &out, Point position, uint8_t color)
+{
+	constexpr int Outset = 2;
+	const int width = (*SmallSpellIcons)[0].width();
+	const int height = (*SmallSpellIcons)[0].height();
+	UnsafeDrawBorder2px(out, Rectangle { Point { position.x - Outset, position.y - height + 1 - Outset }, Size { width + 2 * Outset, height + 2 * Outset } }, color);
+}
+
+uint8_t GetPowerKindColor(SpellID spell)
+{
+	// The bright red and bright blue of the palette's fixed ramps, the same ones the tints use.
+	switch (GetPowerKind(spell)) {
+	case PowerKind::Attack:
+		return PAL8_RED + 2;
+	case PowerKind::LastingBuff:
+		return PAL8_BLUE + 2;
+	case PowerKind::Other:
+		break;
+	}
+	return 0;
 }
 
 void DrawSmallSpellIconBorder(const Surface &out, Point position)

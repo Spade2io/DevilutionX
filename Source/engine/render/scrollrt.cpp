@@ -1421,6 +1421,12 @@ void DrawView(const Surface &out, Point startPosition)
 	DrawMonsterHealthBar(out);
 	DrawFloatingNumbers(out, startPosition, offset);
 
+	// Essence Mod: the buff bar and the spell bar belong to the play area. They are drawn here,
+	// before every window (shops, conversations, the inventory, the quest log, the pause and death
+	// screens), so that all of those sit on top of them. Cooldowns show on the spell bar's buttons.
+	DrawBuffBar(out);
+	DrawSpellBar(out);
+
 	if (IsPlayerInStore() && !qtextflag)
 		DrawSText(out);
 	if (invflag) {
@@ -1472,8 +1478,6 @@ void DrawView(const Surface &out, Point startPosition)
 		DrawDiabloMsg(out.subregionY(0, out.h() - GetMainPanel().size.height));
 	}
 
-	DrawBuffBar(out);
-	DrawCooldownTracker(out);
 	DrawControllerModifierHints(out);
 	DrawPlrMsg(out);
 	gmenu_draw(out);

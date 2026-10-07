@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "control/control.hpp"
+#include "cooldowns.h"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "engine/backbuffer_state.hpp"
@@ -141,8 +142,13 @@ void DrawSpellList(const Surface &out)
 		if (shortHotkeyName)
 			PrintSBookHotkey(out, spellListItem.location, *shortHotkeyName);
 
-		if (!spellListItem.isSelected)
+		if (!spellListItem.isSelected) {
+			// Essence Mod: red around an attack, blue around a lasting buff or aura. The power under
+			// the cursor keeps the list's own highlight instead.
+			if (const uint8_t kindColor = spellListItem.type == SpellType::Spell ? GetPowerKindColor(spellId) : 0; kindColor != 0)
+				DrawLargeSpellIconBorder(out, spellListItem.location, kindColor);
 			continue;
+		}
 
 		uint8_t spellColor = PAL16_GRAY + 5;
 
@@ -295,6 +301,11 @@ void SetSpeedSpell(size_t slot)
 	if (!GetSpellListSelection(pSpell, pSplType)) {
 		return;
 	}
+	AssignSpeedSpell(slot, pSpell, pSplType);
+}
+
+void AssignSpeedSpell(size_t slot, SpellID pSpell, SpellType pSplType)
+{
 	Player &myPlayer = *MyPlayer;
 
 	if (myPlayer._pSplHotKey[slot] == pSpell && myPlayer._pSplTHotKey[slot] == pSplType) {
@@ -309,6 +320,62 @@ void SetSpeedSpell(size_t slot)
 	}
 	myPlayer._pSplHotKey[slot] = pSpell;
 	myPlayer._pSplTHotKey[slot] = pSplType;
+}
+
+void DrawSpellBar(const Surface &out)
+{
+	if (MyPlayer == nullptr || SpellSelectFlag || IsRightPanelOpen())
+		return;
+	const Player &myPlayer = *MyPlayer;
+
+	constexpr int IconWidth = 37;
+	constexpr int IconHeight = 38;
+	constexpr int Gap = 3;
+	constexpr int Margin = 4;
+	constexpr int Columns = 4;
+
+	// Two rows of four, tight against the right edge of the screen, sitting just above the main
+	// panel. Icons are drawn from their bottom-left corner. The top row is Q W E R.
+	const Rectangle &mainPanel = GetMainPanel();
+	const int left = out.w() - Margin - Columns * IconWidth - (Columns - 1) * Gap;
+	const int bottomRowY = mainPanel.position.y - Margin - 8;
+
+	for (size_t slot = 0; slot < SpellBarSlots; slot++) {
+		const int column = static_cast<int>(slot % Columns);
+		const int row = static_cast<int>(slot / Columns);
+		const Point position { left + column * (IconWidth + Gap), bottomRowY - (1 - row) * (IconHeight + Gap) };
+		const Point topLeft { position.x, position.y - IconHeight + 1 };
+
+		const bool filled = IsValidSpeedSpell(slot);
+		if (filled) {
+			const SpellID spell = myPlayer._pSplHotKey[slot];
+			const SpellType type = myPlayer._pSplTHotKey[slot];
+			// Greyed out when it cannot be cast for want of mana.
+			const bool affordable = type != SpellType::Spell || myPlayer._pMana >= GetManaAmount(myPlayer, spell);
+			SetSpellTrans(affordable ? type : SpellType::Invalid);
+			// The icon carries its own cooldown clock.
+			DrawSmallSpellIcon(out, position, spell);
+			if (const int ticks = GetSpellCooldownTicks(spell); ticks > 0) {
+				DrawString(out, StrCat((ticks + 19) / 20), Rectangle { Point { topLeft.x, position.y - 13 }, Size { IconWidth - 2, 12 } },
+				    { .flags = UiFlags::ColorWhite | UiFlags::AlignRight | UiFlags::FontSize12 | UiFlags::Outlined });
+			}
+		} else {
+			DrawHalfTransparentRectTo(out, topLeft.x, topLeft.y, IconWidth, IconHeight);
+		}
+
+		// The key that casts it, read from the player's own key settings.
+		const std::string_view key = GetOptions().Keymapper.KeyNameForAction(StrCat("QuickSpell", slot + 1));
+		// On a filled button the key sits in the corner. On an empty one it is shown plainly in the
+		// middle, so it is obvious which key the slot belongs to.
+		if (filled) {
+			DrawString(out, key, Point { topLeft.x + 2, topLeft.y + 1 },
+			    { .flags = UiFlags::ColorWhitegold | UiFlags::FontSize12 | UiFlags::Outlined });
+		} else {
+			DrawString(out, key, Rectangle { topLeft, Size { IconWidth, IconHeight } },
+			    { .flags = UiFlags::ColorWhite | UiFlags::FontSize12 | UiFlags::Outlined | UiFlags::AlignCenter | UiFlags::VerticalCenter });
+		}
+	}
+	SetSpellTrans(SpellType::Spell);
 }
 
 bool IsValidSpeedSpell(size_t slot)

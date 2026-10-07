@@ -328,6 +328,56 @@ void DoHealOther(const Player &caster, Player &target)
 	}
 }
 
+PowerKind GetPowerKind(SpellID spell)
+{
+	if (!IsValidSpell(spell))
+		return PowerKind::Other;
+	// The powers written by hand before the data file existed.
+	if (IsAnyOf(spell, SpellID::FireAura, SpellID::FlamingWeapon, SpellID::Strength))
+		return PowerKind::LastingBuff;
+	if (IsAnyOf(spell, SpellID::Firebolt, SpellID::Fireball, SpellID::FireWall, SpellID::FlameWave, SpellID::Inferno, SpellID::FlameStrike,
+	        SpellID::InfernoStrike, SpellID::Lightning, SpellID::ChainLightning, SpellID::ChargedBolt,
+	        SpellID::Frostbolt, SpellID::HolyBolt, SpellID::Corruption))
+		return PowerKind::Attack;
+	if (!IsExtendedSpell(spell))
+		return PowerKind::Other;
+
+	const SpellData &spellData = GetSpellData(spell);
+	if (spellData.effect == "Aura" || (spellData.effect == "Buff" && spellData.durationSeconds == 0))
+		return PowerKind::LastingBuff;
+	if (IsAnyOf(spellData.effect, "Burst", "GroundBurst", "ChainBurst", "Strike", "Bolt", "Wave", "Cone", "Chain", "DamageZone", "Burn", "Corruption"))
+		return PowerKind::Attack;
+	return PowerKind::Other;
+}
+
+bool IsSelfCastBuff(SpellID spell)
+{
+	if (IsAnyOf(spell, SpellID::FireAura, SpellID::FlamingWeapon, SpellID::Strength))
+		return true;
+	return IsExtendedSpell(spell) && IsValidSpell(spell) && IsAnyOf(GetSpellData(spell).effect, "Buff", "Aura");
+}
+
+void CastOnSelfNow(SpellID spell)
+{
+	if (MyPlayer == nullptr)
+		return;
+	// The cast is aimed at the player's own tile, with nothing under the cursor, so a buff that
+	// could go on an ally lands on the caster. The usual rule that nothing is cast while the
+	// cursor is over a panel is lifted for this one cast.
+	const Point savedCursor = cursPosition;
+	const int savedMonster = pcursmonst;
+	const Player *savedPlayer = PlayerUnderCursor;
+	cursPosition = MyPlayer->position.tile;
+	pcursmonst = -1;
+	PlayerUnderCursor = nullptr;
+	CastingFromPanel = true;
+	CheckPlrSpell(false, spell, SpellType::Spell);
+	CastingFromPanel = false;
+	cursPosition = savedCursor;
+	pcursmonst = savedMonster;
+	PlayerUnderCursor = savedPlayer;
+}
+
 bool IsAllyTargetedPower(SpellID spell)
 {
 	return IsExtendedSpell(spell) && IsValidSpell(spell) && GetSpellData(spell).targetsAlly;
@@ -354,9 +404,16 @@ void ApplyPowerToMonster(const Player &caster, Monster &monster, SpellID spell, 
 	const auto say = [&](std::string_view text) {
 		AddFloatingNumber(monster.position.tile, { 0, 0 }, std::string(text), GetSpellTextColor(spell) | UiFlags::FontSize12, 1000 + static_cast<int>(monster.getId()));
 	};
-	// "Curse" with the stat "AstralStrip": no Astral resistance or immunity until it dies.
-	if (spellData.effect == "Curse" && spellData.buffStat == "AstralStrip") {
-		StripMonsterAstralResistance(monster);
+	// "Curse" with a "...Strip" stat: no resistance or immunity of that kind until it dies.
+	if (const uint8_t stripped = spellData.effect == "Curse" ? GetStripCategories(spellData.buffStat) : 0; stripped != 0) {
+		const bool hadAny = StripMonsterResistance(monster, stripped);
+		say(hadAny ? std::string(spellData.sNameText) : StrCat(spellData.sNameText, " (no resistance)"));
+		return;
+	}
+	// "Curse" with a "...ResistCut" stat: points off the monster's resistance, for the power's
+	// duration or, with none, until it dies.
+	if (const uint8_t categories = spellData.effect == "Curse" ? GetResistCutCategories(spellData.buffStat) : 0; categories != 0) {
+		CutMonsterResistance(monster, spell, categories, amount, spellData.durationSeconds > 0 ? spellData.durationSeconds * 20 : -1);
 		say(spellData.sNameText);
 		return;
 	}

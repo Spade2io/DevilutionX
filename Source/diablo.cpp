@@ -466,8 +466,15 @@ void RightMouseDown(bool isShiftHeld)
 		SetSpell();
 		return;
 	}
-	if (SpellbookFlag && GetRightPanel().contains(MousePosition))
+	if (SpellbookFlag && GetRightPanel().contains(MousePosition)) {
+		// Essence Mod: right-clicking a power in the spellbook makes it the right-click power.
+		if (const SpellID hovered = GetSpellBookAbilityUnderCursor(); hovered != SpellID::Invalid && !IsInspectingPlayer()) {
+			MyPlayer->_pRSpell = hovered;
+			MyPlayer->_pRSplType = SpellType::Spell;
+			RedrawEverything();
+		}
 		return;
+	}
 	if (TryIconCurs())
 		return;
 	if (pcursinvitem != -1 && UseInvItem(pcursinvitem))
@@ -1870,11 +1877,19 @@ void InitKeymapActions()
 		    "QuickSpell{}",
 		    N_("Quick spell {}"),
 		    N_("Hotkey for skill or spell."),
-		    i < 4 ? static_cast<uint32_t>(SDLK_F5) + i : static_cast<uint32_t>(SDLK_UNKNOWN),
+		    // Essence Mod: the first eight are the spell bar, on the block of keys under the left hand.
+		    i < SpellBarSlots ? static_cast<uint32_t>("QWERASDF"[i]) : static_cast<uint32_t>(SDLK_UNKNOWN),
 		    [i]() {
 			    if (SpellSelectFlag) {
 				    SetSpeedSpell(i);
 				    return;
+			    }
+			    // Essence Mod: with the spellbook open, the key puts the power under the cursor on itself.
+			    if (SpellbookFlag) {
+				    if (const SpellID hovered = GetSpellBookAbilityUnderCursor(); hovered != SpellID::Invalid) {
+					    AssignSpeedSpell(i, hovered, SpellType::Spell);
+					    return;
+				    }
 			    }
 			    if (!*GetOptions().Gameplay.quickCast)
 				    ToggleSpell(i);
@@ -1921,7 +1936,7 @@ void InitKeymapActions()
 	    "DisplaySpells",
 	    N_("Speedbook"),
 	    N_("Open Speedbook."),
-	    'S',
+	    'T', // Essence Mod: S belongs to the spell bar
 	    DisplaySpellsKeyPressed,
 	    nullptr,
 	    CanPlayerTakeAction);
@@ -2016,7 +2031,7 @@ void InitKeymapActions()
 	    "QuestLog",
 	    N_("Quest log"),
 	    N_("Open Quest log."),
-	    'Q',
+	    'J', // Essence Mod: Q belongs to the spell bar
 	    QuestLogKeyPressed,
 	    nullptr,
 	    CanPlayerTakeAction);
@@ -2090,7 +2105,7 @@ void InitKeymapActions()
 	    "DecreaseBrightness",
 	    N_("Decrease Brightness"),
 	    N_("Reduce screen brightness."),
-	    'F',
+	    SDLK_UNKNOWN, // Essence Mod: F belongs to the spell bar; set a key in the options if wanted
 	    DecreaseBrightness,
 	    nullptr,
 	    CanPlayerTakeAction);
@@ -2098,7 +2113,7 @@ void InitKeymapActions()
 	    "IncreaseBrightness",
 	    N_("Increase Brightness"),
 	    N_("Increase screen brightness."),
-	    'G',
+	    SDLK_UNKNOWN, // Essence Mod: unassigned along with its partner
 	    IncreaseBrightness,
 	    nullptr,
 	    CanPlayerTakeAction);
@@ -2143,7 +2158,7 @@ void InitKeymapActions()
 	    "SortInv",
 	    N_("Sort Inventory"),
 	    N_("Sorts the inventory."),
-	    'R',
+	    'O', // Essence Mod: R belongs to the spell bar
 	    [] {
 		    ReorganizeInventory(*MyPlayer);
 	    });

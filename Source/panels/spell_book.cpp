@@ -26,6 +26,7 @@
 #include "missiles.h"
 #include "panels/spell_icons.hpp"
 #include "panels/ui_panels.hpp"
+#include "options.h"
 #include "player.h"
 #include "spell_xp.h"
 #include "tables/itemdat.h"
@@ -222,9 +223,30 @@ void DrawAbilityRow(const Surface &out, const Player &player, SpellID sn, size_t
 	SetSpellTrans(st);
 	const Point iconPosition = GetPanelPosition(UiPanels::Spell, { IconX, top + IconPaddingTop + IconHeight - 1 });
 	DrawSmallSpellIcon(out, iconPosition, sn);
+	// Essence Mod: red around an attack, blue around a lasting buff or aura.
+	if (const uint8_t kindColor = GetPowerKindColor(sn); kindColor != 0)
+		DrawSmallSpellIconFrame(out, iconPosition, kindColor);
 	if (sn == player._pRSpell && st == player._pRSplType) {
 		SetSpellTrans(SpellType::Skill);
 		DrawSmallSpellIconBorder(out, iconPosition);
+	}
+
+	// Essence Mod: the key the power is on is written on its icon, so the book shows at a glance
+	// where everything is, and an assignment can be seen to have taken. The key is in the top
+	// corner; "M2" in the bottom corner marks the power on the right mouse button. A power can
+	// have both.
+	const Point iconTopLeft { iconPosition.x, iconPosition.y - IconHeight + 1 };
+	for (size_t slot = 0; slot < NumHotkeys; slot++) {
+		if (player._pSplHotKey[slot] != sn || player._pSplTHotKey[slot] != SpellType::Spell)
+			continue;
+		const std::string_view key = GetOptions().Keymapper.KeyNameForAction(StrCat("QuickSpell", slot + 1));
+		DrawString(out, key, Point { iconTopLeft.x + 2, iconTopLeft.y + 1 },
+		    { .flags = UiFlags::ColorWhitegold | UiFlags::FontSize12 | UiFlags::Outlined });
+		break;
+	}
+	if (sn == player._pRSpell && player._pRSplType == SpellType::Spell) {
+		DrawString(out, "M2", Rectangle { Point { iconTopLeft.x, iconPosition.y - 13 }, Size { IconWidth - 2, 12 } },
+		    { .flags = UiFlags::ColorWhitegold | UiFlags::FontSize12 | UiFlags::Outlined | UiFlags::AlignRight });
 	}
 
 	const Point line0 { 0, top + 2 };
@@ -312,19 +334,32 @@ void DrawSpellBook(const Surface &out)
 	}
 }
 
+SpellID GetSpellBookAbilityUnderCursor()
+{
+	if (!SpellbookFlag || !IsEssenceTab(SpellbookTab))
+		return SpellID::Invalid;
+	for (size_t position = 0; position < AbilitiesPerEssence; position++) {
+		const Rectangle iconArea = { GetPanelPosition(UiPanels::Spell, { IconX, AbilityRowTop(position) + IconPaddingTop }), Size { IconWidth, IconHeight } };
+		if (!iconArea.contains(MousePosition))
+			continue;
+		const SpellID sn = GetAbilityOnOpenTab(position);
+		return IsValidSpell(sn) && InspectPlayer->GetBaseSpellLevel(sn) != 0 ? sn : SpellID::Invalid;
+	}
+	return SpellID::Invalid;
+}
+
 void CheckSBook()
 {
-	// Essence Mod: clicking an ability's icon readies it. Icons sit in the five ability rows.
+	// Essence Mod: clicking a power's icon. A buff or an aura is cast on yourself there and then,
+	// so a character can be buffed up straight from the book without spending keys on it. Any
+	// other power becomes the right-click power, as before.
 	if (!IsInspectingPlayer()) {
-		for (size_t position = 0; position < AbilitiesPerEssence; position++) {
-			const Rectangle iconArea = { GetPanelPosition(UiPanels::Spell, { IconX, AbilityRowTop(position) + IconPaddingTop }), Size { IconWidth, IconHeight } };
-			if (!iconArea.contains(MousePosition))
-				continue;
-			const SpellID sn = GetAbilityOnOpenTab(position);
-			Player &player = *InspectPlayer;
-			if (IsValidSpell(sn) && player.GetBaseSpellLevel(sn) != 0) {
-				player._pRSpell = sn;
-				player._pRSplType = SpellType::Spell;
+		if (const SpellID sn = GetSpellBookAbilityUnderCursor(); sn != SpellID::Invalid) {
+			if (IsSelfCastBuff(sn)) {
+				CastOnSelfNow(sn);
+			} else {
+				MyPlayer->_pRSpell = sn;
+				MyPlayer->_pRSplType = SpellType::Spell;
 				RedrawEverything();
 			}
 			return;

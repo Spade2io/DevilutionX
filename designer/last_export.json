@@ -480,6 +480,12 @@
       "name": "Arcane",
       "groupId": "g_b6a0b51b",
       "parentId": null
+    },
+    {
+      "id": "t_30044bae",
+      "name": "Teleport",
+      "groupId": "g_40d9d605",
+      "parentId": null
     }
   ],
   "damageTypes": [
@@ -625,7 +631,7 @@
       "id": "e_566cd6e8",
       "name": "Holy",
       "description": "",
-      "rarity": "rare",
+      "rarity": "common",
       "poolSize": 20,
       "damageTypeId": "d_ac50039d",
       "tagsAll": [
@@ -804,11 +810,33 @@
       "rarity": "common",
       "poolSize": 20,
       "damageTypeId": "d_c1473436",
-      "tagsAll": [],
-      "tagsMost": [],
-      "tagsSome": [],
-      "tagsNever": [],
-      "neverOtherGroups": []
+      "tagsAll": [
+        "t_df3e9612"
+      ],
+      "tagsMost": [
+        "t_78e7dc4a",
+        "t_0eaf5fa3"
+      ],
+      "tagsSome": [
+        "t_42d817be",
+        "t_50a7240a",
+        "t_e5439584",
+        "t_4903280f"
+      ],
+      "tagsNever": [
+        "t_f931de44",
+        "t_bcaf43f8",
+        "t_1d3ef0b5",
+        "t_fd0fb5ff"
+      ],
+      "neverOtherGroups": [
+        "g_b6a0b51b"
+      ],
+      "tagsFinite": [
+        "t_27d69a6f",
+        "t_30a3ce12",
+        "t_30044bae"
+      ]
     },
     {
       "id": "e_d59532f1",
@@ -2012,7 +2040,7 @@
     {
       "id": "p_6fb6bab4",
       "name": "Fire Aura",
-      "description": "Aura. In the game today. Every 2 seconds a burst of flame burns every monster within its radius. The radius grows as it levels.",
+      "description": "Aura. In the game today. Every 2 seconds a burst of flame burns every monster within its radius. The radius grows as it levels. It also makes you the obvious target: monsters notice you first and prefer you over your allies. It does nothing for allies; it is yours alone.",
       "status": "accepted",
       "essenceIds": [
         "e_4021590a"
@@ -2022,14 +2050,15 @@
         "t_42d817be",
         "t_be83c5cf",
         "t_abcc5067",
-        "t_6e51786d"
+        "t_6e51786d",
+        "t_bcaf43f8"
       ],
       "potency": 1,
       "manaCost": 10,
       "cooldown": 0,
       "radius": 2,
       "growth": 12.5,
-      "potencyNote": "fire damage every 2 seconds (as built in the game)"
+      "potencyNote": "fire damage every 2 seconds (as built in the game); also threat: monsters treat you as half as far away"
     },
     {
       "id": "p_4de250b8",
@@ -2328,7 +2357,7 @@
         "t_b0c8cbc0",
         "t_9048f21b"
       ],
-      "potency": 30,
+      "potency": 20,
       "manaCost": 18,
       "cooldown": 60,
       "radius": null,
@@ -2337,7 +2366,7 @@
       "number": 103,
       "gameKey": "StokeTheFlames",
       "icon": 18,
-      "shortText": "+30% damage for 20s"
+      "shortText": "+20% damage for 20s"
     },
     {
       "id": "p_730905cd",
@@ -2453,7 +2482,7 @@
     {
       "id": "p_09e61983",
       "name": "Kindling",
-      "description": "Dries one enemy and those beside it to tinder. They lose their resistance to fire until they die, and even the fire-immune can be burned. No damage. Cooldown of about a minute.",
+      "description": "Strips the Elemental resistance and immunity from one enemy and those close to it. Until they die, fire, ice, lightning and earth all hit them in full, from you and from your allies. No damage. The Elemental twin of Soul Rend. Cooldown of about a minute.",
       "status": "accepted",
       "essenceIds": [
         "e_4021590a"
@@ -2472,11 +2501,11 @@
       "cooldown": 60,
       "radius": 2,
       "growth": 12.5,
-      "potencyNote": "removes fire resistance and fire immunity",
+      "potencyNote": "removes Elemental resistance and immunity",
       "number": 108,
       "gameKey": "Kindling",
       "icon": 37,
-      "shortText": "Removes fire resistance"
+      "shortText": "Strips Elemental resistance"
     },
     {
       "id": "p_4922e8a6",
@@ -4878,6 +4907,465 @@
       "gameKey": "Unyielding",
       "icon": 33,
       "shortText": "Threat; never staggered"
+    },
+    {
+      "id": "p_32273d73",
+      "name": "Lightning",
+      "description": "A bolt of lightning tears out from you in a straight line, striking everything in its path. (Already in the game: the original Lightning spell.)",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_2b933c62",
+        "t_278e85ad",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": null,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage to everything in its path (the original spell, with the game's own numbers)"
+    },
+    {
+      "id": "p_60b2686b",
+      "name": "Chain Lightning",
+      "description": "Lightning strikes at an enemy and forks to every other enemy in sight. Costly, and devastating in a crowded room. (Already in the game: the original Chain Lightning.)",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_78e7dc4a",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": null,
+      "manaCost": 30,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage to every enemy in sight (the original spell, with the game's own numbers)"
+    },
+    {
+      "id": "p_81de5dfe",
+      "name": "Charged Bolt",
+      "description": "A spray of small bolts skitters out in the direction you face, wandering as they go. Cheap; more bolts as it levels. (Already in the game: the original Charged Bolt.)",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_2b933c62",
+        "t_278e85ad",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": null,
+      "manaCost": 6,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage for each bolt that lands (the original spell, with the game's own numbers)"
+    },
+    {
+      "id": "p_e36c67d6",
+      "name": "Spark",
+      "description": "Flicks a small spark of lightning at one enemy. A projectile: it can miss. Weak, but very cheap for what it does; the attack to fall back on when mana is short.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 5,
+      "manaCost": 4,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage",
+      "number": 226,
+      "gameKey": "Spark",
+      "icon": 38,
+      "shortText": "Cheap little bolt"
+    },
+    {
+      "id": "p_0f9d6f20",
+      "name": "Arc",
+      "description": "The plain chain attack. Lightning strikes one enemy, then leaps to the nearest other enemy, and again, a little weaker with each leap. More leaps as it levels. Always available.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_78e7dc4a",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": 5,
+      "manaCost": 9,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage to the first target, a quarter less with each leap",
+      "number": 227,
+      "gameKey": "Arc",
+      "icon": 2,
+      "shortText": "Lightning that leaps"
+    },
+    {
+      "id": "p_a53f7947",
+      "name": "Forked Lightning",
+      "description": "Lightning strikes one enemy and forks to the two nearest others, hitting all three at full strength. It never loses power as it spreads, but it never reaches a fourth. Cooldown of about 10 seconds.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_78e7dc4a",
+        "t_8e6b4fcf",
+        "t_a9a0b1a6"
+      ],
+      "potency": 7,
+      "manaCost": 9,
+      "cooldown": 10,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage to each of three targets",
+      "number": 228,
+      "gameKey": "ForkedLightning",
+      "icon": 15,
+      "shortText": "Hits three at full power"
+    },
+    {
+      "id": "p_ea5886c7",
+      "name": "Thunderstrike",
+      "description": "A single heavy bolt called straight down onto one enemy. It lands at once and cannot miss. The essence's one big hit on a single target. Cooldown of about 8 seconds.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_a9a0b1a6"
+      ],
+      "potency": 9,
+      "manaCost": 6,
+      "cooldown": 8,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage",
+      "number": 229,
+      "gameKey": "Thunderstrike",
+      "icon": 24,
+      "shortText": "Heavy hit, cannot miss"
+    },
+    {
+      "id": "p_b0a43e63",
+      "name": "Ball Lightning",
+      "description": "Hurls a crackling ball at one enemy. A projectile: it can miss. Where it hits it bursts, and its lightning leaps on to the nearest other enemies, a little weaker each time. Cooldown of about 30 seconds.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_78e7dc4a",
+        "t_8e6b4fcf",
+        "t_9048f21b"
+      ],
+      "potency": 14,
+      "manaCost": 14,
+      "cooldown": 30,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage on the hit, then a quarter less with each leap",
+      "number": 230,
+      "gameKey": "BallLightning",
+      "icon": 10,
+      "shortText": "Bolt that bursts and leaps"
+    },
+    {
+      "id": "p_1494d891",
+      "name": "Tempest",
+      "description": "Ultimate. A storm breaks on one enemy and races through the room, leaping from enemy to enemy far more times than any other chain, and losing little as it goes. Cooldown of about 3 minutes.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_78e7dc4a",
+        "t_8e6b4fcf",
+        "t_29d3e548"
+      ],
+      "potency": 30,
+      "manaCost": 36,
+      "cooldown": 180,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage to the first target, a tenth less with each of up to 8 leaps",
+      "number": 231,
+      "gameKey": "Tempest",
+      "icon": 45,
+      "shortText": "Leaps through the room"
+    },
+    {
+      "id": "p_51f873a4",
+      "name": "Shocking Grasp",
+      "description": "The essence's one weapon attack. The whole hit lands as lightning damage, plus a little more, and the shock leaps from your target to the two nearest other enemies. Cooldown of about 8 seconds.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_78e7dc4a",
+        "t_8e6b4fcf",
+        "t_a9a0b1a6"
+      ],
+      "potency": 4,
+      "manaCost": 3,
+      "cooldown": 8,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit; 3 lightning to each of the two nearest other enemies",
+      "number": 232,
+      "gameKey": "ShockingGrasp",
+      "icon": 22,
+      "shortText": "Strike; shock arcs to two"
+    },
+    {
+      "id": "p_38cedbf8",
+      "name": "Storm's Focus",
+      "description": "A lasting buff on yourself. Your Spirit is raised, so every spell you cast hits harder.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_50a7240a",
+        "t_e5439584",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "Spirit, lasting",
+      "number": 233,
+      "gameKey": "StormsFocus",
+      "icon": 18,
+      "shortText": "+10 Spirit"
+    },
+    {
+      "id": "p_330ba999",
+      "name": "Amplify",
+      "description": "A lasting buff on yourself. Everything you do deals a little more damage: weapon hits, spells and effects over time alike.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_50a7240a",
+        "t_4903280f",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% more damage dealt, lasting",
+      "number": 234,
+      "gameKey": "Amplify",
+      "icon": 30,
+      "shortText": "+10% damage dealt"
+    },
+    {
+      "id": "p_e7b408d7",
+      "name": "Overcharge",
+      "description": "For about 20 seconds everything you do deals far more damage. The button to press before unloading on a room. Cooldown of about a minute.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_50a7240a",
+        "t_4903280f",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_b0c8cbc0",
+        "t_9048f21b"
+      ],
+      "potency": 20,
+      "manaCost": 15,
+      "cooldown": 60,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% more damage dealt for 20 seconds",
+      "number": 235,
+      "gameKey": "Overcharge",
+      "icon": 34,
+      "shortText": "+20% damage for 20s"
+    },
+    {
+      "id": "p_c491ef05",
+      "name": "Quickening",
+      "description": "A lasting buff on yourself. You walk faster: each step takes one frame less. It does not change how fast you attack or cast.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_50a7240a",
+        "t_27d69a6f",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 1,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "frame less for each step you walk (8 frames down to 7, about an eighth faster), lasting",
+      "number": 236,
+      "gameKey": "Quickening",
+      "icon": 27,
+      "shortText": "You walk faster"
+    },
+    {
+      "id": "p_79ce854c",
+      "name": "Dynamo",
+      "description": "A lasting buff on yourself. Your mana comes back faster, to feed a great many spells.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_50a7240a",
+        "t_30a3ce12",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 30,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% faster mana regeneration, lasting",
+      "number": 237,
+      "gameKey": "Dynamo",
+      "icon": 50,
+      "shortText": "Mana comes back faster"
+    },
+    {
+      "id": "p_f662860e",
+      "name": "Teleport",
+      "description": "You vanish in a crack of lightning and reappear at the spot you choose. No damage. (Already in the game: the original Teleport, now a Lightning power.)",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_30044bae",
+        "t_a9a02fc3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": null,
+      "manaCost": 35,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "moves you to the spot chosen (the original spell, with the game's own cost)"
+    },
+    {
+      "id": "p_e5b0bb9a",
+      "name": "Charged Air",
+      "description": "Aura. The air around you hums with charge. You and every ally within its radius deal a little more damage with spell attacks for as long as they stay near you. It does nothing for weapon attacks.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_50a7240a",
+        "t_4903280f",
+        "t_be83c5cf",
+        "t_abcc5067",
+        "t_6e51786d"
+      ],
+      "potency": 5,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": 8,
+      "growth": 12.5,
+      "potencyNote": "% more spell attack damage, for you and allies in the aura (not special attacks)",
+      "number": 238,
+      "gameKey": "ChargedAir",
+      "icon": 8,
+      "shortText": "Aura: +5% spell damage"
     }
   ]
 }

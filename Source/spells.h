@@ -44,6 +44,22 @@ void DoHealOther(const Player &caster, Player &target);
  * spot on the ground. Such a power can be cast on a player whether or not "player friendly" is on.
  */
 bool IsAllyTargetedPower(SpellID spell);
+/** What a power is for, as far as its coloured frame in the spellbook goes. */
+enum class PowerKind : uint8_t {
+	Other,
+	/** Deals damage: spells, weapon attacks, effects over time, damaging ground. */
+	Attack,
+	/** An aura, or a buff that lasts until death once cast. The ones to put up every session. */
+	LastingBuff,
+};
+
+/** @brief Essence Mod: which kind a power is. An aura counts as a lasting buff even when it deals damage. */
+PowerKind GetPowerKind(SpellID spell);
+
+/** @brief Essence Mod: whether a power is a buff or an aura, the kind that can be cast on yourself from the spellbook. */
+bool IsSelfCastBuff(SpellID spell);
+/** @brief Essence Mod: casts a power on the local player at once, wherever the cursor is. For buffs clicked in the spellbook. */
+void CastOnSelfNow(SpellID spell);
 /**
  * @brief Essence Mod: a power read from essence_powers.tsv lands on a player. Runs on every PC,
  * with the amount the caster's PC worked out.

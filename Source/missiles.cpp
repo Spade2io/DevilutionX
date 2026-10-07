@@ -337,12 +337,14 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 		AddMissile(monster.position.tile, { 1, 0 }, Direction::South, MissileID::WeaponExplosion, TARGET_MONSTERS, player, 0, 0);
 		ApplySpecialAttackExtras(player, monster, sourceSpell, dam);
 	} else {
-		if (resist)
-			dam >>= 2;
+		// Essence Mod: a resistant monster shrugs off three quarters, less whatever curses have taken off.
+		dam = ApplyMonsterResistance(monster, t, damageType, dam);
+		// Essence Mod: anything but an arrow is a spell attack, and takes the "SpellDamage" bonus.
+		if (&player == MyPlayer && !missileData.isArrow())
+			dam = ApplySpellDamageBuffs(sourceSpell != SpellID::Invalid ? sourceSpell : GetSpellForMissile(t), dam);
 		dam = ApplyDamageBuffs(player, dam); // Essence Mod
 		if (&player == MyPlayer)
 			dam = ApplyMonsterVulnerability(monster, dam);
-		dam = ApplyAuraCurses(monster, damageType, dam);
 
 		if (&player == MyPlayer) {
 			// The spell that was cast earns the experience; without one, go by the kind of projectile.
@@ -351,6 +353,12 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 			// Essence Mod: a data-file power's projectile leaves behind the effect over time its rider names.
 			if (IsExtendedSpell(sourceSpell) && IsValidSpell(sourceSpell) && !monster.hasNoLife()) {
 				const SpellData &spellData = GetSpellData(sourceSpell);
+				// The rider "Chain": the bolt's lightning leaps on to the nearest other monsters, each
+				// leap keeping the rider's percentage of the last. Two leaps, or the power's own count.
+				if (spellData.rider == "Chain") {
+					const int leaps = spellData.durationSeconds > 0 ? spellData.durationSeconds : 2 + player.GetBaseSpellLevel(sourceSpell) / 2;
+					ChainSpellDamage(monster, sourceSpell, damageType, static_cast<int>(static_cast<int64_t>(dam) * spellData.riderAmount / 100), spellData.riderAmount, leaps);
+				}
 				if (const std::optional<DotID> left = ParseDotName(spellData.rider); left && !IsImmuneToDot(monster, *left)) {
 					const int stacks = AddMonsterDot(monster, *left, sourceSpell, ScaleDamageForSpellLevel(spellData.riderAmount, std::max<int>(player.GetBaseSpellLevel(sourceSpell), 1)));
 					AddFloatingNumber(monster.position.tile, { 0, 0 }, StrCat(GetDotName(*left), " x", stacks), GetSpellTextColor(sourceSpell) | UiFlags::FontSize12, 1000 + static_cast<int>(monster.getId()));
@@ -1078,8 +1086,7 @@ bool MonsterTrapHit(Monster &monster, int mindam, int maxdam, int dist, MissileI
 	int dam = RandomIntBetween(mindam, maxdam);
 	if (!shift)
 		dam <<= 6;
-	if (resist)
-		dam /= 4;
+	dam = ApplyMonsterResistance(monster, t, damageType, dam); // Essence Mod: resistance can be cursed down
 	ApplyMonsterDamage(damageType, monster, dam);
 #ifdef _DEBUG
 	if (DebugGodMode)
@@ -2535,7 +2542,8 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	const bool isGround = IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && IsAnyOf(GetSpellData(missile.sourceSpell).effect, "GroundBurst", "GroundFreeze");
 	// "Cone" needs no target either: it spreads out from the caster towards the spot chosen.
 	const bool isCone = IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && GetSpellData(missile.sourceSpell).effect == "Cone";
-	const bool isChain = IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && GetSpellData(missile.sourceSpell).effect == "Chain";
+	// "ChainBurst" is a chain that deals its damage at once instead of leaving an effect over time.
+	const bool isChain = IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell) && IsAnyOf(GetSpellData(missile.sourceSpell).effect, "Chain", "ChainBurst");
 
 	const std::optional<Point> targetMonsterPosition = FindClosestValidPosition(
 	    [](Point target) {
@@ -2578,7 +2586,7 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	int radius = 0;
 	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell)) {
 		const SpellData &spellData = GetSpellData(missile.sourceSpell);
-		if (IsAnyOf(spellData.effect, "Burst", "GroundBurst")) {
+		if (IsAnyOf(spellData.effect, "Burst", "GroundBurst", "ChainBurst")) {
 			isBurst = true;
 			burstDamageType = GetSpellDamageType(missile.sourceSpell);
 			switch (burstDamageType) {
@@ -2678,7 +2686,8 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 		// leaps, and one more for every two levels of the power.
 		constexpr int LeapReach = 5;
 		targets.resize(1);
-		const int leaps = 2 + player.GetBaseSpellLevel(spell) / 2;
+		// A power can fix its own number of leaps (in its duration column).
+		const int leaps = GetSpellData(spell).durationSeconds > 0 && isBurst ? GetSpellData(spell).durationSeconds : 2 + player.GetBaseSpellLevel(spell) / 2;
 		for (int leap = 0; leap < leaps; leap++) {
 			const Point from = Monsters[targets.back()].position.tile;
 			int next = -1;
@@ -2696,8 +2705,10 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 			targets.push_back(next);
 		}
 	}
-	// What a chain leaves shrinks by a quarter with each leap.
+	// What a chain leaves shrinks with each leap: by a quarter, unless the power's rider "Keep"
+	// says how much of it each leap keeps.
 	int chainAmount = amount;
+	const int chainKeepPercent = IsExtendedSpell(spell) && IsValidSpell(spell) && GetSpellData(spell).rider == "Keep" ? GetSpellData(spell).riderAmount : 75;
 	bool landedOnAny = false;
 	const SpellData *extended = IsExtendedSpell(spell) && IsValidSpell(spell) ? &GetSpellData(spell) : nullptr;
 	const auto scaled = [&](int base) {
@@ -2749,7 +2760,8 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 		}
 		if (isBurst) {
 			// Resistance, experience, the damage number and the kill are all handled as for any spell damage.
-			DealSpellTickDamage(monster, spell, burstImmunityMissile, burstDamageType, amount);
+			DealSpellTickDamage(monster, spell, burstImmunityMissile, burstDamageType, isChain ? chainAmount : amount);
+			chainAmount = static_cast<int>(static_cast<int64_t>(chainAmount) * chainKeepPercent / 100);
 			landedOnAny = true;
 			// The rider "Freeze": whatever survives is held for the rider's amount in seconds. Every
 			// PC has to hold it alike, so they are all told.
@@ -2763,7 +2775,7 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 			continue;
 		}
 		const int stacks = AddMonsterDot(monster, dot, spell, isChain ? chainAmount : amount);
-		chainAmount = chainAmount * 3 / 4;
+		chainAmount = static_cast<int>(static_cast<int64_t>(chainAmount) * chainKeepPercent / 100);
 		landedOnAny = true;
 		AddFloatingNumber(monster.position.tile, { 0, 0 }, StrCat(GetDotName(dot), " x", stacks), textColor | UiFlags::FontSize12, textId);
 		if (extended == nullptr)
@@ -2973,7 +2985,7 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 		// One player: the one aimed at if the power allows that, otherwise the caster.
 		const Player *target = &caster;
 		for (const Player &other : Players) {
-			if (!spellData.targetsAlly)
+			if (!spellData.targetsAlly || parameter.dst == caster.position.tile)
 				break;
 			if (&other == &caster || !other.plractive || !other.isOnActiveLevel() || other.hasNoLife())
 				continue;

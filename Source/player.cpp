@@ -154,6 +154,9 @@ void StartWalkAnimation(Player &player, Direction dir, bool pmWillBeCalled)
 		skippedFrames = 2;
 	if (pmWillBeCalled)
 		skippedFrames += 1;
+	// Essence Mod: a "WalkSpeed" buff takes frames off every step. One frame is the smallest change
+	// the game can make, about an eighth faster, so the buff is capped low.
+	skippedFrames += static_cast<int8_t>(std::clamp(GetPowerBuffPercent(player, "WalkSpeed"), 0, 2));
 	NewPlrAnim(player, player_graphic::Walk, dir, AnimationDistributionFlags::ProcessAnimationPending, skippedFrames);
 }
 
@@ -2812,14 +2815,17 @@ void StartPlrHit(Player &player, int dam, bool forcehit)
 		return;
 	}
 
-	// Essence Mod: a player who has just risen from death is not staggered for a moment, and a
-	// player with a "NoStagger" buff is never staggered at all.
-	if (IsRebirthProtected(player) || GetPowerBuffPercent(player, "NoStagger") > 0)
+	// Essence Mod: a player who has just risen from death is not staggered for a moment.
+	if (IsRebirthProtected(player))
 		return;
 
 	player.Say(HeroSpeech::ArghClang);
 
 	RedrawComponent(PanelDrawComponent::Health);
+	// Essence Mod: a player with a "NoStagger" buff still cries out when hit, but the blow never
+	// interrupts what they are doing.
+	if (GetPowerBuffPercent(player, "NoStagger") > 0)
+		return;
 	if (player._pClass == HeroClass::Barbarian) {
 		if (dam >> 6 < player.getCharacterLevel() + player.getCharacterLevel() / 4 && !forcehit) {
 			return;
@@ -3384,6 +3390,8 @@ void MakePlrPath(Player &player, Point targetPosition, bool endspace)
 	player.walkpath[path] = WALK_NONE;
 }
 
+bool CastingFromPanel = false;
+
 void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 {
 	bool addflag = false;
@@ -3400,7 +3408,7 @@ void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 		if (pcurs != CURSOR_HAND)
 			return;
 
-		if (GetMainPanel().contains(MousePosition)) // inside main panel
+		if (GetMainPanel().contains(MousePosition) && !CastingFromPanel) // inside main panel
 			return;
 	}
 
@@ -3417,10 +3425,9 @@ void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 
 	if (ControlMode == ControlTypes::KeyboardAndMouse) {
 
-		if (
-		    (IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition))      // inside left panel
-		    || (IsRightPanelOpen() && GetRightPanel().contains(MousePosition)) // inside right panel
-		) {
+		if (!CastingFromPanel
+		    && ((IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition))         // inside left panel
+		        || (IsRightPanelOpen() && GetRightPanel().contains(MousePosition)))) { // inside right panel
 			if (spellID != SpellID::Healing
 			    && spellID != SpellID::Identify
 			    && spellID != SpellID::ItemRepair

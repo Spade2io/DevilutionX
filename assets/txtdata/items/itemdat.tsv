@@ -310,3 +310,20 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Monolith	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Monolith	true	1
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Unyielding	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Unyielding	true	1
 	0	Misc	Unequippable	ESSENCE	Misc	NONE	Earth Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	StoneSpike	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Lightning	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Lightning	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Chain Lightning	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ChainLightning	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Charged Bolt	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ChargedBolt	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Teleport	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Teleport	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Spark	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Spark	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Arc	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Arc	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Forked Lightning	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ForkedLightning	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Thunderstrike	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Thunderstrike	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Ball Lightning	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	BallLightning	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Tempest	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Tempest	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Shocking Grasp	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ShockingGrasp	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Storm's Focus	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	StormsFocus	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Amplify	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Amplify	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Overcharge	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Overcharge	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Quickening	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Quickening	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Dynamo	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Dynamo	true	1
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Charged Air	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	ChargedAir	true	1

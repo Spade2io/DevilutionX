@@ -927,7 +927,10 @@ A power with a Weapon tag only works while that kind of weapon is equipped.
   drawn; see graphics_tool/extracted/shield_only_attack_warrior.png.
 
 **Awareness** (Stealth, Threat)
-- Only on buffs. **Never on auras.**
+- Only on buffs. Not on auras as a rule, with one exception Bryan made on 2026-10-06: the Fire
+  Aura carries threat, because Fire had no threat power. The threat is the owner's alone, as the
+  aura itself is: it hurts enemies near them and gives allies nothing. Ask before adding
+  stealth or threat to any other aura.
 - **Always Permanent, never Timed** (Bryan 2026-10-05: temporary stealth or threat adds more
   complication than he wants). A stealth or threat power is a lasting buff, like Flaming Weapon.
 - Bryan puts them on Never for most essences. **If one is deliberately left off an essence's Never
@@ -975,3 +978,20 @@ A power with a Weapon tag only works while that kind of weapon is equipped.
 - Damaging auras are separate sources of damage, so two players' copies both tick.
 - In the buff bar, a buff or aura that came from another player is drawn yellow; your own are blue. Where debuffs from enemies are shown is not decided.
 - A player can learn only one aura power, whatever essences they hold. Once they know one, every other aura stone is refused. (Decided 2026-10-06.)
+
+## Reducing monster resistance (decided and built 2026-10-07)
+
+A resistant monster shrugs off 75% of the damage. Bryan wanted powers that lower that by points
+(10 points makes it 65%), as a way to do far better against resistant monsters without handing
+everyone a blanket damage increase. His rules:
+
+- **Reducing resistance only reduces resistance.** It does nothing to an immune monster.
+- **Stripping immunity is its own thing**, and says so: Soul Rend (Astral) and Kindling (Elemental)
+  remove resistance and immunity outright, on a cooldown. Keep those as full strips.
+- **Never below zero.** A monster with no resistance left takes normal damage, not extra.
+- **Debuffs and auras with different names add up.** The same one twice counts once.
+- A power can reduce one resistance (Elemental, Natural or Astral) or all three.
+
+In the game: an Aura or a Curse with the stat ElementalResistCut, NaturalResistCut,
+AstralResistCut or AllResistCut. Nothing is saved; it lasts until the monster dies or the game
+ends. Pall of Shadow is the first: 10 points off Astral resistance for monsters within 8 tiles.

@@ -19,6 +19,7 @@
 #include "engine/rectangle.hpp"
 #include "engine/backbuffer_state.hpp"
 #include "engine/render/text_render.hpp"
+#include "dots.h"
 #include "essence_tint.h"
 #include "qol/floatingnumbers.h"
 #include "items.h"
@@ -313,9 +314,15 @@ int GetPowerBuffPercent(const Player &player, std::string_view stat)
 	return percent;
 }
 
+/** How near a player with the Fire Aura seems to monsters: half as far away as they are. */
+constexpr int FireAuraDistanceRatio = 50;
+
 int GetPlayerDistanceRatio(const Player &player)
 {
 	int ratio = 100;
+	// The Fire Aura draws monsters to its owner. Only the owner: it gives allies nothing.
+	if (IsBuffActive(player, BuffID::FireAura))
+		ratio = FireAuraDistanceRatio;
 	for (const PowerBuff &buff : PowerBuffs[player.getId()]) {
 		// The one furthest from normal counts.
 		const SpellData &spellData = GetSpellData(buff.spell);
@@ -436,22 +443,32 @@ void PulseShieldAuras()
 		AddFloatingNumber(MyPlayer->position.tile, { 0, 0 }, StrCat("Shield ", std::max((AuraShieldLeft + 32) >> 6, 1)), UiFlags::ColorGold | UiFlags::FontSize12, 3000 + MyPlayer->getId());
 }
 
-int ApplyAuraCurses(const Monster &monster, DamageType damageType, int damage)
+int GetAuraResistanceCut(const Monster &monster, uint8_t categoryBit)
 {
-	if (GetResistanceCategory(damageType) != DamageType::Magic || damage <= 0)
-		return damage;
-	int percent = 0;
+	if (categoryBit == 0)
+		return 0;
+	// The strongest copy of each aura in reach, then all of them added together.
+	std::vector<std::pair<SpellID, int>> auras;
 	for (const Player &owner : Players) {
 		if (!owner.plractive || !owner.isOnActiveLevel() || owner.hasNoLife())
 			continue;
 		for (const PowerBuff &buff : PowerBuffs[owner.getId()]) {
 			const SpellData &spellData = GetSpellData(buff.spell);
-			// The same aura from two players does not double: the strongest counts.
-			if (spellData.effect == "Aura" && spellData.buffStat == "AstralCurse" && owner.position.tile.WalkingDistance(monster.position.tile) <= spellData.effectRadius)
-				percent = std::max(percent, buff.amount);
+			if (spellData.effect != "Aura" || (GetResistCutCategories(spellData.buffStat) & categoryBit) == 0)
+				continue;
+			if (owner.position.tile.WalkingDistance(monster.position.tile) > spellData.effectRadius)
+				continue;
+			const auto known = std::find_if(auras.begin(), auras.end(), [&](const auto &entry) { return entry.first == buff.spell; });
+			if (known == auras.end())
+				auras.emplace_back(buff.spell, buff.amount);
+			else
+				known->second = std::max(known->second, buff.amount);
 		}
 	}
-	return damage + static_cast<int>(static_cast<int64_t>(damage) * percent / 100);
+	int points = 0;
+	for (const auto &[spell, amount] : auras)
+		points += amount;
+	return points;
 }
 
 bool GetPowerBuffWithStat(const Player &player, std::string_view stat, SpellID &spell, int &amount)

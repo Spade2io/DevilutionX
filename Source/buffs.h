@@ -102,11 +102,13 @@ void RemovePowerBuffFromOthers(SpellID spell, const Player &caster, const Player
 struct Monster;
 
 /**
- * @brief Damage to a monster after the cursing auras of players near it. So far that is one
- * kind: an aura with the stat "AstralCurse" makes monsters within its radius take that percentage
- * more from Astral damage (magic, shadow, holy, death and life). Every PC knows who holds an aura.
+ * @brief The points that cursing auras take off a monster's resistance: auras whose stat is one
+ * of the "...ResistCut" names, held by living players standing within the aura's radius of the
+ * monster. Different auras add up; the same aura from two players counts once, at its strongest.
+ * Every PC knows who holds an aura, so every PC agrees.
+ * @param categoryBit The resistance in question: 1 Elemental, 2 Natural, 4 Astral.
  */
-int ApplyAuraCurses(const Monster &monster, DamageType damageType, int damage);
+int GetAuraResistanceCut(const Monster &monster, uint8_t categoryBit);
 
 /** @brief The player's own buff with a given stat, if they have one: which power, and how strong. */
 bool GetPowerBuffWithStat(const Player &player, std::string_view stat, SpellID &spell, int &amount);

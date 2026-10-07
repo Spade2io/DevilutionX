@@ -1009,6 +1009,9 @@ void ResetPlayerGFX(Player &player);
  */
 bool StartCastMotion(Player &player, SpellID spell);
 
+/** Essence Mod: set for the length of one cast that is allowed although the cursor is over a panel. See CastOnSelfNow. */
+extern bool CastingFromPanel;
+
 void NewPlrAnim(Player &player, player_graphic graphic, Direction dir, AnimationDistributionFlags flags = AnimationDistributionFlags::None, int8_t numSkippedFrames = 0, int8_t distributeFramesBeforeFrame = 0);
 void SetPlrAnims(Player &player);
 void CreatePlayer(Player &player, HeroClass c);

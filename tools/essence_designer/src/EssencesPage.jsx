@@ -6,7 +6,7 @@ import { RARITIES, rarityOf } from './rarity.js'
 import { essenceSummary } from './rules.js'
 
 // Data shape used on this page:
-//   essence: { id, name, description, rarity, poolSize, damageTypeId,
+//   essence: { id, name, description, rarity, damageTypeId,   (poolSize is still stored but no longer shown)
 //              tagsAll, tagsMost, tagsSome, tagsFinite, tagsNever, neverOtherGroups }
 // The four tag lists hold tag ids. A tag sits on at most one of the four; a tag on none of them
 // counts as "a few". They say what the essence's powers should lean towards, and are what Claude
@@ -197,12 +197,13 @@ function Editor({ essence, data, nameTaken, change, addTag, removeTag, onDelete 
           </select>
         </label>
         <label className="field narrow">
-          Pool size
-          <NumberInput value={essence.poolSize} onCommit={(poolSize) => change(essence.id, { poolSize })} />
+          Total Powers
+          {/* Counted from the powers that belong to this essence; it is not typed in. */}
+          <input value={summary.powers.length} readOnly tabIndex={-1} className="count" title="How many powers are designed for this essence so far, drafts included" />
         </label>
       </div>
       <p className="note">
-        Damage type gives the essence its colour. Pool size is how many powers the essence should hold.
+        Damage type gives the essence its colour. Total Powers counts the powers designed for it so far, drafts included.
       </p>
       <label className="field">
         Description
@@ -250,7 +251,7 @@ function Editor({ essence, data, nameTaken, change, addTag, removeTag, onDelete 
         : (
           <>
             <p className="note">
-              {summary.powers.length} of {essence.poolSize} powers ({summary.drafts} still drafts).{' '}
+              {summary.powers.length} powers ({summary.drafts} still drafts).{' '}
               <span className={summary.auras === 1 ? '' : 'problem-text'}>
                 {summary.auras === 1 ? 'One aura, as intended.' : summary.auras === 0 ? 'No aura yet; every essence needs exactly one.' : summary.auras + ' auras; every essence gets exactly one.'}
               </span>{' '}

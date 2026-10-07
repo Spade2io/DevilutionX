@@ -114,6 +114,16 @@ void DrawLargeSpellIconBorder(const Surface &out, Point position, uint8_t color)
 void DrawSmallSpellIconBorder(const Surface &out, Point position);
 
 /**
+ * @brief Essence Mod: draws a coloured frame just outside a small spell icon, leaving room for the
+ * border above to be drawn on the icon itself.
+ * @param color A palette colour, used as it is.
+ */
+void DrawSmallSpellIconFrame(const Surface &out, Point position, uint8_t color);
+
+/** @brief Essence Mod: the frame colour for a power's kind (red for attacks, blue for lasting buffs), or 0 for none. */
+uint8_t GetPowerKindColor(SpellID spell);
+
+/**
  * @brief Set the color mapping for the `Draw(Small|Large)SpellIcon(Border)` calls.
  */
 void SetSpellTrans(SpellType t);

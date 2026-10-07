@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "buffs.h"
+#include "special_attacks.h"
 #include "essence_tint.h"
 #include "monster.h"
 #include "player.h"
@@ -85,8 +86,6 @@ std::array<Pulse, MaxMonsters> MonsterPulses;
 /** Extra damage each monster takes from the local player, in percent. Lasts until the monster dies. */
 std::array<int, MaxMonsters> MonsterVulnerability {};
 
-/** Monsters whose fire resistance and immunity have been stripped. Lasts until the monster dies. */
-std::array<bool, MaxMonsters> MonsterKindled {};
 
 struct Brand {
 	SpellID spell = SpellID::Invalid;
@@ -107,11 +106,45 @@ struct AccuracyPenalty {
 /** How much worse each monster's aim is. Every PC keeps its own copy, told by the caster's. */
 std::array<AccuracyPenalty, MaxMonsters> MonsterAccuracy {};
 
-/** Monsters whose Astral resistance and immunity have been stripped. Every PC keeps this too. */
-std::array<bool, MaxMonsters> MonsterAstralStripped {};
+/**
+ * The resistances each monster has had stripped outright, immunity included: one bit for each
+ * (1 Elemental, 2 Natural, 4 Astral). Every PC keeps this too.
+ */
+std::array<uint8_t, MaxMonsters> MonsterStripped {};
 
 /** How much more each monster takes from effects over time, in percent. This PC only. */
 std::array<int, MaxMonsters> MonsterWither {};
+
+/** One power's curse on a monster's resistance. */
+struct ResistCut {
+	SpellID spell;
+	/** One bit for each resistance it reduces: 1 Elemental, 2 Natural, 4 Astral. */
+	uint8_t categories;
+	int points;
+	/** Game ticks left, or -1 for as long as the monster lives. */
+	int ticksLeft;
+};
+
+/** The curses on each monster's resistances. Every PC keeps its own copy, told by the caster's. */
+std::array<std::vector<ResistCut>, MaxMonsters> MonsterResistCuts;
+
+} // namespace
+
+uint8_t GetResistanceBit(DamageType damageType)
+{
+	switch (GetResistanceCategory(damageType)) {
+	case DamageType::Fire:
+		return 1; // Elemental
+	case DamageType::Lightning:
+		return 2; // Natural
+	case DamageType::Magic:
+		return 4; // Astral
+	default:
+		return 0;
+	}
+}
+
+namespace {
 
 void FlashMonster(const Monster &monster, EssenceTint tint)
 {
@@ -150,14 +183,12 @@ void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, Dam
 	// Resistances work as they do for a spell hit: immune takes nothing, resistant takes a quarter.
 	if (monster.isImmune(missile, damageType))
 		return;
-	if (monster.isResistant(missile, damageType))
-		damage /= 4;
+	damage = ApplyMonsterResistance(monster, missile, damageType, damage);
 	if (damage <= 0)
 		return;
 
 	const Player &player = *MyPlayer;
-	damage = ApplyMonsterVulnerability(monster, ApplyDamageBuffs(player, damage));
-	damage = ApplyAuraCurses(monster, damageType, damage);
+	damage = ApplyMonsterVulnerability(monster, ApplyDamageBuffs(player, ApplySpellDamageBuffs(spell, damage)));
 	AddSpellExperienceForDamage(player, monster, spell, damage, monster.hitPoints);
 	ApplyMonsterDamage(damageType, monster, damage);
 	if (monster.hasNoLife()) {
@@ -240,16 +271,7 @@ bool MakeMonsterVulnerable(Monster &monster, int percent)
 
 bool KindleMonster(Monster &monster)
 {
-	FlashMonster(monster, EssenceTint::VividRed);
-	// Checked before the flag is set, since the flag is what makes these two answer "no".
-	const bool hadAny = monster.isImmune(MissileID::Firebolt, DamageType::Fire) || monster.isResistant(MissileID::Firebolt, DamageType::Fire);
-	MonsterKindled[monster.getId()] = true;
-	return hadAny;
-}
-
-bool IsMonsterKindled(const Monster &monster)
-{
-	return MonsterKindled[monster.getId()];
+	return StripMonsterResistance(monster, 1);
 }
 
 void BrandMonster(Monster &monster, SpellID spell, int damage)
@@ -268,6 +290,49 @@ void TriggerMonsterBrand(Monster &monster)
 	DealSpellTickDamage(monster, brand.spell, MissileID::WeaponExplosion, DamageType::Fire, brand.damage, /*finishKill=*/false);
 }
 
+uint8_t GetResistCutCategories(std::string_view stat)
+{
+	if (stat == "ElementalResistCut")
+		return 1;
+	if (stat == "NaturalResistCut")
+		return 2;
+	if (stat == "AstralResistCut")
+		return 4;
+	if (stat == "AllResistCut")
+		return 7;
+	return 0;
+}
+
+void CutMonsterResistance(Monster &monster, SpellID spell, uint8_t categories, int points, int ticks)
+{
+	FlashMonster(monster, EssenceTint::Shadow);
+	std::vector<ResistCut> &cuts = MonsterResistCuts[monster.getId()];
+	for (ResistCut &cut : cuts) {
+		if (cut.spell != spell)
+			continue;
+		// The same power again: the stronger stays, and a timed one starts its time over.
+		cut.points = std::max(cut.points, points);
+		cut.ticksLeft = ticks;
+		return;
+	}
+	cuts.push_back(ResistCut { spell, categories, points, ticks });
+}
+
+int ApplyMonsterResistance(const Monster &monster, MissileID missile, DamageType damageType, int damage)
+{
+	if (!monster.isResistant(missile, damageType))
+		return damage;
+	const uint8_t bit = GetResistanceBit(damageType);
+	// Curses on the monster itself, each power counted once, then the cursing auras around it.
+	int points = GetAuraResistanceCut(monster, bit);
+	for (const ResistCut &cut : MonsterResistCuts[monster.getId()]) {
+		if ((cut.categories & bit) != 0)
+			points += cut.points;
+	}
+	const int resistance = std::clamp(BaseMonsterResistancePercent - points, 0, BaseMonsterResistancePercent);
+	return static_cast<int>(static_cast<int64_t>(damage) * (100 - resistance) / 100);
+}
+
 void SetMonsterAccuracyPenalty(Monster &monster, int percent, int ticks)
 {
 	FlashMonster(monster, EssenceTint::Shadow);
@@ -284,15 +349,35 @@ int GetMonsterAccuracyPenalty(const Monster &monster)
 	return penalty.ticksLeft != 0 ? penalty.percent : 0;
 }
 
-void StripMonsterAstralResistance(Monster &monster)
+uint8_t GetStripCategories(std::string_view stat)
 {
-	FlashMonster(monster, EssenceTint::Shadow);
-	MonsterAstralStripped[monster.getId()] = true;
+	if (stat == "ElementalStrip")
+		return 1;
+	if (stat == "NaturalStrip")
+		return 2;
+	if (stat == "AstralStrip")
+		return 4;
+	if (stat == "AllStrip")
+		return 7;
+	return 0;
 }
 
-bool IsMonsterAstralStripped(const Monster &monster)
+bool StripMonsterResistance(Monster &monster, uint8_t categories)
 {
-	return MonsterAstralStripped[monster.getId()];
+	FlashMonster(monster, EssenceTint::Shadow);
+	// Checked before the bits are set, since the bits are what make these answer "no".
+	bool hadAny = false;
+	for (const DamageType type : { DamageType::Fire, DamageType::Lightning, DamageType::Magic }) {
+		if ((categories & GetResistanceBit(type)) != 0)
+			hadAny |= monster.isImmune(MissileID::PowerBolt, type) || monster.isResistant(MissileID::PowerBolt, type);
+	}
+	MonsterStripped[monster.getId()] |= categories;
+	return hadAny;
+}
+
+bool IsMonsterStripped(const Monster &monster, DamageType damageType)
+{
+	return (MonsterStripped[monster.getId()] & GetResistanceBit(damageType)) != 0;
 }
 
 void WitherMonster(Monster &monster, int percent)
@@ -314,6 +399,39 @@ int GetMonsterDotRemaining(const Monster &monster, DotID dot)
 	return 0;
 }
 
+int ApplySpellDamageBuffs(SpellID spell, int damage)
+{
+	if (MyPlayer == nullptr || IsSpecialAttack(spell))
+		return damage;
+	return damage + static_cast<int>(static_cast<int64_t>(damage) * GetPowerBuffPercent(*MyPlayer, "SpellDamage") / 100);
+}
+
+void ChainSpellDamage(Monster &from, SpellID spell, DamageType damageType, int amount, int keepPercent, int leaps)
+{
+	constexpr int LeapReach = 5;
+	std::vector<int> struck { static_cast<int>(from.getId()) };
+	for (int leap = 0; leap < leaps && amount > 0; leap++) {
+		const Point origin = Monsters[struck.back()].position.tile;
+		int next = -1;
+		for (size_t i = 0; i < ActiveMonsterCount; i++) {
+			const int monsterId = static_cast<int>(ActiveMonsters[i]);
+			const Monster &candidate = Monsters[monsterId];
+			if (!candidate.isPossibleToHit() || candidate.isPlayerMinion() || std::find(struck.begin(), struck.end(), monsterId) != struck.end())
+				continue;
+			const int distance = candidate.position.tile.WalkingDistance(origin);
+			if (distance <= LeapReach && (next == -1 || distance < Monsters[next].position.tile.WalkingDistance(origin)))
+				next = monsterId;
+		}
+		if (next == -1)
+			break;
+		struck.push_back(next);
+		Monster &monster = Monsters[next];
+		if (!monster.isImmune(MissileID::Lightning, damageType))
+			DealSpellTickDamage(monster, spell, MissileID::Lightning, damageType, amount);
+		amount = static_cast<int>(static_cast<int64_t>(amount) * keepPercent / 100);
+	}
+}
+
 int ApplyMonsterVulnerability(const Monster &monster, int damage)
 {
 	const int percent = MonsterVulnerability[monster.getId()];
@@ -333,19 +451,30 @@ void ProcessMonsterDots()
 			pulse.ticksLeft--;
 
 		// A debuff ends with the monster, so a new monster in the same slot starts clean.
-		if ((MonsterVulnerability[i] != 0 || MonsterKindled[i] || MonsterBrands[i].damage != 0) && Monsters[i].hasNoLife()) {
+		if ((MonsterVulnerability[i] != 0 || MonsterBrands[i].damage != 0) && Monsters[i].hasNoLife()) {
 			MonsterVulnerability[i] = 0;
-			MonsterKindled[i] = false;
 			MonsterBrands[i] = {};
 		}
-		if ((MonsterAccuracy[i].ticksLeft != 0 || MonsterAstralStripped[i] || MonsterWither[i] != 0) && Monsters[i].hasNoLife()) {
+		if ((MonsterAccuracy[i].ticksLeft != 0 || MonsterStripped[i] != 0 || MonsterWither[i] != 0) && Monsters[i].hasNoLife()) {
 			MonsterAccuracy[i] = {};
-			MonsterAstralStripped[i] = false;
+			MonsterStripped[i] = 0;
 			MonsterWither[i] = 0;
 		}
 		// A timed curse on a monster's aim runs out.
 		if (MonsterAccuracy[i].ticksLeft > 0 && --MonsterAccuracy[i].ticksLeft == 0)
 			MonsterAccuracy[i] = {};
+		// Curses on its resistance end with the monster, and the timed ones run out.
+		if (std::vector<ResistCut> &cuts = MonsterResistCuts[i]; !cuts.empty()) {
+			if (Monsters[i].hasNoLife()) {
+				cuts.clear();
+			} else {
+				for (ResistCut &cut : cuts) {
+					if (cut.ticksLeft > 0)
+						cut.ticksLeft--;
+				}
+				std::erase_if(cuts, [](const ResistCut &cut) { return cut.ticksLeft == 0; });
+			}
+		}
 
 		std::vector<ActiveDot> &dots = MonsterDots[i];
 		if (dots.empty())
@@ -382,11 +511,12 @@ void ClearAllMonsterDots()
 		dots.clear();
 	MonsterPulses.fill(Pulse {});
 	MonsterVulnerability.fill(0);
-	MonsterKindled.fill(false);
 	MonsterBrands.fill(Brand {});
 	MonsterAccuracy.fill(AccuracyPenalty {});
-	MonsterAstralStripped.fill(false);
+	MonsterStripped.fill(0);
 	MonsterWither.fill(0);
+	for (std::vector<ResistCut> &cuts : MonsterResistCuts)
+		cuts.clear();
 }
 
 const uint8_t *GetMonsterDotPulseTrn(const Monster &monster)
