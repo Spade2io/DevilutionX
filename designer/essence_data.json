@@ -4782,16 +4782,16 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 3,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "Power, lasting",
+      "potencyNote": "Power, lasting; +1 for each level",
       "number": 223,
       "gameKey": "EarthenMight",
       "icon": 18,
-      "shortText": "+10 Power"
+      "shortText": "+3 Power, +1 each level"
     },
     {
       "id": "p_6ceb6a7c",
@@ -5137,16 +5137,16 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 3,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "Spirit, lasting",
+      "potencyNote": "Spirit, lasting; +1 for each level",
       "number": 233,
       "gameKey": "StormsFocus",
       "icon": 18,
-      "shortText": "+10 Spirit"
+      "shortText": "+3 Spirit, +1 each level"
     },
     {
       "id": "p_330ba999",

@@ -155,6 +155,15 @@ bool IsTagStoneKnown(std::string_view itemName);
  */
 SpellID PickPowerForStone(std::string_view itemName);
 
+/**
+ * @brief The separate roll every dying monster makes for an awakening stone or an essence, beside
+ * the game's own loot (txtdata/spells/drops.tsv). Uses the game's shared random numbers, so the
+ * caller must have seeded them the same on every PC.
+ * @param isBoss A boss always drops one or the other, and never a Common one while anything rarer exists.
+ * @return The row of the item table to drop, or -1 for nothing.
+ */
+int RollEssenceLoot(bool isBoss);
+
 /** @brief Records a newly learned ability in the next free position under its essence. */
 void SlotLearnedAbility(SpellID spell);
 

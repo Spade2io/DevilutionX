@@ -659,7 +659,7 @@ int GetBuffStrengthBonus(const Player &player)
 {
 	if (!IsBuffActive(player, BuffID::Strength))
 		return 0;
-	return 10 + 5 * (SpellLevelOf(player, SpellID::Strength) - 1);
+	return 3 + (SpellLevelOf(player, SpellID::Strength) - 1); // a self-only stat buff: +3, and one more a level
 }
 
 void ProcessBuffs()

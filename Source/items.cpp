@@ -3504,6 +3504,25 @@ void SpawnItem(Monster &monster, Point position, bool sendmsg, bool spawn /*= fa
 		NetSendCmdPItem(false, CMD_SPAWNITEM, item.position, item);
 }
 
+void SpawnEssenceLoot(Monster &monster, bool sendmsg)
+{
+	const bool isBoss = monster.isUnique() || IsAnyOf(monster.type().type, MT_DIABLO, MT_NAKRUL);
+	// A monster that never drops anything drops none of these either, unless it is a boss.
+	if (!isBoss && (monster.data().treasure & T_NODROP) != 0)
+		return;
+	const int row = RollEssenceLoot(isBoss);
+	if (row < 0 || ActiveItemCount >= MAXITEMS)
+		return;
+
+	const int ii = AllocateItem();
+	Item &item = Items[ii];
+	GetSuperItemSpace(monster.position.tile, ii);
+	SetupAllItems(*MyPlayer, item, static_cast<_item_indexes>(row), AdvanceRndSeed(), monster.data().level, 1, false, false);
+	SetupItem(item);
+	if (sendmsg)
+		NetSendCmdPItem(false, CMD_DROPITEM, item.position, item);
+}
+
 void CreateRndItem(Point position, bool onlygood, bool sendmsg, bool delta)
 {
 	const _item_indexes idx = onlygood ? RndUItem(nullptr) : RndAllItems();

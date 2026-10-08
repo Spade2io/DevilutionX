@@ -72,14 +72,14 @@ const SHORT_TEXT = {
   'Great Flood': 'Hurts foes, heals, radius 6',
   'Charged Air': 'Aura: +5% spell damage', 'Spark': 'Cheap little bolt', 'Arc': 'Lightning that leaps',
   'Forked Lightning': 'Hits three at full power', 'Thunderstrike': 'Heavy hit, cannot miss', 'Ball Lightning': 'Bolt that bursts and leaps',
-  'Tempest': 'Leaps through the room', 'Shocking Grasp': 'Strike; shock arcs to two', "Storm's Focus": '+10 Spirit',
+  'Tempest': 'Leaps through the room', 'Shocking Grasp': 'Strike; shock arcs to two', "Storm's Focus": '+3 Spirit, +1 each level',
   'Amplify': '+10% damage dealt', 'Overcharge': '+20% damage for 20s', 'Quickening': 'You walk faster', 'Dynamo': 'Mana comes back faster',
   'Bedrock': 'Aura: -1 physical damage', 'Stone Spike': 'Earth damage, radius 2', 'Tremor': 'Ground shakes 10s, rad 2',
   'Earthquake': 'Ground shakes 20s, rad 4', 'Landslide': 'Earth damage, radius 4', 'Upheaval': 'Heavy hit + hold, rad 6',
   'Stone Fist': 'Strike dealing earth damage', 'Boulder': 'Thrown rock, one enemy', 'Shockwave': 'Hits target and neighbours',
   'Earthshatter': 'Strike; holds foe 2s', 'Crushing Blow': 'Heavy; foe takes more', 'Mire': 'Holds foes 4s, radius 2',
   'Stoneskin': '-2 physical dmg, +10 armor', 'Dig In': '-5 physical dmg for 20s', 'Stone Wall': 'All allies: -3 phys, 15s',
-  'Earthen Might': '+10 Power', 'Monolith': 'Threat; +10% max life', 'Unyielding': 'Threat; never staggered',
+  'Earthen Might': '+3 Power, +1 each level', 'Monolith': 'Threat; +10% max life', 'Unyielding': 'Threat; never staggered',
   'Pall of Shadow': 'Aura: foes resist less', 'Creeping Rot': 'Cheap Corruption', 'Shadow Bolt': 'Hit that leaves Corruption',
   'Blight': 'Corruption, radius 2', 'Plague Wind': 'Corruption in a cone', 'Contagion': 'Corruption that leaps',
   'Drain': 'Corruption that heals you', 'Black Sun': 'Hit + Corruption, radius 6', 'Umbral Strike': 'Strike leaving Corruption',
@@ -193,6 +193,9 @@ const SHORT_TEXT = {
 //         Stat Accuracy: potency percent less chance to hit, for the duration, or with none
 //         until it dies. Stat ElementalStrip, NaturalStrip, AstralStrip or AllStrip: no resistance or immunity
 //         of that kind until it dies (Kindling, Soul Rend). The only thing that removes immunity.
+//   A Buff or Aura with the stat Power or Spirit adds that many points to the stat. Its potency is
+//         where it starts, and it grows by one point a level, not by an eighth: 3 for a
+//         self-only buff, 1 for one that can be cast on others or reaches a group.
 //   Reducing resistance: a resistant monster shrugs off 75% of the damage. An Aura or a Curse
 //         with the stat ElementalResistCut, NaturalResistCut, AstralResistCut or AllResistCut
 //         takes its potency in points off that (10 makes it 65%), never below none. Different
@@ -372,7 +375,7 @@ const ON_SALE = []
 // have to be found. A price of 0 in the item table is how the game knows not to sell something.
 // TEST_PRICES: while it is true, everything costs 1 gold, Epic and Legendary included, so anything
 // can be bought for testing. Set it to false before the mod goes out to friends (Phase 4).
-const TEST_PRICES = true
+const TEST_PRICES = false
 const ALL_ONE_GOLD = { common: 1, rare: 1, epic: 1, legendary: 1, Common: 1, Rare: 1, Epic: 1, Legendary: 1 }
 const ESSENCE_PRICE = TEST_PRICES ? ALL_ONE_GOLD : { common: 50, rare: 250 }
 const STONE_PRICE = TEST_PRICES ? ALL_ONE_GOLD : { Common: 50, Rare: 200 }
@@ -384,6 +387,12 @@ const POWER_TAGS_FILE = path.join(REPO, 'assets/txtdata/spells/power_tags.tsv')
 const STONE_TAGS_FILE = path.join(REPO, 'assets/txtdata/spells/stone_tags.tsv')
 // The stat each essence is bound to when a character takes it.
 const ESSENCE_STATS_FILE = path.join(REPO, 'assets/txtdata/spells/essence_stats.tsv')
+// How often monsters drop stones and essences, beside the game's own loot (Bryan, 2026-10-07).
+// One kill in "stoneOneIn" drops a stone; of the rest, one in "essenceOneIn" drops an essence.
+// The four rarity numbers are shares out of their total. A boss always drops one or the other,
+// and never a Common one.
+const DROPS_FILE = path.join(REPO, 'assets/txtdata/spells/drops.tsv')
+const DROPS = { stoneOneIn: 50, essenceOneIn: 100, common: 65, rare: 25, epic: 8, legendary: 2 }
 
 const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))
 // First, the change log: what has been edited in the designer since the last export. Anything
@@ -549,8 +558,10 @@ if (check) {
   fs.writeFileSync(POWER_TAGS_FILE, [['id', 'tags'], ...powerTagRows].map((r) => r.join('\t')).join('\r\n') + '\r\n')
   fs.writeFileSync(STONE_TAGS_FILE, [['name', 'rarity', 'tags'], ...stoneTagRows].map((r) => r.join('\t')).join('\r\n') + '\r\n')
   console.log(`Awakening stones with tags: ${tagStones.length} (${tagStonesAdded.length} new)` + ((data.stones ?? []).length > tagStones.length ? `; ${(data.stones ?? []).length - tagStones.length} skipped for having no tags` : ''))
-  fs.writeFileSync(ESSENCE_STATS_FILE, [['essence', 'primary'], ...data.essences.map((e) => [e.name, e.primaryStat ?? ''])].map((r) => r.join('\t')).join('\r\n') + '\r\n')
+  fs.writeFileSync(ESSENCE_STATS_FILE, [['essence', 'primary', 'rarity'], ...data.essences.map((e) => [e.name, e.primaryStat ?? '', RARITY_IDS.includes(e.rarity) ? e.rarity : 'common'])].map((r) => r.join('\t')).join('\r\n') + '\r\n')
   console.log('Primary stats: ' + data.essences.map((e) => `${e.name} ${e.primaryStat ?? 'NOT SET'}`).join(', '))
+  fs.writeFileSync(DROPS_FILE, [['setting', 'value'], ...Object.entries(DROPS)].map((r) => r.join('\t')).join('\r\n') + '\r\n')
+  console.log('Drops: ' + Object.entries(DROPS).map(([k, v]) => `${k} ${v}`).join(', '))
   if (TEST_PRICES) console.log('TEST PRICES ARE ON: everything costs 1 gold.')
   console.log('Essence prices: ' + essencePrices.join(', '))
   console.log('Stone prices: ' + tagStones.map((s) => `${s.name} ${STONE_PRICE[rarityOfStone(s.tags.length)] ?? 'not sold'}`).join(', '))

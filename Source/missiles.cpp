@@ -2919,6 +2919,9 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 		if (&caster != MyPlayer)
 			return;
 		auto amount = static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.effectAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)));
+		// A buff or aura that adds points to a stat grows by one point a level, not by an eighth.
+		if (IsAnyOf(spellData.buffStat, "Power", "Spirit"))
+			amount = static_cast<uint32_t>(spellData.effectAmount + ShownPowerLevel(caster.GetBaseSpellLevel(spell)));
 		const int radius = spellData.effectRadius;
 
 		const auto isLivingAllyHere = [](const Player &other) {

@@ -932,6 +932,14 @@ void SpawnLoot(Monster &monster, bool sendmsg)
 		return;
 	}
 
+	// Essence Mod: the separate roll for an awakening stone or an essence. It has its own seed, made
+	// from the monster's, so every PC rolls alike and the ordinary loot below is just what it was.
+	if (!monster.isPlayerMinion()) {
+		SetRndSeed(monster.rndItemSeed ^ 0x45535345U);
+		SpawnEssenceLoot(monster, sendmsg);
+		SetRndSeed(monster.rndItemSeed);
+	}
+
 	if (Quests[Q_GARBUD].IsAvailable() && monster.uniqueType == UniqueMonsterType::Garbud) {
 		CreateTypeItem(monster.position.tile + Displacement { 1, 1 }, true, ItemType::Mace, IMISC_NONE, sendmsg, false);
 	} else if (monster.uniqueType == UniqueMonsterType::Defiler) {

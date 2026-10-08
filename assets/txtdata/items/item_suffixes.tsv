@@ -12,41 +12,41 @@ protection	GETHIT	2	2	6	Armor,Shield	Good	1	true	400	800	4
 absorption	GETHIT	3	3	12	Armor,Shield	Good	1	true	1001	2500	10
 deflection	GETHIT	4	4	20	Armor	Good	1	true	2500	6500	15
 osmosis	GETHIT	5	6	50	Armor	Good	1	true	7500	10000	20
-frailty	STR_CURSE	6	10	3	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-3
-weakness	STR_CURSE	1	5	1	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-2
-strength	STR	1	5	1	Armor,Shield,Weapon,Bow,Misc	Any	1	true	200	1000	2
-might	STR	6	10	5	Armor,Shield,Weapon,Bow,Misc	Any	1	true	1200	2000	3
-power	STR	11	15	11	Armor,Shield,Weapon,Bow,Misc	Any	1	true	2200	3000	4
-giants	STR	16	20	17	Armor,Weapon,Bow,Misc	Any	1	true	3200	5000	7
-titans	STR	21	30	23	Weapon,Misc	Any	1	true	5200	10000	10
-paralysis	DEX_CURSE	6	10	3	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-3
-atrophy	DEX_CURSE	1	5	1	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-2
-dexterity	DEX	1	5	1	Armor,Shield,Weapon,Bow,Misc	Any	1	true	200	1000	2
-skill	DEX	6	10	5	Armor,Shield,Weapon,Bow,Misc	Any	1	true	1200	2000	3
-accuracy	DEX	11	15	11	Armor,Shield,Weapon,Bow,Misc	Any	1	true	2200	3000	4
-precision	DEX	16	20	17	Armor,Weapon,Bow,Misc	Any	1	true	3200	5000	7
-perfection	DEX	21	30	23	Bow,Misc	Any	1	true	5200	10000	10
-the fool	MAG_CURSE	6	10	3	Armor,Shield,Weapon,Staff,Bow,Misc	Evil	1	false	0	0	-3
-dyslexia	MAG_CURSE	1	5	1	Armor,Shield,Weapon,Staff,Bow,Misc	Evil	1	false	0	0	-2
-magic	MAG	1	5	1	Armor,Shield,Weapon,Staff,Bow,Misc	Any	1	true	200	1000	2
-the mind	MAG	6	10	5	Armor,Shield,Weapon,Staff,Bow,Misc	Any	1	true	1200	2000	3
-brilliance	MAG	11	15	11	Armor,Shield,Weapon,Staff,Bow,Misc	Any	1	true	2200	3000	4
-sorcery	MAG	16	20	17	Armor,Weapon,Staff,Bow,Misc	Any	1	true	3200	5000	7
-wizardry	MAG	21	30	23	Staff,Misc	Any	1	true	5200	10000	10
-illness	VIT_CURSE	6	10	3	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-3
-disease	VIT_CURSE	1	5	1	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-2
-vitality	VIT	1	5	1	Armor,Shield,Weapon,Bow,Misc	Good	1	true	200	1000	2
-zest	VIT	6	10	5	Armor,Shield,Weapon,Bow,Misc	Good	1	true	1200	2000	3
-vim	VIT	11	15	11	Armor,Shield,Weapon,Bow,Misc	Good	1	true	2200	3000	4
-vigor	VIT	16	20	17	Armor,Weapon,Bow,Misc	Good	1	true	3200	5000	7
-life	VIT	21	30	23	Misc	Good	1	true	5200	10000	10
-trouble	ATTRIBS_CURSE	6	10	12	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-10
-the pit	ATTRIBS_CURSE	1	5	5	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-5
-the sky	ATTRIBS	1	3	5	Armor,Shield,Weapon,Bow,Misc	Any	1	true	800	4000	5
-the moon	ATTRIBS	4	7	11	Armor,Shield,Weapon,Bow,Misc	Any	1	true	4800	8000	10
-the stars	ATTRIBS	8	11	17	Armor,Weapon,Bow,Misc	Any	1	true	8800	12000	15
-the heavens	ATTRIBS	12	15	25	Weapon,Bow,Misc	Any	1	true	12800	20000	20
-the zodiac	ATTRIBS	16	20	30	Misc	Any	1	true	20800	40000	30
+frailty	STR_CURSE	2	2	3	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-3
+weakness	STR_CURSE	1	1	1	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-2
+strength	STR	1	1	1	Armor,Shield,Weapon,Bow,Misc	Any	1	true	200	1000	2
+might	STR	2	2	5	Armor,Shield,Weapon,Bow,Misc	Any	1	true	1200	2000	3
+power	STR	3	3	11	Armor,Shield,Weapon,Bow,Misc	Any	1	true	2200	3000	4
+giants	STR	4	4	17	Armor,Weapon,Bow,Misc	Any	1	true	3200	5000	7
+titans	STR	5	6	25	Weapon,Misc	Any	1	true	5200	10000	10
+paralysis	DEX_CURSE	2	2	3	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-3
+atrophy	DEX_CURSE	1	1	1	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-2
+dexterity	DEX	1	1	1	Armor,Shield,Weapon,Bow,Misc	Any	1	true	200	1000	2
+skill	DEX	2	2	5	Armor,Shield,Weapon,Bow,Misc	Any	1	true	1200	2000	3
+accuracy	DEX	3	3	11	Armor,Shield,Weapon,Bow,Misc	Any	1	true	2200	3000	4
+precision	DEX	4	4	17	Armor,Weapon,Bow,Misc	Any	1	true	3200	5000	7
+perfection	DEX	5	6	25	Bow,Misc	Any	1	true	5200	10000	10
+the fool	MAG_CURSE	2	2	3	Armor,Shield,Weapon,Staff,Bow,Misc	Evil	1	false	0	0	-3
+dyslexia	MAG_CURSE	1	1	1	Armor,Shield,Weapon,Staff,Bow,Misc	Evil	1	false	0	0	-2
+magic	MAG	1	1	1	Armor,Shield,Weapon,Staff,Bow,Misc	Any	1	true	200	1000	2
+the mind	MAG	2	2	5	Armor,Shield,Weapon,Staff,Bow,Misc	Any	1	true	1200	2000	3
+brilliance	MAG	3	3	11	Armor,Shield,Weapon,Staff,Bow,Misc	Any	1	true	2200	3000	4
+sorcery	MAG	4	4	17	Armor,Weapon,Staff,Bow,Misc	Any	1	true	3200	5000	7
+wizardry	MAG	5	6	25	Staff,Misc	Any	1	true	5200	10000	10
+illness	VIT_CURSE	2	2	3	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-3
+disease	VIT_CURSE	1	1	1	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-2
+vitality	VIT	1	1	1	Armor,Shield,Weapon,Bow,Misc	Good	1	true	200	1000	2
+zest	VIT	2	2	5	Armor,Shield,Weapon,Bow,Misc	Good	1	true	1200	2000	3
+vim	VIT	3	3	11	Armor,Shield,Weapon,Bow,Misc	Good	1	true	2200	3000	4
+vigor	VIT	4	4	17	Armor,Weapon,Bow,Misc	Good	1	true	3200	5000	7
+life	VIT	5	6	25	Misc	Good	1	true	5200	10000	10
+trouble	ATTRIBS_CURSE	2	2	12	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-10
+the pit	ATTRIBS_CURSE	1	1	5	Armor,Shield,Weapon,Bow,Misc	Evil	1	false	0	0	-5
+the sky	ATTRIBS	1	1	100	Armor,Shield,Weapon,Bow,Misc	Any	1	true	800	4000	5
+the moon	ATTRIBS	1	1	11	Armor,Shield,Weapon,Bow,Misc	Any	1	true	4800	8000	10
+the stars	ATTRIBS	2	2	17	Armor,Weapon,Bow,Misc	Any	1	true	8800	12000	15
+the heavens	ATTRIBS	3	3	25	Weapon,Bow,Misc	Any	1	true	12800	20000	20
+the zodiac	ATTRIBS	4	4	30	Misc	Any	1	true	20800	40000	30
 the vulture	LIFE_CURSE	11	25	4	Armor,Shield,Misc	Evil	1	false	0	0	-4
 the jackal	LIFE_CURSE	1	10	1	Armor,Shield,Misc	Evil	1	false	0	0	-2
 the fox	LIFE	10	15	1	Armor,Shield,Misc	Any	1	true	100	1000	2

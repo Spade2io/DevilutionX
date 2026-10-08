@@ -1,9 +1,9 @@
-essence	primary
-Fire	Power
-Holy	Spirit
-Nature	Recovery
-Water	Recovery
-Earth	Power
-Dark	Spirit
-Lightning	Speed
-Shield	Spirit
+essence	primary	rarity
+Fire	Power	common
+Holy	Spirit	common
+Nature	Recovery	rare
+Water	Recovery	common
+Earth	Power	common
+Dark	Spirit	common
+Lightning	Speed	common
+Shield	Spirit	rare

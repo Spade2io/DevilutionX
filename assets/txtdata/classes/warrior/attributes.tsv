@@ -1,5 +1,5 @@
 Attribute	Value
-classFlags	CriticalStrike
+classFlags	
 baseStr	15
 baseMag	10
 baseDex	10
@@ -18,11 +18,11 @@ chrMana	2
 itmLife	1
 itmMana	2
 manaCost	1
-itmRestoreLife	2
-itmRestoreMana	1
-splRestoreLife	2
-splRestoreMana	1
-healOtherRestoreLife	2
+itmRestoreLife	1.5
+itmRestoreMana	1.5
+splRestoreLife	1.5
+splRestoreMana	1.5
+healOtherRestoreLife	1.5
 baseMagicToHit	50
 baseMeleeToHit	70
 baseRangedToHit	60

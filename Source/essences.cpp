@@ -18,6 +18,7 @@
 #include "data/file.hpp"
 #include "data/iterators.hpp"
 #include "data/record_reader.hpp"
+#include "engine/random.hpp"
 #include "items.h"
 #include "msg.h"
 #include "player.h"
@@ -35,6 +36,9 @@ std::array<std::array<SpellID, AbilitiesPerEssence>, AbilitySlotCount> Abilities
 /** Whether the player accepted their confluence, which gives the fourth row to it. */
 bool ConfluenceTaken = false;
 
+/** 0 Common, 1 Rare, 2 Epic, 3 Legendary; defined further down. */
+size_t ParseRarity(std::string_view text);
+
 /** The stat each row of abilities is bound to. */
 std::array<EssenceStat, AbilitySlotCount> SlotStats {};
 /** Points already added to the character's own stats for ability levels, by stat. Kept in the sidecar file. */
@@ -46,6 +50,7 @@ constexpr std::array<EssenceStat, 4> AllStats { EssenceStat::Power, EssenceStat:
 struct EssencePrimary {
 	std::string essence;
 	EssenceStat stat;
+	size_t rarity;
 };
 std::vector<EssencePrimary> EssencePrimaries;
 bool EssencePrimariesLoaded = false;
@@ -71,9 +76,11 @@ EssenceStat PrimaryStatOf(EssenceID essence)
 				RecordReader reader { record, filename };
 				std::string name;
 				std::string primary;
+				std::string rarity;
 				reader.readString("essence", name);
 				reader.readString("primary", primary);
-				EssencePrimaries.push_back({ name, ParseEssenceStat(primary) });
+				reader.readString("rarity", rarity);
+				EssencePrimaries.push_back({ name, ParseEssenceStat(primary), ParseRarity(rarity) });
 			}
 		}
 	}
@@ -139,7 +146,29 @@ struct TaggedPower {
 struct TagStone {
 	std::string itemName;
 	std::vector<std::string> tags;
+	/** 0 Common, 1 Rare, 2 Epic, 3 Legendary. */
+	size_t rarity;
 };
+
+/** Rarity steps, least rare first: Common, Rare, Epic, Legendary. */
+constexpr size_t RarityCount = 4;
+
+size_t ParseRarity(std::string_view text)
+{
+	switch (text.empty() ? 'c' : text.front()) {
+	case 'R':
+	case 'r':
+		return 1;
+	case 'E':
+	case 'e':
+		return 2;
+	case 'L':
+	case 'l':
+		return 3;
+	default:
+		return 0;
+	}
+}
 std::vector<TaggedPower> TaggedPowers;
 std::vector<TagStone> TagStones;
 bool StoneTablesLoaded = false;
@@ -192,7 +221,7 @@ void LoadStoneTables()
 				reader.readString("name", name);
 				reader.readString("rarity", rarity);
 				reader.readString("tags", tags);
-				TagStones.push_back({ StrCat("Awakening Stone of ", name), SplitTags(tags) });
+				TagStones.push_back({ StrCat("Awakening Stone of ", name), SplitTags(tags), ParseRarity(rarity) });
 			}
 		}
 	}
@@ -562,6 +591,125 @@ std::string_view DescribeLearnResult(LearnResult result)
 		return "You already have an aura; you can only ever have one";
 	}
 	return "";
+}
+
+namespace {
+
+/** How often stones and essences drop, as read from drops.tsv. These are what it holds if the file is missing. */
+struct DropSettings {
+	int stoneOneIn = 50;
+	int essenceOneIn = 100;
+	std::array<int, RarityCount> weights { 65, 25, 8, 2 };
+};
+DropSettings Drops;
+/** The rows of the item table that can drop, by rarity. */
+std::array<std::vector<int>, RarityCount> StoneDrops;
+std::array<std::vector<int>, RarityCount> EssenceDrops;
+bool DropTablesLoaded = false;
+
+void LoadDropTables()
+{
+	if (DropTablesLoaded)
+		return;
+	DropTablesLoaded = true;
+	LoadStoneTables();
+	PrimaryStatOf(EssenceID::None); // reads the essences' table
+
+	const std::string_view filename = "txtdata\\spells\\drops.tsv";
+	std::expected<DataFile, DataFile::Error> dataFileResult = DataFile::load(filename);
+	if (dataFileResult.has_value() && dataFileResult.value().skipHeader().has_value()) {
+		for (DataFileRecord record : dataFileResult.value()) {
+			RecordReader reader { record, filename };
+			std::string setting;
+			int value = 0;
+			reader.readString("setting", setting);
+			reader.readInt("value", value);
+			if (setting == "stoneOneIn")
+				Drops.stoneOneIn = value;
+			else if (setting == "essenceOneIn")
+				Drops.essenceOneIn = value;
+			else if (setting == "common")
+				Drops.weights[0] = value;
+			else if (setting == "rare")
+				Drops.weights[1] = value;
+			else if (setting == "epic")
+				Drops.weights[2] = value;
+			else if (setting == "legendary")
+				Drops.weights[3] = value;
+		}
+	}
+
+	for (size_t row = 0; row < AllItemsList.size(); row++) {
+		const ItemData &base = AllItemsList[row];
+		if (base.iMiscId == IMISC_ESSENCE) {
+			for (const EssencePrimary &entry : EssencePrimaries) {
+				if (StrCat(entry.essence, " Essence") == base.iName)
+					EssenceDrops[entry.rarity].push_back(static_cast<int>(row));
+			}
+		} else if (base.iMiscId == IMISC_AWAKENINGSTONE && base.iSpell == SpellID::Null) {
+			if (const TagStone *stone = FindTagStone(base.iName); stone != nullptr)
+				StoneDrops[stone->rarity].push_back(static_cast<int>(row));
+		}
+	}
+}
+
+} // namespace
+
+int RollEssenceLoot(bool isBoss)
+{
+	LoadDropTables();
+
+	// A stone, an essence, or nothing. A boss always drops one of the two, in proportion to how
+	// often each drops from anything else (a stone twice as often as an essence, as the file stands).
+	bool stone = true;
+	if (isBoss) {
+		stone = GenerateRnd(std::max(Drops.stoneOneIn + Drops.essenceOneIn, 1)) < Drops.essenceOneIn;
+	} else if (Drops.stoneOneIn > 0 && GenerateRnd(Drops.stoneOneIn) == 0) {
+		stone = true;
+	} else if (Drops.essenceOneIn > 0 && GenerateRnd(Drops.essenceOneIn) == 0) {
+		stone = false;
+	} else {
+		return -1;
+	}
+
+	// How rare. A boss rolls as if there were no Common ones.
+	std::array<int, RarityCount> weights = Drops.weights;
+	if (isBoss)
+		weights[0] = 0;
+	int total = 0;
+	for (const int weight : weights)
+		total += std::max(weight, 0);
+	size_t rarity = 0;
+	if (total > 0) {
+		int roll = GenerateRnd(total);
+		for (size_t r = 0; r < RarityCount; r++) {
+			if (roll < weights[r]) {
+				rarity = r;
+				break;
+			}
+			roll -= std::max(weights[r], 0);
+		}
+	}
+
+	// Which one: any of that rarity. If none has been made at that rarity, the next one down.
+	const auto pick = [rarity](const std::array<std::vector<int>, RarityCount> &table, size_t lowest) {
+		for (size_t r = rarity + 1; r-- > lowest;) {
+			if (!table[r].empty())
+				return table[r][GenerateRnd(static_cast<int>(table[r].size()))];
+		}
+		return -1;
+	};
+	const auto &wanted = stone ? StoneDrops : EssenceDrops;
+	const auto &other = stone ? EssenceDrops : StoneDrops;
+	if (!isBoss)
+		return pick(wanted, 0);
+	// A boss would sooner drop the other kind than a Common one, and a Common one than nothing.
+	int row = pick(wanted, 1);
+	if (row == -1)
+		row = pick(other, 1);
+	if (row == -1)
+		row = pick(wanted, 0);
+	return row;
 }
 
 bool IsTagStoneKnown(std::string_view itemName)

@@ -997,6 +997,14 @@ In the game: an Aura or a Curse with the stat ElementalResistCut, NaturalResistC
 AstralResistCut or AllResistCut. Nothing is saved; it lasts until the monster dies or the game
 ends. Pall of Shadow is the first: 10 points off Astral resistance for monsters within 8 tiles.
 
+## Buffs that add stat points (Bryan, 2026-10-07)
+
+A buff or aura that adds points to Power, Speed, Recovery or Spirit starts small and grows by one
+point for each level of the power, not by the usual eighth. A self-only buff starts at +3 (so +13
+at level 10). A lasting buff that can be cast on other players, or one that reaches a group, starts
+at +1 (+11 at level 10). The starting number is the power's potency in the designer. Each point is
+worth 10% under the stat rules below, which is why these are kept small.
+
 ## What the four stats do (Bryan, 2026-10-07)
 
 Starting stats, as Power / Speed / Recovery / Spirit: Human 15 / 10 / 10 / 10, Celestine 5 / 15 / 15 / 10,

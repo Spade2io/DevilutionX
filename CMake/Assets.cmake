@@ -215,6 +215,7 @@ set(devilutionx_assets
   txtdata/quests/questdat.tsv
   txtdata/sound/effects.tsv
   txtdata/spells/confluences.tsv
+  txtdata/spells/drops.tsv
   txtdata/spells/essence_powers.tsv
   txtdata/spells/essence_stats.tsv
   txtdata/spells/power_tags.tsv
