@@ -1133,7 +1133,7 @@
         "t_9048f21b",
         "t_6e51786d"
       ],
-      "potency": 30,
+      "potency": 20,
       "manaCost": 30,
       "cooldown": 60,
       "radius": null,
@@ -1220,7 +1220,7 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 30,
+      "potency": 5,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
@@ -1248,7 +1248,7 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 5,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
@@ -1441,7 +1441,7 @@
         "t_abcc5067",
         "t_6e51786d"
       ],
-      "potency": 15,
+      "potency": 5,
       "manaCost": 10,
       "cooldown": 0,
       "radius": 8,
@@ -1826,7 +1826,7 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 30,
+      "potency": 5,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
@@ -1854,7 +1854,7 @@
         "t_b0c8cbc0",
         "t_9048f21b"
       ],
-      "potency": 45,
+      "potency": 20,
       "manaCost": 18,
       "cooldown": 60,
       "radius": null,
@@ -1882,7 +1882,7 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 5,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
@@ -2498,7 +2498,7 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 5,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
@@ -2507,7 +2507,7 @@
       "number": 110,
       "gameKey": "FanTheFlames",
       "icon": 33,
-      "shortText": "Ally acts 10% faster"
+      "shortText": "Ally acts 5% faster"
     },
     {
       "id": "p_e00dcee8",
@@ -3127,7 +3127,7 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 5,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
@@ -3614,7 +3614,7 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 5,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
@@ -3642,7 +3642,7 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 30,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
@@ -3670,7 +3670,7 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 30,
+      "potency": 20,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
@@ -3679,7 +3679,7 @@
       "number": 185,
       "gameKey": "Oathbound",
       "icon": 40,
-      "shortText": "You take 30% of ally damage"
+      "shortText": "You take 20% of ally damage"
     },
     {
       "id": "p_37c3d958",
@@ -3755,7 +3755,7 @@
         "t_b0c8cbc0",
         "t_29d3e548"
       ],
-      "potency": 50,
+      "potency": 20,
       "manaCost": 40,
       "cooldown": 180,
       "radius": null,
@@ -3764,7 +3764,7 @@
       "number": 188,
       "gameKey": "Unbreakable",
       "icon": 34,
-      "shortText": "All allies: half damage 12s"
+      "shortText": "All allies: -20% damage 12s"
     },
     {
       "id": "p_fc1502cc",
@@ -5249,7 +5249,7 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 30,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,

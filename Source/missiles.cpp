@@ -2631,6 +2631,9 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	// whatever the caster's level, because every PC must agree on when the monster moves again.
 	const int freezeSeconds = amount;
 	amount = ScaleDamageForSpellLevel(amount, std::max<int>(player.GetBaseSpellLevel(spell), 1));
+	// A curse that is a percentage grows by a set step each level, like a percentage buff.
+	if (isCurse && IsExtendedSpell(spell) && IsValidSpell(spell) && IsPercentBuffStat(GetSpellData(spell).buffStat))
+		amount = GetPercentBuffAmount(GetSpellData(spell).buffStat, GetSpellData(spell).effectAmount, ShownPowerLevel(player.GetBaseSpellLevel(spell)));
 	const UiFlags textColor = isKindle ? GetSpellTextColor(spell) : GetDamageTypeTextColor(dot == DotID::Corruption ? DamageType::Shadow : DamageType::Fire);
 
 	// The monster under the cursor, and with a radius every monster standing within it.
@@ -2922,6 +2925,12 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 		// A buff or aura that adds points to a stat grows by one point a level, not by an eighth.
 		if (IsAnyOf(spellData.buffStat, "Power", "Spirit"))
 			amount = static_cast<uint32_t>(spellData.effectAmount + ShownPowerLevel(caster.GetBaseSpellLevel(spell)));
+		// Stealth and threat never grow: a power that carries one grows through its other effect.
+		if (spellData.buffStat == "Distance")
+			amount = static_cast<uint32_t>(spellData.effectAmount);
+		// A percentage grows by a set step each level.
+		if (IsAnyOf(spellData.effect, "Buff", "Aura") && IsPercentBuffStat(spellData.buffStat))
+			amount = static_cast<uint32_t>(GetPercentBuffAmount(spellData.buffStat, spellData.effectAmount, ShownPowerLevel(caster.GetBaseSpellLevel(spell))));
 		const int radius = spellData.effectRadius;
 
 		const auto isLivingAllyHere = [](const Player &other) {

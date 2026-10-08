@@ -997,6 +997,34 @@ In the game: an Aura or a Curse with the stat ElementalResistCut, NaturalResistC
 AstralResistCut or AllResistCut. Nothing is saved; it lasts until the monster dies or the game
 ends. Pall of Shadow is the first: 10 points off Astral resistance for monsters within 8 tiles.
 
+## Starting sizes for percentage buffs (Bryan, 2026-10-08)
+
+A first pass, to be balanced in play. These are the numbers at level 0.
+
+- A lasting buff on yourself: 10%.
+- A lasting buff you give to others, and an aura: 5%.
+- A buff on a cooldown, for yourself: 20% on a Battle cooldown, up to 30% on an Ultimate.
+- A buff on a cooldown that reaches everyone: about 20%, even on an Ultimate. 30% is for personal
+  Ultimates only.
+- Stealth and threat never grow with level. A power that carries one must carry a second effect
+  that does grow; several do not yet.
+- Damage and healing keep the rule of an eighth more each level, compounding (3.25 times at level 10).
+- A percentage buff, aura or curse grows by a set step each level, by where it starts: 5% gains
+  1% a level (15% at level 10), 10% gains 1.5% (25%), 20% gains 2% (40%), 30% gains 2.5% (55%).
+  Half percents add up across levels and only whole percents count. Kept small on purpose, so
+  the big buffs do not get out of control.
+- Attack and casting speed buffs are their own case. One given to others starts at 5% and gains
+  2% a level (25% at level 10): Fan the Flames. A self-only one starts at 10% and gains 3% (40%);
+  none exists yet, and that size is being saved for them.
+- Haste: a speed buff of X% takes frames off an attack or cast in proportion to its length
+  (frames x X / (100 + X), rounded down), so the action is X% faster to within a frame and a long
+  animation gains a frame more often than a short one. At least one frame is left before the hit
+  or spell. The four attack speed suffixes on gear are switched off so they cannot stack with it;
+  eight unique weapons still carry attack speed.
+
+Some buffs' numbers are not bonuses of this kind and sit outside the rule: Oathbound (the share of
+an ally's damage you take) and Guardian Angel (the share of life an ally rises with) start at 20%.
+
 ## Buffs that add stat points (Bryan, 2026-10-07)
 
 A buff or aura that adds points to Power, Speed, Recovery or Spirit starts small and grows by one

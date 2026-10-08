@@ -492,9 +492,12 @@ int ApplyDamageBuffs(const Player &player, int damage)
 	return damage + static_cast<int>(static_cast<int64_t>(damage) * percent / 100);
 }
 
-int GetBuffSkippedFrames(const Player &player)
+int GetBuffSkippedFrames(const Player &player, int animationFrames, int actionFrame)
 {
-	return std::clamp(GetPowerBuffPercent(player, "Speed") / 10, 0, 4);
+	const int percent = GetPowerBuffPercent(player, "Speed");
+	if (percent <= 0 || animationFrames <= 0)
+		return 0;
+	return std::clamp(animationFrames * percent / (100 + percent), 0, std::max(actionFrame - 1, 0));
 }
 
 bool IsPassivePower(SpellID spell)

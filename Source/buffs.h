@@ -136,11 +136,15 @@ std::vector<SpellID> GetActivePowerBuffs(const Player &player);
 int ApplyDamageBuffs(const Player &player, int damage);
 
 /**
- * @brief How many frames a player's "Speed" buffs shave off the start of each attack and cast.
- * One frame for every 10% of speed, four at most. A warrior's swing is 16 frames, so one frame is
- * roughly 6% faster; the game has no finer step than a frame.
+ * @brief How many frames a player's "Speed" buffs take off an attack or a cast. A buff of X% makes
+ * the action X% faster: frames x X / (100 + X) come off, rounded down, so a long animation gains
+ * a frame more often than a short one and nobody is faster than the buff says. The game has no
+ * finer step than a frame.
+ * @param animationFrames How many frames the animation has.
+ * @param actionFrame The frame on which the hit or the spell happens. Frames only come off before
+ * it, and one is always left.
  */
-int GetBuffSkippedFrames(const Player &player);
+int GetBuffSkippedFrames(const Player &player, int animationFrames, int actionFrame);
 
 /**
  * @brief Whether a power read from essence_powers.tsv is passive: it is never cast, and acts by

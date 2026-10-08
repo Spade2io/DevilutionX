@@ -92,8 +92,8 @@ const SHORT_TEXT = {
   'Bulwark Slam': 'Shield per enemy struck', 'Barrier': 'Shield of 14 on an ally', 'Reinforce': 'Big shield and +15 armor',
   'Shield Wall': 'Shields ally and nearby', 'Phalanx': 'Shields every ally', 'Bulwark': 'You have more armor',
   'Spell Ward': 'Ally: +10 resistances', 'Hold the Line': 'All allies: +5 armor', 'Stout Heart': 'Ally has more maximum life',
-  'Resilience': 'You regain life faster', 'Oathbound': 'You take 30% of ally damage', 'Stalwart': 'Monsters prefer you',
-  'Brace': '+30 armor and resist, 20s', 'Unbreakable': 'All allies: half damage 12s',
+  'Resilience': 'You regain life faster', 'Oathbound': 'You take 20% of ally damage', 'Stalwart': 'Monsters prefer you',
+  'Brace': '+30 armor and resist, 20s', 'Unbreakable': 'All allies: -20% damage 12s',
   'Ironbark': 'Aura: resistances, rad 8', 'Healing Touch': 'Heals an ally, or you', 'Nourish': 'Cheap heal; more with a HoT',
   'Full Bloom': 'Restores 70% of ally life', 'Pollinate': 'Heal that leaps to others', 'Verdant Tide': 'Heals every ally anywhere',
   'Fairy Ring': 'Heals allies, radius 2', 'Rejuvenation': 'Heals an ally over 12s', 'Spring Shower': 'Heals all allies over 10s',
@@ -108,7 +108,7 @@ const SHORT_TEXT = {
   'Vigil': 'Ally regains life faster', 'Benediction': 'Ally has more maximum life', 'Smite': 'Strike dealing holy damage',
   'Judgment': 'Heavy; more to undead/demon', 'Atonement': 'Strike that heals an ally', 'Searing Light': 'Holy damage, radius 2',
   'Dawnburst': 'Hurts foes, heals, radius 4',
-  'Searing Brand': 'All hits deal extra fire', 'Fan the Flames': 'Ally acts 10% faster',
+  'Searing Brand': 'All hits deal extra fire', 'Fan the Flames': 'Ally acts 5% faster',
 }
 // What each built power does in the game. "missile" is the game projectile that carries the cast;
 // "effect" names what lands. A power not listed here has no behaviour yet: it can be learned, and

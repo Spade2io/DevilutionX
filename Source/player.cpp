@@ -210,8 +210,9 @@ void StartAttack(Player &player, Direction d, bool includesFirstFrame)
 	} else if (HasAnyOf(flags, ItemSpecialEffect::QuickAttack)) {
 		skippedAnimationFrames = includesFirstFrame ? 1 : 0;
 	}
-	// Essence Mod: a speed buff shaves frames off as well, on top of any from items.
-	skippedAnimationFrames = static_cast<int8_t>(std::min(skippedAnimationFrames + GetBuffSkippedFrames(player), 4));
+	// Essence Mod: a speed buff takes frames off as well, in proportion to the swing's length,
+	// on top of any from an item. At least one frame is always left before the hit.
+	skippedAnimationFrames = static_cast<int8_t>(std::min<int>(skippedAnimationFrames + GetBuffSkippedFrames(player, player._pAFrames, player._pAFNum), std::max(player._pAFNum - 1, 0)));
 
 	auto animationFlags = AnimationDistributionFlags::ProcessAnimationPending;
 	if (player._pmode == PM_ATTACK)
@@ -258,8 +259,8 @@ void StartRangeAttack(Player &player, Direction d, WorldTileCoord cx, WorldTileC
 			skippedAnimationFrames += 1;
 		}
 	}
-	// Essence Mod: a speed buff shaves frames off as well, on top of any from items.
-	skippedAnimationFrames = static_cast<int8_t>(std::min(skippedAnimationFrames + GetBuffSkippedFrames(player), 4));
+	// Essence Mod: a speed buff takes frames off as well, in proportion to the shot's length.
+	skippedAnimationFrames = static_cast<int8_t>(std::min<int>(skippedAnimationFrames + GetBuffSkippedFrames(player, player._pAFrames, player._pAFNum), std::max(player._pAFNum - 1, 0)));
 
 	auto animationFlags = AnimationDistributionFlags::ProcessAnimationPending;
 	if (player._pmode == PM_RATTACK)
@@ -321,7 +322,7 @@ void StartSpell(Player &player, Direction d, WorldTileCoord cx, WorldTileCoord c
 	if (player._pmode == PM_SPELL)
 		animationFlags = static_cast<AnimationDistributionFlags>(animationFlags | AnimationDistributionFlags::RepeatedAction);
 	// Essence Mod: a speed buff shaves frames off the start of a cast, as it does for an attack.
-	NewPlrAnim(player, GetPlayerGraphicForSpell(player.queuedSpell.spellId), d, animationFlags, static_cast<int8_t>(GetBuffSkippedFrames(player)), player._pSFNum);
+	NewPlrAnim(player, GetPlayerGraphicForSpell(player.queuedSpell.spellId), d, animationFlags, static_cast<int8_t>(GetBuffSkippedFrames(player, player._pSFrames, player._pSFNum)), player._pSFNum);
 
 	PlaySfxLoc(GetSpellData(player.queuedSpell.spellId).sSFX, player.position.tile);
 

@@ -86,10 +86,10 @@ blood	STEALLIFE	5	5	19	Weapon	Any	1	true	15000	15000	3
 piercing	TARGAC	2	6	1	Weapon,Bow	Any	1	true	1000	1000	3
 puncturing	TARGAC	4	12	9	Weapon,Bow	Any	1	true	2000	2000	6
 bashing	TARGAC	8	24	17	Weapon	Any	1	true	4000	4000	12
-readiness	FASTATTACK	1	1	1	Weapon,Staff,Bow	Any	1	true	2000	2000	2
-swiftness	FASTATTACK	2	2	10	Weapon,Staff,Bow	Any	1	true	4000	4000	4
-speed	FASTATTACK	3	3	19	Weapon,Staff	Any	1	true	8000	8000	8
-haste	FASTATTACK	4	4	27	Weapon,Staff	Any	1	true	16000	16000	16
+readiness	FASTATTACK	1	1	100	Weapon,Staff,Bow	Any	1	true	2000	2000	2
+swiftness	FASTATTACK	2	2	100	Weapon,Staff,Bow	Any	1	true	4000	4000	4
+speed	FASTATTACK	3	3	100	Weapon,Staff	Any	1	true	8000	8000	8
+haste	FASTATTACK	4	4	100	Weapon,Staff	Any	1	true	16000	16000	16
 balance	FASTRECOVER	1	1	1	Armor,Misc	Any	1	true	2000	2000	2
 stability	FASTRECOVER	2	2	10	Armor,Misc	Any	1	true	4000	4000	4
 harmony	FASTRECOVER	3	3	20	Armor,Misc	Any	1	true	8000	8000	8

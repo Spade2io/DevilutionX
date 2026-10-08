@@ -402,6 +402,22 @@ int GetMonsterDotRemaining(const Monster &monster, DotID dot)
 	return 0;
 }
 
+bool IsPercentBuffStat(std::string_view stat)
+{
+	return IsAnyOf(stat, "Damage", "SpellDamage", "DotDamage", "Speed", "ManaRegen", "LifeRegen", "MaxLife", "MaxMana", "DamageTaken", "Oath", "Rebirth", "Accuracy");
+}
+
+int GetPercentBuffAmount(std::string_view stat, int base, int shownLevel)
+{
+	// The step each level, in half percents.
+	int halves = base <= 5 ? 2 : base <= 10 ? 3 : base <= 20 ? 4 : 5;
+	// Attack and casting speed: one given to others starts at 5% and gains 2% a level (25% at
+	// level 10); a self-only one starts at 10% and gains 3% (40%).
+	if (stat == "Speed")
+		halves = base <= 5 ? 4 : 6;
+	return base + halves * std::max(shownLevel, 0) / 2;
+}
+
 int ScaleByStat(int amount, int stat)
 {
 	return static_cast<int>(static_cast<int64_t>(amount) * std::max(stat, 0) / 10);

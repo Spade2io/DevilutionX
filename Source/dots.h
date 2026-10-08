@@ -162,6 +162,22 @@ void WitherMonster(Monster &monster, int percent);
 int GetMonsterDotRemaining(const Monster &monster, DotID dot);
 
 /**
+ * @brief Whether a buff, aura or curse stat is a percentage that grows by a set step each level:
+ * more damage, faster regeneration, a bigger pool, less damage taken and the like. Points (armor,
+ * resistance, stat points), hit points (heals, shields) and stealth or threat are not.
+ */
+bool IsPercentBuffStat(std::string_view stat);
+
+/**
+ * @brief A percentage buff's strength at a level. It gains a set step each level, by where it
+ * starts: 1% from 5% or less, 1.5% from 10%, 2% from 20%, 2.5% from 30% or more. Half percents
+ * add up across levels and only whole percents count, so a 10% buff runs 10, 11, 13, 14, 16.
+ * A "Speed" buff (attack and casting speed) is its own case: 2% a level from 5%, 3% from 10%.
+ * @param shownLevel The power's level as the player sees it, 0 to 10.
+ */
+int GetPercentBuffAmount(std::string_view stat, int base, int shownLevel);
+
+/**
  * @brief An amount after a stat's multiplier: the stat times 10 percent. A stat of 10 leaves it
  * as it is, 15 makes it half as much again, 5 halves it.
  */
