@@ -190,6 +190,7 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .field input, .field select, .field textarea { font-size: 15px; color: var(--fg); }
 .field.grow { flex: 1; min-width: 180px; }
 .field.narrow input { width: 96px; }
+.field.name input { width: 220px; }
 
 .tag-lines { display: flex; flex-direction: column; gap: 8px; }
 .tag-line { display: flex; gap: 12px; align-items: flex-start; }
@@ -294,3 +295,21 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* A figure that is worked out, not typed: shown like a field, but plainly not editable. */
 input.count { color: var(--muted); cursor: default; text-align: center; }
+
+/* Awakening Stones page */
+.grid.stones { width: 100%; }
+.grid.stones td { vertical-align: top; padding-top: 8px; padding-bottom: 8px; }
+.grid.stones .stone-tags { width: 38%; min-width: 260px; }
+.grid.stones .stone-matches { max-width: 320px; }
+.rarity-word { font-weight: 600; }
+.rarity-word.common { color: var(--fg); }
+.rarity-word.rare { color: #8fa4e8; }
+.rarity-word.epic { color: #c08be0; }
+.rarity-word.legendary { color: var(--accent); }
+
+/* Confluences page */
+.trio-filter { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 18px; color: var(--muted); }
+.trio-pick { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 6px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
+.trio-pick.on { border-color: currentColor; color: var(--fg); font-weight: 600; }
+.trio-essence { display: inline-flex; align-items: center; gap: 8px; min-width: 110px; }
+.grid.confluences .confluence-name { width: 220px; font-weight: 600; }

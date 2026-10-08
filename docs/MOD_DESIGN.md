@@ -818,7 +818,8 @@ call for changing powers already accepted)
   in the aura.
 - Resurrect: brings someone back to life. Normally an Ally power. The one exception is a
   self-resurrect, which must be an Ultimate with a super long cooldown (10 to 20 minutes) and must
-  be super rare.
+  be super rare. Every Resurrect power is also tagged Healing, since it gives life back (Bryan,
+  2026-10-07); this lets a healing awakening stone reach them.
 - Cleanse: removes debuffs that monsters have put on allies. Usually Instant, never Permanent.
   Self, Ally, Splash, Blanket and Everyone all apply. Strength varies (remove one stack, all stacks
   of one thing, everything). How monsters apply debuffs is not designed yet, so keep the wording
@@ -995,3 +996,28 @@ everyone a blanket damage increase. His rules:
 In the game: an Aura or a Curse with the stat ElementalResistCut, NaturalResistCut,
 AstralResistCut or AllResistCut. Nothing is saved; it lasts until the monster dies or the game
 ends. Pall of Shadow is the first: 10 points off Astral resistance for monsters within 8 tiles.
+
+## What the four stats do (Bryan, 2026-10-07)
+
+Starting stats, as Power / Speed / Recovery / Spirit: Human 15 / 10 / 10 / 10, Celestine 5 / 15 / 15 / 10,
+Runic 10 / 5 / 10 / 20, Leonid 15 / 15 / 10 / 5.
+
+A stat of 10 is the baseline: where a stat multiplies something, the multiplier is the stat times
+10 percent (`ScaleByStat` in `dots.cpp`).
+
+- **Power (Strength):** multiplies weapon attacks and special attacks. 3 life a point. It no longer
+  adds damage to a hit.
+- **Speed (Dexterity):** multiplies bow shots, and special attacks made with a bow, in place of
+  Power. To hit: +1 a point for melee, +2 for bows. 1 armor for every 3. Twice the old share of block.
+- **Recovery (Vitality):** life and mana regeneration of Recovery / 10 a second, as before. 1 life a point.
+- **Spirit (Magic):** 2 mana a point. Spells get +2 to hit a point. Multiplies spell attacks, damage
+  over time, healing and shields. Buffs and auras are not changed by it. The original spells no
+  longer add Spirit into their own damage; each keeps what it had at 10 Spirit.
+
+Life and mana come from the stats alone: nothing flat, nothing for a level, the same for every
+race. A character is brought to this on loading (`RecalculateBaseLifeAndMana`). No race has a cap
+of its own; a character's own points stop at 255 (one byte in the save) and 750 with gear.
+
+Left for later, by his choice: accuracy (the 5 to 95 percent limits and each race's flat starting
+to-hit), weapon and armour requirements, how stat points are earned, the size of stat buffs and of
+stat bonuses on gear, the remaining race differences from the old classes, and monster balance.

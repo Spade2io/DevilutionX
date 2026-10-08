@@ -1080,12 +1080,12 @@ std::span<Item> ActiveHealerItems()
 	}
 }
 
-/** Essence Mod: Pepin sells every essence in the item table. */
+/** Essence Mod: Pepin sells every essence in the item table that has a price. Epic and Legendary ones have none: they must be found. */
 void RefreshEssenceItems()
 {
 	EssenceItems.clear();
 	for (size_t i = 0; i < AllItemsList.size(); i++) {
-		if (AllItemsList[i].iMiscId != IMISC_ESSENCE)
+		if (AllItemsList[i].iMiscId != IMISC_ESSENCE || AllItemsList[i].iValue == 0)
 			continue;
 		Item item;
 		InitializeItem(item, static_cast<_item_indexes>(i));
@@ -1105,7 +1105,11 @@ void RefreshAwakeningStoneItems()
 	// Real awakening stone items come first: every row of the item table with that type.
 	// These are handed over as items and are always listed, known spell or not.
 	for (size_t i = 0; i < AllItemsList.size(); i++) {
-		if (AllItemsList[i].iMiscId != IMISC_AWAKENINGSTONE || !IsStoneOnSale(AllItemsList[i].iSpell))
+		if (AllItemsList[i].iMiscId != IMISC_AWAKENINGSTONE)
+			continue;
+		// A stone that carries tags has no power of its own; the others are sold while on the test list.
+		// One with no price (Epic or Legendary) is never sold.
+		if (AllItemsList[i].iSpell == SpellID::Null ? (AllItemsList[i].iValue == 0 || !IsTagStoneKnown(AllItemsList[i].iName)) : !IsStoneOnSale(AllItemsList[i].iSpell))
 			continue;
 		Item item;
 		InitializeItem(item, static_cast<_item_indexes>(i));

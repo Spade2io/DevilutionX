@@ -2180,7 +2180,17 @@ bool UseInvItem(int cii)
 
 	// Essence Mod: a book or awakening stone can only be used if its ability can be learned now:
 	// not already known, its essence held, and that essence not yet full. Otherwise it is kept.
-	if (IsAnyOf(item->_iMiscId, IMISC_BOOK, IMISC_AWAKENINGSTONE)) {
+	// A stone that carries tags has no power of its own: it draws one now, from those that can be
+	// learned. With nothing to draw from, the stone is kept.
+	SpellID learnedSpell = item->_iSpell;
+	if (item->_iMiscId == IMISC_AWAKENINGSTONE && item->_iSpell == SpellID::Null) {
+		learnedSpell = PickPowerForStone(AllItemsList[static_cast<size_t>(item->IDidx)].iName);
+		if (learnedSpell == SpellID::Invalid) {
+			EventPlrMsg(GetEssenceInSlot(0) == EssenceID::None ? "You need an essence before a stone can awaken a power" : "You have no room for another ability", UiFlags::ColorWhite);
+			player.Say(HeroSpeech::ICantDoThat, SpeechDelay);
+			return true;
+		}
+	} else if (IsAnyOf(item->_iMiscId, IMISC_BOOK, IMISC_AWAKENINGSTONE)) {
 		const LearnResult result = CheckCanLearn(item->_iSpell);
 		if (result != LearnResult::Ok) {
 			EventPlrMsg(DescribeLearnResult(result), UiFlags::ColorWhite);
@@ -2193,9 +2203,24 @@ bool UseInvItem(int cii)
 	if (item->_iMiscId == IMISC_ESSENCE) {
 		const EssenceID essence = GetSpellEssence(item->_iSpell);
 		if (!CanAbsorbEssence(essence)) {
-			EventPlrMsg(HasEssence(essence) ? "You already have this essence" : "You already have three essences", UiFlags::ColorWhite);
+			EventPlrMsg(HasEssence(essence) ? "You already have this essence" : "You have no room for another essence", UiFlags::ColorWhite);
 			player.Say(HeroSpeech::ICantDoThat, SpeechDelay);
 			return true;
+		}
+		// A fourth essence takes the place of the confluence for good, so the first use only warns.
+		// Using the same essence again within ten seconds goes through with it.
+		if (IsConfluenceOffered()) {
+			static EssenceID warnedAbout = EssenceID::None;
+			static uint32_t warnedAt = 0;
+			const uint32_t now = SDL_GetTicks();
+			if (warnedAbout != essence || now - warnedAt > 10000) {
+				warnedAbout = essence;
+				warnedAt = now;
+				EventPlrMsg(StrCat("This would replace your ", GetConfluenceName(), " Confluence for good."), UiFlags::ColorWhitegold);
+				EventPlrMsg(StrCat("Use it again to take ", GetEssenceName(essence), " as a fourth essence."), UiFlags::ColorWhitegold);
+				return true;
+			}
+			warnedAbout = EssenceID::None;
 		}
 	}
 
@@ -2232,13 +2257,13 @@ bool UseInvItem(int cii)
 		// Essence Mod: learning from an awakening stone gets the quest-complete fanfare.
 		if (&player == MyPlayer) {
 			PlaySFX(SfxID::QuestDone);
-			EventPlrMsg(StrCat("You learned ", GetSpellData(item->_iSpell).sNameText), UiFlags::ColorWhitegold);
+			EventPlrMsg(StrCat("You learned ", GetSpellData(learnedSpell).sNameText), UiFlags::ColorWhitegold);
 		}
 	} else if (&player == MyPlayer) {
 		PlaySFX(ItemInvSnds[idata]);
 	}
 
-	UseItem(player, item->_iMiscId, item->_iSpell, cii);
+	UseItem(player, item->_iMiscId, learnedSpell, cii);
 
 	if (speedlist) {
 		if (player.SpdList[c]._iMiscId == IMISC_NOTE) {

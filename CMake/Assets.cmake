@@ -214,7 +214,11 @@ set(devilutionx_assets
   txtdata/objects/objdat.tsv
   txtdata/quests/questdat.tsv
   txtdata/sound/effects.tsv
+  txtdata/spells/confluences.tsv
   txtdata/spells/essence_powers.tsv
+  txtdata/spells/essence_stats.tsv
+  txtdata/spells/power_tags.tsv
+  txtdata/spells/stone_tags.tsv
   txtdata/spells/stone_shop.tsv
   txtdata/spells/spelldat.tsv
   txtdata/text/textdat.tsv

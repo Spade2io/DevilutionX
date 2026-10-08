@@ -89,9 +89,11 @@ void RaiseSpellLevelIfEarned(Player &player, SpellID spell)
 		level++;
 		player.SetBaseSpellLevel(spell, level);
 		NetSendCmdParam2(true, CMD_CHANGE_SPELL_LEVEL, static_cast<uint16_t>(spell), level);
-		EventPlrMsg(StrCat(GetSpellData(spell).sNameText, " reached level ", static_cast<int>(level)), UiFlags::ColorWhitegold);
+		EventPlrMsg(StrCat(GetSpellData(spell).sNameText, " reached level ", ShownPowerLevel(level)), UiFlags::ColorWhitegold);
 		// A buff's strength depends on its spell's level, so a level-up takes effect straight away.
 		RefreshBuffStats(player);
+		// Each level adds a point to the stat the power's essence is bound to.
+		GrantEarnedStatPoints(player, /*inGame=*/true);
 	}
 }
 
@@ -387,6 +389,8 @@ void LoadSpellExperience(const std::string &path, Player &player)
 	}
 	std::fclose(file);
 	ApplyExtendedSpellSelections(player);
+	// A character from before stats grew this way is given what their powers have already earned.
+	GrantEarnedStatPoints(player, /*inGame=*/false);
 }
 
 void ApplyExtendedSpellSelections(Player &player)

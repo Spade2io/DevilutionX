@@ -1,5 +1,7 @@
 #include "panels/charpanel.hpp"
 
+#include "dots.h"
+
 #include <cstdint>
 #include <expected>
 
@@ -95,8 +97,10 @@ std::pair<int, int> GetDamage()
 	} else {
 		damageMod += InspectPlayer->_pDamageMod;
 	}
-	const int mindam = InspectPlayer->_pIMinDam + (InspectPlayer->_pIBonusDam * InspectPlayer->_pIMinDam / 100) + damageMod;
-	const int maxdam = InspectPlayer->_pIMaxDam + (InspectPlayer->_pIBonusDam * InspectPlayer->_pIMaxDam / 100) + damageMod;
+	// Essence Mod: shown after Power's multiplier, or Speed's with a bow.
+	const int stat = GetWeaponDamageStat(*InspectPlayer);
+	const int mindam = ScaleByStat(InspectPlayer->_pIMinDam + (InspectPlayer->_pIBonusDam * InspectPlayer->_pIMinDam / 100) + damageMod, stat);
+	const int maxdam = ScaleByStat(InspectPlayer->_pIMaxDam + (InspectPlayer->_pIBonusDam * InspectPlayer->_pIMaxDam / 100) + damageMod, stat);
 	return { mindam, maxdam };
 }
 

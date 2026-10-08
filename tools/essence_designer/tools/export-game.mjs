@@ -367,9 +367,23 @@ const BEHAVIOUR = {
 const FIRST_NUMBER = 100
 // The powers whose awakening stones Pepin's test shelf sells: the ones being tested now. Use the
 // names as the designer shows them. Everything else stays in the game but is not for sale.
-const ON_SALE = ['Lightning', 'Chain Lightning', 'Charged Bolt', 'Teleport', 'Spark', 'Arc', 'Forked Lightning', 'Thunderstrike', 'Ball Lightning', 'Tempest',
-  'Shocking Grasp', "Storm's Focus", 'Amplify', 'Overcharge', 'Quickening', 'Dynamo', 'Charged Air']
+const ON_SALE = []
+// What Pepin charges, by rarity (Bryan, 2026-10-07). Epic and Legendary are not sold at all: they
+// have to be found. A price of 0 in the item table is how the game knows not to sell something.
+// TEST_PRICES: while it is true, everything costs 1 gold, Epic and Legendary included, so anything
+// can be bought for testing. Set it to false before the mod goes out to friends (Phase 4).
+const TEST_PRICES = true
+const ALL_ONE_GOLD = { common: 1, rare: 1, epic: 1, legendary: 1, Common: 1, Rare: 1, Epic: 1, Legendary: 1 }
+const ESSENCE_PRICE = TEST_PRICES ? ALL_ONE_GOLD : { common: 50, rare: 250 }
+const STONE_PRICE = TEST_PRICES ? ALL_ONE_GOLD : { Common: 50, Rare: 200 }
 const SHOP_FILE = path.join(REPO, 'assets/txtdata/spells/stone_shop.tsv')
+// What each set of three essences is called together, as named on the designer's Confluences page.
+const CONFLUENCES_FILE = path.join(REPO, 'assets/txtdata/spells/confluences.tsv')
+// The tags on every power in the game, and on every awakening stone that picks a power by its tags.
+const POWER_TAGS_FILE = path.join(REPO, 'assets/txtdata/spells/power_tags.tsv')
+const STONE_TAGS_FILE = path.join(REPO, 'assets/txtdata/spells/stone_tags.tsv')
+// The stat each essence is bound to when a character takes it.
+const ESSENCE_STATS_FILE = path.join(REPO, 'assets/txtdata/spells/essence_stats.tsv')
 
 const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))
 // First, the change log: what has been edited in the designer since the last export. Anything
@@ -451,18 +465,60 @@ const row = ({ power, essence }) => {
 const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount', 'stat', 'duration', 'ally', 'weapon'].join('\t')
 const powersText = [header, ...exported.map(row)].join('\r\n') + '\r\n'
 
-// Stones. Keep every existing row exactly where it is; drop the stand-in test stone if it is
-// still the last row; add a stone at the end for each power that has none.
+// Stones. A power no longer has a stone of its own: those were for testing and are taken out of
+// the item table here, should any remain. The only awakening stones are the ones with tags, below.
+// Items in a saved bag are remembered by their row number, so rows after a removed one shift:
+// from here on, rows are only ever added at the end.
 let itemLines = fs.readFileSync(ITEMS_FILE, 'utf8').split('\r\n')
 if (itemLines.at(-1) === '') itemLines.pop()
 const SPELL_COLUMN = 20
-if (itemLines.at(-1).split('\t')[SPELL_COLUMN] === 'TestBolt') itemLines.pop()
+const rowsBefore = itemLines.length
+itemLines = itemLines.filter((line) => { const c = line.split('\t'); return !(c[19] === 'AWAKENINGSTONE' && c[SPELL_COLUMN] !== 'Null') })
 const stonesAdded = []
-for (const { power } of exported) {
-  if (itemLines.some((line) => line.split('\t')[SPELL_COLUMN] === power.gameKey)) continue
-  itemLines.push(['', 0, 'Misc', 'Unequippable', 'AWAKENING_STONE', 'Misc', 'NONE', 'Awakening Stone of ' + power.name, 'Stone', 1, 0, 0, 0, 0, 0, 0, 0, 0, '', 'AWAKENINGSTONE', power.gameKey, 'true', 1].join('\t'))
-  stonesAdded.push(power.name)
+if (rowsBefore !== itemLines.length) console.log(`Removed ${rowsBefore - itemLines.length} one-power test stones from the item table.`)
+
+// Awakening stones that carry tags. Each is an awakening stone item with no power of its own
+// ("Null" in the spell column); the game knows which stone it is by its name. A stone keeps its
+// row for good: renaming it here renames the row, and a deleted stone's row is simply left behind.
+const NAME_COLUMN = 7
+const MISC_COLUMN = 19
+const VALUE_COLUMN = 22
+const RARITY_IDS = ['common', 'rare', 'epic', 'legendary']
+const rarityOfStone = (n) => (n >= 5 ? 'Legendary' : n === 4 ? 'Epic' : n === 3 ? 'Rare' : 'Common')
+const tagStones = (data.stones ?? []).filter((s) => s.name && s.tags.length > 0)
+const tagStonesAdded = []
+for (const stone of tagStones) {
+  const fullName = 'Awakening Stone of ' + stone.name
+  const oldName = 'Awakening Stone of ' + (stone.gameName ?? stone.name)
+  const price = STONE_PRICE[rarityOfStone(stone.tags.length)] ?? 0
+  const at = itemLines.findIndex((line) => { const c = line.split('\t'); return c[MISC_COLUMN] === 'AWAKENINGSTONE' && c[SPELL_COLUMN] === 'Null' && c[NAME_COLUMN] === oldName })
+  if (at >= 0) {
+    const cells = itemLines[at].split('\t')
+    cells[NAME_COLUMN] = fullName
+    cells[VALUE_COLUMN] = price
+    itemLines[at] = cells.join('\t')
+  } else {
+    itemLines.push(['', 0, 'Misc', 'Unequippable', 'AWAKENING_STONE', 'Misc', 'NONE', fullName, 'Stone', 1, 0, 0, 0, 0, 0, 0, 0, 0, '', 'AWAKENINGSTONE', 'Null', 'true', price].join('\t'))
+    tagStonesAdded.push(stone.name)
+  }
+  stone.gameName = stone.name
 }
+// Essences: each one's row is priced by the rarity the designer gives it.
+const essencePrices = []
+itemLines = itemLines.map((line) => {
+  const cells = line.split('\t')
+  if (cells[MISC_COLUMN] !== 'ESSENCE') return line
+  const essence = data.essences.find((e) => e.name + ' Essence' === cells[NAME_COLUMN])
+  if (!essence) return line
+  cells[VALUE_COLUMN] = ESSENCE_PRICE[RARITY_IDS.includes(essence.rarity) ? essence.rarity : 'common'] ?? 0
+  essencePrices.push(`${essence.name} ${cells[VALUE_COLUMN] || 'not sold'}`)
+  return cells.join('\t')
+})
+const stoneTagRows = tagStones.map((s) => [s.name, rarityOfStone(s.tags.length), tagNames(s).join('|')])
+// Every designer power the game has, under the game's own name for it.
+const powerTagRows = data.powers
+  .map((p) => [ALREADY_IN_GAME[p.name] ?? p.gameKey, tagNames(p).join('|')])
+  .filter(([key]) => key)
 
 for (const { power } of exported) console.log(String(power.number).padStart(4), power.gameKey.padEnd(16), String(power.manaCost ?? '-').padStart(3) + ' mana', String(power.cooldown ?? 0).padStart(4) + 's', ' icon ' + String(power.icon).padStart(2), ' ', shortLine(power).padEnd(28), BEHAVIOUR[power.name] ? '[' + BEHAVIOUR[power.name].effect + ']' : '[not built]')
 console.log(`${exported.length} powers for ${essenceNames.join(', ')}; ${stonesAdded.length} stones added`)
@@ -481,5 +537,22 @@ if (check) {
   fs.writeFileSync(SHOP_FILE, ['id', ...saleKeys].join('\r\n') + '\r\n')
   console.log('Stones on sale: ' + (ON_SALE.join(', ') || 'none'))
   fs.writeFileSync(ITEMS_FILE, itemLines.join('\r\n') + '\r\n')
+  // Confluences: one row for each named set of three essences that all still exist.
+  const essenceNameOf = (id) => data.essences.find((e) => e.id === id)?.name
+  const confluenceRows = (data.confluences ?? [])
+    .map((c) => [...c.essences.map(essenceNameOf), c.name])
+    .filter((row) => row.every(Boolean))
+    .sort((a, b) => a.join().localeCompare(b.join()))
+  fs.writeFileSync(CONFLUENCES_FILE, [['essence1', 'essence2', 'essence3', 'name'], ...confluenceRows].map((r) => r.join('\t')).join('\r\n') + '\r\n')
+  const trioCount = data.essences.length * (data.essences.length - 1) * (data.essences.length - 2) / 6
+  console.log(`Confluences: ${confluenceRows.length} named of ${trioCount}` + (confluenceRows.length < trioCount ? '. THE REST HAVE NO NAME and show as "Unnamed" in the game.' : '.'))
+  fs.writeFileSync(POWER_TAGS_FILE, [['id', 'tags'], ...powerTagRows].map((r) => r.join('\t')).join('\r\n') + '\r\n')
+  fs.writeFileSync(STONE_TAGS_FILE, [['name', 'rarity', 'tags'], ...stoneTagRows].map((r) => r.join('\t')).join('\r\n') + '\r\n')
+  console.log(`Awakening stones with tags: ${tagStones.length} (${tagStonesAdded.length} new)` + ((data.stones ?? []).length > tagStones.length ? `; ${(data.stones ?? []).length - tagStones.length} skipped for having no tags` : ''))
+  fs.writeFileSync(ESSENCE_STATS_FILE, [['essence', 'primary'], ...data.essences.map((e) => [e.name, e.primaryStat ?? ''])].map((r) => r.join('\t')).join('\r\n') + '\r\n')
+  console.log('Primary stats: ' + data.essences.map((e) => `${e.name} ${e.primaryStat ?? 'NOT SET'}`).join(', '))
+  if (TEST_PRICES) console.log('TEST PRICES ARE ON: everything costs 1 gold.')
+  console.log('Essence prices: ' + essencePrices.join(', '))
+  console.log('Stone prices: ' + tagStones.map((s) => `${s.name} ${STONE_PRICE[rarityOfStone(s.tags.length)] ?? 'not sold'}`).join(', '))
   console.log('Written.')
 }

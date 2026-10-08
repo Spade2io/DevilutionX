@@ -23,6 +23,7 @@
 namespace devilution {
 
 struct Monster;
+struct Player;
 
 /**
  * @brief The default damage scaling for the mod's spells: 12.5% more for each spell level after the
@@ -161,11 +162,27 @@ void WitherMonster(Monster &monster, int percent);
 int GetMonsterDotRemaining(const Monster &monster, DotID dot);
 
 /**
- * @brief Damage from one of the local player's spell attacks after their "SpellDamage" buffs and
- * auras. Weapon attacks made through a power (special attacks) are not spell attacks and are
- * left as they are.
+ * @brief An amount after a stat's multiplier: the stat times 10 percent. A stat of 10 leaves it
+ * as it is, 15 makes it half as much again, 5 halves it.
+ */
+int ScaleByStat(int amount, int stat);
+
+/** @brief The stat that multiplies a player's weapon damage: Speed (Dexterity) with a bow in hand, otherwise Power (Strength). */
+int GetWeaponDamageStat(const Player &player);
+
+/**
+ * @brief Damage from one of the local player's powers after their stat and buffs. A special attack
+ * is a weapon attack and takes Power, or Speed if made with a bow. Anything else is a spell
+ * attack, damage over time included: it takes Spirit (Magic), then the "SpellDamage" buffs and auras.
  */
 int ApplySpellDamageBuffs(SpellID spell, int damage);
+
+/**
+ * @brief What the local player's power gives another player, after Spirit. Healing and shields
+ * take the multiplier, heals over time included; a buff's strength, an aura's, mana and
+ * percentages are left as they are.
+ */
+uint32_t ScaleGivenAmountBySpirit(SpellID spell, uint32_t amount);
 
 /**
  * @brief Lightning that leaps on from a monster already struck: to the nearest other monster in

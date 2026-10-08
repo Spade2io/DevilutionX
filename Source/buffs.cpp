@@ -25,6 +25,7 @@
 #include "items.h"
 #include "missiles.h"
 #include "monster.h"
+#include "msg.h"
 #include "multi.h"
 #include "panels/spell_icons.hpp"
 #include "player.h"
@@ -675,6 +676,56 @@ void ProcessBuffs()
 		countdown = AuraPulseInterval;
 		PulseFireAura(player);
 	}
+}
+
+void CancelBuff(Player &player, SpellID spell)
+{
+	for (size_t i = 0; i < BuffCount; i++) {
+		if (GetBuffSpell(static_cast<BuffID>(i)) == spell)
+			BuffsOf(player)[i] = false;
+	}
+	std::erase_if(PowerBuffs[player.getId()], [spell](const PowerBuff &buff) { return buff.spell == spell; });
+	CalcPlrInv(player, true);
+}
+
+bool CancelBuffUnderCursor()
+{
+	if (MyPlayer == nullptr)
+		return false;
+	const Player &player = *MyPlayer;
+
+	// The same places DrawBuffBar puts the icons.
+	constexpr int IconWidth = 37;
+	constexpr int IconHeight = 38;
+	constexpr int Margin = 8;
+	constexpr int Gap = 4;
+	constexpr int Left = 68;
+
+	Rectangle iconArea { Point { Left, Margin }, Size { IconWidth, IconHeight } };
+	const auto cancel = [](SpellID spell) {
+		NetSendCmdParam1(true, CMD_CANCELBUFF, static_cast<uint16_t>(spell));
+	};
+	for (size_t i = 0; i < BuffCount; i++) {
+		const auto buff = static_cast<BuffID>(i);
+		if (!IsBuffActive(player, buff))
+			continue;
+		if (iconArea.contains(MousePosition)) {
+			cancel(GetBuffSpell(buff));
+			return true;
+		}
+		iconArea.position.x += IconWidth + Gap;
+	}
+	for (const ReachingBuff &reaching : GetReachingBuffs(player)) {
+		if (iconArea.contains(MousePosition)) {
+			// Only what the player holds can be put down: an ally's aura is the ally's to switch off.
+			const std::vector<PowerBuff> &held = PowerBuffs[player.getId()];
+			if (std::any_of(held.begin(), held.end(), [&](const PowerBuff &buff) { return buff.spell == reaching.spell; }))
+				cancel(reaching.spell);
+			return true;
+		}
+		iconArea.position.x += IconWidth + Gap;
+	}
+	return false;
 }
 
 void DrawBuffBar(const Surface &out)

@@ -625,7 +625,8 @@
       "tagsFinite": [
         "t_4f155f0e",
         "t_bcaf43f8"
-      ]
+      ],
+      "primaryStat": "Power"
     },
     {
       "id": "e_566cd6e8",
@@ -657,7 +658,8 @@
       ],
       "tagsFinite": [
         "t_4f155f0e"
-      ]
+      ],
+      "primaryStat": "Spirit"
     },
     {
       "id": "e_1c094682",
@@ -691,7 +693,8 @@
       "tagsFinite": [
         "t_4f155f0e",
         "t_f931de44"
-      ]
+      ],
+      "primaryStat": "Recovery"
     },
     {
       "id": "e_c253b238",
@@ -722,20 +725,8 @@
       ],
       "neverOtherGroups": [
         "g_b6a0b51b"
-      ]
-    },
-    {
-      "id": "e_ca76e0c9",
-      "name": "Bone",
-      "description": "",
-      "rarity": "rare",
-      "poolSize": 20,
-      "damageTypeId": "d_6832d2c0",
-      "tagsAll": [],
-      "tagsMost": [],
-      "tagsSome": [],
-      "tagsNever": [],
-      "neverOtherGroups": []
+      ],
+      "primaryStat": "Recovery"
     },
     {
       "id": "e_f60d06c1",
@@ -769,7 +760,8 @@
         "t_ff9bcfb1",
         "t_bcaf43f8",
         "t_b5fae28d"
-      ]
+      ],
+      "primaryStat": "Power"
     },
     {
       "id": "e_dddc13cb",
@@ -801,7 +793,8 @@
       "tagsFinite": [
         "t_f931de44",
         "t_7d14c833"
-      ]
+      ],
+      "primaryStat": "Spirit"
     },
     {
       "id": "e_057f86d1",
@@ -836,20 +829,8 @@
         "t_27d69a6f",
         "t_30a3ce12",
         "t_30044bae"
-      ]
-    },
-    {
-      "id": "e_d59532f1",
-      "name": "Might",
-      "description": "",
-      "rarity": "rare",
-      "poolSize": 20,
-      "damageTypeId": "d_6832d2c0",
-      "tagsAll": [],
-      "tagsMost": [],
-      "tagsSome": [],
-      "tagsNever": [],
-      "neverOtherGroups": []
+      ],
+      "primaryStat": "Speed"
     },
     {
       "id": "e_d0ab3dce",
@@ -882,49 +863,8 @@
       ],
       "tagsFinite": [
         "t_bcaf43f8"
-      ]
-    },
-    {
-      "id": "e_45da6d31",
-      "name": "Magic",
-      "description": "",
-      "rarity": "rare",
-      "poolSize": 20,
-      "damageTypeId": "d_3e299ea5",
-      "tagsAll": [],
-      "tagsMost": [],
-      "tagsSome": [],
-      "tagsFinite": [],
-      "tagsNever": [],
-      "neverOtherGroups": []
-    },
-    {
-      "id": "e_2dd770ea",
-      "name": "Sword",
-      "description": "",
-      "rarity": "rare",
-      "poolSize": 20,
-      "damageTypeId": null,
-      "tagsAll": [],
-      "tagsMost": [],
-      "tagsSome": [],
-      "tagsFinite": [],
-      "tagsNever": [],
-      "neverOtherGroups": []
-    },
-    {
-      "id": "e_a16ede68",
-      "name": "Bow",
-      "description": "",
-      "rarity": "rare",
-      "poolSize": 20,
-      "damageTypeId": "d_6832d2c0",
-      "tagsAll": [],
-      "tagsMost": [],
-      "tagsSome": [],
-      "tagsFinite": [],
-      "tagsNever": [],
-      "neverOtherGroups": []
+      ],
+      "primaryStat": "Spirit"
     }
   ],
   "powers": [
@@ -1157,6 +1097,7 @@
       "tags": [
         "t_66c62b9b",
         "t_4f155f0e",
+        "t_78bf3c15",
         "t_b06216ac",
         "t_08fdec9d",
         "t_8e6b4fcf",
@@ -1184,6 +1125,7 @@
       "tags": [
         "t_66c62b9b",
         "t_4f155f0e",
+        "t_78bf3c15",
         "t_50a7240a",
         "t_8a021f56",
         "t_b06216ac",
@@ -2379,6 +2321,7 @@
       "tags": [
         "t_73143798",
         "t_4f155f0e",
+        "t_78bf3c15",
         "t_be83c5cf",
         "t_08fdec9d",
         "t_8e6b4fcf",
@@ -5366,6 +5309,526 @@
       "gameKey": "ChargedAir",
       "icon": 8,
       "shortText": "Aura: +5% spell damage"
+    }
+  ],
+  "confluences": [
+    {
+      "essences": [
+        "e_4021590a",
+        "e_566cd6e8",
+        "e_f60d06c1"
+      ],
+      "name": "Forge"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_4021590a",
+        "e_566cd6e8"
+      ],
+      "name": "Wrath"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_566cd6e8",
+        "e_d0ab3dce"
+      ],
+      "name": "Crusader"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_4021590a",
+        "e_c253b238"
+      ],
+      "name": "Seasons"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_4021590a",
+        "e_f60d06c1"
+      ],
+      "name": "Primal"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_4021590a",
+        "e_d0ab3dce"
+      ],
+      "name": "Hearth"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_c253b238",
+        "e_f60d06c1"
+      ],
+      "name": "Geyser"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_c253b238",
+        "e_dddc13cb"
+      ],
+      "name": "Veil"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_4021590a",
+        "e_c253b238"
+      ],
+      "name": "Maelstrom"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_c253b238",
+        "e_d0ab3dce"
+      ],
+      "name": "Equilibrium"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_dddc13cb",
+        "e_f60d06c1"
+      ],
+      "name": "Brimstone"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_4021590a",
+        "e_f60d06c1"
+      ],
+      "name": "Cataclysm"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_d0ab3dce",
+        "e_f60d06c1"
+      ],
+      "name": "Anvil"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_4021590a",
+        "e_dddc13cb"
+      ],
+      "name": "Havoc"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_d0ab3dce",
+        "e_dddc13cb"
+      ],
+      "name": "Tyrant"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_4021590a",
+        "e_d0ab3dce"
+      ],
+      "name": "Vanguard"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_566cd6e8",
+        "e_c253b238"
+      ],
+      "name": "Sanctuary"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_566cd6e8",
+        "e_f60d06c1"
+      ],
+      "name": "Eden"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_566cd6e8",
+        "e_dddc13cb"
+      ],
+      "name": "Twilight"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_1c094682",
+        "e_566cd6e8"
+      ],
+      "name": "Firmament"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_566cd6e8",
+        "e_d0ab3dce"
+      ],
+      "name": "Warden"
+    },
+    {
+      "essences": [
+        "e_566cd6e8",
+        "e_c253b238",
+        "e_f60d06c1"
+      ],
+      "name": "Covenant"
+    },
+    {
+      "essences": [
+        "e_566cd6e8",
+        "e_c253b238",
+        "e_dddc13cb"
+      ],
+      "name": "Requiem"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_566cd6e8",
+        "e_c253b238"
+      ],
+      "name": "Deluge"
+    },
+    {
+      "essences": [
+        "e_566cd6e8",
+        "e_dddc13cb",
+        "e_f60d06c1"
+      ],
+      "name": "Reliquary"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_566cd6e8",
+        "e_f60d06c1"
+      ],
+      "name": "Ascension"
+    },
+    {
+      "essences": [
+        "e_566cd6e8",
+        "e_d0ab3dce",
+        "e_f60d06c1"
+      ],
+      "name": "Bastion"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_566cd6e8",
+        "e_dddc13cb"
+      ],
+      "name": "Revelation"
+    },
+    {
+      "essences": [
+        "e_566cd6e8",
+        "e_d0ab3dce",
+        "e_dddc13cb"
+      ],
+      "name": "Inquisitor"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_566cd6e8",
+        "e_d0ab3dce"
+      ],
+      "name": "Templar"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_c253b238",
+        "e_d0ab3dce"
+      ],
+      "name": "Haven"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_dddc13cb",
+        "e_f60d06c1"
+      ],
+      "name": "Barrow"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_1c094682",
+        "e_f60d06c1"
+      ],
+      "name": "Savage"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_1c094682",
+        "e_dddc13cb"
+      ],
+      "name": "Predator"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_d0ab3dce",
+        "e_dddc13cb"
+      ],
+      "name": "Bramble"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_1c094682",
+        "e_d0ab3dce"
+      ],
+      "name": "Sentinel"
+    },
+    {
+      "essences": [
+        "e_c253b238",
+        "e_dddc13cb",
+        "e_f60d06c1"
+      ],
+      "name": "Abyss"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_c253b238",
+        "e_f60d06c1"
+      ],
+      "name": "Torrent"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_c253b238",
+        "e_dddc13cb"
+      ],
+      "name": "Leviathan"
+    },
+    {
+      "essences": [
+        "e_c253b238",
+        "e_d0ab3dce",
+        "e_dddc13cb"
+      ],
+      "name": "Undertow"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_c253b238",
+        "e_d0ab3dce"
+      ],
+      "name": "Breakwater"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_dddc13cb",
+        "e_f60d06c1"
+      ],
+      "name": "Ruin"
+    },
+    {
+      "essences": [
+        "e_d0ab3dce",
+        "e_dddc13cb",
+        "e_f60d06c1"
+      ],
+      "name": "Tomb"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_d0ab3dce",
+        "e_f60d06c1"
+      ],
+      "name": "Colossus"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_d0ab3dce",
+        "e_dddc13cb"
+      ],
+      "name": "Dreadnought"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_4021590a",
+        "e_566cd6e8"
+      ],
+      "name": "Dawn"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_566cd6e8",
+        "e_c253b238"
+      ],
+      "name": "Redemption"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_566cd6e8",
+        "e_dddc13cb"
+      ],
+      "name": "Reckoning"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_4021590a",
+        "e_dddc13cb"
+      ],
+      "name": "Pyre"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_1c094682",
+        "e_4021590a"
+      ],
+      "name": "Firestorm"
+    },
+    {
+      "essences": [
+        "e_566cd6e8",
+        "e_c253b238",
+        "e_d0ab3dce"
+      ],
+      "name": "Mercy"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_c253b238",
+        "e_f60d06c1"
+      ],
+      "name": "Oasis"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_c253b238",
+        "e_dddc13cb"
+      ],
+      "name": "Quagmire"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_1c094682",
+        "e_c253b238"
+      ],
+      "name": "Thunderhead"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_d0ab3dce",
+        "e_f60d06c1"
+      ],
+      "name": "Stronghold"
+    },
+    {
+      "essences": [
+        "e_c253b238",
+        "e_d0ab3dce",
+        "e_f60d06c1"
+      ],
+      "name": "Rampart"
+    }
+  ],
+  "stones": [
+    {
+      "id": "s_9c9d287b",
+      "name": "Striking",
+      "tags": [
+        "t_42d817be",
+        "t_5462244b"
+      ],
+      "gameName": "Striking"
+    },
+    {
+      "id": "s_4fe694fa",
+      "name": "the Auror",
+      "tags": [
+        "t_abcc5067"
+      ],
+      "gameName": "the Auror"
+    },
+    {
+      "id": "s_ee7b5b63",
+      "name": "the Healer",
+      "tags": [
+        "t_78bf3c15",
+        "t_c99a2f16"
+      ],
+      "gameName": "the Healer"
+    },
+    {
+      "id": "s_6e5a61a0",
+      "name": "Improvement",
+      "tags": [
+        "t_be83c5cf",
+        "t_50a7240a"
+      ],
+      "gameName": "Improvement"
+    },
+    {
+      "id": "s_57421316",
+      "name": "the Helper",
+      "tags": [
+        "t_b06216ac",
+        "t_50a7240a"
+      ],
+      "gameName": "the Helper"
+    },
+    {
+      "id": "s_3153ba7f",
+      "name": "Curses",
+      "tags": [
+        "t_fd59c54d"
+      ],
+      "gameName": "Curses"
+    },
+    {
+      "id": "s_8dc05c2e",
+      "name": "Spells",
+      "tags": [
+        "t_0eaf5fa3"
+      ],
+      "gameName": "Spells"
+    },
+    {
+      "id": "s_77a71d67",
+      "name": "Combat",
+      "tags": [
+        "t_e712d8ea"
+      ],
+      "gameName": "Combat"
     }
   ]
 }

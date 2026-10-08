@@ -721,7 +721,7 @@ bool PlrHitMonst(Player &player, Monster &monster, bool adjacentDamage = false)
 			AddMissile(monster.position.tile, { 1, 0 }, Direction::South, MissileID::WeaponExplosion, TARGET_MONSTERS, player, 0, 0);
 			ApplySpecialAttackExtras(player, monster, specialAttack, dam);
 		} else {
-			dam = ApplyDamageBuffs(player, dam);                                   // Essence Mod
+			dam = ApplyDamageBuffs(player, ScaleByStat(dam, GetWeaponDamageStat(player))); // Essence Mod: Power x 10%
 			if (&player == MyPlayer)
 				dam = ApplyMonsterVulnerability(monster, dam);
 			AddAttackExperienceForDamage(player, monster, dam, monster.hitPoints); // Essence Mod
@@ -2137,7 +2137,8 @@ uint32_t Player::getNextExperienceThreshold() const
 int32_t Player::calculateBaseLife() const
 {
 	const ClassAttributes &attr = getClassAttributes();
-	return attr.adjLife + (attr.lvlLife * getCharacterLevel()) + (attr.chrLife * _pBaseVit);
+	// Essence Mod: every point of Power (Strength) is worth 3 life, beside Recovery's share.
+	return attr.adjLife + (attr.lvlLife * getCharacterLevel()) + (attr.chrLife * _pBaseVit) + ((PowerLifePerPoint * _pBaseStr) << 6);
 }
 
 int32_t Player::calculateBaseMana() const
@@ -2555,11 +2556,8 @@ void NextPlrLevel(Player &player)
 
 	CalcPlrInv(player, true);
 
-	if (CalcStatDiff(player) < 5) {
-		player._pStatPts = CalcStatDiff(player);
-	} else {
-		player._pStatPts += 5;
-	}
+	// Essence Mod: a level no longer gives stat points to spend. Stats rise with the levels of
+	// the character's powers (see GrantEarnedStatPoints).
 	const int hp = player.getClassAttributes().lvlLife;
 
 	player._pMaxHP += hp;
@@ -2595,6 +2593,10 @@ void NextPlrLevel(Player &player)
 
 void Player::_addExperience(uint32_t experience, int levelDelta)
 {
+	// Essence Mod: characters no longer earn experience of their own. Their level follows the
+	// levels of their powers (see GrantEarnedStatPoints); the powers are what earn experience.
+	return;
+
 	if (this != MyPlayer || hasNoLife())
 		return;
 
@@ -3618,6 +3620,13 @@ void ModifyPlrStr(Player &player, int l)
 	player._pStrength += l;
 	player._pBaseStr += l;
 
+	// Essence Mod: Power gives life.
+	const int life = (l * PowerLifePerPoint) << 6;
+	player._pHPBase += life;
+	player._pMaxHPBase += life;
+	player._pHitPoints += life;
+	player._pMaxHP += life;
+
 	CalcPlrInv(player, true);
 
 	if (&player == MyPlayer) {
@@ -3697,7 +3706,20 @@ void SetPlayerHitPoints(Player &player, int val)
 void SetPlrStr(Player &player, int v)
 {
 	player._pBaseStr = v;
+	// Essence Mod: Power gives life, so another player's life follows it as it does their Recovery.
+	player._pHPBase = player.calculateBaseLife();
+	player._pMaxHPBase = player._pHPBase;
 	CalcPlrInv(player, true);
+}
+
+void RecalculateBaseLifeAndMana(Player &player)
+{
+	const int32_t life = player.calculateBaseLife();
+	player._pHPBase = std::min(player._pHPBase + (life - player._pMaxHPBase), life);
+	player._pMaxHPBase = life;
+	const int32_t mana = player.calculateBaseMana();
+	player._pManaBase = std::min(player._pManaBase + (mana - player._pMaxManaBase), mana);
+	player._pMaxManaBase = mana;
 }
 
 void SetPlrMag(Player &player, int v)
@@ -3722,8 +3744,7 @@ void SetPlrVit(Player &player, int v)
 {
 	player._pBaseVit = v;
 
-	int hp = v;
-	hp *= player.getClassAttributes().chrLife;
+	const int hp = player.calculateBaseLife(); // Essence Mod: Power's share as well as Recovery's
 
 	player._pHPBase = hp;
 	player._pMaxHPBase = hp;

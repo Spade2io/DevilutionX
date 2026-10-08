@@ -342,6 +342,9 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 		// Essence Mod: anything but an arrow is a spell attack, and takes the "SpellDamage" bonus.
 		if (&player == MyPlayer && !missileData.isArrow())
 			dam = ApplySpellDamageBuffs(sourceSpell != SpellID::Invalid ? sourceSpell : GetSpellForMissile(t), dam);
+		// Essence Mod: a bow shot deals Speed x 10% of its damage.
+		if (missileData.isArrow())
+			dam = ScaleByStat(dam, player._pDexterity);
 		dam = ApplyDamageBuffs(player, dam); // Essence Mod
 		if (&player == MyPlayer)
 			dam = ApplyMonsterVulnerability(monster, dam);
@@ -924,7 +927,7 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 	switch (spell) {
 	case SpellID::Firebolt:
 	case SpellID::Frostbolt: {
-		const int min = (myPlayer._pMagic / 8) + spellLevel + 1;
+		const int min = 1 + spellLevel + 1; // Essence Mod: was Spirit / 8; Spirit now multiplies the damage
 		return { min, min + 9 };
 	}
 	case SpellID::Healing:
@@ -1017,7 +1020,7 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 			ScaleSpellEffect((2 * myPlayer.getCharacterLevel()) + 40, spellLevel)
 		};
 	case SpellID::ChargedBolt:
-		return { 1, 1 + (myPlayer._pMagic / 4) };
+		return { 1, 1 + 2 }; // Essence Mod: was Spirit / 4; Spirit now multiplies the damage
 	case SpellID::HolyBolt:
 		return { myPlayer.getCharacterLevel() + 9, myPlayer.getCharacterLevel() + 18 };
 	case SpellID::BloodStar: {
@@ -1936,7 +1939,7 @@ void AddFirebolt(Missile &missile, AddMissileParameter &parameter)
 		switch (missile.sourceType()) {
 		case MissileSource::Player: {
 			const Player &player = *missile.sourcePlayer();
-			missile._midam = GenerateRnd(10) + (player._pMagic / 8) + missile._mispllvl + 1;
+			missile._midam = GenerateRnd(10) + 1 + missile._mispllvl + 1; // Essence Mod: was Spirit / 8
 		} break;
 
 		case MissileSource::Monster:
@@ -2927,7 +2930,8 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 		// amount as healing. If there is nobody to raise, the cast is not spent.
 		if (spellData.effect == "Resurrect") {
 			if (radius >= EveryoneRadius) {
-				const auto heal = static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.riderAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)));
+				// The heal for the living takes Spirit here: the percentage for the fallen must not.
+				const auto heal = static_cast<uint32_t>(ScaleByStat(ScaleDamageForSpellLevel(spellData.riderAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)), caster._pMagic));
 				for (const Player &other : Players) {
 					if (!other.plractive)
 						continue;
@@ -3261,7 +3265,7 @@ void AddChargedBolt(Missile &missile, AddMissileParameter &parameter)
 {
 	WorldTilePosition dst = parameter.dst;
 	missile._mirnd = GenerateRnd(15) + 1;
-	missile._midam = (missile._micaster == TARGET_MONSTERS) ? (GenerateRnd(Players[missile._misource]._pMagic / 4) + 1) : 15;
+	missile._midam = (missile._micaster == TARGET_MONSTERS) ? (GenerateRnd(2) + 1) : 15; // Essence Mod: was Spirit / 4
 
 	if (missile.position.start == dst) {
 		dst += parameter.midir;

@@ -816,6 +816,7 @@ void pfile_read_player_from_save(uint32_t saveNum, Player &player)
 	RemoveAllInvalidItems(player);
 	ClearBuffs(player); // Essence Mod: buffs are never saved, so a character loads with none.
 	ClearCooldowns();   // Essence Mod: nor are cooldowns.
+	RecalculateBaseLifeAndMana(player); // Essence Mod: life and mana come from the stats alone
 	CalcPlrInv(player, false);
 	LoadSpellExperience(GetEssenceSidecarPath(saveNum), player);
 }

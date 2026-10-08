@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -19,8 +20,10 @@
 #include "monster.h"
 #include "player.h"
 #include "spell_xp.h"
+#include "spells.h"
 #include "tables/misdat.h"
 #include "tables/spelldat.h"
+#include "utils/is_of.hpp"
 
 namespace devilution {
 
@@ -399,11 +402,54 @@ int GetMonsterDotRemaining(const Monster &monster, DotID dot)
 	return 0;
 }
 
+int ScaleByStat(int amount, int stat)
+{
+	return static_cast<int>(static_cast<int64_t>(amount) * std::max(stat, 0) / 10);
+}
+
+int GetWeaponDamageStat(const Player &player)
+{
+	return player.isHoldingItem(ItemType::Bow) ? player._pDexterity : player._pStrength;
+}
+
 int ApplySpellDamageBuffs(SpellID spell, int damage)
 {
-	if (MyPlayer == nullptr || IsSpecialAttack(spell))
+	if (MyPlayer == nullptr)
 		return damage;
-	return damage + static_cast<int>(static_cast<int64_t>(damage) * GetPowerBuffPercent(*MyPlayer, "SpellDamage") / 100);
+	const Player &player = *MyPlayer;
+	// A special attack is a weapon attack: Power, or Speed when it is made with a bow.
+	if (IsSpecialAttack(spell))
+		return ScaleByStat(damage, GetWeaponDamageStat(player));
+	// Everything else is a spell attack: Spirit, then the "SpellDamage" bonus.
+	damage = ScaleByStat(damage, player._pMagic);
+	return damage + static_cast<int>(static_cast<int64_t>(damage) * GetPowerBuffPercent(player, "SpellDamage") / 100);
+}
+
+uint32_t ScaleGivenAmountBySpirit(SpellID spell, uint32_t amount)
+{
+	if (MyPlayer == nullptr || !IsExtendedSpell(spell) || !IsValidSpell(spell))
+		return amount;
+	const SpellData &spellData = GetSpellData(spell);
+	const std::string &effect = spellData.effect;
+	const std::string &rider = spellData.rider;
+	const std::string &stat = spellData.buffStat;
+	bool isLife = false;
+	if (IsAnyOf(effect, "Heal", "ChainHeal", "Zone", "Shield")) {
+		isLife = true;
+	} else if (IsAnyOf(effect, "Buff", "Aura")) {
+		// A heal or a shield that arrives a little at a time, from a buff or an aura, is still a
+		// heal or a shield. The strength is fixed when the buff or aura is cast.
+		isLife = IsAnyOf(stat, "HealPulse", "ShieldPulse", "Shield");
+	} else if (IsAnyOf(effect, "Mana", "Cleanse", "HealPercent", "Resurrect", "Rebirth")) {
+		isLife = false;
+	} else {
+		// An attack that gives a player something: life or a shield riding on it.
+		isLife = IsAnyOf(rider, "HealAlly", "Leech", "ShieldPerHit") || rider.starts_with("Heal") || (rider == "Guard" && stat == "Shield");
+	}
+	if (!isLife)
+		return amount;
+	// The most a PC will accept for one of these is 3000 hit points.
+	return static_cast<uint32_t>(std::min<int64_t>(static_cast<int64_t>(amount) * std::max(MyPlayer->_pMagic, 0) / 10, 192000));
 }
 
 void ChainSpellDamage(Monster &from, SpellID spell, DamageType damageType, int amount, int keepPercent, int leaps)

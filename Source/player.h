@@ -37,8 +37,21 @@ namespace devilution {
 
 constexpr int InventoryGridCells = 40;
 constexpr int MaxBeltItems = 8;
+/** Essence Mod: life each point of Power (Strength) gives. Recovery's share is in the race tables. */
+constexpr int PowerLifePerPoint = 3;
+
 constexpr int MaxResistance = 75;
-constexpr uint8_t MaxSpellLevel = 15;
+/**
+ * Essence Mod: a power is shown from level 0 to 10. Inside the game it runs from 1 to 11, since a
+ * level of 0 means "not known"; ShownPowerLevel turns one into the other.
+ */
+constexpr uint8_t MaxSpellLevel = 11;
+
+/** @brief The level of a power as the player is shown it: one less than the game counts, and never below 0. */
+constexpr int ShownPowerLevel(int level)
+{
+	return level > 0 ? level - 1 : 0;
+}
 constexpr int PlayerNameLength = 32;
 
 constexpr size_t NumHotkeys = 12;
@@ -570,7 +583,7 @@ public:
 	 */
 	int GetArmor() const
 	{
-		return _pIBonusAC + _pIAC + _pDexterity / 5;
+		return _pIBonusAC + _pIAC + _pDexterity / 3; // Essence Mod: 1 armor for every 3 Speed (was 5)
 	}
 
 	/**
@@ -578,7 +591,7 @@ public:
 	 */
 	int GetMeleeToHit() const
 	{
-		return getCharacterLevel() + _pDexterity / 2 + _pIBonusToHit + getPlayerCombatData().baseMeleeToHit;
+		return getCharacterLevel() + _pDexterity + _pIBonusToHit + getPlayerCombatData().baseMeleeToHit; // Essence Mod: +1 a point of Speed (was a half)
 	}
 
 	/**
@@ -598,7 +611,7 @@ public:
 	 */
 	int GetRangedToHit() const
 	{
-		return getCharacterLevel() + _pDexterity + _pIBonusToHit + getPlayerCombatData().baseRangedToHit;
+		return getCharacterLevel() + _pDexterity * 2 + _pIBonusToHit + getPlayerCombatData().baseRangedToHit; // Essence Mod: +2 a point of Speed (was 1)
 	}
 
 	int GetRangedPiercingToHit() const
@@ -615,7 +628,7 @@ public:
 	 */
 	int GetMagicToHit() const
 	{
-		return _pMagic + getPlayerCombatData().baseMagicToHit;
+		return _pMagic * 2 + getPlayerCombatData().baseMagicToHit; // Essence Mod: +2 a point of Spirit (was 1)
 	}
 
 	/**
@@ -624,7 +637,7 @@ public:
 	 */
 	int GetBlockChance(bool useLevel = true) const
 	{
-		int blkper = _pDexterity + getBaseToBlock();
+		int blkper = _pDexterity * 2 + getBaseToBlock(); // Essence Mod: twice the old share from Speed
 		if (useLevel)
 			blkper += getCharacterLevel() * 2;
 		return blkper;
@@ -921,7 +934,7 @@ public:
 		this->plrIsOnSetLevel = true;
 	}
 
-	/** @brief Returns a character's life based on starting life, character level, and base vitality. */
+	/** @brief Returns a character's life based on starting life, character level, base vitality and, in the Essence Mod, base strength. */
 	int32_t calculateBaseLife() const;
 
 	/** @brief Returns a character's mana based on starting mana, character level, and base magic. */
@@ -1068,6 +1081,11 @@ void ModifyPlrDex(Player &player, int l);
 void ModifyPlrVit(Player &player, int l);
 void SetPlayerHitPoints(Player &player, int val);
 void SetPlrStr(Player &player, int v);
+/**
+ * @brief Essence Mod: sets a character's base life and mana to what their stats give now. Used on
+ * loading, so a character made under older rules follows the current ones.
+ */
+void RecalculateBaseLifeAndMana(Player &player);
 void SetPlrMag(Player &player, int v);
 void SetPlrDex(Player &player, int v);
 void SetPlrVit(Player &player, int v);

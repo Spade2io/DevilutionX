@@ -5,6 +5,9 @@ import TagInput, { DRAG_TYPE } from './TagInput.jsx'
 import { RARITIES, rarityOf } from './rarity.js'
 import { essenceSummary } from './rules.js'
 
+// The four stats an essence can be bound to.
+const PRIMARY_STATS = ['Power', 'Spirit', 'Recovery', 'Speed']
+
 // Data shape used on this page:
 //   essence: { id, name, description, rarity, damageTypeId,   (poolSize is still stored but no longer shown)
 //              tagsAll, tagsMost, tagsSome, tagsFinite, tagsNever, neverOtherGroups }
@@ -178,10 +181,18 @@ function Editor({ essence, data, nameTaken, change, addTag, removeTag, onDelete 
   return (
     <section className="editor">
       <div className="field-row">
-        <label className="field grow">
+        <label className="field name">
           Name
           <NameInput value={essence.name} check={(name) => (nameTaken(name, essence.id) ? 'taken' : '')}
             onCommit={(name) => change(essence.id, { name })} />
+        </label>
+        <label className="field">
+          Primary
+          {/* The stat this essence is bound to when a character takes it, if no other essence holds it. */}
+          <select value={essence.primaryStat ?? ''} onChange={(e) => change(essence.id, { primaryStat: e.target.value || null })}>
+            <option value="">Not set</option>
+            {PRIMARY_STATS.map((stat) => <option key={stat} value={stat}>{stat}</option>)}
+          </select>
         </label>
         <label className="field">
           Damage type
@@ -203,7 +214,8 @@ function Editor({ essence, data, nameTaken, change, addTag, removeTag, onDelete 
         </label>
       </div>
       <p className="note">
-        Damage type gives the essence its colour. Total Powers counts the powers designed for it so far, drafts included.
+        Damage type gives the essence its colour. Primary is the stat the essence is bound to when a character takes
+        it; each level its powers gain adds a point to that stat. Total Powers counts the powers designed for it so far.
       </p>
       <label className="field">
         Description

@@ -11,6 +11,8 @@
 #include "control/control.hpp"
 #include "cooldowns.h"
 #include "cursor.h"
+#include "effects.h"
+#include "plrmsg.h"
 #include "engine/backbuffer_state.hpp"
 #include "engine/clx_sprite.hpp"
 #include "engine/load_cel.hpp"
@@ -69,9 +71,16 @@ constexpr int IconPaddingTop = 4;
 constexpr int FirstEssenceTab = 1;
 constexpr int ConfluenceTab = 4;
 
+/** Tabs whose page is a header and five ability rows: the three essences and the fourth row. */
 bool IsEssenceTab(int tab)
 {
-	return tab >= FirstEssenceTab && tab < FirstEssenceTab + static_cast<int>(EssenceSlotCount);
+	return tab >= FirstEssenceTab && tab < FirstEssenceTab + static_cast<int>(AbilitySlotCount);
+}
+
+/** Where the confluence's header is drawn, and where a click accepts a confluence on offer. */
+Rectangle ConfluenceHeaderArea()
+{
+	return { GetPanelPosition(UiPanels::Spell, { IconX, PageTop }), Size { IconWidth + SpellBookDescription.width, HeaderRowHeight } };
 }
 
 int AbilityRowTop(size_t position)
@@ -211,7 +220,54 @@ void DrawEssenceHeader(const Surface &out, size_t slot)
 			held++;
 	}
 	PrintSBookStr(out, { 0, PageTop + 7 }, StrCat(GetEssenceName(essence), " Essence"), UiFlags::ColorWhitegold);
-	PrintSBookStr(out, { 0, PageTop + 25 }, StrCat(held, " of ", AbilitiesPerEssence, " abilities"));
+	// The stat this essence raises as its abilities gain levels, then how full it is.
+	PrintSBookStr(out, { 0, PageTop + 25 }, StrCat(GetEssenceStatName(GetSlotStat(slot)), ", ", held, " of ", AbilitiesPerEssence, " abilities"));
+}
+
+/**
+ * The top row of the fifth page. Before the player has three essences it says so; with three it
+ * offers their confluence, to be accepted with a click; after that it is the confluence itself.
+ * A fourth essence taken in the confluence's place is drawn as any other essence.
+ */
+void DrawConfluenceHeader(const Surface &out)
+{
+	if (IsInspectingPlayer()) {
+		DrawPlaceholderPage(out, "Confluence", "");
+		return;
+	}
+	if (GetEssenceInSlot(ConfluenceSlot) != EssenceID::None) {
+		DrawEssenceHeader(out, ConfluenceSlot);
+		return;
+	}
+	const std::string name = GetConfluenceName();
+	if (name.empty()) {
+		DrawPlaceholderPage(out, "Confluence", "Three essences form a confluence");
+		return;
+	}
+
+	// The essence picture, untinted: a confluence belongs to no one damage type.
+	const ClxSprite sprite = GetInvItemSprite(static_cast<int>(CURSOR_FIRSTITEM) + ICURS_ESSENCE);
+	ClxDraw(out, GetPanelPosition(UiPanels::Spell, { IconX + (IconWidth - sprite.width()) / 2, PageTop + IconPaddingTop + (IconHeight + sprite.height()) / 2 }), sprite);
+
+	if (IsConfluenceOffered()) {
+		const bool hovered = ConfluenceHeaderArea().contains(MousePosition);
+		PrintSBookStr(out, { 0, PageTop + 7 }, StrCat(name, " Confluence"), UiFlags::ColorWhitegold);
+		PrintSBookStr(out, { 0, PageTop + 25 }, "Click here to accept it", hovered ? UiFlags::ColorWhitegold : UiFlags::ColorWhite);
+		PrintSBookStr(out, { 0, AbilityRowTop(0) + 2 }, "It holds five more abilities,");
+		PrintSBookStr(out, { 0, AbilityRowTop(0) + 2 + AbilityTextLineSpacing }, "from any of your three essences.");
+		PrintSBookStr(out, { 0, AbilityRowTop(1) + 2 }, "Or use a fourth essence to take");
+		PrintSBookStr(out, { 0, AbilityRowTop(1) + 2 + AbilityTextLineSpacing }, "that in its place. Either choice");
+		PrintSBookStr(out, { 0, AbilityRowTop(1) + 2 + 2 * AbilityTextLineSpacing }, "is permanent.");
+		return;
+	}
+
+	size_t held = 0;
+	for (size_t position = 0; position < AbilitiesPerEssence; position++) {
+		if (GetEssenceAbility(ConfluenceSlot, position) != SpellID::Invalid)
+			held++;
+	}
+	PrintSBookStr(out, { 0, PageTop + 7 }, StrCat(name, " Confluence"), UiFlags::ColorWhitegold);
+	PrintSBookStr(out, { 0, PageTop + 25 }, StrCat(GetEssenceStatName(GetSlotStat(ConfluenceSlot)), ", ", held, " of ", AbilitiesPerEssence, " abilities"));
 }
 
 /** One ability on an essence page: icon, three lines of text and the experience bar. */
@@ -256,7 +312,7 @@ void DrawAbilityRow(const Surface &out, const Player &player, SpellID sn, size_t
 
 	// Line 1: name and level.
 	PrintSBookStr(out, line0, pgettext("spell", GetSpellData(sn).sNameText));
-	PrintSBookStr(out, line0, FormatRuntime(pgettext(/* TRANSLATORS: UI constraints, keep short please.*/ "spellbook", "Level {:d}"), level), UiFlags::AlignRight);
+	PrintSBookStr(out, line0, FormatRuntime(pgettext(/* TRANSLATORS: UI constraints, keep short please.*/ "spellbook", "Level {:d}"), ShownPowerLevel(level)), UiFlags::AlignRight);
 
 	// Line 2: cost and cooldown on the left, damage on the right.
 	std::string cost = StrCat("Mana ", GetManaAmount(player, sn) >> 6);
@@ -317,14 +373,13 @@ void DrawSpellBook(const Surface &out)
 		DrawPlaceholderPage(out, "Racial Abilities", "Not yet implemented");
 		return;
 	}
-	if (SpellbookTab == ConfluenceTab) {
-		DrawPlaceholderPage(out, "Confluence", "Not yet implemented");
-		return;
-	}
 	if (!IsEssenceTab(SpellbookTab))
 		return;
 
-	DrawEssenceHeader(out, static_cast<size_t>(SpellbookTab - FirstEssenceTab));
+	if (SpellbookTab == ConfluenceTab)
+		DrawConfluenceHeader(out);
+	else
+		DrawEssenceHeader(out, static_cast<size_t>(SpellbookTab - FirstEssenceTab));
 
 	const Player &player = *InspectPlayer;
 	for (size_t position = 0; position < AbilitiesPerEssence; position++) {
@@ -354,6 +409,14 @@ void CheckSBook()
 	// so a character can be buffed up straight from the book without spending keys on it. Any
 	// other power becomes the right-click power, as before.
 	if (!IsInspectingPlayer()) {
+		// Essence Mod: a confluence on offer is accepted by clicking its header.
+		if (SpellbookTab == ConfluenceTab && IsConfluenceOffered() && ConfluenceHeaderArea().contains(MousePosition)) {
+			AcceptConfluence();
+			PlaySFX(SfxID::QuestDone);
+			EventPlrMsg(StrCat("You have taken the ", GetConfluenceName(), " Confluence. It is bound to your ", GetEssenceStatName(GetSlotStat(ConfluenceSlot)), "."), UiFlags::ColorWhitegold);
+			RedrawEverything();
+			return;
+		}
 		if (const SpellID sn = GetSpellBookAbilityUnderCursor(); sn != SpellID::Invalid) {
 			if (IsSelfCastBuff(sn)) {
 				CastOnSelfNow(sn);

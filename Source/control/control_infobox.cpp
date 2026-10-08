@@ -359,7 +359,7 @@ void CheckPanelInfo()
 			case SpellType::Spell: {
 				AddInfoBoxString(FormatRuntime(_("{:s} Spell"), pgettext("spell", GetSpellData(spellId).sNameText)));
 				const int spellLevel = myPlayer.GetSpellLevel(spellId);
-				AddInfoBoxString(spellLevel == 0 ? _("Spell Level 0 - Unusable") : FormatRuntime(_("Spell Level {:d}"), spellLevel));
+				AddInfoBoxString(spellLevel == 0 ? _("Spell Level 0 - Unusable") : FormatRuntime(_("Spell Level {:d}"), ShownPowerLevel(spellLevel)));
 			} break;
 			case SpellType::Scroll: {
 				AddInfoBoxString(FormatRuntime(_("Scroll of {:s}"), pgettext("spell", GetSpellData(spellId).sNameText)));

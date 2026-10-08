@@ -428,6 +428,10 @@ enum _cmd_id : uint8_t {
 	//
 	// body (TCmd)
 	CMD_SHIELDSTRIKE,
+	// Essence Mod: the sender has switched off one of their own buffs or auras.
+	//
+	// body (TCmdParam1): the power's spell id
+	CMD_CANCELBUFF,
 	// Fake command; set current player for succeeding mega pkt buffer messages.
 	//
 	// body (TFakeCmdPlr)

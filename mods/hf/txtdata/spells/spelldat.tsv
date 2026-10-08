@@ -21,7 +21,7 @@ Invisibility	Invisibility	CastFire	0	0	0	Magic	-1	-1	0		0	0	40	80
 Inferno	Inferno	CastFire	200	10	11	Fire,Targeted	3	2	20	InfernoControl	1	6	20	40
 Golem	Golem	CastFire	1800	110	100	Fire,Targeted	11	9	81	Golem	6	60	16	32
 Rage	Rage	CastHealing	0	0	15	Magic	-1	-1	0	Rage	1	1	0	0
-Teleport	Teleport	CastSkill	2000	125	35	Magic,Targeted	14	12	105	Teleport	3	15	16	32
+Teleport	Teleport	CastSkill	2000	125	35	Magic,Targeted,AllowedInTown	14	12	105	Teleport	3	15	16	32
 Apocalypse	Apocalypse	CastFire	3000	200	150	Fire	19	15	149	Apocalypse	6	90	8	12
 Etherealize	Etherealize	CastFire	2600	160	100	Magic	-1	-1	93	Etherealize	0	100	2	6
 ItemRepair	Item Repair	CastSkill	0	0	0	Magic,AllowedInTown	-1	-1	255	ItemRepair	0	0	40	80

@@ -108,6 +108,7 @@ export function listChanges(before, after) {
     if (old.name !== essence.name) add('Essence', essence.name, `renamed from "${old.name}". The game knows it by the old name.`, true)
     if (old.damageTypeId !== essence.damageTypeId)
       add('Essence', essence.name, `damage type ${typeName(before, old.damageTypeId)} -> ${typeName(after, essence.damageTypeId)}. Its damage type and item colour are typed into the game.`, true)
+    if ((old.primaryStat ?? '') !== (essence.primaryStat ?? '')) add('Essence', essence.name, `primary stat ${old.primaryStat ?? 'not set'} -> ${essence.primaryStat ?? 'not set'}. Carried over by the export; characters who already hold the essence keep the stat they have.`)
     if (old.rarity !== essence.rarity) add('Essence', essence.name, `rarity ${old.rarity} -> ${essence.rarity}. Nothing in the game uses rarity yet.`)
     if (old.poolSize !== essence.poolSize) add('Essence', essence.name, `pool size ${old.poolSize} -> ${essence.poolSize}.`)
     if ((old.description ?? '') !== (essence.description ?? '')) add('Essence', essence.name, 'description changed.')
@@ -120,6 +121,34 @@ export function listChanges(before, after) {
     if (!same(old.neverOtherGroups, essence.neverOtherGroups)) add('Essence', essence.name, '"All other ..." entries on the Never line changed. This guides drafting only.')
   }
   for (const [id, old] of oldEssences) if (!newEssences.has(id)) add('Essence', old.name, 'deleted. If it is in the game, it and its powers are still there.', true)
+
+  // --- Awakening stones ---
+  const oldStones = byId(before.stones ?? []), newStones = byId(after.stones ?? [])
+  for (const [id, stone] of newStones) {
+    const old = oldStones.get(id)
+    const tagsText = (data, s) => s.tags.map((t) => tagName(data, t)).join(', ') || 'no tags'
+    if (!old) { add('Stone', stone.name, `new (${tagsText(after, stone)}). Carried over by the export.`); continue }
+    if (old.name !== stone.name) add('Stone', stone.name, `renamed from "${old.name}". Carried over by the export.`)
+    if (!same(old.tags, stone.tags)) add('Stone', stone.name, `tags ${tagsText(before, old)} -> ${tagsText(after, stone)}. Carried over by the export.`)
+  }
+  for (const [id, old] of oldStones) if (!newStones.has(id)) add('Stone', old.name, 'deleted. Any already in a character\'s bag will give a power at random.')
+
+  // --- Confluences ---
+  const trioKey = (c) => [...c.essences].sort().join('+')
+  const trioText = (data, c) => c.essences.map((e) => essenceName(data, e)).join(' + ')
+  const oldConfluences = new Map((before.confluences ?? []).map((c) => [trioKey(c), c]))
+  for (const c of after.confluences ?? []) {
+    const old = oldConfluences.get(trioKey(c))
+    if (!old) add('Confluence', c.name, `new name for ${trioText(after, c)}. Carried over by the export.`)
+    else if (old.name !== c.name) add('Confluence', c.name, `renamed from "${old.name}" (${trioText(after, c)}). Carried over by the export.`)
+  }
+  {
+    const n = after.essences.length, named = new Set((after.confluences ?? []).filter((c) => c.name).map(trioKey))
+    let unnamed = 0
+    for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) for (let c = b + 1; c < n; c++)
+      if (!named.has([after.essences[a].id, after.essences[b].id, after.essences[c].id].sort().join('+'))) unnamed++
+    if (unnamed) add('Confluence', '(unnamed)', `${unnamed} sets of three essences have no confluence name yet.`, true)
+  }
 
   // --- Damage types ---
   const oldTypes = byId(before.damageTypes), newTypes = byId(after.damageTypes)

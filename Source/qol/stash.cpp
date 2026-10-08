@@ -24,6 +24,7 @@
 #include "hwcursor.hpp"
 #include "inv.h"
 #include "minitext.h"
+#include "plrmsg.h"
 #include "stores.h"
 #include "utils/display.h"
 #include "utils/format_int.hpp"
@@ -488,6 +489,12 @@ bool UseStashItem(uint16_t c)
 
 	if (!MyPlayer->CanUseItem(*item)) {
 		MyPlayer->Say(HeroSpeech::ICantUseThisYet);
+		return true;
+	}
+
+	// Essence Mod: the rules for essences and awakening stones are checked where the bag is used.
+	if (IsAnyOf(item->_iMiscId, IMISC_AWAKENINGSTONE, IMISC_ESSENCE)) {
+		EventPlrMsg("Move it to your inventory to use it", UiFlags::ColorWhite);
 		return true;
 	}
 

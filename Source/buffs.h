@@ -47,6 +47,16 @@ void ActivateBuff(Player &player, BuffID buff);
 
 bool IsBuffActive(const Player &player, BuffID buff);
 
+/** @brief Switches off a buff or aura a player has on, whoever cast it. Every PC does this when told. */
+void CancelBuff(Player &player, SpellID spell);
+
+/**
+ * @brief If the mouse is over one of the local player's own buffs in the buff bar, switches it
+ * off and tells the other PCs. An ally's aura that merely reaches the player cannot be cancelled.
+ * @return true if the mouse was over the buff bar's icons, so the click is used up.
+ */
+bool CancelBuffUnderCursor();
+
 /**
  * @brief Switches on a buff that is read from essence_powers.tsv (effect "Buff"). Casting it again
  * while it is running starts its time again. Such buffs are held in memory only, like the others.

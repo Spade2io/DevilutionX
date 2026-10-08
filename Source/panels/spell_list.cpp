@@ -365,15 +365,9 @@ void DrawSpellBar(const Surface &out)
 
 		// The key that casts it, read from the player's own key settings.
 		const std::string_view key = GetOptions().Keymapper.KeyNameForAction(StrCat("QuickSpell", slot + 1));
-		// On a filled button the key sits in the corner. On an empty one it is shown plainly in the
-		// middle, so it is obvious which key the slot belongs to.
-		if (filled) {
-			DrawString(out, key, Point { topLeft.x + 2, topLeft.y + 1 },
-			    { .flags = UiFlags::ColorWhitegold | UiFlags::FontSize12 | UiFlags::Outlined });
-		} else {
-			DrawString(out, key, Rectangle { topLeft, Size { IconWidth, IconHeight } },
-			    { .flags = UiFlags::ColorWhite | UiFlags::FontSize12 | UiFlags::Outlined | UiFlags::AlignCenter | UiFlags::VerticalCenter });
-		}
+		// Always gold and always in the top-left corner, so it never moves as powers come and go.
+		DrawString(out, key, Point { topLeft.x + 2, topLeft.y + 1 },
+		    { .flags = UiFlags::ColorWhitegold | UiFlags::FontSize12 | UiFlags::Outlined });
 	}
 	SetSpellTrans(SpellType::Spell);
 }

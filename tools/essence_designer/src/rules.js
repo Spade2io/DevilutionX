@@ -68,6 +68,7 @@ export function checkPower(power, data) {
   if (has('Timed') && !buff && !debuff && !has('Shielding')) warnings.push('Timed is for buffs, debuffs and shields.')
   if (has('Cleanse') && has('Permanent')) warnings.push('A cleanse is never Permanent.')
   if (has('Resurrect') && has('Self') && !isUltimate(tags)) warnings.push('A self-resurrect must be an Ultimate.')
+  if (has('Resurrect') && !has('Healing')) warnings.push('A resurrect gives life back, so it is also tagged Healing.')
   // A Weapon tag means "only works with this weapon equipped", and only Special Attacks carry one.
   const weapons = inGroup('Weapon')
   if (weapons && weapons.length > 0 && !has('Special Attack')) warnings.push('Weapon tags (' + weapons.map((t) => t.name).join(', ') + ') only go on Special Attacks.')

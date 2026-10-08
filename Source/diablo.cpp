@@ -475,6 +475,8 @@ void RightMouseDown(bool isShiftHeld)
 		}
 		return;
 	}
+	if (CancelBuffUnderCursor()) // Essence Mod: right-click a buff in the buff bar to switch it off
+		return;
 	if (TryIconCurs())
 		return;
 	if (pcursinvitem != -1 && UseInvItem(pcursinvitem))

@@ -27,6 +27,8 @@
 
 #include "DiabloUI/diabloui.h"
 #include "automap.h"
+#include "buffs.h"
+#include "dots.h"
 #include "config.h"
 #include "control/control.hpp"
 #include "dead.h"
@@ -198,6 +200,7 @@ std::string_view CmdIdString(_cmd_id cmd)
 	case CMD_POWERONPLAYER: return "CMD_POWERONPLAYER";
 	case CMD_POWERONMONSTER: return "CMD_POWERONMONSTER";
 	case CMD_SHIELDSTRIKE: return "CMD_SHIELDSTRIKE";
+	case CMD_CANCELBUFF: return "CMD_CANCELBUFF";
 	case FAKE_CMD_SETID: return "FAKE_CMD_SETID";
 	case FAKE_CMD_DROPID: return "FAKE_CMD_DROPID";
 	case CMD_INVALID: return "CMD_INVALID";
@@ -2614,6 +2617,14 @@ size_t OnShieldStrike(const TCmd &message, Player &player)
 	return sizeof(message);
 }
 
+size_t OnCancelBuff(const TCmdParam1 &message, Player &player)
+{
+	if (gbBufferMsgs != 1)
+		CancelBuff(player, static_cast<SpellID>(Swap16LE(message.wParam1)));
+
+	return sizeof(message);
+}
+
 size_t OnPowerOnMonster(const TCmdPowerOnMonster &message, const Player &caster)
 {
 	const uint16_t monsterId = Swap16LE(message.wMonster);
@@ -3354,6 +3365,9 @@ void NetSendCmdPowerOnPlayer(const Player &target, SpellID spell, uint32_t amoun
 {
 	TCmdPowerOnPlayer cmd;
 
+	// Essence Mod: healing and shields take the caster's Spirit, here where every one of them is sent.
+	amount = ScaleGivenAmountBySpirit(spell, amount);
+
 	cmd.bCmd = CMD_POWERONPLAYER;
 	cmd.bPlr = target.getId();
 	cmd.wSpell = Swap16LE(static_cast<uint16_t>(spell));
@@ -3564,6 +3578,8 @@ size_t ParseCmd(uint8_t pnum, const TCmd *pCmd, size_t maxCmdSize)
 		return HandleCmd(OnPowerOnMonster, player, pCmd, maxCmdSize);
 	case CMD_SHIELDSTRIKE:
 		return HandleCmd(OnShieldStrike, player, pCmd, maxCmdSize);
+	case CMD_CANCELBUFF:
+		return HandleCmd(OnCancelBuff, player, pCmd, maxCmdSize);
 	default:
 		break;
 	}

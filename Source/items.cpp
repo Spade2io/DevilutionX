@@ -35,6 +35,7 @@
 #include "doom.h"
 #include "buffs.h"
 #include "effects.h"
+#include "plrmsg.h"
 #include "essences.h"
 #include "engine/animationinfo.h"
 #include "engine/backbuffer_state.hpp"
@@ -2603,6 +2604,10 @@ void CalcPlrDamageMod(Player &player)
 		break;
 	}
 
+	// Essence Mod: stats no longer add damage to a weapon hit. Power, or Speed for a bow,
+	// multiplies it instead (see GetWeaponDamageStat).
+	player._pDamageMod = 0;
+
 	const ClassAttributes &classAttributes = GetClassAttributes(player._pClass);
 	if (HasAnyOf(classAttributes.classFlags, PlayerClassFlag::IronSkin)) {
 		player._pIAC += playerLevel / 4;
@@ -2903,7 +2908,8 @@ void CalcPlrItemVals(Player &player, bool loadgfx)
 	player._pISplLvlAdd = splLvlAdd;
 	player._pIEnAc = targetAc;
 	CalcPlrResistances(player, flags, fireRes, lightRes, magicRes);
-	CalcPlrLifeMana(player, vitality, magic, life, mana);
+	// Essence Mod: Power on items gives life as the character's own does.
+	CalcPlrLifeMana(player, vitality, magic, life + (((player._pStrength - player._pBaseStr) * PowerLifePerPoint) << 6), mana);
 	player._pIFMinDam = minFireDam;
 	player._pIFMaxDam = maxFireDam;
 	player._pILMinDam = minLightDam;
@@ -4308,8 +4314,15 @@ void UseItem(Player &player, item_misc_id mid, SpellID spellID, int spellFrom)
 		break;
 	case IMISC_ESSENCE:
 		// Essence Mod: an essence item grants the essence that its row's spell belongs to.
-		if (&player == MyPlayer)
+		if (&player == MyPlayer) {
 			AbsorbEssence(GetSpellEssence(spellID));
+			if (const EssenceStat stat = GetEssenceStat(GetSpellEssence(spellID)); stat != EssenceStat::None)
+				EventPlrMsg(StrCat("It is bound to your ", GetEssenceStatName(stat), "."), UiFlags::ColorWhitegold);
+			if (IsConfluenceOffered()) {
+				EventPlrMsg(StrCat("Your essences have formed the ", GetConfluenceName(), " Confluence."), UiFlags::ColorWhitegold);
+				EventPlrMsg("Open the last page of your spellbook to accept it.", UiFlags::ColorWhitegold);
+			}
+		}
 		break;
 	case IMISC_AWAKENINGSTONE:
 		// Essence Mod: an awakening stone teaches the spell written in its item table row.

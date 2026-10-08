@@ -7,17 +7,26 @@
  * they are used. Each essence holds five abilities: the first five awakening stones of that essence
  * the character uses. Both choices are permanent. This is the local player's data; it is kept in
  * the sidecar file next to the save.
+ *
+ * Three essences form a confluence, which is offered on the fifth spellbook tab. Its name depends
+ * on the three (txtdata/spells/confluences.tsv, written by the Essence Designer). Once accepted it
+ * is a fourth row of five abilities, filled by powers of any of the three essences once that
+ * essence's own row is full. A player may turn it down by absorbing a fourth essence instead,
+ * which then has the fourth row to itself. Either choice is permanent.
  */
 #pragma once
 
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include <string>
 #include <string_view>
 
 #include "tables/spelldat.h"
 
 namespace devilution {
+
+struct Player;
 
 enum class EssenceID : uint8_t {
 	None,
@@ -32,21 +41,61 @@ enum class EssenceID : uint8_t {
 	LAST = Earth,
 };
 
+/**
+ * The four stats, by the mod's names for them (Strength, Magic, Dexterity, Vitality in the game's own).
+ * Each essence, and the confluence, is bound to one when it is taken: the essence's primary stat
+ * (txtdata/spells/essence_stats.tsv, from the designer) if no other holds it, otherwise one of
+ * those still free. Every level one of its abilities gains adds a point to that stat.
+ */
+enum class EssenceStat : uint8_t {
+	None,
+	Power,
+	Spirit,
+	Speed,
+	Recovery,
+};
+
 /** Essence tabs in the spellbook: tabs 2, 3 and 4. */
 constexpr size_t EssenceSlotCount = 3;
+
+/** The fourth row of abilities: the confluence's, or those of a fourth essence taken in its place. */
+constexpr size_t ConfluenceSlot = 3;
+
+/** Rows of abilities in all: the three essences and the fourth row. */
+constexpr size_t AbilitySlotCount = 4;
+
+/** Levels the character's abilities must gain between them for the character to gain one. */
+constexpr int PowerLevelsPerCharacterLevel = 8;
 
 /** Abilities each essence holds. */
 constexpr size_t AbilitiesPerEssence = 5;
 
 std::string_view GetEssenceName(EssenceID essence);
 
+std::string_view GetEssenceStatName(EssenceStat stat);
+
+/** @brief The stat a row of abilities (0 to 3) is bound to, or None for a row not yet in use. */
+EssenceStat GetSlotStat(size_t slot);
+
+/** @brief The stat an essence the player holds is bound to, or None if they do not hold it. */
+EssenceStat GetEssenceStat(EssenceID essence);
+
+/**
+ * @brief Adds to the player's own stats whatever their abilities' levels have earned and not yet
+ * been given: one point for each level above the first, to the stat the ability's row is bound to.
+ * Also sets the character's level, which is 1 plus one for every eight of those levels.
+ * @param inGame true while playing, when the other PCs are told and a message is shown; false
+ * while a character is being loaded.
+ */
+void GrantEarnedStatPoints(Player &player, bool inGame);
+
 /** @brief The essence an ability belongs to, or None for abilities that have no essence yet. */
 EssenceID GetSpellEssence(SpellID spell);
 
-/** @brief The essence in a slot (0 to 2), or None if the slot is empty. */
+/** @brief The essence in a slot (0 to 3), or None if the slot is empty. Slot 3 only ever holds a fourth essence taken in place of the confluence. */
 EssenceID GetEssenceInSlot(size_t slot);
 
-/** @brief The ability at a position (0 to 4) under the essence in a slot, or SpellID::Invalid. */
+/** @brief The ability at a position (0 to 4) in a row (0 to 3), or SpellID::Invalid. */
 SpellID GetEssenceAbility(size_t slot, size_t position);
 
 bool HasEssence(EssenceID essence);
@@ -56,6 +105,18 @@ bool CanAbsorbEssence(EssenceID essence);
 
 /** @brief Puts an essence in the first free slot. Does nothing if it cannot be absorbed. */
 void AbsorbEssence(EssenceID essence);
+
+/** @brief Whether the player holds three essences and has not yet chosen what fills the fourth row. */
+bool IsConfluenceOffered();
+
+/** @brief Whether the player has accepted their confluence. */
+bool HasConfluence();
+
+/** @brief Accepts the confluence on offer. Does nothing if none is. */
+void AcceptConfluence();
+
+/** @brief The name of the confluence the player's three essences form, or empty with fewer than three. */
+std::string GetConfluenceName();
 
 enum class LearnResult : uint8_t {
 	Ok,
@@ -78,6 +139,21 @@ LearnResult CheckCanLearn(SpellID spell);
 
 /** @brief A short sentence explaining why an ability cannot be learned. */
 std::string_view DescribeLearnResult(LearnResult result);
+
+/**
+ * @brief Whether an item name is that of an awakening stone that picks a power by tags, as listed
+ * in txtdata/spells/stone_tags.tsv (the designer's Awakening Stones page).
+ */
+bool IsTagStoneKnown(std::string_view itemName);
+
+/**
+ * @brief The power an awakening stone with tags gives the player now. Of the powers the player
+ * could learn at this moment (an essence held, room for it, not known, and not a second aura),
+ * it takes those matching the most of the stone's tags and picks one at random. So a stone whose
+ * tags match nothing learnable gives any learnable power at all.
+ * @return SpellID::Invalid if there is no power the player can learn.
+ */
+SpellID PickPowerForStone(std::string_view itemName);
 
 /** @brief Records a newly learned ability in the next free position under its essence. */
 void SlotLearnedAbility(SpellID spell);

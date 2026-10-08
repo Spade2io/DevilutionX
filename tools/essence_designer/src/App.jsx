@@ -3,16 +3,18 @@ import TagsPage from './TagsPage.jsx'
 import EssencesPage from './EssencesPage.jsx'
 import PowersPage from './PowersPage.jsx'
 import DamageTypesPage from './DamageTypesPage.jsx'
+import ConfluencesPage from './ConfluencesPage.jsx'
+import StonesPage from './StonesPage.jsx'
 
 // Every page in the spec. Only the ones marked "ready" are built so far.
 const PAGES = [
   { id: 'tags', label: 'Tags', ready: true },
   { id: 'essences', label: 'Essences', ready: true },
   { id: 'powers', label: 'Powers', ready: true },
-  { id: 'confluences', label: 'Confluences' },
+  { id: 'confluences', label: 'Confluences', ready: true },
   { id: 'confluence-powers', label: 'Confluence Powers' },
   { id: 'damage-types', label: 'Damage Types', ready: true },
-  { id: 'stones', label: 'Awakening Stones' },
+  { id: 'stones', label: 'Awakening Stones', ready: true },
 ]
 
 const STATUS_TEXT = {
@@ -100,6 +102,8 @@ export default function App() {
         {data && page === 'tags' && <TagsPage data={data} update={update} />}
         {data && page === 'essences' && <EssencesPage data={data} update={update} />}
         {data && page === 'powers' && <PowersPage data={data} update={update} />}
+        {data && page === 'confluences' && <ConfluencesPage data={data} update={update} />}
+        {data && page === 'stones' && <StonesPage data={data} update={update} />}
         {data && page === 'damage-types' && <DamageTypesPage data={data} update={update} />}
       </main>
     </div>
