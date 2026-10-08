@@ -20,6 +20,13 @@ enum class SpellCheckResult : uint8_t {
 };
 
 bool IsValidSpell(SpellID spl);
+
+/**
+ * @brief How many stacks of harmful effects a caster's power removes: what its row gives at level
+ * 0, and its quarter stacks for each level, with the quarters adding up and only whole stacks
+ * counting. 99 or more is all of them. Every PC knows a caster's levels, so every PC agrees.
+ */
+int GetCleanseStacks(const Player &caster, SpellID spell);
 bool IsValidSpellFrom(int spellFrom);
 bool IsWallSpell(SpellID spl);
 bool TargetsMonster(SpellID id);

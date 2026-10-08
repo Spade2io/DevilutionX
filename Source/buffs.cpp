@@ -92,10 +92,10 @@ int SpellLevelOf(const Player &player, SpellID spell)
 	return std::max<int>(player.GetBaseSpellLevel(spell), 1);
 }
 
-/** Fire Aura reaches 2 tiles at spell level 1 and one tile further every two levels. */
-int FireAuraRadius(const Player &player)
+/** Fire Aura reaches 2 tiles at every level. No power's area grows with level. */
+int FireAuraRadius(const Player & /*player*/)
 {
-	return 2 + (SpellLevelOf(player, SpellID::FireAura) - 1) / 2;
+	return 2;
 }
 
 int FireAuraDamage(const Player &player)
@@ -309,8 +309,13 @@ int GetPowerBuffPercent(const Player &player, std::string_view stat)
 		if (spellData.buffStat == stat)
 			percent += buff.amount;
 		// A buff's rider can name a second stat it changes, by the rider's own amount.
-		else if (!spellData.buffStat.empty() && spellData.rider == stat && stat != "Distance")
+		else if (!spellData.buffStat.empty() && spellData.rider == stat && stat != "Distance") {
 			percent += spellData.riderAmount;
+			// The armor that comes with a damage reduction buff (Stoneskin) gains a point for each
+			// level of the power. It is a self buff, so the level is the player's own.
+			if (stat == "Armor" && spellData.buffStat == "DmgReduction" && !buff.fromOther)
+				percent += ShownPowerLevel(player.GetBaseSpellLevel(buff.spell));
+		}
 	}
 	return percent;
 }

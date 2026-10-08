@@ -2928,6 +2928,18 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 		// Stealth and threat never grow: a power that carries one grows through its other effect.
 		if (spellData.buffStat == "Distance")
 			amount = static_cast<uint32_t>(spellData.effectAmount);
+		// A small number of points (armor, resistance) gains a point a level: an eighth of it is nothing.
+		if (IsAnyOf(spellData.buffStat, "Armor", "Resist") && spellData.effectAmount <= 5)
+			amount = static_cast<uint32_t>(spellData.effectAmount + ShownPowerLevel(caster.GetBaseSpellLevel(spell)));
+		// Points off a physical hit: half a point a level for a small one, a whole point for one
+		// that starts at 5 or more. Halves add up across levels; only whole points count.
+		if (spellData.buffStat == "DmgReduction") {
+			const int level = ShownPowerLevel(caster.GetBaseSpellLevel(spell));
+			amount = static_cast<uint32_t>(spellData.effectAmount + (spellData.effectAmount >= 5 ? level : level / 2));
+		}
+		// Walking speed is in whole frames off each step: one more at level 5 and again at level 10.
+		if (spellData.buffStat == "WalkSpeed")
+			amount = static_cast<uint32_t>(spellData.effectAmount + ShownPowerLevel(caster.GetBaseSpellLevel(spell)) / 5);
 		// A percentage grows by a set step each level.
 		if (IsAnyOf(spellData.effect, "Buff", "Aura") && IsPercentBuffStat(spellData.buffStat))
 			amount = static_cast<uint32_t>(GetPercentBuffAmount(spellData.buffStat, spellData.effectAmount, ShownPowerLevel(caster.GetBaseSpellLevel(spell))));

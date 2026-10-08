@@ -116,41 +116,24 @@ bool TargetsMonster(SpellID id)
 
 int GetManaAmount(const Player &player, SpellID sn)
 {
-	int ma; // mana amount
+	// Essence Mod: a power costs a tenth more mana for each level it has gained, compounding. The
+	// sum is kept in 64ths of a point, so the fractions are charged and only the number shown is
+	// rounded. The old game's rule, where a spell got cheaper as it levelled, is gone.
+	const SpellData &spellData = GetSpellData(sn);
+	int levels = std::max(player.GetSpellLevel(sn) - 1, 0);
+	// A power that only gets better at levels 5 and 10 only gets dearer there, catching up each time.
+	if (spellData.buffStat == "WalkSpeed")
+		levels = levels / 5 * 5;
 
-	// mana adjust
-	int adj = 0;
-
-	// spell level
-	const int sl = std::max(player.GetSpellLevel(sn) - 1, 0);
-
-	if (sl > 0) {
-		adj = sl * GetSpellData(sn).sManaAdj;
-	}
-	if (sn == SpellID::Firebolt) {
-		adj /= 2;
-	}
-	if (sn == SpellID::Resurrect && sl > 0) {
-		adj = sl * (GetSpellData(SpellID::Resurrect).sManaCost / 8);
-	}
-
-	if (sn == SpellID::Healing || sn == SpellID::HealOther) {
-		ma = (GetSpellData(SpellID::Healing).sManaCost + 2 * player.getCharacterLevel() - adj);
-	} else if (GetSpellData(sn).sManaCost == 255) {
-		ma = (player._pMaxManaBase >> 6) - adj;
-	} else {
-		ma = (GetSpellData(sn).sManaCost - adj);
-	}
-
+	int ma = spellData.sManaCost == 255 ? player._pMaxManaBase : spellData.sManaCost << 6; // mana amount, in 64ths
+	if (sn == SpellID::Healing || sn == SpellID::HealOther)
+		ma = GetSpellData(SpellID::Healing).sManaCost << 6;
 	ma = std::max(ma, 0);
-	ma <<= 6;
+	for (int i = 0; i < levels; i++)
+		ma += ma / 10;
 
 	const ClassAttributes &classAttributes = GetClassAttributes(player._pClass);
 	ma = ma * classAttributes.manaCost >> 6;
-
-	if (GetSpellData(sn).sMinMana > ma >> 6) {
-		ma = GetSpellData(sn).sMinMana << 6;
-	}
 
 	return ma;
 }
@@ -394,6 +377,18 @@ int CleansePlayer(Player & /*target*/, int /*count*/)
 	return 0;
 }
 
+int GetCleanseStacks(const Player &caster, SpellID spell)
+{
+	if (!IsExtendedSpell(spell) || !IsValidSpell(spell))
+		return 0;
+	const SpellData &spellData = GetSpellData(spell);
+	if (spellData.cleanseStacks >= 99)
+		return 99;
+	if (spellData.cleanseStacks == 0)
+		return 0;
+	return spellData.cleanseStacks + spellData.cleanseQuarterStacks * ShownPowerLevel(caster.GetBaseSpellLevel(spell)) / 4;
+}
+
 void ApplyPowerToMonster(const Player &caster, Monster &monster, SpellID spell, int amount)
 {
 	if (!IsExtendedSpell(spell) || !IsValidSpell(spell) || amount <= 0)
@@ -476,7 +471,7 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 
 	// A rider that names "Cleanse" washes harmful effects off as well as whatever else happens.
 	if (rider.find("Cleanse") != std::string::npos)
-		CleansePlayer(target, 99);
+		CleansePlayer(target, GetCleanseStacks(caster, spell));
 
 	// "Shield": temporary health that takes damage before the player's own life does. It is kept
 	// as a timed buff whose strength is what is left of it. A strike that carries a buff (armor
@@ -513,7 +508,7 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 
 	// "Cleanse" by itself: removes harmful effects and nothing else.
 	if (effect == "Cleanse") {
-		const int removed = CleansePlayer(target, amount);
+		const int removed = CleansePlayer(target, GetCleanseStacks(caster, spell));
 		if (target.isOnActiveLevel())
 			AddFloatingNumber(target.position.tile, { 0, 0 }, removed > 0 ? std::string("Cleansed") : std::string("Nothing to cleanse"), textStyle, textId);
 		return;

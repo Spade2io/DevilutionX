@@ -3,7 +3,7 @@ Radiance	Holy|Healing|Self|Aura|Permanent
 Mend	Holy|Healing|Ally|Single Target|Instant|No CD
 DivineLight	Holy|Healing|Ally|Single Target|Instant|No CD
 PatientPrayer	Holy|Healing|Ally|Single Target|Instant|Efficient|Skirmish (<15)
-LayOnHands	Holy|Healing|Cleanse|Ally|Single Target|Instant|Battle (<60)
+LayOnHands	Holy|Healing|Cleanse|Ally|Single Target|Instant|Utlimate (120+)
 Purify	Holy|Cleanse|Healing|Ally|Single Target|Instant|No CD
 Absolution	Holy|Cleanse|Ally|Splash|Instant|Skirmish (<15)
 ChorusOfLight	Holy|Healing|Ally|Chain|Instant|Skirmish (<15)

@@ -991,11 +991,11 @@
         "t_b06216ac",
         "t_08fdec9d",
         "t_8e6b4fcf",
-        "t_9048f21b"
+        "t_29d3e548"
       ],
       "potency": 70,
       "manaCost": 6,
-      "cooldown": 60,
+      "cooldown": 120,
       "radius": null,
       "growth": 12.5,
       "potencyNote": "% of the ally's maximum life restored",

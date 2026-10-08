@@ -288,6 +288,12 @@ struct SpellData {
 	uint8_t iconFrame = 0;
 	/** Essence Mod: for a power from essence_powers.tsv, its cooldown in seconds. Zero means none. */
 	uint16_t cooldownSeconds = 0;
+	/** Essence Mod: seconds its cooldown shrinks by for each level of the power. Zero for most. */
+	uint8_t cooldownDropSeconds = 0;
+	/** Essence Mod: stacks of harmful effects the power removes at level 0. 99 is all of them; 0 is none. */
+	uint8_t cleanseStacks = 0;
+	/** Essence Mod: quarter stacks more it removes for each level of the power. */
+	uint8_t cleanseQuarterStacks = 0;
 	/** Essence Mod: for a power from essence_powers.tsv, the short line the spellbook shows under it. */
 	std::string description;
 	/**

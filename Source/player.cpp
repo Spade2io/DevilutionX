@@ -155,8 +155,8 @@ void StartWalkAnimation(Player &player, Direction dir, bool pmWillBeCalled)
 	if (pmWillBeCalled)
 		skippedFrames += 1;
 	// Essence Mod: a "WalkSpeed" buff takes frames off every step. One frame is the smallest change
-	// the game can make, about an eighth faster, so the buff is capped low.
-	skippedFrames += static_cast<int8_t>(std::clamp(GetPowerBuffPercent(player, "WalkSpeed"), 0, 2));
+	// the game can make, about an eighth faster. A step is 8 frames; three off is the most allowed.
+	skippedFrames += static_cast<int8_t>(std::clamp(GetPowerBuffPercent(player, "WalkSpeed"), 0, 3));
 	NewPlrAnim(player, player_graphic::Walk, dir, AnimationDistributionFlags::ProcessAnimationPending, skippedFrames);
 }
 

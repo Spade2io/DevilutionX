@@ -266,6 +266,9 @@ void LoadExtendedSpellData()
 		reader.readInt("ally", ally);
 		item.targetsAlly = ally != 0;
 		reader.readString("weapon", item.requiredWeapon);
+		reader.readInt("cooldownDrop", item.cooldownDropSeconds);
+		reader.readInt("cleanse", item.cleanseStacks);
+		reader.readInt("cleanseGrowth", item.cleanseQuarterStacks);
 		item.sBookLvl = 1;
 		ExtendedSpellKeys.emplace_back(std::move(key), static_cast<SpellID>(number));
 	}

@@ -1009,6 +1009,28 @@ A first pass, to be balanced in play. These are the numbers at level 0.
 - Stealth and threat never grow with level. A power that carries one must carry a second effect
   that does grow; several do not yet.
 - Damage and healing keep the rule of an eighth more each level, compounding (3.25 times at level 10).
+- Mana cost grows a tenth each level, compounding (2.59 times at level 10), for every power. It
+  is kept in 64ths of a point. The old game's rule of spells getting cheaper with level is gone.
+- A power with nothing else to gain from a level can have its cooldown shrink instead: Teleport
+  (30 seconds), Kindling (60) and Soul Rend (45) each lose 2 seconds a level; Ward of Purity (60)
+  loses 3, Lay on Hands (120) loses 5 and Absolution (12) loses 1.
+- A small number of points gains one a level: Ironbark's resistance and Hold the Line's armor
+  run 5 to 15.
+- Physical damage reduction gains half a point a level when it starts small (Bedrock 1 to 6,
+  Stoneskin 2 to 7, Stone Wall 3 to 8) and a whole point when it starts at 5 or more (Dig In 5
+  to 15). Stoneskin's armor gains a point a level too (10 to 20).
+- Cleansing removes stacks of harmful effects, of any kind, the most damaging first. A power
+  starts at a number of stacks and gains some each level (quarters and halves add up; only whole
+  stacks count): the plain cleanses and Monsoon 1 +1 a level; the cheap heals that also cleanse
+  (Purify, Wash Away, Remedy) and Renewal 1 +0.5; Sacred Grove 1 each tick +0.25; World Tree 2
+  each tick +1; Great Flood and Miracle 3 +1. Absolution and Lay on Hands remove everything and
+  grow by a shorter cooldown instead. Nothing puts harmful effects on players yet, so none of
+  this can be seen working; Renewal's and Ward of Purity's own effects are not built either.
+- Quickening takes 1 frame off each step, 2 from level 5 and 3 from level 10. Its mana cost
+  moves only at those two levels, catching up to what it would have been.
+- Radiuses do not grow with level, the Fire Aura's included (it stays at 2). The sizes in use are
+  2 (splash), 4 (blanket), 6 (big blanket or ultimate) and 8 (aura). At the game's normal view a
+  radius of 6 reaches the sides of the screen and 8 the top, so there is little room to grow into.
 - A percentage buff, aura or curse grows by a set step each level, by where it starts: 5% gains
   1% a level (15% at level 10), 10% gains 1.5% (25%), 20% gains 2% (40%), 30% gains 2.5% (55%).
   Half percents add up across levels and only whole percents count. Kept small on purpose, so

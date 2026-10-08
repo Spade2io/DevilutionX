@@ -44,15 +44,28 @@ void FitToSpellTable()
 
 int GetSpellCooldownTicks(SpellID spell)
 {
+	// Some cooldowns shrink as the power gains levels. The level is the local player's: cooldowns
+	// are only ever kept for them.
+	const int level = MyPlayer != nullptr && IsValidSpell(spell) ? ShownPowerLevel(MyPlayer->GetBaseSpellLevel(spell)) : 0;
+	const auto shrinking = [level](int seconds, int dropPerLevel) {
+		return std::max(seconds - dropPerLevel * level, 1) * TicksPerSecond;
+	};
 	switch (spell) {
 	case SpellID::InfernoStrike:
 		return 12 * TicksPerSecond;
+	case SpellID::Teleport:
+		// It has nothing else to gain from a level: 30 seconds, and 2 less for each level.
+		return shrinking(30, 2);
 	default:
 		break;
 	}
 	// A power read from essence_powers.tsv carries its cooldown in its own row.
-	if (IsExtendedSpell(spell) && IsValidSpell(spell))
-		return GetSpellData(spell).cooldownSeconds * TicksPerSecond;
+	if (IsExtendedSpell(spell) && IsValidSpell(spell)) {
+		const SpellData &spellData = GetSpellData(spell);
+		if (spellData.cooldownSeconds == 0)
+			return 0;
+		return shrinking(spellData.cooldownSeconds, spellData.cooldownDropSeconds);
+	}
 	return 0;
 }
 

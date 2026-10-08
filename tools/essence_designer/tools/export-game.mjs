@@ -196,6 +196,10 @@ const SHORT_TEXT = {
 //   A Buff or Aura with the stat Power or Spirit adds that many points to the stat. Its potency is
 //         where it starts, and it grows by one point a level, not by an eighth: 3 for a
 //         self-only buff, 1 for one that can be cast on others or reaches a group.
+//   Cleansing: "cleanse" is how many stacks of harmful effects a power removes at level 0, of any
+//         kind, the most damaging first; 99 is all of them. "cleanseQuarters" is how many quarter
+//         stacks it gains a level. A zone removes that many each tick. "cooldownDrop" is the
+//         seconds a cooldown shrinks by each level.
 //   Reducing resistance: a resistant monster shrugs off 75% of the damage. An Aura or a Curse
 //         with the stat ElementalResistCut, NaturalResistCut, AstralResistCut or AllResistCut
 //         takes its potency in points off that (10 makes it 65%), never below none. Different
@@ -234,7 +238,7 @@ const BEHAVIOUR = {
   'Flame Cleave': { effect: 'Strike', spread: true },
   'Melt Armor': { effect: 'Strike', rider: 'Vulnerable', riderPercent: 15 },
   'Searing Brand': { effect: 'Strike', rider: 'Branded', riderDamage: 2 },
-  'Kindling': { missile: 'Corruption', effect: 'Curse', stat: 'ElementalStrip', duration: 0 },
+  'Kindling': { missile: 'Corruption', effect: 'Curse', stat: 'ElementalStrip', duration: 0, cooldownDrop: 2 },
   'Phoenix': { effect: 'Rebirth' },
   'Stoke the Flames': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Damage', duration: 20 },
   'Fan the Flames': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Speed', duration: 0 },
@@ -253,10 +257,10 @@ const BEHAVIOUR = {
   'Wellspring': { missile: 'StrengthBuff', effect: 'Aura', stat: 'ManaRegen', duration: 0 },
   'Tidal Wave': { missile: 'FlameWaveControl', effect: 'Wave' },
   'Deep Freeze': { missile: 'Corruption', effect: 'Freeze' },
-  'Wash Away': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 1 },
-  'Purging Rain': { missile: 'StrengthBuff', effect: 'Cleanse' },
-  'Monsoon': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 99 },
-  'Great Flood': { missile: 'Corruption', effect: 'GroundBurst', rider: 'HealCleanse', riderHeal: 29 },
+  'Wash Away': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 1, cleanse: 1, cleanseQuarters: 2 },
+  'Purging Rain': { missile: 'StrengthBuff', effect: 'Cleanse', cleanse: 1, cleanseQuarters: 4 },
+  'Monsoon': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 99, cleanse: 1, cleanseQuarters: 4 },
+  'Great Flood': { missile: 'Corruption', effect: 'GroundBurst', rider: 'HealCleanse', riderHeal: 29, cleanse: 3, cleanseQuarters: 4 },
   'Charged Air': { missile: 'StrengthBuff', effect: 'Aura', stat: 'SpellDamage', duration: 0 },
   'Spark': { missile: 'PowerBolt', effect: 'Bolt' },
   'Arc': { missile: 'Corruption', effect: 'ChainBurst', rider: 'Keep', riderPercent: 75 },
@@ -303,7 +307,7 @@ const BEHAVIOUR = {
   'Murk': { missile: 'Corruption', effect: 'Curse', stat: 'Accuracy', duration: 12 },
   'Night Terrors': { missile: 'Corruption', effect: 'Corruption', rider: 'Accuracy', riderPercent: 15, duration: 20 },
   'Wither': { missile: 'Corruption', effect: 'Corruption', rider: 'Wither', riderPercent: 25 },
-  'Soul Rend': { missile: 'Corruption', effect: 'Curse', stat: 'AstralStrip', duration: 0 },
+  'Soul Rend': { missile: 'Corruption', effect: 'Curse', stat: 'AstralStrip', duration: 0, cooldownDrop: 2 },
   'Cloak of Night': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0 },
   'Malice': { missile: 'StrengthBuff', effect: 'Buff', stat: 'DotDamage', duration: 0 },
   "Night's Edge": { missile: 'StrengthBuff', effect: 'Buff', stat: 'WeaponDot', duration: 0, perTick: true, rider: 'Corruption', riderPercent: 0 },
@@ -336,29 +340,29 @@ const BEHAVIOUR = {
   'Fairy Ring': { missile: 'StrengthBuff', effect: 'Heal' },
   'Rejuvenation': { missile: 'StrengthBuff', effect: 'Buff', stat: 'HealPulse', duration: 12, overTime: true },
   'Spring Shower': { missile: 'StrengthBuff', effect: 'Buff', stat: 'HealPulse', duration: 10, overTime: true },
-  'Sacred Grove': { missile: 'StrengthBuff', effect: 'Zone', duration: 20, rider: 'Cleanse', riderPercent: 1 },
-  'Remedy': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 1 },
-  'Renewal': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Renewal', duration: 10 },
-  'Fresh Breeze': { missile: 'StrengthBuff', effect: 'Cleanse' },
+  'Sacred Grove': { missile: 'StrengthBuff', effect: 'Zone', duration: 20, rider: 'Cleanse', riderPercent: 1, cleanse: 1, cleanseQuarters: 1 },
+  'Remedy': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 1, cleanse: 1, cleanseQuarters: 2 },
+  'Renewal': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Renewal', duration: 10, cleanse: 1, cleanseQuarters: 2 },
+  'Fresh Breeze': { missile: 'StrengthBuff', effect: 'Cleanse', cleanse: 1, cleanseQuarters: 4 },
   'New Growth': { missile: 'StrengthBuff', effect: 'Resurrect', stat: 'HealPulse', duration: 15, rider: 'Regrow', riderPercent: 60 },
   'Barkskin': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Resist', duration: 0 },
   'Canopy': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Resist', duration: 20 },
   'Ironwood': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Armor', duration: 0 },
   'Oakheart': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0 },
   'Camouflage': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0 },
-  'World Tree': { missile: 'StrengthBuff', effect: 'Zone', duration: 30, rider: 'CleanseRaise', riderPercent: 1 },
+  'World Tree': { missile: 'StrengthBuff', effect: 'Zone', duration: 30, rider: 'CleanseRaise', riderPercent: 1, cleanse: 2, cleanseQuarters: 4 },
   'Radiance': { missile: 'StrengthBuff', effect: 'Aura', stat: 'HealPulse', duration: 0 },
   'Mend': { missile: 'StrengthBuff', effect: 'Heal' },
   'Divine Light': { missile: 'StrengthBuff', effect: 'Heal' },
   'Patient Prayer': { missile: 'StrengthBuff', effect: 'Heal' },
-  'Lay on Hands': { missile: 'StrengthBuff', effect: 'HealPercent', rider: 'Cleanse', riderPercent: 99 },
-  'Purify': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 1 },
-  'Absolution': { missile: 'StrengthBuff', effect: 'Cleanse' },
+  'Lay on Hands': { missile: 'StrengthBuff', effect: 'HealPercent', rider: 'Cleanse', riderPercent: 99, cleanse: 99, cooldownDrop: 5 },
+  'Purify': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Cleanse', riderPercent: 1, cleanse: 1, cleanseQuarters: 2 },
+  'Absolution': { missile: 'StrengthBuff', effect: 'Cleanse', cleanse: 99, cooldownDrop: 1 },
   'Chorus of Light': { missile: 'StrengthBuff', effect: 'ChainHeal' },
   'Second Dawn': { missile: 'StrengthBuff', effect: 'Resurrect' },
   'Guardian Angel': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Rebirth', duration: 0 },
-  'Miracle': { missile: 'StrengthBuff', effect: 'Resurrect', rider: 'HealCleanse', riderHeal: 15 },
-  'Ward of Purity': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Ward', duration: 20, rider: 'Cleanse', riderPercent: 1 },
+  'Miracle': { missile: 'StrengthBuff', effect: 'Resurrect', rider: 'HealCleanse', riderHeal: 15, cleanse: 3, cleanseQuarters: 4 },
+  'Ward of Purity': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Ward', duration: 20, rider: 'Cleanse', riderPercent: 1, cleanse: 1, cooldownDrop: 3 },
   'Vigil': { missile: 'StrengthBuff', effect: 'Buff', stat: 'LifeRegen', duration: 0 },
   'Benediction': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0 },
   'Smite': { effect: 'Strike' },
@@ -469,9 +473,14 @@ const row = ({ power, essence }) => {
     ['Heal', 'Buff', 'Mana', 'Cleanse', 'HealPercent', 'ChainHeal', 'Shield'].includes(behaviour?.effect) && tags.includes('Ally') ? 1 : 0,
     // The weapon the power needs in hand, from its Weapon tag.
     behaviour ? weaponOf(power) : '',
+    // Seconds the cooldown shrinks by each level, for a power with nothing else to gain from one.
+    behaviour?.cooldownDrop ?? 0,
+    // Cleansing: stacks of harmful effects removed at level 0 (99 is all of them), and the
+    // quarter stacks gained with each level.
+    behaviour?.cleanse ?? 0, behaviour?.cleanseQuarters ?? 0,
   ].join('\t')
 }
-const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount', 'stat', 'duration', 'ally', 'weapon'].join('\t')
+const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount', 'stat', 'duration', 'ally', 'weapon', 'cooldownDrop', 'cleanse', 'cleanseGrowth'].join('\t')
 const powersText = [header, ...exported.map(row)].join('\r\n') + '\r\n'
 
 // Stones. A power no longer has a stone of its own: those were for testing and are taken out of
