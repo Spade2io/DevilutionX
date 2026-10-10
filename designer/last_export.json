@@ -1980,7 +1980,7 @@
         "t_9048f21b"
       ],
       "potency": 40,
-      "manaCost": 18,
+      "manaCost": 12,
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
@@ -3224,12 +3224,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 5,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "armor, lasting",
+      "potencyNote": "armor, lasting; +1 for each level",
       "number": 165,
       "gameKey": "Ironwood",
       "icon": 7,

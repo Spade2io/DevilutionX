@@ -24,7 +24,7 @@ WashAway	121	Wash Away	Water	CastHealing	3	Magic,AllowedInTown	StrengthBuff	0	3	
 PurgingRain	122	Purging Rain	Water	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	21	12	Cleanses allies, radius 4	Cleanse	1	4		0		0	0		0	1	4	0
 Monsoon	123	Monsoon	Water	CastHealing	24	Magic,AllowedInTown	StrengthBuff	0	24	3	60	Big heal + cleanse, rad 4	Heal	1152	4	Cleanse	99		0	0		0	1	4	0
 Clarity	124	Clarity	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	Ally regains mana faster	Buff	10	0		0	ManaRegen	0	1		0	0	0	0
-HighTide	125	High Tide	Water	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	50	60	All allies: mana regen 20s	Buff	40	99		0	ManaRegen	20	0		0	0	0	0
+HighTide	125	High Tide	Water	CastHealing	12	Magic,AllowedInTown	StrengthBuff	0	12	50	60	All allies: mana regen 20s	Buff	40	99		0	ManaRegen	20	0		0	0	0	0
 Reservoir	126	Reservoir	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	Ally has more maximum mana	Buff	10	0		0	MaxMana	0	1		0	0	0	0
 ManaTide	127	Mana Tide	Water	CastHealing	20	Magic,AllowedInTown	StrengthBuff	0	20	28	10	Gives an ally 15 mana	Mana	960	0		0		0	1		0	0	0	0
 DeepFreeze	128	Deep Freeze	Water	CastFire	18	Magic,Targeted	Corruption	0	18	7	45	Holds foes still 6s, rad 2	Freeze	6	2		0		0	0		0	0	0	0
@@ -64,7 +64,7 @@ FreshBreeze	161	Fresh Breeze	Nature	CastHealing	15	Magic,AllowedInTown	StrengthB
 NewGrowth	162	New Growth	Nature	CastHealing	30	Magic,AllowedInTown	StrengthBuff	0	30	44	60	Raises ally, then regrows	Resurrect	10	0	Regrow	60	HealPulse	15	0		0	0	0	0
 Barkskin	163	Barkskin	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	Ally: +10 resistances	Buff	10	0		0	Resist	0	1		0	0	0	0
 Canopy	164	Canopy	Nature	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	45	60	All allies: resist for 20s	Buff	15	99		0	Resist	20	0		0	0	0	0
-Ironwood	165	Ironwood	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	7	0	Ally has more armor	Buff	10	0		0	Armor	0	1		0	0	0	0
+Ironwood	165	Ironwood	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	7	0	Ally has more armor	Buff	5	0		0	Armor	0	1		0	0	0	0
 Oakheart	166	Oakheart	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	Ally has more maximum life	Buff	10	0		0	MaxLife	0	1		0	0	0	0
 Camouflage	167	Camouflage	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	19	0	Stealth; +5% to hit	Buff	150	0	ToHit	5	Distance	0	0		0	0	0	0
 WorldTree	168	World Tree	Nature	CastHealing	60	Magic,AllowedInTown	StrengthBuff	0	60	24	240	Healing ground, 30s, rad 6	Zone	256	6	CleanseRaise	1		30	0		0	2	4	0

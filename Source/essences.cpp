@@ -835,6 +835,30 @@ int RollEssenceLoot(bool isBoss, bool always)
 	return row;
 }
 
+int GetEssenceItemWorth(const Item &item)
+{
+	if (!IsAnyOf(item._iMiscId, IMISC_ESSENCE, IMISC_AWAKENINGSTONE))
+		return 0;
+	if (item._ivalue > 0)
+		return item._ivalue;
+	// 0 Common, 1 Rare, 2 Epic, 3 Legendary.
+	size_t rarity = 0;
+	if (item._iMiscId == IMISC_AWAKENINGSTONE) {
+		const TagStone *stone = FindTagStone(item._iName);
+		if (stone == nullptr)
+			return 0;
+		rarity = stone->rarity;
+		return rarity == 2 ? 600 : rarity == 3 ? 1200 : 0;
+	}
+	const EssenceID essence = GetSpellEssence(item._iSpell);
+	PrimaryStatOf(essence); // reads the table of essences, rarities included, if it has not been read
+	for (const EssencePrimary &entry : EssencePrimaries) {
+		if (entry.essence == GetEssenceName(essence))
+			rarity = entry.rarity;
+	}
+	return rarity == 2 ? 800 : rarity == 3 ? 1500 : 0;
+}
+
 bool IsTagStoneKnown(std::string_view itemName)
 {
 	return FindTagStone(itemName) != nullptr;

@@ -193,7 +193,8 @@ void SelheroListSelect(size_t value)
 				continue;
 			}
 
-			if (heroClass == HeroClass::Barbarian && !HaveBarbarianAssets() && !(*GetOptions().Gameplay.testBarbarian)) {
+			// Essence Mod: the Barbarian is not one of the races and is never offered.
+			if (heroClass == HeroClass::Barbarian) {
 				continue;
 			}
 

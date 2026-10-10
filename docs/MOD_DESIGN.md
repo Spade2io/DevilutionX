@@ -1064,7 +1064,7 @@ A first pass, to be balanced in play. These are the numbers at level 0.
   this can be seen working; Renewal's and Ward of Purity's own effects are not built either.
 - Quickening takes 1 frame off each step, 2 from level 5 and 3 from level 10. Its mana cost
   moves only at those two levels, catching up to what it would have been.
-- Radiuses do not grow with level, the Fire Aura's included (it stays at 2). The sizes in use are
+- Radiuses do not grow with level, with one exception made on 2026-10-10: the Fire Aura reaches 2 tiles, 3 from level 5 and 4 at level 10. The sizes in use are
   2 (splash), 4 (blanket), 6 (big blanket or ultimate) and 8 (aura). At the game's normal view a
   radius of 6 reaches the sides of the screen and 8 the top, so there is little room to grow into.
 - A percentage buff, aura or curse grows by a set step each level, by where it starts: 5% gains
@@ -1168,3 +1168,21 @@ The same was done for boons that enlarge the health pool or the mana pool, the s
 the same reason (5% of a new character's 40 life is 2): 10% +2 for others, 20% +3 for yourself,
 40% +4 on a cooldown; double when riding on another boon (Monolith, Juggernaut, Ascendance); 40%
 when left by a heal or a resurrection (Invigorate, Genesis); 20% for the racial ones.
+
+## Experience for powers with a cooldown (2026-10-10)
+
+A power on a cooldown is used far less often than one without, so it would level far more slowly.
+- **An attack with a cooldown earns three times the experience** for the damage it deals, its
+  damage over time included.
+- **A boon with a cooldown earns half of every gain while it is running**, where a lasting boon
+  earns a tenth. The share is taken from the ordinary amount, never from a tripled one.
+Heals with a cooldown are unchanged. `spell_xp.cpp`.
+
+## Armor and resistance boons (decided 2026-10-10)
+
+A boon of armor or resistance that starts at 10 or more grows an eighth a level, compounding, like
+damage (10 is 24 at level 10; 30 is 91). One that starts at 5 or less gains a flat point a level.
+Armor or resistance riding on another boon grows an eighth as well (Brace's resistance,
+Reinforce's armor, Juggernaut's armor), except where it already had the flat point (Stoneskin,
+Cloak of Night). A rider's growth uses the level of the player wearing the boon, so it applies when
+you cast it on yourself; on an ally it stays at its starting size.

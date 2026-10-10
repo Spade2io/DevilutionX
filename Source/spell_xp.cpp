@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "buffs.h"
+#include "cooldowns.h"
 #include "essences.h"
 #include "races.h"
 #include "monster.h"
@@ -140,6 +141,10 @@ uint32_t AwardSpellExperience(Player &player, SpellID spell, int64_t gained, int
 
 /** Share of any experience gain that each active buff's spell also earns. */
 constexpr int BuffExperienceDivisor = 10;
+/** A boon with a cooldown is rarely running, so while it is it earns half of every gain. */
+constexpr int CooldownBuffExperienceDivisor = 2;
+/** An attack with a cooldown is rarely used, so its damage earns this many times the experience. */
+constexpr int CooldownAttackExperienceMultiplier = 3;
 
 /**
  * @brief Gives every active buff a tenth of an experience gain (damage, healing, or a weapon hit),
@@ -168,7 +173,8 @@ void ShareExperienceWithActiveBuffs(Player &player, uint32_t gained, std::string
 	for (const SpellID buffSpell : GetActivePowerBuffs(player)) {
 		if (player.GetBaseSpellLevel(buffSpell) == 0)
 			continue;
-		const uint32_t buffGain = AwardSpellExperience(player, buffSpell, gained / BuffExperienceDivisor, 0);
+		const int divisor = GetSpellCooldownTicks(buffSpell) > 0 ? CooldownBuffExperienceDivisor : BuffExperienceDivisor;
+		const uint32_t buffGain = AwardSpellExperience(player, buffSpell, gained / divisor, 0);
 		if (buffGain != 0)
 			StrAppend(message, message.empty() ? "" : ", ", DescribeGain(buffSpell, buffGain));
 	}
@@ -256,13 +262,16 @@ void AddSpellExperienceForDamage(const Player &player, const Monster &monster, S
 	}
 
 	const int64_t worth = WithRacialExperience(player, ExperienceForDamage(player, monster, damage, hitPointsBefore));
-	const uint32_t added = AwardSpellExperience(*MyPlayer, spell, worth, 0);
+	// An attack with a cooldown earns three times as much. The boons that share in the gain take
+	// their share of the ordinary amount, not of the tripled one.
+	const int multiplier = GetSpellCooldownTicks(spell) > 0 ? CooldownAttackExperienceMultiplier : 1;
+	const uint32_t added = AwardSpellExperience(*MyPlayer, spell, worth * multiplier, 0);
 	if (added == 0)
 		return;
 
 	// One line for the whole gain, however many buffs are sharing in it.
 	std::string message = DescribeGain(spell, added);
-	ShareExperienceWithActiveBuffs(*MyPlayer, added, message);
+	ShareExperienceWithActiveBuffs(*MyPlayer, added / multiplier, message);
 	EventPlrMsg(message, UiFlags::ColorWhite);
 }
 

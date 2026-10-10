@@ -93,10 +93,14 @@ int SpellLevelOf(const Player &player, SpellID spell)
 	return std::max<int>(player.GetBaseSpellLevel(spell), 1);
 }
 
-/** Fire Aura reaches 2 tiles at every level. No power's area grows with level. */
-int FireAuraRadius(const Player & /*player*/)
+/**
+ * Fire Aura reaches 2 tiles, 3 from level 5 and 4 at level 10 (Bryan, 2026-10-10). It is the one
+ * power whose area grows with level.
+ */
+int FireAuraRadius(const Player &player)
 {
-	return 2;
+	const int level = ShownPowerLevel(player.GetBaseSpellLevel(SpellID::FireAura));
+	return level >= 10 ? 4 : level >= 5 ? 3 : 2;
 }
 
 int FireAuraDamage(const Player &player)
@@ -120,9 +124,9 @@ std::string DescribeBuff(const Player &player, BuffID buff)
 	case BuffID::Strength:
 		return StrCat("Strength: +", GetBuffStrengthBonus(player), " Power");
 	case BuffID::FireAura:
-		return StrCat("Fire Aura: ", FormatDamage(FireAuraDamage(player)), " fire damage every 2 seconds within ", FireAuraRadius(player), " tiles");
+		return StrCat("Fire Aura: ", FormatDamage(FireAuraDamage(player)), " fire damage every 2 seconds, radius ", FireAuraRadius(player));
 	case BuffID::FlamingWeapon:
-		return StrCat("Flaming Weapon: +", FormatDamage(GetFlamingWeaponDamage(player)), " fire damage on every weapon hit");
+		return StrCat("Flaming Weapon: +", FormatDamage(GetFlamingWeaponDamage(player)), " fire damage on each weapon hit");
 	}
 	return {};
 }
@@ -302,6 +306,40 @@ std::vector<ReachingBuff> GetReachingBuffs(const Player &player)
 	return reaching;
 }
 
+/** Whether a buff's rider names a stat. The rider may name several, with bars between them ("ManaRegen|MaxMana"). */
+bool RiderNames(const SpellData &spellData, std::string_view stat)
+{
+	return !spellData.buffStat.empty() && StrCat("|", spellData.rider, "|").find(StrCat("|", stat, "|")) != std::string::npos;
+}
+
+/**
+ * What a buff's rider gives for a stat it names: the rider's own amount, and what the rules add.
+ * The level is the player's own, so the growth applies only to a boon the player cast on themselves.
+ */
+int GetRiderAmount(const Player &player, const ReachingBuff &buff, const SpellData &spellData, std::string_view stat)
+{
+	// Regeneration or a larger pool riding on another boon (Ascendance, Juggernaut, Monolith)
+	// counts double, as every boon of those kinds is double size.
+	int amount = IsAnyOf(stat, "ManaRegen", "LifeRegen", "MaxLife", "MaxMana") ? 2 * spellData.riderAmount : spellData.riderAmount;
+	if (buff.fromOther)
+		return amount;
+	const int level = ShownPowerLevel(player.GetBaseSpellLevel(buff.spell));
+	// The armor that comes with a damage reduction boon (Stoneskin) or with a stealth boon (Cloak
+	// of Night) gains a point a level. So does a chance to block (Stalwart) or to hit (Camouflage).
+	if (stat == "Armor" && IsAnyOf(spellData.buffStat, "DmgReduction", "Distance"))
+		amount += level;
+	// Any other armor or resistance riding on a boon (Brace, Reinforce, Juggernaut) grows as armor
+	// and resistance boons do: an eighth more each level.
+	else if (IsAnyOf(stat, "Armor", "Resist"))
+		amount = ScaleDamageForSpellLevel(amount, std::max<int>(player.GetBaseSpellLevel(buff.spell), 1));
+	if (IsAnyOf(stat, "Block", "ToHit"))
+		amount += level;
+	// Points off a physical hit (Unyielding): half a point a level, or a whole one from 5 up.
+	if (stat == "DmgReduction")
+		amount += spellData.riderAmount >= 5 ? level : level / 2;
+	return amount;
+}
+
 int GetPowerBuffPercent(const Player &player, std::string_view stat)
 {
 	int percent = 0;
@@ -310,30 +348,101 @@ int GetPowerBuffPercent(const Player &player, std::string_view stat)
 		if (spellData.buffStat == stat)
 			percent += buff.amount;
 		// A buff's rider can name a second stat it changes, by the rider's own amount.
-		// The rider may name several, with bars between them ("ManaRegen|MaxMana").
-		else if (!spellData.buffStat.empty() && stat != "Distance" && StrCat("|", spellData.rider, "|").find(StrCat("|", stat, "|")) != std::string::npos) {
-			// Regeneration or a larger pool riding on another boon (Ascendance, Juggernaut, Monolith)
-			// counts double, as every boon of those kinds is double size.
-			percent += IsAnyOf(stat, "ManaRegen", "LifeRegen", "MaxLife", "MaxMana") ? 2 * spellData.riderAmount : spellData.riderAmount;
-			// The armor that comes with a damage reduction buff (Stoneskin) gains a point for each
-			// level of the power. It is a self buff, so the level is the player's own.
-			if (stat == "Armor" && spellData.buffStat == "DmgReduction" && !buff.fromOther)
-				percent += ShownPowerLevel(player.GetBaseSpellLevel(buff.spell));
-			// A chance to block riding on a self boon (Stalwart) gains a point a level, and points
-			// off a physical hit (Unyielding) half a point a level, or a whole one from 5 up.
-			// So does a chance to hit (Camouflage), and the armor that comes with a stealth boon
-			// (Cloak of Night).
-			if (IsAnyOf(stat, "Block", "ToHit") && !buff.fromOther)
-				percent += ShownPowerLevel(player.GetBaseSpellLevel(buff.spell));
-			if (stat == "Armor" && spellData.buffStat == "Distance" && !buff.fromOther)
-				percent += ShownPowerLevel(player.GetBaseSpellLevel(buff.spell));
-			if (stat == "DmgReduction" && !buff.fromOther) {
-				const int level = ShownPowerLevel(player.GetBaseSpellLevel(buff.spell));
-				percent += spellData.riderAmount >= 5 ? level : level / 2;
-			}
-		}
+		else if (stat != "Distance" && RiderNames(spellData, stat))
+			percent += GetRiderAmount(player, buff, spellData, stat);
 	}
 	return percent;
+}
+
+/** One effect of a boon in a few plain words, with its size: "+3 Spirit". Empty for one with nothing to say. */
+std::string DescribeBuffEffect(std::string_view stat, int amount, const SpellData &spellData)
+{
+	if (IsAnyOf(stat, "Power", "Spirit"))
+		return StrCat("+", amount, " ", stat);
+	if (stat == "Speed")
+		return StrCat("+", amount, "% attack and casting speed");
+	if (stat == "Damage")
+		return StrCat("+", amount, "% damage");
+	if (stat == "SpellDamage")
+		return StrCat("+", amount, "% spell attack damage");
+	if (stat == "SpecialDamage")
+		return StrCat("+", amount, "% special attack damage");
+	if (stat == "DotDamage")
+		return StrCat("+", amount, "% damage over time");
+	if (stat == "ManaRegen")
+		return StrCat("+", amount, "% mana regeneration");
+	if (stat == "LifeRegen")
+		return StrCat("+", amount, "% health regeneration");
+	if (stat == "MaxLife")
+		return StrCat("+", amount, "% health");
+	if (stat == "MaxMana")
+		return StrCat("+", amount, "% mana");
+	if (stat == "Armor")
+		return StrCat("+", amount, " armor");
+	if (stat == "Resist")
+		return StrCat("+", amount, " to all resistances");
+	if (stat == "DmgReduction")
+		return StrCat("-", amount, " damage from each physical hit");
+	if (stat == "DamageTaken")
+		return StrCat("-", amount, "% damage taken");
+	if (stat == "Oath")
+		return StrCat(amount, "% of your damage goes to your protector");
+	if (stat == "Rebirth")
+		return StrCat("rise once at ", std::clamp(amount, 1, 100), "% life");
+	if (stat == "WeaponToHit")
+		return StrCat("+", amount, "% weapon accuracy");
+	if (stat == "ToHit")
+		return StrCat("+", amount, "% accuracy");
+	if (stat == "Block")
+		return StrCat("+", amount, "% block");
+	if (stat == "WalkSpeed")
+		return "faster walking";
+	if (stat == "NoStagger")
+		return "never staggered";
+	if (stat == "Distance")
+		return amount > 100 ? "stealth" : "threat";
+	if (stat == "HealPulse")
+		return StrCat("+", FormatDamage(amount), " health every 2 seconds");
+	if (stat == "ShieldPulse")
+		return StrCat(FormatDamage(amount), " shield every 10 seconds");
+	if (stat == "Shield")
+		return StrCat(std::max((amount + 32) >> 6, 1), " shield left");
+	if (stat == "WeaponDot")
+		return StrCat("weapon hits leave ", spellData.rider);
+	if (stat == "ElementalResistCut")
+		return StrCat("-", amount, " Elemental resistance on enemies nearby");
+	if (stat == "NaturalResistCut")
+		return StrCat("-", amount, " Natural resistance on enemies nearby");
+	if (stat == "AstralResistCut")
+		return StrCat("-", amount, " Astral resistance on enemies nearby");
+	if (stat == "AllResistCut")
+		return StrCat("-", amount, " resistance on enemies nearby");
+	return {};
+}
+
+/**
+ * What a boon on the buff bar says under the mouse: its name, then each thing it is doing now with
+ * its real size, then the seconds left if it runs out. "Storm's Focus: +3 Spirit".
+ */
+std::string DescribePowerBuff(const Player &player, const ReachingBuff &buff)
+{
+	const SpellData &spellData = GetSpellData(buff.spell);
+	std::string effects = DescribeBuffEffect(spellData.buffStat, buff.amount, spellData);
+	// Each stat the rider names, in the order it names them.
+	std::string_view rest = spellData.buffStat == "WeaponDot" ? std::string_view {} : std::string_view { spellData.rider };
+	while (!rest.empty()) {
+		const size_t bar = rest.find('|');
+		const std::string_view stat = rest.substr(0, bar);
+		rest = bar == std::string_view::npos ? std::string_view {} : rest.substr(bar + 1);
+		const std::string more = DescribeBuffEffect(stat, GetRiderAmount(player, buff, spellData, stat), spellData);
+		if (!more.empty())
+			StrAppend(effects, effects.empty() ? "" : ", ", more);
+	}
+	// A boon with nothing the list above knows how to say keeps its short description.
+	std::string text = StrCat(spellData.sNameText, ": ", effects.empty() ? std::string_view { spellData.description } : std::string_view { effects });
+	if (buff.ticksLeft > 0)
+		StrAppend(text, " (", (buff.ticksLeft + TicksPerSecond - 1) / TicksPerSecond, "s left)");
+	return text;
 }
 
 /** How near a player with the Fire Aura seems to monsters: half as far away as they are. */
@@ -805,12 +914,7 @@ void DrawBuffBar(const Surface &out)
 			    { .flags = UiFlags::ColorWhite | UiFlags::AlignRight | UiFlags::FontSize12 });
 		}
 		if (iconArea.contains(MousePosition)) {
-			std::string text = StrCat(spellData.sNameText, ": ", spellData.description);
-			if (spellData.buffStat == "Shield")
-				StrAppend(text, " (", std::max((buff.amount + 32) >> 6, 1), " shield left)");
-			if (buff.ticksLeft > 0)
-				StrAppend(text, " (", secondsLeft, "s left)");
-			DrawString(out, WordWrapString(text, DescriptionWidth),
+			DrawString(out, WordWrapString(DescribePowerBuff(player, buff), DescriptionWidth),
 			    Rectangle { Point { Left, Margin + IconHeight + 2 }, Size { DescriptionWidth, 3 * DescriptionLineHeight } },
 			    { .flags = UiFlags::ColorWhitegold, .lineHeight = DescriptionLineHeight });
 		}

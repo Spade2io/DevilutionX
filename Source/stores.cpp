@@ -758,6 +758,12 @@ void StartWitchBuy()
 	NumTextLines = std::max(CurrentItemIndex - 4, 0);
 }
 
+/**
+ * Essence Mod: Pepin buys essences and awakening stones, for half their price. He borrows Adria's
+ * sell screen; this says the screen is open at his house and not hers.
+ */
+bool HealerIsBuying = false;
+
 bool WitchSellOk(int i)
 {
 	const Item *pI;
@@ -767,6 +773,9 @@ bool WitchSellOk(int i)
 	else
 		pI = &MyPlayer->SpdList[-(i + 1)];
 
+	// Pepin wants only essences and awakening stones, and only those that have a price.
+	if (HealerIsBuying)
+		return GetEssenceItemWorth(*pI) > 0;
 	return WitchWillBuy(*pI);
 }
 
@@ -792,7 +801,9 @@ void StartWitchSell()
 			if (PlayerItems[CurrentItemIndex]._iMagical != ITEM_QUALITY_NORMAL && PlayerItems[CurrentItemIndex]._iIdentified)
 				PlayerItems[CurrentItemIndex]._ivalue = PlayerItems[CurrentItemIndex]._iIvalue;
 
-			PlayerItems[CurrentItemIndex]._ivalue = std::max(PlayerItems[CurrentItemIndex]._ivalue / 4, 1);
+			if (HealerIsBuying)
+				PlayerItems[CurrentItemIndex]._ivalue = GetEssenceItemWorth(PlayerItems[CurrentItemIndex]); // Epic and Legendary ones have a worth but no price
+			PlayerItems[CurrentItemIndex]._ivalue = std::max(PlayerItems[CurrentItemIndex]._ivalue / (HealerIsBuying ? 2 : 4), 1); // Essence Mod: Pepin pays half
 			PlayerItems[CurrentItemIndex]._iIvalue = PlayerItems[CurrentItemIndex]._ivalue;
 			PlayerItemIndexes[CurrentItemIndex] = i;
 			CurrentItemIndex++;
@@ -809,7 +820,9 @@ void StartWitchSell()
 			if (PlayerItems[CurrentItemIndex]._iMagical != ITEM_QUALITY_NORMAL && PlayerItems[CurrentItemIndex]._iIdentified)
 				PlayerItems[CurrentItemIndex]._ivalue = PlayerItems[CurrentItemIndex]._iIvalue;
 
-			PlayerItems[CurrentItemIndex]._ivalue = std::max(PlayerItems[CurrentItemIndex]._ivalue / 4, 1);
+			if (HealerIsBuying)
+				PlayerItems[CurrentItemIndex]._ivalue = GetEssenceItemWorth(PlayerItems[CurrentItemIndex]); // Epic and Legendary ones have a worth but no price
+			PlayerItems[CurrentItemIndex]._ivalue = std::max(PlayerItems[CurrentItemIndex]._ivalue / (HealerIsBuying ? 2 : 4), 1); // Essence Mod: Pepin pays half
 			PlayerItems[CurrentItemIndex]._iIvalue = PlayerItems[CurrentItemIndex]._ivalue;
 			PlayerItemIndexes[CurrentItemIndex] = -(i + 1);
 			CurrentItemIndex++;
@@ -1050,9 +1063,11 @@ std::vector<Item> EssenceItems;
  */
 std::vector<Item> AwakeningStoneItems;
 
-constexpr int HealerBuyItemsLine = 14;
-constexpr int HealerBuyEssencesLine = 16;
-constexpr int HealerBuyAwakeningStonesLine = 18;
+constexpr int HealerTalkLine = 10;
+constexpr int HealerBuyItemsLine = 12;
+constexpr int HealerBuyEssencesLine = 14;
+constexpr int HealerBuyAwakeningStonesLine = 16;
+constexpr int HealerSellLine = 18;
 constexpr int HealerLeaveLine = 20;
 
 /** The line of Pepin's menu that leads to the list currently open. */
@@ -1130,11 +1145,12 @@ void StartHealer()
 	HasScrollbar = false;
 	AddSText(0, 1, _("Welcome to the"), UiFlags::ColorWhitegold | UiFlags::AlignCenter, false);
 	AddSText(0, 3, _("Healer's home"), UiFlags::ColorWhitegold | UiFlags::AlignCenter, false);
-	AddSText(0, 9, _("Would you like to:"), UiFlags::ColorWhitegold | UiFlags::AlignCenter, false);
-	AddSText(0, 12, _("Talk to Pepin"), UiFlags::ColorBlue | UiFlags::AlignCenter, true);
+	AddSText(0, 7, _("Would you like to:"), UiFlags::ColorWhitegold | UiFlags::AlignCenter, false);
+	AddSText(0, HealerTalkLine, _("Talk to Pepin"), UiFlags::ColorBlue | UiFlags::AlignCenter, true);
 	AddSText(0, HealerBuyItemsLine, _("Buy items"), UiFlags::ColorWhite | UiFlags::AlignCenter, true);
 	AddSText(0, HealerBuyEssencesLine, "Buy essences", UiFlags::ColorWhite | UiFlags::AlignCenter, true);
 	AddSText(0, HealerBuyAwakeningStonesLine, "Buy awakening stones", UiFlags::ColorWhite | UiFlags::AlignCenter, true);
+	AddSText(0, HealerSellLine, "Sell essences and stones", UiFlags::ColorWhite | UiFlags::AlignCenter, true);
 	AddSText(0, HealerLeaveLine, _("Leave Healer's home"), UiFlags::ColorWhite | UiFlags::AlignCenter, true);
 	AddSLine(5);
 	CurrentItemIndex = 20;
@@ -1681,6 +1697,7 @@ void WitchEnter()
 		StartStore(TalkID::WitchBuy);
 		break;
 	case 16:
+		HealerIsBuying = false;
 		StartStore(TalkID::WitchSell);
 		break;
 	case 18:
@@ -1743,8 +1760,8 @@ void WitchBuyEnter()
 void WitchSellEnter()
 {
 	if (CurrentTextLine == BackButtonLine()) {
-		StartStore(TalkID::Witch);
-		CurrentTextLine = 16;
+		StartStore(HealerIsBuying ? TalkID::Healer : TalkID::Witch);
+		CurrentTextLine = HealerIsBuying ? HealerSellLine : 16;
 		return;
 	}
 
@@ -2015,8 +2032,8 @@ void ConfirmEnter(Item &item)
 void HealerEnter()
 {
 	switch (CurrentTextLine) {
-	case 12:
-		OldTextLine = 12;
+	case HealerTalkLine:
+		OldTextLine = HealerTalkLine;
 		TownerId = TOWN_HEALER;
 		OldActiveStore = TalkID::Healer;
 		StartStore(TalkID::Gossip);
@@ -2037,6 +2054,10 @@ void HealerEnter()
 	case HealerBuyAwakeningStonesLine:
 		ActiveHealerShelf = HealerShelf::AwakeningStones;
 		StartStore(TalkID::HealerBuy);
+		break;
+	case HealerSellLine:
+		HealerIsBuying = true;
+		StartStore(TalkID::WitchSell);
 		break;
 	case HealerLeaveLine:
 		ActiveStore = TalkID::None;
@@ -2685,8 +2706,8 @@ void StoreESC()
 		CurrentTextLine = 14;
 		break;
 	case TalkID::WitchSell:
-		StartStore(TalkID::Witch);
-		CurrentTextLine = 16;
+		StartStore(HealerIsBuying ? TalkID::Healer : TalkID::Witch);
+		CurrentTextLine = HealerIsBuying ? HealerSellLine : 16;
 		break;
 	case TalkID::WitchRecharge:
 		StartStore(TalkID::Witch);

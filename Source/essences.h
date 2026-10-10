@@ -168,6 +168,14 @@ SpellID PickPowerForStone(std::string_view itemName);
  */
 int RollEssenceLoot(bool isBoss, bool always = false);
 
+struct Item;
+/**
+ * @brief What an essence or an awakening stone is worth, for selling. One that Pepin sells is
+ * worth its price. An Epic or Legendary one is never sold and has no price, but is worth 800 or
+ * 1500 (an essence) and 600 or 1200 (a stone). Zero for anything else.
+ */
+int GetEssenceItemWorth(const Item &item);
+
 /**
  * @brief Whether a player is Filthy. A character becomes Filthy on filling their fourth row (their
  * confluence, or a fourth essence), when the filth of their old self pours out, and stays so until
