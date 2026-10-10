@@ -7,10 +7,13 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include "control/control.hpp"
 #include "cooldowns.h"
+#include "buffs.h"
 #include "cursor.h"
+#include "dots.h"
 #include "effects.h"
 #include "plrmsg.h"
 #include "engine/backbuffer_state.hpp"
@@ -149,7 +152,125 @@ StringOrView GetSpellPowerText(SpellID spell, int spellLevel)
 	return FormatRuntime(_(/* TRANSLATORS: UI constraints, keep short please.*/ "Damage: {:d} - {:d}"), min, max);
 }
 
-/** Essence Mod: a few words on what an ability does, for the third line of its entry. */
+/** Essence Mod: an amount held in 64ths as the book writes it: whole from 10 up, one decimal below. */
+std::string FormatBookAmount(int64_t sixtyFourths)
+{
+	if (sixtyFourths >= 10 * 64)
+		return StrCat((sixtyFourths + 32) / 64);
+	const int64_t tenths = (sixtyFourths * 10 + 32) / 64;
+	return StrCat(tenths / 10, ".", tenths % 10);
+}
+
+/**
+ * Essence Mod: a power's numbers for the player as they stand, for a line of their own in the
+ * book: damage to each monster, healing or shield, how long something over time runs, the radius.
+ * Averages: what lands at once varies a fifth either way. Empty when a power has no number to show.
+ */
+std::string GetPowerNumbersText(const Player &player, SpellID spell, int level)
+{
+	if (level == 0)
+		return {};
+	if (!IsExtendedSpell(spell) || !IsValidSpell(spell)) {
+		// One of the game's own spells: its range, after Spirit and the player's boons.
+		const auto [min, max] = GetDamageAmt(spell, level);
+		if (min == -1)
+			return {};
+		return StrCat(FormatBookAmount(ApplyDamageBuffs(player, ApplySpellDamageBuffs(spell, min << 6))), " - ", FormatBookAmount(ApplyDamageBuffs(player, ApplySpellDamageBuffs(spell, max << 6))), " damage");
+	}
+
+	const SpellData &data = GetSpellData(spell);
+	const std::string &effect = data.effect;
+	const std::string &stat = data.buffStat;
+	const int shown = ShownPowerLevel(level);
+	const auto grown = [&](int base) { return ScaleDamageForSpellLevel(base, std::max(level, 1)); };
+	// Damage takes the stat behind it and the player's boons; healing and shields take Spirit.
+	const auto damage = [&](int base) { return FormatBookAmount(ApplyDamageBuffs(player, ApplySpellDamageBuffs(spell, grown(base)))); };
+	const auto given = [&](int base) {
+		return FormatBookAmount(static_cast<int64_t>(grown(base)) * std::max(player._pMagic, 0) / 10 * (100 + GetRacialElementPercent(player, spell)) / 100);
+	};
+	const std::string barred = StrCat("|", data.rider, "|");
+	const auto rides = [&](std::string_view name) { return barred.find(StrCat("|", name, "|")) != std::string::npos; };
+
+	std::string text;
+	bool timed = false; // whether the duration belongs on the end
+	if (IsAnyOf(effect, "Burst", "GroundBurst", "ChainBurst", "Bolt", "Wave")) {
+		text = StrCat(damage(data.effectAmount), " damage");
+	} else if (effect == "Strike") {
+		text = StrCat("+", damage(data.effectAmount), " damage");
+	} else if (IsAnyOf(effect, "Burn", "Corruption", "Cone", "Chain")) {
+		text = StrCat(damage(data.effectAmount), " damage per 2s, 20s");
+	} else if (effect == "DamageZone") {
+		text = StrCat(damage(data.effectAmount), " damage per 2s");
+		timed = true;
+	} else if (IsAnyOf(effect, "Heal", "ChainHeal")) {
+		text = StrCat(given(data.effectAmount), " healing");
+	} else if (effect == "Zone") {
+		text = StrCat(given(data.effectAmount), " healing per 2s");
+		timed = true;
+	} else if (effect == "Shield") {
+		text = StrCat(given(data.effectAmount), " shield");
+		timed = true;
+	} else if (effect == "HealPercent") {
+		text = StrCat(std::min(grown(data.effectAmount), 100), "% of their life");
+	} else if (IsAnyOf(effect, "Resurrect", "Rebirth")) {
+		text = StrCat("Rise at ", std::clamp(grown(data.effectAmount), 1, 100), "% life");
+	} else if (effect == "Mana") {
+		text = StrCat("+", FormatBookAmount(grown(data.effectAmount)), " mana");
+	} else if (IsAnyOf(effect, "Freeze", "GroundFreeze")) {
+		text = StrCat("Held ", data.effectAmount, "s");
+	} else if (effect == "Curse") {
+		if (stat == "Accuracy")
+			text = StrCat("-", std::min(GetPercentBuffAmount(stat, data.effectAmount, shown), 95), "% to hit");
+		else if (GetResistCutCategories(stat) != 0)
+			text = StrCat("-", grown(data.effectAmount), " resistance");
+		timed = true;
+	} else if (IsAnyOf(effect, "Buff", "Aura")) {
+		const int amount = static_cast<int>(GetPowerCastAmount(player, spell));
+		timed = true;
+		if (stat == "HealPulse") {
+			text = StrCat(given(data.effectAmount), " healing per 2s");
+		} else if (stat == "ShieldPulse") {
+			text = StrCat(given(data.effectAmount), " shield per 10s");
+		} else if (stat == "Distance") {
+			// Stealth and threat never grow; the second effect riding on them does.
+			if (rides("Block"))
+				text = StrCat("+", data.riderAmount + shown, "% block");
+			else if (rides("ToHit"))
+				text = StrCat("+", data.riderAmount + shown, "% to hit");
+			else if (rides("Armor"))
+				text = StrCat("+", data.riderAmount + shown, " armor");
+			else if (rides("DmgReduction"))
+				text = StrCat(data.riderAmount + (data.riderAmount >= 5 ? shown : shown / 2), " off each physical hit");
+			else if (rides("MaxLife"))
+				text = StrCat("+", data.riderAmount, "% life");
+		} else if (stat == "DamageTaken") {
+			text = StrCat("-", amount, "% damage taken");
+		} else if (stat == "Oath") {
+			text = StrCat(amount, "% of their damage");
+		} else if (stat == "Rebirth") {
+			text = StrCat("Rise at ", std::clamp(amount, 1, 100), "% life");
+		} else if (IsPercentBuffStat(stat)) {
+			text = StrCat("+", amount, "%");
+		} else if (stat == "DmgReduction") {
+			text = StrCat(amount, " off each physical hit");
+		} else if (IsAnyOf(stat, "Power", "Spirit")) {
+			text = StrCat("+", amount, " ", stat);
+		} else if (stat == "Armor") {
+			text = StrCat("+", amount, " armor");
+		} else if (stat == "Resist") {
+			text = StrCat("+", amount, " resistance");
+		}
+	}
+	if (text.empty())
+		return text;
+	if (timed && data.durationSeconds > 0)
+		StrAppend(text, ", ", data.durationSeconds, "s");
+	if (data.effectRadius > 0 && data.effectRadius < 99)
+		StrAppend(text, ", rad ", data.effectRadius);
+	return text;
+}
+
+/** Essence Mod: a few words on what an ability does, for the last line of its entry. */
 std::string_view GetAbilityDescription(SpellID spell)
 {
 	switch (spell) {
@@ -315,16 +436,44 @@ void DrawAbilityRow(const Surface &out, const Player &player, SpellID sn, size_t
 	PrintSBookStr(out, line0, pgettext("spell", GetSpellData(sn).sNameText));
 	PrintSBookStr(out, line0, FormatRuntime(pgettext(/* TRANSLATORS: UI constraints, keep short please.*/ "spellbook", "Level {:d}"), ShownPowerLevel(level)), UiFlags::AlignRight);
 
-	// Line 2: cost and cooldown on the left, damage on the right.
-	std::string cost = StrCat("Mana ", GetManaAmount(player, sn) >> 6);
-	if (const int cooldownTicks = GetSpellCooldownTicks(sn); cooldownTicks > 0)
-		StrAppend(cost, "  Cooldown ", cooldownTicks / 20, "s");
+	// Line 2: cost and cooldown on the left, and on the right the power's numbers for this
+	// character as they stand. This is the game's smallest lettering, so when the two would not
+	// fit side by side the words are shortened, a step at a time, until they do.
+	const int mana = GetManaAmount(player, sn) >> 6;
+	const int cooldownSeconds = GetSpellCooldownTicks(sn) / 20;
+	std::string numbers = GetPowerNumbersText(player, sn, level);
+	const auto costText = [&](std::string_view manaWord, std::string_view cooldownWord) {
+		std::string cost = StrCat(manaWord, " ", mana);
+		if (cooldownSeconds > 0)
+			StrAppend(cost, "  ", cooldownWord, " ", cooldownSeconds, "s");
+		return cost;
+	};
+	const auto shorten = [](std::string text) {
+		static constexpr std::pair<std::string_view, std::string_view> Shorter[] = {
+			{ " damage", " dmg" }, { " healing", " heal" }, { " per 2s", "/2s" }, { " per 10s", "/10s" }, { " resistance", " resist" }, { " physical", "" }, { ", rad ", " r" }
+		};
+		for (const auto &[longer, shorter] : Shorter) {
+			if (const size_t at = text.find(longer); at != std::string::npos)
+				text.replace(at, longer.size(), shorter);
+		}
+		return text;
+	};
+	const int room = SpellBookDescription.width - 2 * SpellBookDescriptionPaddingHorizontal - 8;
+	const auto fits = [&](const std::string &cost, const std::string &right) {
+		return right.empty() || GetLineWidth(cost, GameFont12) + GetLineWidth(right, GameFont12) <= room;
+	};
+	std::string cost = costText("Mana", "Cooldown");
+	if (!fits(cost, numbers))
+		cost = costText("Mana", "CD");
+	if (!fits(cost, numbers))
+		numbers = shorten(numbers);
+	if (!fits(cost, numbers))
+		cost = costText("MP", "CD");
 	PrintSBookStr(out, line1, cost);
-	if (const StringOrView text = GetSpellPowerText(sn, level); !text.empty())
-		PrintSBookStr(out, line1, text, UiFlags::AlignRight);
+	if (!numbers.empty())
+		PrintSBookStr(out, line1, numbers, UiFlags::ColorWhitegold | UiFlags::AlignRight);
 
-	// Line 3: what it does. Progress towards the next level is shown by the bar underneath alone;
-	// the numbers were dropped to leave the whole line for the description.
+	// Line 3: what it does. Progress towards the next level is shown by the bar underneath alone.
 	PrintSBookStr(out, line2, GetAbilityDescription(sn));
 
 	constexpr int BarHeight = 3;

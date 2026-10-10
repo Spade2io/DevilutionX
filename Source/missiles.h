@@ -249,6 +249,8 @@ struct DamageRange {
 	int max;
 };
 DamageRange GetDamageAmt(SpellID spell, int spellLevel);
+/** Essence Mod: the amount a power from essence_powers.tsv is cast with at the caster's level of it, before Spirit. */
+uint32_t GetPowerCastAmount(const Player &caster, SpellID spell);
 
 /**
  * @brief Returns the direction a vector from p1(x1, y1) to p2(x2, y2) is pointing to.

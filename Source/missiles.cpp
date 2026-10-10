@@ -2929,6 +2929,39 @@ void ProcessHealingZone(Missile &missile)
 	}
 }
 
+/**
+ * Essence Mod: the amount a power is cast with at the caster's level of it, before Spirit: an
+ * eighth more a level for most, and the set steps for percentages, small points and the rest.
+ * The casting code and the spellbook both use it.
+ */
+uint32_t GetPowerCastAmount(const Player &caster, SpellID spell)
+{
+	const SpellData &spellData = GetSpellData(spell);
+	auto amount = static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.effectAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)));
+	// A buff or aura that adds points to a stat grows by one point a level, not by an eighth.
+	if (IsAnyOf(spellData.buffStat, "Power", "Spirit"))
+		amount = static_cast<uint32_t>(spellData.effectAmount + ShownPowerLevel(caster.GetBaseSpellLevel(spell)));
+	// Stealth and threat never grow: a power that carries one grows through its other effect.
+	if (spellData.buffStat == "Distance")
+		amount = static_cast<uint32_t>(spellData.effectAmount);
+	// A small number of points (armor, resistance) gains a point a level: an eighth of it is nothing.
+	if (IsAnyOf(spellData.buffStat, "Armor", "Resist") && spellData.effectAmount <= 5)
+		amount = static_cast<uint32_t>(spellData.effectAmount + ShownPowerLevel(caster.GetBaseSpellLevel(spell)));
+	// Points off a physical hit: half a point a level for a small one, a whole point for one
+	// that starts at 5 or more. Halves add up across levels; only whole points count.
+	if (spellData.buffStat == "DmgReduction") {
+		const int level = ShownPowerLevel(caster.GetBaseSpellLevel(spell));
+		amount = static_cast<uint32_t>(spellData.effectAmount + (spellData.effectAmount >= 5 ? level : level / 2));
+	}
+	// Walking speed is in whole frames off each step: one more at level 5 and again at level 10.
+	if (spellData.buffStat == "WalkSpeed")
+		amount = static_cast<uint32_t>(spellData.effectAmount + ShownPowerLevel(caster.GetBaseSpellLevel(spell)) / 5);
+	// A percentage grows by a set step each level.
+	if (IsAnyOf(spellData.effect, "Buff", "Aura") && IsPercentBuffStat(spellData.buffStat))
+		amount = static_cast<uint32_t>(GetPercentBuffAmount(spellData.buffStat, spellData.effectAmount, ShownPowerLevel(caster.GetBaseSpellLevel(spell))));
+	return amount;
+}
+
 void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 {
 	// The buff lives on the player, so this effect has done its job the moment it is created.
@@ -2947,28 +2980,7 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 		const Player &caster = Players[missile._misource];
 		if (&caster != MyPlayer)
 			return;
-		auto amount = static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.effectAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)));
-		// A buff or aura that adds points to a stat grows by one point a level, not by an eighth.
-		if (IsAnyOf(spellData.buffStat, "Power", "Spirit"))
-			amount = static_cast<uint32_t>(spellData.effectAmount + ShownPowerLevel(caster.GetBaseSpellLevel(spell)));
-		// Stealth and threat never grow: a power that carries one grows through its other effect.
-		if (spellData.buffStat == "Distance")
-			amount = static_cast<uint32_t>(spellData.effectAmount);
-		// A small number of points (armor, resistance) gains a point a level: an eighth of it is nothing.
-		if (IsAnyOf(spellData.buffStat, "Armor", "Resist") && spellData.effectAmount <= 5)
-			amount = static_cast<uint32_t>(spellData.effectAmount + ShownPowerLevel(caster.GetBaseSpellLevel(spell)));
-		// Points off a physical hit: half a point a level for a small one, a whole point for one
-		// that starts at 5 or more. Halves add up across levels; only whole points count.
-		if (spellData.buffStat == "DmgReduction") {
-			const int level = ShownPowerLevel(caster.GetBaseSpellLevel(spell));
-			amount = static_cast<uint32_t>(spellData.effectAmount + (spellData.effectAmount >= 5 ? level : level / 2));
-		}
-		// Walking speed is in whole frames off each step: one more at level 5 and again at level 10.
-		if (spellData.buffStat == "WalkSpeed")
-			amount = static_cast<uint32_t>(spellData.effectAmount + ShownPowerLevel(caster.GetBaseSpellLevel(spell)) / 5);
-		// A percentage grows by a set step each level.
-		if (IsAnyOf(spellData.effect, "Buff", "Aura") && IsPercentBuffStat(spellData.buffStat))
-			amount = static_cast<uint32_t>(GetPercentBuffAmount(spellData.buffStat, spellData.effectAmount, ShownPowerLevel(caster.GetBaseSpellLevel(spell))));
+		auto amount = GetPowerCastAmount(caster, spell);
 		const int radius = spellData.effectRadius;
 
 		const auto isLivingAllyHere = [](const Player &other) {

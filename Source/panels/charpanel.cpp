@@ -315,7 +315,8 @@ namespace {
 /** Formats a value held in 64ths with one decimal place, e.g. 96 -> "1.5". */
 std::string FormatSixtyFourthsPerSecond(int value)
 {
-	const int tenths = value * 10 / 64;
+	// Rounded to the nearest tenth: 70/64 is 1.09, which should read 1.1 and not 1.0.
+	const int tenths = (value * 10 + 32) / 64;
 	return StrCat(tenths / 10, ".", tenths % 10);
 }
 
