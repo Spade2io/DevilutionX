@@ -1,7 +1,7 @@
 id	name	soundId	bookCost10	staffCost10	manaCost	flags	bookLevel	staffLevel	minIntelligence	missiles	manaMultiplier	minMana	staffMin	staffMax
 Firebolt	Firebolt	CastFire	100	5	6	Fire,Targeted	1	1	7	Firebolt	1	3	40	80
 Healing	Healing	CastHealing	100	5	5	Magic,AllowedInTown	1	1	8	Healing	3	1	20	40
-Lightning	Lightning	CastLightning	300	15	10	Lightning,Targeted	4	3	10	LightningControl	1	6	20	60
+Lightning	Lightning	CastLightning	300	15	15	Lightning,Targeted	4	3	10	LightningControl	1	15	20	60
 Flash	Flash	CastLightning	750	50	30	Lightning	5	4	16	FlashBottom,FlashTop	2	16	20	40
 Identify	Identify	CastSkill	0	10	13	Magic,AllowedInTown	-1	-1	11	Identify	2	1	8	12
 FireWall	Fire Wall	CastFire	600	40	28	Fire,Targeted	3	2	13	FireWallControl	2	16	8	16

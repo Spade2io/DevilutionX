@@ -40,8 +40,11 @@ int ScaleDamageForSpellLevel(int baseDamage, int spellLevel);
  *
  * @param damage Damage before resistance, in 64ths of a hit point.
  * @param finishKill Start the death of a monster this kills. Pass false when the caller does that itself.
+ * @param overTime true for one beat of something that arrives over time (damage over time, a
+ * damage zone, a damage aura). Those are exactly their number every beat; anything that lands all
+ * at once has a little luck in it (see RollVariance).
  */
-void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, DamageType damageType, int damage, bool finishKill = true);
+void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, DamageType damageType, int damage, bool finishKill = true, bool overTime = false);
 
 enum class DotID : uint8_t {
 	Corruption,
@@ -160,6 +163,17 @@ void WitherMonster(Monster &monster, int percent);
 
 /** @brief The damage an effect over time on a monster still has to deal, in 64ths of a hit point. */
 int GetMonsterDotRemaining(const Monster &monster, DotID dot);
+
+/** How far a power's damage, healing or shield can land from its number, either way, in percent. */
+constexpr int PowerVariancePercent = 20;
+
+/**
+ * @brief An amount with a little luck in it: anywhere from 20% under to 20% over, evenly, so the
+ * average is the amount itself. Used for the damage, healing and shields of powers that land all
+ * at once. Anything that arrives over time is steady from beat to beat. Rolled on the PC of whoever cast the power, which then tells the
+ * others what happened, so it never puts the PCs out of step.
+ */
+int RollVariance(int amount);
 
 /**
  * @brief Whether a buff, aura or curse stat is a percentage that grows by a set step each level:

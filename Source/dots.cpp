@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <random>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -164,7 +165,7 @@ void DealDotDamage(Monster &monster, const ActiveDot &dot)
 	// to each tick they cause.
 	const int morePercent = MonsterWither[monster.getId()] + (MyPlayer != nullptr ? GetPowerBuffPercent(*MyPlayer, "DotDamage") : 0);
 	for (const DotShare &share : dot.shares) {
-		DealSpellTickDamage(monster, share.spell, definition.missile, definition.damageType, share.damagePerTick + static_cast<int>(static_cast<int64_t>(share.damagePerTick) * morePercent / 100));
+		DealSpellTickDamage(monster, share.spell, definition.missile, definition.damageType, share.damagePerTick + static_cast<int>(static_cast<int64_t>(share.damagePerTick) * morePercent / 100), /*finishKill=*/true, /*overTime=*/true);
 		if (monster.hasNoLife())
 			break;
 	}
@@ -181,7 +182,7 @@ int ScaleDamageForSpellLevel(int baseDamage, int spellLevel)
 	return baseDamage;
 }
 
-void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, DamageType damageType, int damage, bool finishKill)
+void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, DamageType damageType, int damage, bool finishKill, bool overTime)
 {
 	// Resistances work as they do for a spell hit: immune takes nothing, resistant takes a quarter.
 	if (monster.isImmune(missile, damageType))
@@ -191,6 +192,8 @@ void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, Dam
 		return;
 
 	const Player &player = *MyPlayer;
+	if (!overTime)
+		damage = RollVariance(damage); // a little luck in every hit; a beat of something over time is steady
 	damage = ApplyMonsterVulnerability(monster, ApplyDamageBuffs(player, ApplySpellDamageBuffs(spell, damage)));
 	AddSpellExperienceForDamage(player, monster, spell, damage, monster.hitPoints);
 	ApplyMonsterDamage(damageType, monster, damage);
@@ -402,6 +405,15 @@ int GetMonsterDotRemaining(const Monster &monster, DotID dot)
 	return 0;
 }
 
+int RollVariance(int amount)
+{
+	if (amount <= 0)
+		return amount;
+	static std::mt19937 generator { std::random_device {}() };
+	const int percent = std::uniform_int_distribution<int>(100 - PowerVariancePercent, 100 + PowerVariancePercent)(generator);
+	return std::max(static_cast<int>(static_cast<int64_t>(amount) * percent / 100), 1);
+}
+
 bool IsPercentBuffStat(std::string_view stat)
 {
 	return IsAnyOf(stat, "Damage", "SpellDamage", "DotDamage", "Speed", "ManaRegen", "LifeRegen", "MaxLife", "MaxMana", "DamageTaken", "Oath", "Rebirth", "Accuracy");
@@ -465,7 +477,13 @@ uint32_t ScaleGivenAmountBySpirit(SpellID spell, uint32_t amount)
 	if (!isLife)
 		return amount;
 	// The most a PC will accept for one of these is 3000 hit points.
-	return static_cast<uint32_t>(std::min<int64_t>(static_cast<int64_t>(amount) * std::max(MyPlayer->_pMagic, 0) / 10, 192000));
+	const int64_t scaled = std::min<int64_t>(static_cast<int64_t>(amount) * std::max(MyPlayer->_pMagic, 0) / 10, 192000);
+	// Healing ground, a heal or shield that pulses from a buff or an aura, and life drawn back
+	// over time are the same every beat. A heal or shield that lands at once has a little luck in it.
+	const bool overTime = effect == "Zone" || IsAnyOf(effect, "Buff", "Aura") || rider == "Leech";
+	if (overTime)
+		return static_cast<uint32_t>(scaled);
+	return static_cast<uint32_t>(std::min<int64_t>(RollVariance(static_cast<int>(scaled)), 192000));
 }
 
 void ChainSpellDamage(Monster &from, SpellID spell, DamageType damageType, int amount, int keepPercent, int leaps)

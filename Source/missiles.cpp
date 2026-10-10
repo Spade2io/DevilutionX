@@ -340,8 +340,13 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 		// Essence Mod: a resistant monster shrugs off three quarters, less whatever curses have taken off.
 		dam = ApplyMonsterResistance(monster, t, damageType, dam);
 		// Essence Mod: anything but an arrow is a spell attack, and takes the "SpellDamage" bonus.
-		if (&player == MyPlayer && !missileData.isArrow())
+		if (&player == MyPlayer && !missileData.isArrow()) {
+			// A designer power's bolt or wave carries one exact number: give it a little luck. The
+			// old game's spells have already rolled their own dice.
+			if (IsExtendedSpell(sourceSpell) && IsValidSpell(sourceSpell))
+				dam = RollVariance(dam);
 			dam = ApplySpellDamageBuffs(sourceSpell != SpellID::Invalid ? sourceSpell : GetSpellForMissile(t), dam);
+		}
 		// Essence Mod: a bow shot deals Speed x 10% of its damage.
 		if (missileData.isArrow())
 			dam = ScaleByStat(dam, player._pDexterity);
@@ -939,7 +944,7 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 		};
 	case SpellID::RuneOfLight:
 	case SpellID::Lightning:
-		return { 2, 2 + myPlayer.getCharacterLevel() };
+		return { 2, 3 }; // each hit; a monster in the bolt takes several
 	case SpellID::Flash: {
 		int min = ScaleSpellEffect(myPlayer.getCharacterLevel(), spellLevel);
 		min += min / 2;
@@ -972,12 +977,12 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 	case SpellID::FireWall:
 	case SpellID::LightningWall:
 	case SpellID::RingOfFire: {
-		const int min = (2 * myPlayer.getCharacterLevel()) + 4;
+		const int min = (2 * 1) + 4;
 		return { min, min + 36 };
 	}
 	case SpellID::Fireball:
 	case SpellID::RuneOfFire: {
-		const int base = (2 * myPlayer.getCharacterLevel()) + 4;
+		const int base = (2 * 1) + 4;
 		return {
 			ScaleSpellEffect(base, spellLevel),
 			ScaleSpellEffect(base + 36, spellLevel)
@@ -991,10 +996,9 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 		};
 	} break;
 	case SpellID::ChainLightning:
-		return { 4, 4 + (2 * myPlayer.getCharacterLevel()) };
+		return { 2, 3 }; // each hit of each bolt, as Lightning
 	case SpellID::FlameWave: {
-		const int min = 6 * (myPlayer.getCharacterLevel() + 1);
-		return { min, min + 54 };
+		return { 2, 11 }; // what each flame really deals; the old line showed far more
 	}
 	case SpellID::Nova:
 	case SpellID::Immolation:
@@ -1005,7 +1009,7 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 			ScaleSpellEffect((myPlayer.getCharacterLevel() + 30) / 2, spellLevel) * 5
 		};
 	case SpellID::Inferno: {
-		int max = myPlayer.getCharacterLevel() + 4;
+		int max = 1 + 4;
 		max += max / 2;
 		return { 3, max };
 	}
@@ -1020,9 +1024,9 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 			ScaleSpellEffect((2 * myPlayer.getCharacterLevel()) + 40, spellLevel)
 		};
 	case SpellID::ChargedBolt:
-		return { 1, 1 + 2 }; // Essence Mod: was Spirit / 4; Spirit now multiplies the damage
+		return { 2, 4 }; // each bolt: 2 or 4
 	case SpellID::HolyBolt:
-		return { myPlayer.getCharacterLevel() + 9, myPlayer.getCharacterLevel() + 18 };
+		return { 10, 19 };
 	case SpellID::BloodStar: {
 		const int min = (myPlayer._pMagic / 2) + (3 * spellLevel) - (myPlayer._pMagic / 8);
 		return { min, min };
@@ -2013,7 +2017,8 @@ void AddNovaBall(Missile &missile, AddMissileParameter &parameter)
 void AddFireWall(Missile &missile, AddMissileParameter &parameter)
 {
 	missile._midam = GenerateRndSum(10, 2) + 2;
-	missile._midam += missile._misource >= 0 ? Players[missile._misource].getCharacterLevel() : currlevel; // BUGFIX: missing parenthesis around ternary (fixed)
+	// Essence Mod: a player's Fire Wall no longer grows with character level; a trap's still goes by the dungeon level.
+	missile._midam += missile._misource >= 0 ? 1 : currlevel; // BUGFIX: missing parenthesis around ternary (fixed)
 	missile._midam <<= 3;
 	UpdateMissileVelocity(missile, parameter.dst, 16);
 	const int i = missile._mispllvl;
@@ -2037,7 +2042,8 @@ void AddFireball(Missile &missile, AddMissileParameter &parameter)
 		sp += std::min(missile._mispllvl * 2, 34);
 		const Player &player = Players[missile._misource];
 
-		const int dmg = (2 * (player.getCharacterLevel() + GenerateRndSum(10, 2))) + 4;
+		// Essence Mod: no longer grows with character level.
+		const int dmg = (2 * (1 + GenerateRndSum(10, 2))) + 4;
 		missile._midam = ScaleSpellEffect(dmg, missile._mispllvl);
 	}
 	UpdateMissileVelocity(missile, dst, sp);
@@ -2228,7 +2234,7 @@ void AddManaShield(Missile &missile, AddMissileParameter &parameter)
 
 void AddFlameWave(Missile &missile, AddMissileParameter &parameter)
 {
-	missile._midam = GenerateRnd(10) + Players[missile._misource].getCharacterLevel() + 1;
+	missile._midam = GenerateRnd(10) + 1 + 1; // Essence Mod: no longer grows with character level
 	// Essence Mod: a wave cast by a power read from essence_powers.tsv deals that power's amount.
 	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell)) {
 		const Player &caster = Players[missile._misource];
@@ -2881,7 +2887,7 @@ void ProcessHealingZone(Missile &missile)
 		for (const int monsterId : standing) {
 			Monster &monster = Monsters[monsterId];
 			if (!monster.isImmune(MissileID::PowerBolt, damageType))
-				DealSpellTickDamage(monster, spell, MissileID::PowerBolt, damageType, static_cast<int>(amount));
+				DealSpellTickDamage(monster, spell, MissileID::PowerBolt, damageType, static_cast<int>(amount), /*finishKill=*/true, /*overTime=*/true);
 		}
 		return;
 	}
@@ -2955,7 +2961,7 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 		if (spellData.effect == "Resurrect") {
 			if (radius >= EveryoneRadius) {
 				// The heal for the living takes Spirit here: the percentage for the fallen must not.
-				const auto heal = static_cast<uint32_t>(ScaleByStat(ScaleDamageForSpellLevel(spellData.riderAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)), caster._pMagic));
+				const auto heal = static_cast<uint32_t>(RollVariance(ScaleByStat(ScaleDamageForSpellLevel(spellData.riderAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)), caster._pMagic)));
 				for (const Player &other : Players) {
 					if (!other.plractive)
 						continue;
@@ -3265,7 +3271,7 @@ void AddInferno(Missile &missile, AddMissileParameter &parameter)
 	missile.duration = missile.var2 + 20;
 	missile._mlid = AddLight(missile.position.start, 1);
 	if (missile._micaster == TARGET_MONSTERS) {
-		const int i = GenerateRnd(Players[missile._misource].getCharacterLevel()) + GenerateRnd(2);
+		const int i = GenerateRnd(2); // Essence Mod: no longer grows with character level
 		missile._midam = 8 * i + 16 + ((8 * i + 16) / 2);
 	} else {
 		const Monster &monster = Monsters[missile._misource];
@@ -3289,7 +3295,7 @@ void AddChargedBolt(Missile &missile, AddMissileParameter &parameter)
 {
 	WorldTilePosition dst = parameter.dst;
 	missile._mirnd = GenerateRnd(15) + 1;
-	missile._midam = (missile._micaster == TARGET_MONSTERS) ? (GenerateRnd(2) + 1) : 15; // Essence Mod: was Spirit / 4
+	missile._midam = (missile._micaster == TARGET_MONSTERS) ? 2 * (GenerateRnd(2) + 1) : 15; // Essence Mod: was Spirit / 4; doubled 2026-10-09
 
 	if (missile.position.start == dst) {
 		dst += parameter.midir;
@@ -3314,15 +3320,13 @@ void AddHolyBolt(Missile &missile, AddMissileParameter &parameter)
 		sp += std::min(missile._mispllvl * 2, 47);
 	}
 
-	const Player &player = Players[missile._misource];
-
 	UpdateMissileVelocity(missile, dst, sp);
 	missile.setDirection(GetDirection16(missile.position.start, dst));
 	missile.duration = 256;
 	missile.var1 = missile.position.start.x;
 	missile.var2 = missile.position.start.y;
 	missile._mlid = AddLight(missile.position.start, 8);
-	missile._midam = GenerateRnd(10) + player.getCharacterLevel() + 9;
+	missile._midam = GenerateRnd(10) + 1 + 9; // Essence Mod: no longer grows with character level
 }
 
 void AddResurrect(Missile &missile, AddMissileParameter & /*parameter*/)
@@ -3962,7 +3966,7 @@ void ProcessLightningControl(Missile &missile)
 		dam = GenerateRnd(currlevel) + 2 * currlevel;
 	} else if (missile._micaster == TARGET_MONSTERS) {
 		// BUGFIX: damage of missile should be encoded in missile struct; player can be dead/have left the game before missile arrives.
-		dam = (GenerateRnd(2) + GenerateRnd(Players[missile._misource].getCharacterLevel()) + 2) << 6;
+		dam = (GenerateRnd(2) + 2) << 6; // Essence Mod: no longer grows with character level
 	} else {
 		const Monster &monster = Monsters[missile._misource];
 		dam = 2 * RandomIntBetween(monster.minDamage, monster.maxDamage);

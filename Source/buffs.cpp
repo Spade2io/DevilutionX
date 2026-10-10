@@ -150,7 +150,7 @@ void PulseFireAura(Player &player)
 		anyMonsterInReach = true;
 		// Only the aura owner's own PC deals the damage; it is reported to the others as normal.
 		if (&player == MyPlayer)
-			DealSpellTickDamage(monster, SpellID::FireAura, MissileID::FireAuraPulse, DamageType::Fire, damage);
+			DealSpellTickDamage(monster, SpellID::FireAura, MissileID::FireAuraPulse, DamageType::Fire, damage, /*finishKill=*/true, /*overTime=*/true);
 	}
 
 	// The burst at the player's feet only plays when the aura has something to burn,

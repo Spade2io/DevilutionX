@@ -1006,6 +1006,17 @@ and leaves them Filthy. It lasts until they use a Crystal Wash, which Pepin alwa
 gold. Filthy does nothing but show: halving the stats was tried and was too punishing. It is kept in the sidecar file, shown as a
 greyed icon at the end of the buff bar, and other PCs are told (`CMD_FILTHY`). No cleanse removes it.
 
+## A little luck in every number (Bryan, 2026-10-09)
+
+The old game's spells and every weapon roll dice; the powers made in the designer used to deal one
+exact number. Now damage, healing and shields that land all at once fall anywhere from 20% under
+their number to 20% over (`RollVariance`). Anything that arrives over time is steady from beat
+to beat: damage over time, damage zones, damage auras, heals over time and healing ground. The
+size of a tick is how a player reads how many stacks are on a monster, so it must not wobble.
+Averages are unchanged, so the balance numbers stand. Buff strengths, percentages, durations and cooldowns
+do not vary. The original spells no longer grow with character level; each keeps what it dealt at
+level 1 and grows with its own level and Spirit like everything else.
+
 ## What a longer cooldown buys (Bryan, 2026-10-09)
 
 A general rule, above all for powers made from here on. A longer cooldown should give slightly
