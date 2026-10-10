@@ -167,7 +167,7 @@ std::string_view GetAbilityDescription(SpellID spell)
 	case SpellID::FlamingWeapon:
 		return "Fire on every weapon hit";
 	case SpellID::FlameStrike:
-		return "Fire weapon attack, +3";
+		return "Fire weapon attack, +2";
 	case SpellID::InfernoStrike:
 		return "Fire weapon attack, x3";
 	case SpellID::Lightning:

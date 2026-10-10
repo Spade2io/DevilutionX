@@ -10,7 +10,7 @@ StoneCurse	Stone Curse	CastFire	1200	80	60	Magic,Targeted	6	5	25	StoneCurse	3	40
 Infravision	Infravision	CastHealing	0	60	40	Magic	-1	-1	18	Infravision	5	20	0	0
 Phasing	Phasing	CastFire	350	20	12	Magic	7	6	19	Phasing	2	4	40	80
 ManaShield	Mana Shield	CastFire	1600	120	33	Magic	6	5	12	ManaShield	0	33	4	10
-Fireball	Fireball	CastFire	800	30	16	Fire,Targeted	8	7	24	Fireball	1	10	40	80
+Fireball	Fireball	CastFire	800	30	30	Fire,Targeted	8	7	24	Fireball	1	30	40	80
 Guardian	Guardian	CastFire	1400	95	50	Fire,Targeted	9	8	30	Guardian	2	30	16	32
 ChainLightning	Chain Lightning	CastFire	1100	75	30	Lightning	8	7	27	ChainLightning	1	18	20	60
 FlameWave	Flame Wave	CastFire	1000	65	35	Fire,Targeted	9	8	27	FlameWaveControl	3	20	20	40
@@ -52,7 +52,7 @@ RuneOfImmolation	Rune of Immolation	CastHealing	800	30	255	Magic,Targeted	-1	-1	
 RuneOfStone	Rune of Stone	CastHealing	800	30	255	Magic,Targeted	-1	-1	24	RuneOfStone	1	10	40	80
 Frostbolt	Frostbolt	CastFire	100	5	6	Magic,Targeted	1	1	7	Frostbolt	1	3	40	80
 Strength	Strength	CastHealing	100	5	10	Magic,AllowedInTown	1	-1	0	StrengthBuff	0	10	0	0
-Corruption	Corruption	CastFire	100	5	6	Magic,Targeted	1	-1	0	Corruption	1	3	0	0
+Corruption	Corruption	CastFire	100	5	4	Magic,Targeted	1	-1	0	Corruption	1	4	0	0
 FireAura	Fire Aura	CastFire	100	5	10	Fire,AllowedInTown	1	-1	0	FireAuraBuff	0	10	0	0
 FlamingWeapon	Flaming Weapon	CastFire	100	5	10	Fire,AllowedInTown	1	-1	0	FlamingWeaponBuff	0	10	0	0
 FlameStrike	Flame Strike	CastFire	100	5	2	Fire,Targeted	1	-1	0		0	2	0	0

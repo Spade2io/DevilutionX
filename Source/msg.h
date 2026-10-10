@@ -432,6 +432,10 @@ enum _cmd_id : uint8_t {
 	//
 	// body (TCmdParam1): the power's spell id
 	CMD_CANCELBUFF,
+	// Essence Mod: whether the sender is Filthy. 0 clean, 1 filthy, 2 has just become filthy.
+	//
+	// body (TCmdParam1)
+	CMD_FILTHY,
 	// Fake command; set current player for succeeding mega pkt buffer messages.
 	//
 	// body (TFakeCmdPlr)

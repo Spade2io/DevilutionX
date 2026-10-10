@@ -1276,7 +1276,7 @@
         "t_8e6b4fcf",
         "t_5462244b"
       ],
-      "potency": 3,
+      "potency": 2,
       "manaCost": 2,
       "cooldown": 0,
       "radius": null,
@@ -1333,7 +1333,7 @@
         "t_8e6b4fcf",
         "t_5462244b"
       ],
-      "potency": 3,
+      "potency": 2,
       "manaCost": 3,
       "cooldown": 0,
       "radius": null,
@@ -1362,7 +1362,7 @@
         "t_5462244b"
       ],
       "potency": 6,
-      "manaCost": 6,
+      "manaCost": 7,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -1414,7 +1414,7 @@
         "t_8e6b4fcf",
         "t_9048f21b"
       ],
-      "potency": 5,
+      "potency": 6,
       "manaCost": 18,
       "cooldown": 30,
       "radius": 4,
@@ -1493,7 +1493,7 @@
         "t_8e6b4fcf",
         "t_a9a0b1a6"
       ],
-      "potency": 9,
+      "potency": 18,
       "manaCost": 6,
       "cooldown": 10,
       "radius": null,
@@ -1549,7 +1549,7 @@
         "t_8e6b4fcf",
         "t_a9a0b1a6"
       ],
-      "potency": 5,
+      "potency": 8,
       "manaCost": 12,
       "cooldown": 12,
       "radius": 4,
@@ -1577,7 +1577,7 @@
         "t_8e6b4fcf",
         "t_a9a0b1a6"
       ],
-      "potency": 6,
+      "potency": 9,
       "manaCost": 9,
       "cooldown": 10,
       "radius": null,
@@ -1605,7 +1605,7 @@
         "t_8e6b4fcf",
         "t_5462244b"
       ],
-      "potency": 3,
+      "potency": 2,
       "manaCost": 2,
       "cooldown": 0,
       "radius": null,
@@ -1634,7 +1634,7 @@
         "t_8e6b4fcf",
         "t_a9a0b1a6"
       ],
-      "potency": 4,
+      "potency": 8,
       "manaCost": 9,
       "cooldown": 6,
       "radius": 2,
@@ -2044,7 +2044,7 @@
         "t_5462244b"
       ],
       "potency": 4,
-      "manaCost": 9,
+      "manaCost": 30,
       "cooldown": 0,
       "radius": 2,
       "growth": 12.5,
@@ -2068,7 +2068,7 @@
         "t_5462244b"
       ],
       "potency": 4,
-      "manaCost": 9,
+      "manaCost": 35,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -2092,7 +2092,7 @@
         "t_5462244b"
       ],
       "potency": 6,
-      "manaCost": 14,
+      "manaCost": 11,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -2116,7 +2116,7 @@
         "t_5462244b"
       ],
       "potency": 4,
-      "manaCost": 12,
+      "manaCost": 28,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -2139,7 +2139,7 @@
         "t_8e6b4fcf",
         "t_5462244b"
       ],
-      "potency": 3,
+      "potency": 2,
       "manaCost": 2,
       "cooldown": 0,
       "radius": null,
@@ -2212,8 +2212,8 @@
         "t_b5fae28d",
         "t_5462244b"
       ],
-      "potency": 2,
-      "manaCost": 2,
+      "potency": 1,
+      "manaCost": 3,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -2356,7 +2356,7 @@
         "t_5462244b"
       ],
       "potency": 10,
-      "manaCost": 6,
+      "manaCost": 4,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -2383,7 +2383,7 @@
         "t_b5fae28d",
         "t_a9a0b1a6"
       ],
-      "potency": 10,
+      "potency": 19,
       "manaCost": 9,
       "cooldown": 10,
       "radius": 2,
@@ -3239,7 +3239,7 @@
         "t_8e6b4fcf",
         "t_5462244b"
       ],
-      "potency": 3,
+      "potency": 2,
       "manaCost": 2,
       "cooldown": 0,
       "radius": null,
@@ -3811,7 +3811,7 @@
         "t_5462244b"
       ],
       "potency": 10,
-      "manaCost": 6,
+      "manaCost": 4,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -3836,7 +3836,7 @@
         "t_5462244b"
       ],
       "potency": 9,
-      "manaCost": 4,
+      "manaCost": 2,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -3865,7 +3865,7 @@
         "t_5462244b"
       ],
       "potency": 3,
-      "manaCost": 6,
+      "manaCost": 4,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -3893,7 +3893,7 @@
         "t_5462244b"
       ],
       "potency": 7,
-      "manaCost": 9,
+      "manaCost": 8,
       "cooldown": 0,
       "radius": 2,
       "growth": 12.5,
@@ -3920,7 +3920,7 @@
         "t_b5fae28d",
         "t_a9a0b1a6"
       ],
-      "potency": 10,
+      "potency": 18,
       "manaCost": 9,
       "cooldown": 10,
       "radius": null,
@@ -3979,7 +3979,7 @@
         "t_5462244b"
       ],
       "potency": 5,
-      "manaCost": 4,
+      "manaCost": 1,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -4036,8 +4036,8 @@
         "t_b5fae28d",
         "t_5462244b"
       ],
-      "potency": 3,
-      "manaCost": 2,
+      "potency": 1,
+      "manaCost": 3,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -4065,7 +4065,7 @@
         "t_f407f67c",
         "t_5462244b"
       ],
-      "potency": 3,
+      "potency": 2,
       "manaCost": 1,
       "cooldown": 0,
       "radius": null,
@@ -4181,7 +4181,7 @@
         "t_b0c8cbc0",
         "t_a9a0b1a6"
       ],
-      "potency": 10,
+      "potency": 30,
       "manaCost": 6,
       "cooldown": 10,
       "radius": null,
@@ -4212,7 +4212,7 @@
         "t_6e51786d",
         "t_a9a0b1a6"
       ],
-      "potency": 5,
+      "potency": 30,
       "manaCost": 6,
       "cooldown": 12,
       "radius": null,
@@ -4408,7 +4408,7 @@
         "t_b5fae28d",
         "t_a9a0b1a6"
       ],
-      "potency": 9,
+      "potency": 18,
       "manaCost": 9,
       "cooldown": 10,
       "radius": 2,
@@ -4436,7 +4436,7 @@
         "t_b5fae28d",
         "t_9048f21b"
       ],
-      "potency": 12,
+      "potency": 14,
       "manaCost": 18,
       "cooldown": 45,
       "radius": 4,
@@ -4523,7 +4523,7 @@
         "t_8e6b4fcf",
         "t_5462244b"
       ],
-      "potency": 3,
+      "potency": 2,
       "manaCost": 2,
       "cooldown": 0,
       "radius": null,
@@ -4552,7 +4552,7 @@
         "t_5462244b"
       ],
       "potency": 6,
-      "manaCost": 6,
+      "manaCost": 5,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -4579,8 +4579,8 @@
         "t_8e6b4fcf",
         "t_5462244b"
       ],
-      "potency": 2,
-      "manaCost": 3,
+      "potency": 1,
+      "manaCost": 4,
       "cooldown": 0,
       "radius": 2,
       "growth": 12.5,
@@ -4942,7 +4942,7 @@
         "t_5462244b"
       ],
       "potency": 5,
-      "manaCost": 4,
+      "manaCost": 2,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -4997,7 +4997,7 @@
         "t_8e6b4fcf",
         "t_a9a0b1a6"
       ],
-      "potency": 7,
+      "potency": 10,
       "manaCost": 9,
       "cooldown": 10,
       "radius": null,
@@ -5025,7 +5025,7 @@
         "t_8e6b4fcf",
         "t_a9a0b1a6"
       ],
-      "potency": 9,
+      "potency": 16,
       "manaCost": 6,
       "cooldown": 8,
       "radius": null,

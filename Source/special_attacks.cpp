@@ -35,7 +35,7 @@ namespace {
 constexpr int QueueLifetimeTicks = 200;
 
 /** Fire damage Flame Strike adds at spell level 1, in 64ths of a hit point. */
-constexpr int FlameStrikeBaseBonus = 3 * 64;
+constexpr int FlameStrikeBaseBonus = 2 * 64;
 
 /** Extra weapon damage Inferno Strike adds at spell level 1, in percent: 200% more is three times the hit. */
 constexpr int InfernoStrikeBaseBonusPercent = 200;

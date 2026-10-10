@@ -164,6 +164,22 @@ SpellID PickPowerForStone(std::string_view itemName);
  */
 int RollEssenceLoot(bool isBoss);
 
+/**
+ * @brief Whether a player is Filthy. A character becomes Filthy on filling their fourth row (their
+ * confluence, or a fourth essence), when the filth of their old self pours out, and stays so until
+ * they use a Crystal Wash. It does nothing but show: it is there for the joke.
+ */
+bool IsFilthy(const Player &player);
+
+/** @brief Another player's PC says whether they are Filthy: 0 clean, 1 filthy, 2 has just become so. */
+void SetOtherPlayerFilthy(Player &player, int state);
+
+/** @brief The local player uses a Crystal Wash. */
+void WashOffFilth(Player &player);
+
+/** @brief Called every game tick: now and then tells the other PCs again that the local player is Filthy. */
+void ProcessFilth();
+
 /** @brief Records a newly learned ability in the next free position under its essence. */
 void SlotLearnedAbility(SpellID spell);
 

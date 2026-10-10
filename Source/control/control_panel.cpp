@@ -763,6 +763,12 @@ void DrawDurIcon(const Surface &out)
 		if (IsRightPanelOpen() && MainPanel.position.x + MainPanel.size.width > RightPanel.position.x)
 			x -= MainPanel.position.x + MainPanel.size.width - RightPanel.position.x;
 	}
+	// Essence Mod: the spell bar sits in the bottom right corner, two rows of four buttons. While it
+	// is showing, the icons start to the left of it so they do not cover the buttons.
+	if (!IsRightPanelOpen() && !SpellSelectFlag) {
+		constexpr int SpellBarWidth = 4 + 4 * 37 + 3 * 3;
+		x = std::min(x, out.w() - SpellBarWidth - 8 - 32);
+	}
 
 	Player &myPlayer = *MyPlayer;
 	x = DrawDurIcon4Item(out, myPlayer.InvBody[INVLOC_HEAD], x, 3);

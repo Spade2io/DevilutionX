@@ -21,6 +21,7 @@
 #include "engine/render/text_render.hpp"
 #include "dots.h"
 #include "essence_tint.h"
+#include "essences.h"
 #include "qol/floatingnumbers.h"
 #include "items.h"
 #include "missiles.h"
@@ -630,6 +631,7 @@ void ProcessBuffTimers()
 {
 	PulseHealingAuras();
 	PulseShieldAuras();
+	ProcessFilth();
 	RefreshAuraStats();
 
 	if (RebirthProtectionLeft > 0)
@@ -799,6 +801,18 @@ void DrawBuffBar(const Surface &out)
 		}
 
 		position.x += IconWidth + Gap;
+	}
+
+	// Filthy comes last, greyed, so that it never moves the icons a click would cancel.
+	if (IsFilthy(player)) {
+		SetSpellTrans(SpellType::Invalid);
+		DrawSmallSpellIcon(out, position, SpellID::BoneSpirit);
+		const Rectangle iconArea { Point { position.x, position.y - IconHeight + 1 }, Size { IconWidth, IconHeight } };
+		if (iconArea.contains(MousePosition)) {
+			DrawString(out, WordWrapString("Filthy: the grime of your old self is all over you. A Crystal Wash from Pepin washes it off.", DescriptionWidth),
+			    Rectangle { Point { Left, Margin + IconHeight + 2 }, Size { DescriptionWidth, 3 * DescriptionLineHeight } },
+			    { .flags = UiFlags::ColorWhitegold, .lineHeight = DescriptionLineHeight });
+		}
 	}
 	SetSpellTrans(SpellType::Spell);
 }

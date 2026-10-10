@@ -1,22 +1,22 @@
 id	number	name	essence	soundId	manaCost	flags	missiles	manaMultiplier	minMana	icon	cooldown	description	effect	amount	radius	rider	riderAmount	stat	duration	ally	weapon	cooldownDrop	cleanse	cleanseGrowth
-Ignite	100	Ignite	Fire	CastFire	2	Fire,Targeted		0	2	22	0	Strike that leaves a burn	Strike	128	0	Burn	32		0	0		0	0	0
+Ignite	100	Ignite	Fire	CastFire	3	Fire,Targeted		0	3	22	0	Strike that leaves a burn	Strike	64	0	Burn	32		0	0		0	0	0
 FlameCleave	101	Flame Cleave	Fire	CastFire	3	Fire,Targeted		0	3	47	8	Hits target and neighbours	Strike	192	2		0		0	0		0	0	0
 MeltArmor	102	Melt Armor	Fire	CastFire	2	Fire,Targeted		0	2	30	60	Target takes more damage	Strike	448	0	Vulnerable	15		0	0		0	0	0
 StokeTheFlames	103	Stoke the Flames	Fire	CastFire	18	Fire,AllowedInTown	StrengthBuff	0	18	18	60	+20% damage for 20s	Buff	20	0		0	Damage	20	0		0	0	0
 Phoenix	104	Phoenix	Fire	CastFire	0	Fire		0	0	40	900	Rise again on death	Rebirth	50	0		0		0	0		0	0	0
-Smolder	105	Smolder	Fire	CastFire	6	Fire,Targeted	Corruption	0	6	32	0	Stacking burn from range	Burn	64	0		0		0	0		0	0	0
-Wildfire	106	Wildfire	Fire	CastFire	9	Fire,Targeted	Corruption	0	9	46	10	Burn that spreads	Burn	64	2		0		0	0		0	0	0
+Smolder	105	Smolder	Fire	CastFire	4	Fire,Targeted	Corruption	0	4	32	0	Stacking burn from range	Burn	64	0		0		0	0		0	0	0
+Wildfire	106	Wildfire	Fire	CastFire	9	Fire,Targeted	Corruption	0	9	46	10	Burn that spreads	Burn	122	2		0		0	0		0	0	0
 Meteor	107	Meteor	Fire	CastFire	20	Fire,Targeted	Corruption	0	20	24	45	Heavy hit, radius 2	Burst	1216	2		0		0	0		0	0	0
 Kindling	108	Kindling	Fire	CastFire	15	Fire,Targeted	Corruption	0	15	37	60	Strips Elemental resistance	Curse	1	2		0	ElementalStrip	0	0		2	0	0
 SearingBrand	109	Searing Brand	Fire	CastFire	2	Fire,Targeted		0	2	31	12	All hits deal extra fire	Strike	192	0	Branded	128		0	0		0	0	0
 FanTheFlames	110	Fan the Flames	Fire	CastFire	10	Fire,AllowedInTown	StrengthBuff	0	10	33	0	Ally acts 5% faster	Buff	5	0		0	Speed	0	1		0	0	0
 Wellspring	111	Wellspring	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: mana regen, radius 8	Aura	5	8		0	ManaRegen	0	0		0	0	0
-GlacialSpike	112	Glacial Spike	Water	CastFire	6	Magic,Targeted	Corruption	0	6	29	10	Heavy ice hit, one enemy	Burst	576	0		0		0	0		0	0	0
+GlacialSpike	112	Glacial Spike	Water	CastFire	6	Magic,Targeted	Corruption	0	6	29	10	Heavy ice hit, one enemy	Burst	1152	0		0		0	0		0	0	0
 IceBurst	113	Ice Burst	Water	CastFire	9	Magic	Corruption	0	9	10	0	Ice damage, radius 2	GroundBurst	256	2		0		0	0		0	0	0
-Hailstorm	114	Hailstorm	Water	CastFire	12	Magic	Corruption	0	12	45	12	Ice damage, radius 4	GroundBurst	320	4		0		0	0		0	0	0
-TidalWave	115	Tidal Wave	Water	CastFire	9	Magic	FlameWaveControl	0	9	13	10	Wave of ice damage	Wave	384	0		0		0	0		0	0	0
-Icebreaker	116	Icebreaker	Water	CastFire	2	Magic,Targeted		0	2	35	0	Strike dealing ice damage	Strike	192	0		0		0	0		0	0	0
-Riptide	117	Riptide	Water	CastFire	9	Magic	Corruption	0	9	13	6	Hurts foes, heals allies	GroundBurst	256	2	Heal	512		0	0		0	0	0
+Hailstorm	114	Hailstorm	Water	CastFire	12	Magic	Corruption	0	12	45	12	Ice damage, radius 4	GroundBurst	512	4		0		0	0		0	0	0
+TidalWave	115	Tidal Wave	Water	CastFire	9	Magic	FlameWaveControl	0	9	13	10	Wave of ice damage	Wave	576	0		0		0	0		0	0	0
+Icebreaker	116	Icebreaker	Water	CastFire	2	Magic,Targeted		0	2	35	0	Strike dealing ice damage	Strike	128	0		0		0	0		0	0	0
+Riptide	117	Riptide	Water	CastFire	9	Magic	Corruption	0	9	13	6	Hurts foes, heals allies	GroundBurst	512	2	Heal	512		0	0		0	0	0
 SoothingWaters	118	Soothing Waters	Water	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	9	0	Heals an ally, or you	Heal	768	0		0		0	1		0	0	0
 HealingRain	119	Healing Rain	Water	CastHealing	16	Magic,AllowedInTown	StrengthBuff	0	16	1	0	Heals allies, radius 4	Heal	384	4		0		0	0		0	0	0
 Springwater	120	Springwater	Water	CastHealing	12	Magic,AllowedInTown	StrengthBuff	0	12	40	8	Heals ally, half to nearby	Heal	832	2		0		0	1		0	0	0
@@ -43,11 +43,11 @@ Miracle	140	Miracle	Holy	CastHealing	60	Magic,AllowedInTown	StrengthBuff	0	60	24
 WardOfPurity	141	Ward of Purity	Holy	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	12	60	Cleanse; wards for 20s	Buff	20	0	Cleanse	1	Ward	20	1		3	1	0
 Vigil	142	Vigil	Holy	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	Ally regains life faster	Buff	5	0		0	LifeRegen	0	1		0	0	0
 Benediction	143	Benediction	Holy	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	Ally has more maximum life	Buff	5	0		0	MaxLife	0	1		0	0	0
-Smite	144	Smite	Holy	CastFire	2	Magic,Targeted		0	2	41	0	Strike dealing holy damage	Strike	192	0		0		0	0		0	0	0
+Smite	144	Smite	Holy	CastFire	2	Magic,Targeted		0	2	41	0	Strike dealing holy damage	Strike	128	0		0		0	0		0	0	0
 Judgment	145	Judgment	Holy	CastFire	4	Magic,Targeted		0	4	34	10	Heavy; more to undead/demon	Strike	576	0	Bane	50		0	0		0	0	0
-Atonement	146	Atonement	Holy	CastFire	3	Magic,Targeted		0	3	33	0	Strike that heals an ally	Strike	192	0	HealAlly	704		0	0		0	0	0
+Atonement	146	Atonement	Holy	CastFire	3	Magic,Targeted		0	3	33	0	Strike that heals an ally	Strike	128	0	HealAlly	704		0	0		0	0	0
 SearingLight	147	Searing Light	Holy	CastFire	9	Magic,Targeted	Corruption	0	9	10	0	Holy damage, radius 2	Burst	256	2		0		0	0		0	0	0
-Dawnburst	148	Dawnburst	Holy	CastFire	18	Magic	Corruption	0	18	37	30	Hurts foes, heals, radius 4	GroundBurst	320	4	Heal	704		0	0		0	0	0
+Dawnburst	148	Dawnburst	Holy	CastFire	18	Magic	Corruption	0	18	37	30	Hurts foes, heals, radius 4	GroundBurst	384	4	Heal	704		0	0		0	0	0
 Ironbark	149	Ironbark	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: resistances, rad 8	Aura	5	8		0	Resist	0	0		0	0	0
 HealingTouch	150	Healing Touch	Nature	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	1	0	Heals an ally, or you	Heal	768	0		0		0	1		0	0	0
 Nourish	151	Nourish	Nature	CastHealing	5	Magic,AllowedInTown	StrengthBuff	0	5	9	6	Cheap heal; more with a HoT	Heal	1024	0	Nourish	50		0	1		0	0	0
@@ -69,7 +69,7 @@ Oakheart	166	Oakheart	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	1
 Camouflage	167	Camouflage	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	19	0	Monsters notice you less	Buff	150	0		0	Distance	0	0		0	0	0
 WorldTree	168	World Tree	Nature	CastHealing	60	Magic,AllowedInTown	StrengthBuff	0	60	24	240	Healing ground, 30s, rad 6	Zone	256	6	CleanseRaise	1		30	0		0	2	4
 Aegis	169	Aegis	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: small shield per 10s	Aura	128	8		0	ShieldPulse	0	0		0	0	0
-ShieldBash	170	Shield Bash	Shield	CastFire	2	Magic,Targeted		0	2	47	0	Shield strike	Strike	192	0		0		0	0	Shield	0	0	0
+ShieldBash	170	Shield Bash	Shield	CastFire	2	Magic,Targeted		0	2	47	0	Shield strike	Strike	128	0		0		0	0	Shield	0	0	0
 ShieldSlam	171	Shield Slam	Shield	CastFire	4	Magic,Targeted		0	4	22	8	Heavy; armor adds damage	Strike	576	0	ArmorBonus	25		0	0	Shield	0	0	0
 ShieldSweep	172	Shield Sweep	Shield	CastFire	3	Magic,Targeted		0	3	46	8	Hits target and neighbours	Strike	192	2		0		0	0	Shield	0	0	0
 ConcussiveBlow	173	Concussive Blow	Shield	CastFire	1	Magic,Targeted		0	1	7	12	Strike; holds foe 3s	Strike	128	0	Freeze	3		0	0	Shield	0	0	0
@@ -89,33 +89,33 @@ Stalwart	186	Stalwart	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	1
 Brace	187	Brace	Shield	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	30	60	+30 armor and resist, 20s	Buff	30	0	Resist	30	Armor	20	0		0	0	0
 Unbreakable	188	Unbreakable	Shield	CastHealing	40	Magic,AllowedInTown	StrengthBuff	0	40	34	180	All allies: -20% damage 12s	Buff	20	99		0	DamageTaken	12	0		0	0	0
 PallOfShadow	189	Pall of Shadow	Dark	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: foes resist less	Aura	10	8		0	AstralResistCut	0	0		0	0	0
-CreepingRot	190	Creeping Rot	Dark	CastFire	4	Magic,Targeted	Corruption	0	4	32	0	Cheap Corruption	Corruption	58	0		0		0	0		0	0	0
-ShadowBolt	191	Shadow Bolt	Dark	CastFire	6	Magic,Targeted	PowerBolt	0	6	35	0	Hit that leaves Corruption	Bolt	192	0	Corruption	26		0	0		0	0	0
-Blight	192	Blight	Dark	CastFire	9	Magic,Targeted	Corruption	0	9	46	0	Corruption, radius 2	Corruption	45	2		0		0	0		0	0	0
-PlagueWind	193	Plague Wind	Dark	CastFire	9	Magic	Corruption	0	9	13	10	Corruption in a cone	Cone	64	0	Corruption	0		0	0		0	0	0
+CreepingRot	190	Creeping Rot	Dark	CastFire	2	Magic,Targeted	Corruption	0	2	32	0	Cheap Corruption	Corruption	58	0		0		0	0		0	0	0
+ShadowBolt	191	Shadow Bolt	Dark	CastFire	4	Magic,Targeted	PowerBolt	0	4	35	0	Hit that leaves Corruption	Bolt	192	0	Corruption	26		0	0		0	0	0
+Blight	192	Blight	Dark	CastFire	8	Magic,Targeted	Corruption	0	8	46	0	Corruption, radius 2	Corruption	45	2		0		0	0		0	0	0
+PlagueWind	193	Plague Wind	Dark	CastFire	9	Magic	Corruption	0	9	13	10	Corruption in a cone	Cone	115	0	Corruption	0		0	0		0	0	0
 Contagion	194	Contagion	Dark	CastFire	22	Magic,Targeted	Corruption	0	22	15	0	Corruption that leaps	Chain	154	0	Corruption	0		0	0		0	0	0
-Drain	195	Drain	Dark	CastFire	4	Magic,Targeted	Corruption	0	4	29	0	Corruption that heals you	Corruption	32	0	Leech	32	HealPulse	20	0		0	0	0
+Drain	195	Drain	Dark	CastFire	1	Magic,Targeted	Corruption	0	1	29	0	Corruption that heals you	Corruption	32	0	Leech	32	HealPulse	20	0		0	0	0
 BlackSun	196	Black Sun	Dark	CastFire	36	Magic	Corruption	0	36	24	180	Hit + Corruption, radius 6	GroundBurst	1536	6	Corruption	256		0	0		0	0	0
-UmbralStrike	197	Umbral Strike	Dark	CastFire	2	Magic,Targeted		0	2	22	0	Strike leaving Corruption	Strike	192	0	Corruption	26		0	0		0	0	0
-NightBlade	198	Night Blade	Dark	CastFire	1	Magic,Targeted		0	1	47	0	Cheap shadow strike	Strike	192	0		0		0	0		0	0	0
+UmbralStrike	197	Umbral Strike	Dark	CastFire	3	Magic,Targeted		0	3	22	0	Strike leaving Corruption	Strike	64	0	Corruption	26		0	0		0	0	0
+NightBlade	198	Night Blade	Dark	CastFire	1	Magic,Targeted		0	1	47	0	Cheap shadow strike	Strike	128	0		0		0	0		0	0	0
 Rupture	199	Rupture	Dark	CastFire	2	Magic,Targeted		0	2	34	8	Strike: more per Corruption	Strike	320	0	Rupture	50		0	0		0	0	0
 Blind	200	Blind	Dark	CastFire	6	Magic,Targeted	Corruption	0	6	30	6	Foe misses more	Curse	10	0		0	Accuracy	0	0		0	0	0
 Murk	201	Murk	Dark	CastFire	18	Magic,Targeted	Corruption	0	18	31	40	Foes miss a lot for 12s	Curse	30	2		0	Accuracy	12	0		0	0	0
-NightTerrors	202	Night Terrors	Dark	CastFire	6	Magic,Targeted	Corruption	0	6	33	10	Corruption; foe misses more	Corruption	64	0	Accuracy	15		20	0		0	0	0
-Wither	203	Wither	Dark	CastFire	6	Magic,Targeted	Corruption	0	6	37	12	Foe takes more over time	Corruption	32	0	Wither	25		0	0		0	0	0
+NightTerrors	202	Night Terrors	Dark	CastFire	6	Magic,Targeted	Corruption	0	6	33	10	Corruption; foe misses more	Corruption	192	0	Accuracy	15		20	0		0	0	0
+Wither	203	Wither	Dark	CastFire	6	Magic,Targeted	Corruption	0	6	37	12	Foe takes more over time	Corruption	192	0	Wither	25		0	0		0	0	0
 SoulRend	204	Soul Rend	Dark	CastFire	15	Magic,Targeted	Corruption	0	15	36	45	Removes Astral resistance	Curse	100	0		0	AstralStrip	0	0		2	0	0
 CloakOfNight	205	Cloak of Night	Dark	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	19	0	Monsters notice you less	Buff	150	0		0	Distance	0	0		0	0	0
 Malice	206	Malice	Dark	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	Your Corruption hits harder	Buff	10	0		0	DotDamage	0	0		0	0	0
 NightsEdge	207	Night's Edge	Dark	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	44	0	Weapon hits add Corruption	Buff	13	0	Corruption	0	WeaponDot	0	0		0	0	0
 Bedrock	208	Bedrock	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: -1 physical damage	Aura	1	8		0	DmgReduction	0	0		0	0	0
 StoneSpike	209	Stone Spike	Earth	CastFire	9	Magic	Corruption	0	9	10	0	Earth damage, radius 2	GroundBurst	256	2		0		0	0		0	0	0
-Tremor	210	Tremor	Earth	CastFire	9	Magic	StrengthBuff	0	9	37	10	Ground shakes 10s, rad 2	DamageZone	115	2		0		10	0		0	0	0
-Earthquake	211	Earthquake	Earth	CastFire	18	Magic	StrengthBuff	0	18	45	45	Ground shakes 20s, rad 4	DamageZone	77	4		0		20	0		0	0	0
+Tremor	210	Tremor	Earth	CastFire	9	Magic	StrengthBuff	0	9	37	10	Ground shakes 10s, rad 2	DamageZone	230	2		0		10	0		0	0	0
+Earthquake	211	Earthquake	Earth	CastFire	18	Magic	StrengthBuff	0	18	45	45	Ground shakes 20s, rad 4	DamageZone	90	4		0		20	0		0	0	0
 Landslide	212	Landslide	Earth	CastFire	12	Magic	Corruption	0	12	46	0	Earth damage, radius 4	GroundBurst	192	4		0		0	0		0	0	0
 Upheaval	213	Upheaval	Earth	CastFire	36	Magic	Corruption	0	36	24	180	Heavy hit + hold, rad 6	GroundBurst	1536	6	Freeze	4		0	0		0	0	0
-StoneFist	214	Stone Fist	Earth	CastFire	2	Magic,Targeted		0	2	47	0	Strike dealing earth damage	Strike	192	0		0		0	0		0	0	0
-Boulder	215	Boulder	Earth	CastFire	6	Magic,Targeted	PowerBolt	0	6	35	0	Thrown rock, one enemy	Bolt	384	0		0		0	0		0	0	0
-Shockwave	216	Shockwave	Earth	CastFire	3	Magic,Targeted		0	3	22	0	Hits target and neighbours	Strike	128	2		0		0	0		0	0	0
+StoneFist	214	Stone Fist	Earth	CastFire	2	Magic,Targeted		0	2	47	0	Strike dealing earth damage	Strike	128	0		0		0	0		0	0	0
+Boulder	215	Boulder	Earth	CastFire	5	Magic,Targeted	PowerBolt	0	5	35	0	Thrown rock, one enemy	Bolt	384	0		0		0	0		0	0	0
+Shockwave	216	Shockwave	Earth	CastFire	4	Magic,Targeted		0	4	22	0	Hits target and neighbours	Strike	64	2		0		0	0		0	0	0
 Earthshatter	217	Earthshatter	Earth	CastFire	3	Magic,Targeted		0	3	7	10	Strike; holds foe 2s	Strike	256	0	Freeze	2		0	0		0	0	0
 CrushingBlow	218	Crushing Blow	Earth	CastFire	3	Magic,Targeted		0	3	34	45	Heavy; foe takes more	Strike	576	0	Vulnerable	15		0	0		0	0	0
 Mire	219	Mire	Earth	CastFire	12	Magic	Corruption	0	12	31	40	Holds foes 4s, radius 2	GroundFreeze	4	2		0		0	0		0	0	0
@@ -125,10 +125,10 @@ StoneWall	222	Stone Wall	Earth	CastHealing	25	Magic,AllowedInTown	StrengthBuff	0
 EarthenMight	223	Earthen Might	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	+3 Power, +1 each level	Buff	3	0		0	Power	0	0		0	0	0
 Monolith	224	Monolith	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	25	0	Threat; +10% max life	Buff	50	0	MaxLife	10	Distance	0	0		0	0	0
 Unyielding	225	Unyielding	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	33	0	Threat; never staggered	Buff	50	0	NoStagger	1	Distance	0	0		0	0	0
-Spark	226	Spark	Lightning	CastLightning	4	Lightning,Targeted	PowerBolt	0	4	38	0	Cheap little bolt	Bolt	320	0		0		0	0		0	0	0
+Spark	226	Spark	Lightning	CastLightning	2	Lightning,Targeted	PowerBolt	0	2	38	0	Cheap little bolt	Bolt	320	0		0		0	0		0	0	0
 Arc	227	Arc	Lightning	CastLightning	9	Lightning,Targeted	Corruption	0	9	2	0	Lightning that leaps	ChainBurst	320	0	Keep	75		0	0		0	0	0
-ForkedLightning	228	Forked Lightning	Lightning	CastLightning	9	Lightning,Targeted	Corruption	0	9	15	10	Hits three at full power	ChainBurst	448	0	Keep	100		2	0		0	0	0
-Thunderstrike	229	Thunderstrike	Lightning	CastLightning	6	Lightning,Targeted	Corruption	0	6	24	8	Heavy hit, cannot miss	Burst	576	0		0		0	0		0	0	0
+ForkedLightning	228	Forked Lightning	Lightning	CastLightning	9	Lightning,Targeted	Corruption	0	9	15	10	Hits three at full power	ChainBurst	640	0	Keep	100		2	0		0	0	0
+Thunderstrike	229	Thunderstrike	Lightning	CastLightning	6	Lightning,Targeted	Corruption	0	6	24	8	Heavy hit, cannot miss	Burst	1024	0		0		0	0		0	0	0
 BallLightning	230	Ball Lightning	Lightning	CastLightning	14	Lightning,Targeted	PowerBolt	0	14	10	30	Bolt that bursts and leaps	Bolt	896	0	Chain	75		0	0		0	0	0
 Tempest	231	Tempest	Lightning	CastLightning	36	Lightning,Targeted	Corruption	0	36	45	180	Leaps through the room	ChainBurst	1920	0	Keep	90		8	0		0	0	0
 ShockingGrasp	232	Shocking Grasp	Lightning	CastLightning	3	Lightning,Targeted		0	3	22	8	Strike; shock arcs to two	Strike	256	0	Arc	192		0	0		0	0	0

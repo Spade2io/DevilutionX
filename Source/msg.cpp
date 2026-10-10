@@ -29,6 +29,7 @@
 #include "automap.h"
 #include "buffs.h"
 #include "dots.h"
+#include "essences.h"
 #include "config.h"
 #include "control/control.hpp"
 #include "dead.h"
@@ -201,6 +202,7 @@ std::string_view CmdIdString(_cmd_id cmd)
 	case CMD_POWERONMONSTER: return "CMD_POWERONMONSTER";
 	case CMD_SHIELDSTRIKE: return "CMD_SHIELDSTRIKE";
 	case CMD_CANCELBUFF: return "CMD_CANCELBUFF";
+	case CMD_FILTHY: return "CMD_FILTHY";
 	case FAKE_CMD_SETID: return "FAKE_CMD_SETID";
 	case FAKE_CMD_DROPID: return "FAKE_CMD_DROPID";
 	case CMD_INVALID: return "CMD_INVALID";
@@ -2617,6 +2619,14 @@ size_t OnShieldStrike(const TCmd &message, Player &player)
 	return sizeof(message);
 }
 
+size_t OnFilthy(const TCmdParam1 &message, Player &player)
+{
+	if (gbBufferMsgs != 1)
+		SetOtherPlayerFilthy(player, Swap16LE(message.wParam1));
+
+	return sizeof(message);
+}
+
 size_t OnCancelBuff(const TCmdParam1 &message, Player &player)
 {
 	if (gbBufferMsgs != 1)
@@ -3580,6 +3590,8 @@ size_t ParseCmd(uint8_t pnum, const TCmd *pCmd, size_t maxCmdSize)
 		return HandleCmd(OnShieldStrike, player, pCmd, maxCmdSize);
 	case CMD_CANCELBUFF:
 		return HandleCmd(OnCancelBuff, player, pCmd, maxCmdSize);
+	case CMD_FILTHY:
+		return HandleCmd(OnFilthy, player, pCmd, maxCmdSize);
 	default:
 		break;
 	}

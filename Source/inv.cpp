@@ -2199,6 +2199,12 @@ bool UseInvItem(int cii)
 		}
 	}
 
+	// Essence Mod: a Crystal Wash is only used up when there is filth to wash off.
+	if (item->_iMiscId == IMISC_CRYSTALWASH && !IsFilthy(player)) {
+		EventPlrMsg("You are not filthy", UiFlags::ColorWhite);
+		return true;
+	}
+
 	// Essence Mod: an essence can only be absorbed once, and only while a slot is free.
 	if (item->_iMiscId == IMISC_ESSENCE) {
 		const EssenceID essence = GetSpellEssence(item->_iSpell);

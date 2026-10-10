@@ -997,6 +997,31 @@ In the game: an Aura or a Curse with the stat ElementalResistCut, NaturalResistC
 AstralResistCut or AllResistCut. Nothing is saved; it lasts until the monster dies or the game
 ends. Pall of Shadow is the first: 10 points off Astral resistance for monsters within 8 tiles.
 
+## Iron Rank and the Filthy debuff (Bryan, 2026-10-08)
+
+From the books: on gaining a fourth essence a person reaches Iron Rank and the contamination of
+their old self pours out of them. In the game, filling the fourth row (accepting the confluence,
+or taking a fourth essence in its place) sets off a burst of sludge and the character's death cry,
+and leaves them Filthy. It lasts until they use a Crystal Wash, which Pepin always stocks for 10
+gold. Filthy does nothing but show: halving the stats was tried and was too punishing. It is kept in the sidecar file, shown as a
+greyed icon at the end of the buff bar, and other PCs are told (`CMD_FILTHY`). No cleanse removes it.
+
+## What a longer cooldown buys (Bryan, 2026-10-09)
+
+A general rule, above all for powers made from here on. A longer cooldown should give slightly
+more damage for the mana. More importantly, it should give the power more layers: more separate
+effects in one cast. An Ultimate may carry three or four (damage, a hold, a heal, a cleanse, a
+curse and so on), because it is an Ultimate. A no-cooldown power does one thing.
+
+How attack powers are valued when their numbers are set (the balance passes of 2026-10-09):
+a radius 2, cone or full-strength chain power is counted as hitting 3 monsters; a chain that
+loses a quarter each leap as 2.31; a bigger area as 5; damage over time at half its total; a
+special attack by its bonus alone, since the weapon swing is free. On that footing, in damage for
+a point of mana at level 0: no-cooldown spells 1.2 to 2.4 (Efficient ones near 3, Inefficient
+ones near 0.5 with much higher damage); Skirmish spells 2.5 to 3.5; a plain no-cooldown special
+attack adds 2 for 2 mana. A spell should do about twice what an equal special attack adds, the
+weapon supplying the other half.
+
 ## Starting sizes for percentage buffs (Bryan, 2026-10-08)
 
 A first pass, to be balanced in play. These are the numbers at level 0.

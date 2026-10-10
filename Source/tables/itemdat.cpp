@@ -460,6 +460,7 @@ std::expected<item_misc_id, std::string> ParseItemMiscId(std::string_view value)
 	if (value == "ARENAPOT") return IMISC_ARENAPOT;
 	if (value == "AWAKENINGSTONE") return IMISC_AWAKENINGSTONE;
 	if (value == "ESSENCE") return IMISC_ESSENCE;
+	if (value == "CRYSTALWASH") return IMISC_CRYSTALWASH;
 	return std::unexpected("Unknown enum value");
 }
 

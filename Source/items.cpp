@@ -1833,7 +1833,8 @@ void PrintItemMisc(const Item &item)
 	    || (item._iMiscId > IMISC_RUNEFIRST && item._iMiscId < IMISC_RUNELAST)
 	    || item._iMiscId == IMISC_ARENAPOT
 	    || item._iMiscId == IMISC_AWAKENINGSTONE
-	    || item._iMiscId == IMISC_ESSENCE;
+	    || item._iMiscId == IMISC_ESSENCE
+	    || item._iMiscId == IMISC_CRYSTALWASH;
 	const bool mouseRequiresTarget = (item._iMiscId == IMISC_SCROLLT && item._iSpell != SpellID::Flash)
 	    || (item._iMiscId == IMISC_SCROLL && IsAnyOf(item._iSpell, SpellID::TownPortal, SpellID::Identify));
 	const bool gamepadRequiresTarget = item.isScroll() && TargetsMonster(item._iSpell);
@@ -2534,9 +2535,10 @@ void CalcPlrPrimaryStats(Player &player, int strength, int &magic, int dexterity
 
 	strength += GetBuffStrengthBonus(player) + GetPowerBuffPercent(player, "Power"); // Essence Mod: persistent buffs
 
-	player._pStrength = std::clamp(strength + player._pBaseStr, 0, 750);
 	// Essence Mod: "Spirit" buffs add points. (In the game's own terms Spirit is Magic.)
-	player._pMagic = std::clamp(magic + player._pBaseMag + GetPowerBuffPercent(player, "Spirit"), 0, 750);
+	magic += GetPowerBuffPercent(player, "Spirit");
+	player._pStrength = std::clamp(strength + player._pBaseStr, 0, 750);
+	player._pMagic = std::clamp(magic + player._pBaseMag, 0, 750);
 	player._pDexterity = std::clamp(dexterity + player._pBaseDex, 0, 750);
 	player._pVitality = std::clamp(vitality + player._pBaseVit, 0, 750);
 }
@@ -4331,6 +4333,11 @@ void UseItem(Player &player, item_misc_id mid, SpellID spellID, int spellFrom)
 			NetSendCmdLocParam3(true, CMD_SPELLXY, target, static_cast<uint16_t>(spellID), static_cast<uint8_t>(SpellType::Scroll), static_cast<uint16_t>(spellFrom));
 		}
 		break;
+	case IMISC_CRYSTALWASH:
+		// Essence Mod: washes off the Filthy debuff.
+		if (&player == MyPlayer)
+			WashOffFilth(player);
+		break;
 	case IMISC_ESSENCE:
 		// Essence Mod: an essence item grants the essence that its row's spell belongs to.
 		if (&player == MyPlayer) {
@@ -4739,6 +4746,23 @@ void SpawnHealer(int lvl)
 		}
 
 		HealerItems.push_back(item);
+	}
+
+	// Essence Mod: Pepin always stocks Crystal Wash. It takes the place of the last of his other wares.
+	for (size_t row = 0; row < AllItemsList.size(); row++) {
+		if (AllItemsList[row].iMiscId != IMISC_CRYSTALWASH)
+			continue;
+		Item wash = {};
+		wash._iSeed = AdvanceRndSeed();
+		GetItemAttrs(wash, static_cast<_item_indexes>(row), 1);
+		wash._iCreateInfo = lvl;
+		wash._iStatFlag = true;
+		wash._iIdentified = true;
+		if (HealerItems.size() > PinnedItemCount)
+			HealerItems[HealerItems.size() - 1] = wash;
+		else
+			HealerItems.push_back(wash);
+		break;
 	}
 
 	SortVendor(HealerItems, PinnedItemCount);

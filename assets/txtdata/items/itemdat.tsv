@@ -183,3 +183,4 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Curses	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Spells	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Combat	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
+	0	Misc	Unequippable	SPECTRAL_ELIXIR	Misc	NONE	Crystal Wash	Wash	1	0	0	0	0	0	0	0	0		CRYSTALWASH	Null	true	10

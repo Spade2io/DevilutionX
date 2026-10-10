@@ -491,6 +491,7 @@ enum item_misc_id : int8_t {
 	IMISC_ARENAPOT,
 	IMISC_AWAKENINGSTONE, // Essence Mod: teaches the spell written in its item table row
 	IMISC_ESSENCE, // Essence Mod: grants the essence of the spell written in its item table row
+	IMISC_CRYSTALWASH, // Essence Mod: washes off the Filthy debuff
 	IMISC_INVALID = -1,
 };
 

@@ -493,7 +493,7 @@ bool UseStashItem(uint16_t c)
 	}
 
 	// Essence Mod: the rules for essences and awakening stones are checked where the bag is used.
-	if (IsAnyOf(item->_iMiscId, IMISC_AWAKENINGSTONE, IMISC_ESSENCE)) {
+	if (IsAnyOf(item->_iMiscId, IMISC_AWAKENINGSTONE, IMISC_ESSENCE, IMISC_CRYSTALWASH)) {
 		EventPlrMsg("Move it to your inventory to use it", UiFlags::ColorWhite);
 		return true;
 	}

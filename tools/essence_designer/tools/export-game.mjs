@@ -502,6 +502,12 @@ const NAME_COLUMN = 7
 const MISC_COLUMN = 19
 const VALUE_COLUMN = 22
 const RARITY_IDS = ['common', 'rare', 'epic', 'legendary']
+// Crystal Wash: washes off the Filthy debuff a character gets on filling their fourth row. Pepin
+// always stocks it. It has no rarity and is not a test price.
+const CRYSTAL_WASH_PRICE = 10
+if (!itemLines.some((line) => line.split('\t')[19] === 'CRYSTALWASH'))
+  itemLines.push(['', 0, 'Misc', 'Unequippable', 'SPECTRAL_ELIXIR', 'Misc', 'NONE', 'Crystal Wash', 'Wash', 1, 0, 0, 0, 0, 0, 0, 0, 0, '', 'CRYSTALWASH', 'Null', 'true', CRYSTAL_WASH_PRICE].join('\t'))
+itemLines = itemLines.map((line) => { const c = line.split('\t'); if (c[19] !== 'CRYSTALWASH') return line; c[22] = CRYSTAL_WASH_PRICE; return c.join('\t') })
 const rarityOfStone = (n) => (n >= 5 ? 'Legendary' : n === 4 ? 'Epic' : n === 3 ? 'Rare' : 'Common')
 const tagStones = (data.stones ?? []).filter((s) => s.name && s.tags.length > 0)
 const tagStonesAdded = []

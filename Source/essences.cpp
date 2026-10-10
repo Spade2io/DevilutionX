@@ -20,7 +20,9 @@
 #include "data/record_reader.hpp"
 #include "engine/random.hpp"
 #include "items.h"
+#include "missiles.h"
 #include "msg.h"
+#include "multi.h"
 #include "player.h"
 #include "plrmsg.h"
 #include "spells.h"
@@ -94,6 +96,68 @@ EssenceStat PrimaryStatOf(EssenceID essence)
 bool IsStatClaimed(EssenceStat stat)
 {
 	return std::find(SlotStats.begin(), SlotStats.end(), stat) != SlotStats.end();
+}
+
+/** Whether the local player is Filthy. Kept in the sidecar file. */
+bool LocalFilthy = false;
+/** Whether the filth has poured out of the local player yet, washed off since or not. Kept in the sidecar file. */
+bool FilthHasHappened = false;
+/** Whether each other player is, as their PCs have said. */
+std::array<bool, MAX_PLRS> OthersFilthy {};
+
+/** The burst of sludge, seen by everyone near, and the player's death cry. */
+void ShowFilthEruption(Player &player)
+{
+	player.Say(HeroSpeech::AuughUh);
+	if (!player.isOnActiveLevel())
+		return;
+	const Point centre = player.position.tile;
+	// A brown ring at the feet (the colour of an Earth power, if the game has one to borrow it from)...
+	const std::expected<SpellID, std::string> earth = ParseSpellId("StoneSpike");
+	Missile *ringAtFeet = nullptr;
+	for (const MissileID ring : { MissileID::FireAuraPulse, MissileID::FireAuraPulseBack }) {
+		Missile *missile = AddMissile(centre, centre, player._pdir, ring, TARGET_MONSTERS, player.getId(), 0, 0);
+		if (missile == nullptr)
+			continue;
+		if (earth.has_value())
+			missile->sourceSpell = *earth;
+		if (ringAtFeet == nullptr)
+			ringAtFeet = missile;
+	}
+	// ...and dark bursts on the player's tile and every tile around it. The game's explosion takes
+	// its place from the missile that caused it, so each is made from the ring and then moved.
+	if (ringAtFeet == nullptr)
+		return;
+	for (int dy = -1; dy <= 1; dy++) {
+		for (int dx = -1; dx <= 1; dx++) {
+			const Point tile = centre + Displacement { dx, dy };
+			if (!InDungeonBounds(tile))
+				continue;
+			Missile *burst = AddMissile(tile, { 0, 0 }, Direction::South, MissileID::CorruptionExplosion, TARGET_MONSTERS, player.getId(), 0, 0, ringAtFeet);
+			if (burst == nullptr)
+				continue;
+			burst->position.tile = tile;
+			burst->position.start = tile;
+			burst->position.offset = { 0, 0 };
+			// The ring's colour came along with it; these are the dark ones.
+			burst->sourceSpell = SpellID::Invalid;
+		}
+	}
+}
+
+/** The local player reaches Iron Rank: the filth pours out and stays until washed off. */
+void BecomeFilthy()
+{
+	if (MyPlayer == nullptr || FilthHasHappened)
+		return;
+	Player &player = *MyPlayer;
+	FilthHasHappened = true;
+	LocalFilthy = true;
+	ShowFilthEruption(player);
+	CalcPlrInv(player, true);
+	EventPlrMsg("You have reached Iron Rank.", UiFlags::ColorWhitegold);
+	EventPlrMsg("The filth of your old self pours out of you. You are Filthy.", UiFlags::ColorWhitegold);
+	NetSendCmdParam1(true, CMD_FILTHY, 2);
 }
 
 /** One row of confluences.tsv: three essence names in alphabetical order, and what they form. */
@@ -396,6 +460,55 @@ void AbsorbEssence(EssenceID essence)
 	const size_t slot = SlotOf(EssenceID::None);
 	Slots[slot] = essence;
 	AssignSlotStat(slot);
+	// A fourth essence fills the fourth row, as the confluence would have.
+	if (slot == ConfluenceSlot)
+		BecomeFilthy();
+}
+
+bool IsFilthy(const Player &player)
+{
+	return &player == MyPlayer ? LocalFilthy : OthersFilthy[player.getId()];
+}
+
+void SetOtherPlayerFilthy(Player &player, int state)
+{
+	if (&player == MyPlayer)
+		return;
+	const bool filthy = state != 0;
+	if (OthersFilthy[player.getId()] == filthy)
+		return;
+	OthersFilthy[player.getId()] = filthy;
+	if (state == 2)
+		ShowFilthEruption(player);
+	CalcPlrInv(player, true);
+}
+
+void WashOffFilth(Player &player)
+{
+	if (&player != MyPlayer || !LocalFilthy)
+		return;
+	LocalFilthy = false;
+	CalcPlrInv(player, true);
+	EventPlrMsg("You are clean again.", UiFlags::ColorWhitegold);
+	NetSendCmdParam1(true, CMD_FILTHY, 0);
+}
+
+void ProcessFilth()
+{
+	if (MyPlayer == nullptr)
+		return;
+	// A character whose fourth row was filled before any of this existed has it happen now.
+	if (!FilthHasHappened && (ConfluenceTaken || Slots[ConfluenceSlot] != EssenceID::None) && !MyPlayer->hasNoLife())
+		BecomeFilthy();
+
+	// Every ten seconds, for the sake of anyone who has joined since it began.
+	static int countdown = 0;
+	if (!LocalFilthy || !gbIsMultiplayer)
+		return;
+	if (--countdown > 0)
+		return;
+	countdown = 200;
+	NetSendCmdParam1(false, CMD_FILTHY, 1);
 }
 
 std::string_view GetEssenceStatName(EssenceStat stat)
@@ -521,6 +634,7 @@ void AcceptConfluence()
 		return;
 	ConfluenceTaken = true;
 	AssignSlotStat(ConfluenceSlot);
+	BecomeFilthy();
 }
 
 std::string GetConfluenceName()
@@ -790,6 +904,9 @@ void ResetEssences()
 	Slots.fill(EssenceID::None);
 	SlotStats.fill(EssenceStat::None);
 	PointsGranted.fill(0);
+	LocalFilthy = false;
+	FilthHasHappened = false;
+	OthersFilthy.fill(false);
 	ConfluenceTaken = false;
 	ClearAbilities();
 }
@@ -798,6 +915,8 @@ void WriteEssenceSidecarLines(FILE *file)
 {
 	if (ConfluenceTaken)
 		std::fprintf(file, "C 1\n");
+	if (FilthHasHappened)
+		std::fprintf(file, "F %u\n", LocalFilthy ? 1U : 0U);
 	// The stat each row is bound to, and the points its abilities' levels have already added.
 	for (size_t slot = 0; slot < AbilitySlotCount; slot++) {
 		if (SlotStats[slot] != EssenceStat::None)
@@ -826,6 +945,11 @@ bool ReadEssenceSidecarLine(const char *line)
 	unsigned slot = 0;
 	unsigned second = 0;
 	unsigned third = 0;
+	if (std::sscanf(line, "F %u", &slot) == 1) {
+		FilthHasHappened = true;
+		LocalFilthy = slot != 0;
+		return true;
+	}
 	if (std::sscanf(line, "C %u", &slot) == 1) {
 		ConfluenceTaken = slot != 0;
 		return true;
