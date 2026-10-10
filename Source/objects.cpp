@@ -2144,11 +2144,11 @@ void OperateSlainHero(const Player &player, Object &corpse, bool sendmsg)
 	} else if (player._pClass == HeroClass::Rogue) {
 		CreateMagicWeapon(corpse.position, ItemType::Bow, ICURS_LONG_BATTLE_BOW, sendmsg, false);
 	} else if (player._pClass == HeroClass::Sorcerer) {
-		CreateSpellBook(corpse.position, SpellID::Lightning, sendmsg, false);
+		CreateMagicWeapon(corpse.position, ItemType::Staff, ICURS_WAR_STAFF, sendmsg, false); // Essence Mod: was a Book of Lightning
 	} else if (player._pClass == HeroClass::Monk) {
 		CreateMagicWeapon(corpse.position, ItemType::Staff, ICURS_WAR_STAFF, sendmsg, false);
-	} else if (player._pClass == HeroClass::Bard) {
-		CreateMagicWeapon(corpse.position, ItemType::Sword, ICURS_BASTARD_SWORD, sendmsg, false);
+	} else if (player._pClass == HeroClass::Bard) { // Essence Mod: the Elf, a second Rogue
+		CreateMagicWeapon(corpse.position, ItemType::Bow, ICURS_LONG_BATTLE_BOW, sendmsg, false);
 	} else if (player._pClass == HeroClass::Barbarian) {
 		CreateMagicWeapon(corpse.position, ItemType::Axe, ICURS_BATTLE_AXE, sendmsg, false);
 	}
@@ -3117,10 +3117,8 @@ void OperateBookStand(Object &bookStand, bool sendmsg, bool sendLootMsg)
 	bookStand.selectionRegion = SelectionRegion::None;
 	bookStand._oAnimFrame += 2;
 	SetRndSeed(bookStand._oRndSeed);
-	if (FlipCoin(5))
-		CreateTypeItem(bookStand.position, false, ItemType::Misc, IMISC_BOOK, sendLootMsg, false);
-	else
-		CreateTypeItem(bookStand.position, false, ItemType::Misc, IMISC_SCROLL, sendLootMsg, false);
+	// Essence Mod: spellbooks are out of the game, so a book stand always holds a scroll.
+	CreateTypeItem(bookStand.position, false, ItemType::Misc, IMISC_SCROLL, sendLootMsg, false);
 	if (sendmsg)
 		NetSendCmdLoc(MyPlayerId, false, CMD_OPERATEOBJ, bookStand.position);
 }
@@ -3135,7 +3133,10 @@ void OperateBookcase(Object &bookcase, bool sendmsg, bool sendLootMsg)
 	bookcase.selectionRegion = SelectionRegion::None;
 	bookcase._oAnimFrame -= 2;
 	SetRndSeed(bookcase._oRndSeed);
-	CreateTypeItem(bookcase.position, false, ItemType::Misc, IMISC_BOOK, sendLootMsg, false);
+	// Essence Mod: spellbooks are out of the game. One bookcase in four holds an awakening stone
+	// or an essence instead; the rest are empty.
+	if (GenerateRnd(4) == 0)
+		CreateEssenceLoot(bookcase.position, sendLootMsg);
 
 	if (Quests[Q_ZHAR].IsAvailable()) {
 		Monster &zhar = Monsters[MAX_PLRS];

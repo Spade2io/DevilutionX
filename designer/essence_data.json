@@ -165,13 +165,13 @@
     },
     {
       "id": "t_50a7240a",
-      "name": "Buff",
+      "name": "Boon",
       "groupId": "g_40d9d605",
       "parentId": null
     },
     {
       "id": "t_fd59c54d",
-      "name": "Debuff",
+      "name": "Affliction",
       "groupId": "g_40d9d605",
       "parentId": null
     },
@@ -309,7 +309,7 @@
     },
     {
       "id": "t_29d3e548",
-      "name": "Utlimate (120+)",
+      "name": "Ultimate (120+)",
       "groupId": "g_840a14f1",
       "parentId": null
     },
@@ -865,6 +865,40 @@
         "t_bcaf43f8"
       ],
       "primaryStat": "Spirit"
+    },
+    {
+      "id": "e_c3e242a4",
+      "name": "Life",
+      "description": "",
+      "rarity": "rare",
+      "poolSize": 20,
+      "damageTypeId": "d_63f57914",
+      "tagsAll": [
+        "t_a8091ad3"
+      ],
+      "tagsMost": [
+        "t_0eaf5fa3",
+        "t_f68550c3"
+      ],
+      "tagsSome": [
+        "t_50a7240a",
+        "t_78bf3c15",
+        "t_afa5e43e"
+      ],
+      "tagsFinite": [
+        "t_42d817be",
+        "t_b5fae28d",
+        "t_4f155f0e",
+        "t_1d3ef0b5"
+      ],
+      "tagsNever": [
+        "t_bcaf43f8",
+        "t_f931de44"
+      ],
+      "neverOtherGroups": [
+        "g_b6a0b51b"
+      ],
+      "primaryStat": "Recovery"
     }
   ],
   "powers": [
@@ -1205,7 +1239,7 @@
     {
       "id": "p_5096457e",
       "name": "Vigil",
-      "description": "A lasting buff on one ally. Their life comes back faster on its own.",
+      "description": "A lasting boon on one ally. Their life comes back faster on its own.",
       "status": "accepted",
       "essenceIds": [
         "e_566cd6e8"
@@ -1234,7 +1268,7 @@
     {
       "id": "p_b7f8eba6",
       "name": "Benediction",
-      "description": "A lasting buff on one ally. Their maximum life is raised.",
+      "description": "A lasting boon on one ally. Their maximum life is raised.",
       "status": "accepted",
       "essenceIds": [
         "e_566cd6e8"
@@ -1812,7 +1846,7 @@
     {
       "id": "p_af84f201",
       "name": "Clarity",
-      "description": "A lasting buff on one ally. Their mana comes back faster. Stronger than the aura's boost, and it goes with them wherever they walk.",
+      "description": "A lasting boon on one ally. Their mana comes back faster. Stronger than the aura's boost, and it goes with them wherever they walk.",
       "status": "accepted",
       "essenceIds": [
         "e_c253b238"
@@ -1868,7 +1902,7 @@
     {
       "id": "p_cde0b1ab",
       "name": "Reservoir",
-      "description": "A lasting buff on one ally. Their maximum mana is raised.",
+      "description": "A lasting boon on one ally. Their maximum mana is raised.",
       "status": "accepted",
       "essenceIds": [
         "e_c253b238"
@@ -2173,7 +2207,7 @@
     {
       "id": "p_20b1fb28",
       "name": "Flaming Weapon",
-      "description": "In the game today. A lasting buff on yourself: every weapon hit you land also deals fire damage.",
+      "description": "In the game today. A lasting boon on yourself: every weapon hit you land also deals fire damage.",
       "status": "accepted",
       "essenceIds": [
         "e_4021590a"
@@ -2484,7 +2518,7 @@
     {
       "id": "p_4af4aa27",
       "name": "Fan the Flames",
-      "description": "A lasting buff on one ally. They attack and cast a little faster.",
+      "description": "A lasting boon on one ally. They attack and cast a little faster.",
       "status": "accepted",
       "essenceIds": [
         "e_4021590a"
@@ -3029,7 +3063,7 @@
     {
       "id": "p_a61d038f",
       "name": "Barkskin",
-      "description": "A lasting buff on one ally. Their skin hardens like bark: all three resistances are raised. Stronger than the aura's boost, and it goes with them wherever they walk.",
+      "description": "A lasting boon on one ally. Their skin hardens like bark: all three resistances are raised. Stronger than the aura's boost, and it goes with them wherever they walk.",
       "status": "accepted",
       "essenceIds": [
         "e_1c094682"
@@ -3085,7 +3119,7 @@
     {
       "id": "p_0ad1ca63",
       "name": "Ironwood",
-      "description": "A lasting buff on one ally. Their armor is raised.",
+      "description": "A lasting boon on one ally. Their armor is raised.",
       "status": "accepted",
       "essenceIds": [
         "e_1c094682"
@@ -3113,7 +3147,7 @@
     {
       "id": "p_f9476753",
       "name": "Oakheart",
-      "description": "A lasting buff on one ally. Sturdy as an oak: their maximum life is raised.",
+      "description": "A lasting boon on one ally. Sturdy as an oak: their maximum life is raised.",
       "status": "accepted",
       "essenceIds": [
         "e_1c094682"
@@ -3141,7 +3175,7 @@
     {
       "id": "p_2d21a0b3",
       "name": "Camouflage",
-      "description": "A lasting buff on yourself. You blend into leaf and shadow: monsters are slower to notice you and prefer other targets. It stays until you die or leave the game.",
+      "description": "A lasting boon on yourself. You blend into leaf and shadow: monsters are slower to notice you and prefer other targets. It stays until you die or leave the game.",
       "status": "accepted",
       "essenceIds": [
         "e_1c094682"
@@ -3516,7 +3550,7 @@
     {
       "id": "p_e68eae73",
       "name": "Bulwark",
-      "description": "A lasting buff on yourself. Your armor is raised. It stays until you die or leave the game.",
+      "description": "A lasting boon on yourself. Your armor is raised. It stays until you die or leave the game.",
       "status": "accepted",
       "essenceIds": [
         "e_d0ab3dce"
@@ -3544,7 +3578,7 @@
     {
       "id": "p_2abccdd1",
       "name": "Spell Ward",
-      "description": "A lasting buff on one ally. All three of their resistances are raised. Cast it once on each person you want protected.",
+      "description": "A lasting boon on one ally. All three of their resistances are raised. Cast it once on each person you want protected.",
       "status": "accepted",
       "essenceIds": [
         "e_d0ab3dce"
@@ -3572,7 +3606,7 @@
     {
       "id": "p_35810d35",
       "name": "Hold the Line",
-      "description": "A lasting buff on the whole party. Every ally in the game has slightly raised armor for as long as you are with them.",
+      "description": "A lasting boon on the whole party. Every ally in the game has slightly raised armor for as long as you are with them.",
       "status": "accepted",
       "essenceIds": [
         "e_d0ab3dce"
@@ -3600,7 +3634,7 @@
     {
       "id": "p_bf2c880e",
       "name": "Stout Heart",
-      "description": "A lasting buff on one ally. Their maximum life is raised.",
+      "description": "A lasting boon on one ally. Their maximum life is raised.",
       "status": "accepted",
       "essenceIds": [
         "e_d0ab3dce"
@@ -3628,7 +3662,7 @@
     {
       "id": "p_38cdb891",
       "name": "Resilience",
-      "description": "A lasting buff on yourself. Your life comes back faster on its own.",
+      "description": "A lasting boon on yourself. Your life comes back faster on its own.",
       "status": "accepted",
       "essenceIds": [
         "e_d0ab3dce"
@@ -3684,7 +3718,7 @@
     {
       "id": "p_37c3d958",
       "name": "Stalwart",
-      "description": "A lasting buff on yourself. You make yourself the obvious target: monsters notice you first and prefer you over your allies. It stays until you die or leave the game.",
+      "description": "A lasting boon on yourself. You make yourself the obvious target: monsters notice you first and prefer you over your allies. It stays until you die or leave the game.",
       "status": "accepted",
       "essenceIds": [
         "e_d0ab3dce"
@@ -3712,7 +3746,7 @@
     {
       "id": "p_bf5fdb61",
       "name": "Brace",
-      "description": "The one big cooldown buff, and it is yours alone. Set your feet behind the shield: a very large boost to your armor and resistances for about 20 seconds. Cooldown of about a minute.",
+      "description": "The one big cooldown boon, and it is yours alone. Set your feet behind the shield: a very large boost to your armor and resistances for about 20 seconds. Cooldown of about a minute.",
       "status": "accepted",
       "essenceIds": [
         "e_d0ab3dce"
@@ -4254,7 +4288,7 @@
     {
       "id": "p_a669856c",
       "name": "Cloak of Night",
-      "description": "A lasting buff on yourself, with two gifts. Darkness gathers around you: monsters are slower to notice you and prefer other targets. And eyes used to the dark cannot be darkened: you are immune to blindness. It stays until you die or leave the game.",
+      "description": "A lasting boon on yourself, with two gifts. Darkness gathers around you: monsters are slower to notice you and prefer other targets. And eyes used to the dark cannot be darkened: you are immune to blindness. It stays until you die or leave the game.",
       "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
@@ -4283,7 +4317,7 @@
     {
       "id": "p_062b5547",
       "name": "Malice",
-      "description": "A lasting buff on yourself. Every tick of damage over time you cause deals a little more. It does nothing for direct hits.",
+      "description": "A lasting boon on yourself. Every tick of damage over time you cause deals a little more. It does nothing for direct hits.",
       "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
@@ -4311,7 +4345,7 @@
     {
       "id": "p_7e1963bf",
       "name": "Night's Edge",
-      "description": "A lasting buff on yourself. Your weapon is edged with shadow: every hit that lands also leaves a trace of Corruption on the enemy, adding to the same Corruption your other powers build.",
+      "description": "A lasting boon on yourself. Your weapon is edged with shadow: every hit that lands also leaves a trace of Corruption on the enemy, adding to the same Corruption your other powers build.",
       "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
@@ -4683,7 +4717,7 @@
     {
       "id": "p_161257a6",
       "name": "Stoneskin",
-      "description": "A lasting buff on yourself, with two gifts. Your skin takes on the hardness of stone: your armor is raised, so fewer blows land, and every physical hit that does land is reduced by a couple of points. It adds to the aura.",
+      "description": "A lasting boon on yourself, with two gifts. Your skin takes on the hardness of stone: your armor is raised, so fewer blows land, and every physical hit that does land is reduced by a couple of points. It adds to the aura.",
       "status": "accepted",
       "essenceIds": [
         "e_f60d06c1"
@@ -4712,7 +4746,7 @@
     {
       "id": "p_a0cf7ab7",
       "name": "Dig In",
-      "description": "Plant your feet. For about 20 seconds every physical hit you take is reduced by far more than your lasting buffs manage. The button for when you are surrounded. Cooldown of about a minute.",
+      "description": "Plant your feet. For about 20 seconds every physical hit you take is reduced by far more than your lasting boons manage. The button for when you are surrounded. Cooldown of about a minute.",
       "status": "accepted",
       "essenceIds": [
         "e_f60d06c1"
@@ -4768,7 +4802,7 @@
     {
       "id": "p_56f4ebe8",
       "name": "Earthen Might",
-      "description": "A lasting buff on yourself. The strength of the mountain is in your arms: your Power is raised.",
+      "description": "A lasting boon on yourself. The strength of the mountain is in your arms: your Power is raised.",
       "status": "accepted",
       "essenceIds": [
         "e_f60d06c1"
@@ -4796,7 +4830,7 @@
     {
       "id": "p_6ceb6a7c",
       "name": "Monolith",
-      "description": "A lasting buff on yourself, with two gifts. You stand like a standing stone, impossible to ignore: monsters notice you first and prefer you over your allies. And there is more of you to break: your maximum life is raised. Its threat does not add to Unyielding's.",
+      "description": "A lasting boon on yourself, with two gifts. You stand like a standing stone, impossible to ignore: monsters notice you first and prefer you over your allies. And there is more of you to break: your maximum life is raised. Its threat does not add to Unyielding's.",
       "status": "accepted",
       "essenceIds": [
         "e_f60d06c1"
@@ -4825,7 +4859,7 @@
     {
       "id": "p_3d85e6a2",
       "name": "Unyielding",
-      "description": "A lasting buff on yourself, with two gifts. Blows no longer stagger you: taking a hit never interrupts what you are doing. And you will not be moved or ignored: monsters notice you first and prefer you over your allies. It does not reduce damage, and its threat does not add to Monolith's.",
+      "description": "A lasting boon on yourself, with two gifts. Blows no longer stagger you: taking a hit never interrupts what you are doing. And you will not be moved or ignored: monsters notice you first and prefer you over your allies. It does not reduce damage, and its threat does not add to Monolith's.",
       "status": "accepted",
       "essenceIds": [
         "e_f60d06c1"
@@ -5123,7 +5157,7 @@
     {
       "id": "p_38cedbf8",
       "name": "Storm's Focus",
-      "description": "A lasting buff on yourself. Your Spirit is raised, so every spell you cast hits harder.",
+      "description": "A lasting boon on yourself. Your Spirit is raised, so every spell you cast hits harder.",
       "status": "accepted",
       "essenceIds": [
         "e_057f86d1"
@@ -5151,7 +5185,7 @@
     {
       "id": "p_330ba999",
       "name": "Amplify",
-      "description": "A lasting buff on yourself. Everything you do deals a little more damage: weapon hits, spells and effects over time alike.",
+      "description": "A lasting boon on yourself. Everything you do deals a little more damage: weapon hits, spells and effects over time alike.",
       "status": "accepted",
       "essenceIds": [
         "e_057f86d1"
@@ -5207,7 +5241,7 @@
     {
       "id": "p_c491ef05",
       "name": "Quickening",
-      "description": "A lasting buff on yourself. You walk faster: each step takes one frame less. It does not change how fast you attack or cast.",
+      "description": "A lasting boon on yourself. You walk faster: each step takes one frame less. It does not change how fast you attack or cast.",
       "status": "accepted",
       "essenceIds": [
         "e_057f86d1"
@@ -5235,7 +5269,7 @@
     {
       "id": "p_79ce854c",
       "name": "Dynamo",
-      "description": "A lasting buff on yourself. Your mana comes back faster, to feed a great many spells.",
+      "description": "A lasting boon on yourself. Your mana comes back faster, to feed a great many spells.",
       "status": "accepted",
       "essenceIds": [
         "e_057f86d1"
@@ -5829,6 +5863,194 @@
         "t_e712d8ea"
       ],
       "gameName": "Combat"
+    },
+    {
+      "id": "s_259a8c35",
+      "name": "of Patience",
+      "tags": [
+        "t_42d817be",
+        "t_b5fae28d",
+        "t_fd59c54d"
+      ]
+    },
+    {
+      "id": "s_044964ba",
+      "name": "of Glory",
+      "tags": [
+        "t_9048f21b",
+        "t_29d3e548",
+        "t_42d817be"
+      ]
+    }
+  ],
+  "races": [
+    {
+      "id": "r_human",
+      "name": "Human",
+      "gameClass": "Warrior",
+      "powers": [
+        {
+          "id": "rp_0001",
+          "name": "Human Ambition",
+          "effect": "XpGain",
+          "amount": 10,
+          "element": ""
+        },
+        {
+          "id": "rp_0002",
+          "name": "Special Attack Aptitude",
+          "effect": "SpecialAptitude",
+          "amount": 0,
+          "element": ""
+        },
+        {
+          "id": "rp_0003",
+          "name": "Essence Gifts",
+          "effect": "EssenceGift",
+          "amount": 5,
+          "element": ""
+        }
+      ]
+    },
+    {
+      "id": "r_celestine",
+      "name": "Celestine",
+      "gameClass": "Rogue",
+      "powers": [
+        {
+          "id": "rp_0004",
+          "name": "Holy Affinity",
+          "effect": "Affinity",
+          "amount": 10,
+          "element": "Holy"
+        },
+        {
+          "id": "rp_0005",
+          "name": "Mana Recovery",
+          "effect": "ManaRegen",
+          "amount": 10,
+          "element": ""
+        },
+        {
+          "id": "rp_0006",
+          "name": "Innate Speed",
+          "effect": "Speed",
+          "amount": 10,
+          "element": ""
+        }
+      ]
+    },
+    {
+      "id": "r_runic",
+      "name": "Runic",
+      "gameClass": "Sorcerer",
+      "powers": [
+        {
+          "id": "rp_0007",
+          "name": "Spellborn",
+          "effect": "MaxMana",
+          "amount": 10,
+          "element": ""
+        },
+        {
+          "id": "rp_0008",
+          "name": "Wellspring",
+          "effect": "ManaRegen",
+          "amount": 10,
+          "element": ""
+        },
+        {
+          "id": "rp_0009",
+          "name": "Spell Aptitude",
+          "effect": "SpellAptitude",
+          "amount": 0,
+          "element": ""
+        },
+        {
+          "id": "rp_0010",
+          "name": "Magic Affinity",
+          "effect": "SpellDamage",
+          "amount": 5,
+          "element": ""
+        },
+        {
+          "id": "rp_0011",
+          "name": "Adaptive Resistance",
+          "effect": "Resist",
+          "amount": 5,
+          "element": ""
+        }
+      ]
+    },
+    {
+      "id": "r_leonid",
+      "name": "Leonid",
+      "gameClass": "Monk",
+      "powers": [
+        {
+          "id": "rp_0012",
+          "name": "Ancestral Strength",
+          "effect": "Power",
+          "amount": 10,
+          "element": ""
+        },
+        {
+          "id": "rp_0013",
+          "name": "Ancestral Swiftness",
+          "effect": "Speed",
+          "amount": 10,
+          "element": ""
+        },
+        {
+          "id": "rp_0014",
+          "name": "Ancestral Stamina",
+          "effect": "MaxLife",
+          "amount": 10,
+          "element": ""
+        }
+      ]
+    },
+    {
+      "id": "r_elf",
+      "name": "Elf",
+      "gameClass": "Rogue (the Bard's place)",
+      "powers": [
+        {
+          "id": "rp_0015",
+          "name": "Spell Aptitude",
+          "effect": "SpellAptitude",
+          "amount": 0,
+          "element": ""
+        },
+        {
+          "id": "rp_0016",
+          "name": "Nature Affinity",
+          "effect": "Affinity",
+          "amount": 10,
+          "element": "Nature"
+        },
+        {
+          "id": "rp_0017",
+          "name": "Life Affinity",
+          "effect": "Affinity",
+          "amount": 10,
+          "element": "Life"
+        },
+        {
+          "id": "rp_0018",
+          "name": "Mystic Bloodline",
+          "effect": "MaxMana",
+          "amount": 10,
+          "element": ""
+        },
+        {
+          "id": "rp_0019",
+          "name": "Grace",
+          "effect": "Speed",
+          "amount": 10,
+          "element": ""
+        }
+      ]
     }
   ]
 }

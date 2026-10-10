@@ -24,6 +24,7 @@
 #include "msg.h"
 #include "multi.h"
 #include "player.h"
+#include "races.h"
 #include "plrmsg.h"
 #include "spells.h"
 #include "utils/str_cat.hpp"
@@ -37,6 +38,8 @@ std::array<EssenceID, AbilitySlotCount> Slots {};
 std::array<std::array<SpellID, AbilitiesPerEssence>, AbilitySlotCount> Abilities {};
 /** Whether the player accepted their confluence, which gives the fourth row to it. */
 bool ConfluenceTaken = false;
+/** Whether this character's starting stats are the 10s every race now has. Kept in the sidecar file (line "B"). */
+bool StatsRebased = true;
 
 /** 0 Common, 1 Rare, 2 Epic, 3 Legendary; defined further down. */
 size_t ParseRarity(std::string_view text);
@@ -769,14 +772,14 @@ void LoadDropTables()
 
 } // namespace
 
-int RollEssenceLoot(bool isBoss)
+int RollEssenceLoot(bool isBoss, bool always)
 {
 	LoadDropTables();
 
 	// A stone, an essence, or nothing. A boss always drops one of the two, in proportion to how
 	// often each drops from anything else (a stone twice as often as an essence, as the file stands).
 	bool stone = true;
-	if (isBoss) {
+	if (isBoss || always) {
 		stone = GenerateRnd(std::max(Drops.stoneOneIn + Drops.essenceOneIn, 1)) < Drops.essenceOneIn;
 	} else if (Drops.stoneOneIn > 0 && GenerateRnd(Drops.stoneOneIn) == 0) {
 		stone = true;
@@ -835,6 +838,17 @@ SpellID PickPowerForStone(std::string_view itemName)
 {
 	// A stone the designer no longer lists has no tags, so anything learnable matches it.
 	const TagStone *stone = FindTagStone(itemName);
+	std::vector<std::string> wanted;
+	if (stone != nullptr)
+		wanted = stone->tags;
+	// A racial aptitude: a stone that says Attack without saying which kind leans the race's way.
+	const auto wants = [&wanted](std::string_view tag) { return std::find(wanted.begin(), wanted.end(), tag) != wanted.end(); };
+	if (MyPlayer != nullptr && wants("Attack") && !wants("Special Attack") && !wants("Spell Attack")) {
+		if (GetRacialPercent(MyPlayer->_pClass, "SpecialAptitude") != 0)
+			wanted.emplace_back("Special Attack");
+		else if (GetRacialPercent(MyPlayer->_pClass, "SpellAptitude") != 0)
+			wanted.emplace_back("Spell Attack");
+	}
 	std::vector<SpellID> pool;
 	size_t best = 0;
 	for (const TaggedPower &power : TaggedPowers) {
@@ -842,11 +856,9 @@ SpellID PickPowerForStone(std::string_view itemName)
 		if (!IsValidSpell(power.spell) || CheckCanLearn(power.spell) != LearnResult::Ok)
 			continue;
 		size_t matched = 0;
-		if (stone != nullptr) {
-			for (const std::string &tag : stone->tags) {
-				if (std::find(power.tags.begin(), power.tags.end(), tag) != power.tags.end())
-					matched++;
-			}
+		for (const std::string &tag : wanted) {
+			if (std::find(power.tags.begin(), power.tags.end(), tag) != power.tags.end())
+				matched++;
 		}
 		// Only the powers matching the most tags stay in the draw.
 		if (matched > best) {
@@ -908,11 +920,53 @@ void ResetEssences()
 	FilthHasHappened = false;
 	OthersFilthy.fill(false);
 	ConfluenceTaken = false;
+	StatsRebased = true; // a new character already starts at 10s
 	ClearAbilities();
+}
+
+void BeginEssenceSidecarRead()
+{
+	StatsRebased = false; // until the file says otherwise
+}
+
+void RebaseStartingStats(Player &player)
+{
+	if (StatsRebased)
+		return;
+	StatsRebased = true;
+	// What each old class started with above or below 10: Power, Spirit, Speed, Recovery.
+	std::array<int, 4> head {};
+	switch (player._pClass) {
+	case HeroClass::Warrior:
+		head = { 5, 0, 0, 0 };
+		break;
+	case HeroClass::Rogue:
+		head = { -5, 0, 5, 5 };
+		break;
+	case HeroClass::Sorcerer:
+		head = { 0, 10, -5, 0 };
+		break;
+	case HeroClass::Monk:
+		head = { 5, -5, 5, 0 };
+		break;
+	case HeroClass::Bard:
+		head = { 10, 10, 15, 10 };
+		break;
+	default:
+		return;
+	}
+	player._pBaseStr = std::clamp(player._pBaseStr - head[0], 10, 255);
+	player._pBaseMag = std::clamp(player._pBaseMag - head[1], 10, 255);
+	player._pBaseDex = std::clamp(player._pBaseDex - head[2], 10, 255);
+	player._pBaseVit = std::clamp(player._pBaseVit - head[3], 10, 255);
+	RecalculateBaseLifeAndMana(player);
+	CalcPlrInv(player, false);
 }
 
 void WriteEssenceSidecarLines(FILE *file)
 {
+	if (StatsRebased)
+		std::fprintf(file, "B 1\n");
 	if (ConfluenceTaken)
 		std::fprintf(file, "C 1\n");
 	if (FilthHasHappened)
@@ -948,6 +1002,10 @@ bool ReadEssenceSidecarLine(const char *line)
 	if (std::sscanf(line, "F %u", &slot) == 1) {
 		FilthHasHappened = true;
 		LocalFilthy = slot != 0;
+		return true;
+	}
+	if (std::sscanf(line, "B %u", &slot) == 1) {
+		StatsRebased = slot != 0;
 		return true;
 	}
 	if (std::sscanf(line, "C %u", &slot) == 1) {

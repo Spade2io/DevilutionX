@@ -313,3 +313,8 @@ input.count { color: var(--muted); cursor: default; text-align: center; }
 .trio-pick.on { border-color: currentColor; color: var(--fg); font-weight: 600; }
 .trio-essence { display: inline-flex; align-items: center; gap: 8px; min-width: 110px; }
 .grid.confluences .confluence-name { width: 220px; font-weight: 600; }
+.race { margin-bottom: 32px; }
+.race h3 { margin: 0 0 8px; }
+.grid.races { width: 100%; }
+.grid.races td { vertical-align: top; padding-top: 8px; padding-bottom: 8px; }
+.grid.races .race-says { max-width: 420px; }

@@ -172,6 +172,7 @@ set(devilutionx_assets
   plrgfx/warrior/whu/whulm.trn
   plrgfx/warrior/whu/whuqm.trn
   txtdata/Experience.tsv
+  txtdata/classes/racial_powers.tsv
   txtdata/classes/barbarian/animations.tsv
   txtdata/classes/barbarian/attributes.tsv
   txtdata/classes/barbarian/sounds.tsv

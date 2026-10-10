@@ -1115,3 +1115,32 @@ of its own; a character's own points stop at 255 (one byte in the save) and 750 
 Left for later, by his choice: accuracy (the 5 to 95 percent limits and each race's flat starting
 to-hit), weapon and armour requirements, how stat points are earned, the size of stat buffs and of
 stat bonuses on gear, the remaining race differences from the old classes, and monster balance.
+
+## Races and racial powers (2026-10-09)
+
+Different starting stats threw the game out of balance, so **every race starts with 10 in each of
+the four stats**. What tells the races apart is their racial powers: things a character is born
+with, never cast and never growing. They are made on the designer's Races page, exported to
+`txtdata/classes/racial_powers.tsv` and read by `Source/races.cpp`. A race is found by its name,
+which is the name its class goes by in `classdat.tsv`. The hero screen lists a race's racial
+powers by name where the four stats used to be.
+
+- **Human** (Warrior): Human Ambition (10% more experience), Special Attack Aptitude, Essence Gifts
+  (5% more damage, healing and shields from the powers of each essence held; the confluence gives
+  nothing yet, undecided).
+- **Celestine** (Rogue): Holy Affinity (10% to Holy damage, healing, shields), Mana Recovery (10%
+  faster mana), Innate Speed (10% Speed).
+- **Runic** (Sorcerer): Spellborn (10% larger mana pool), Wellspring (10% faster mana), Spell
+  Aptitude, Magic Affinity (5% spell damage), Adaptive Resistance (5 points on all resistances).
+- **Leonid** (Monk): Ancestral Strength (10% Power), Ancestral Swiftness (10% Speed), Ancestral
+  Stamina (10% larger health pool).
+- **Elf** (a second Rogue, in the Bard's place): Spell Aptitude, Nature Affinity, Life Affinity
+  (no Life essence yet), Mystic Bloodline (10% larger mana pool), Grace (10% Speed).
+
+An aptitude: a stone tagged Attack that names neither Special Attack nor Spell Attack is treated as
+carrying the race's kind as well, so the race leans that way; a stone that names a kind is obeyed.
+
+A stat percentage applies to the character's own stat only, rounded down; points from gear and boons are added after it. A character made before
+this loses the old head start of their class once (sidecar line `B 1`) and keeps what they earned.
+Multiplayer: all of it follows from the class alone except a Human's gifts, which touch only the
+Human's own numbers on their own PC.

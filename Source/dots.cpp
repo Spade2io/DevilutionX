@@ -20,6 +20,7 @@
 #include "essence_tint.h"
 #include "monster.h"
 #include "player.h"
+#include "races.h"
 #include "spell_xp.h"
 #include "spells.h"
 #include "tables/misdat.h"
@@ -446,11 +447,17 @@ int ApplySpellDamageBuffs(SpellID spell, int damage)
 		return damage;
 	const Player &player = *MyPlayer;
 	// A special attack is a weapon attack: Power, or Speed when it is made with a bow.
-	if (IsSpecialAttack(spell))
-		return ScaleByStat(damage, GetWeaponDamageStat(player));
-	// Everything else is a spell attack: Spirit, then the "SpellDamage" bonus.
+	// Either way a racial power can add a percentage for the power's element (an affinity, or a
+	// Human's gift for an essence held).
+	const int element = GetRacialElementPercent(player, spell);
+	if (IsSpecialAttack(spell)) {
+		damage = ScaleByStat(damage, GetWeaponDamageStat(player));
+		return damage + static_cast<int>(static_cast<int64_t>(damage) * element / 100);
+	}
+	// Everything else is a spell attack: Spirit, then the "SpellDamage" bonus of buffs and of race.
 	damage = ScaleByStat(damage, player._pMagic);
-	return damage + static_cast<int>(static_cast<int64_t>(damage) * GetPowerBuffPercent(player, "SpellDamage") / 100);
+	const int percent = GetPowerBuffPercent(player, "SpellDamage") + GetRacialPercent(player._pClass, "SpellDamage") + element;
+	return damage + static_cast<int>(static_cast<int64_t>(damage) * percent / 100);
 }
 
 uint32_t ScaleGivenAmountBySpirit(SpellID spell, uint32_t amount)
@@ -477,7 +484,8 @@ uint32_t ScaleGivenAmountBySpirit(SpellID spell, uint32_t amount)
 	if (!isLife)
 		return amount;
 	// The most a PC will accept for one of these is 3000 hit points.
-	const int64_t scaled = std::min<int64_t>(static_cast<int64_t>(amount) * std::max(MyPlayer->_pMagic, 0) / 10, 192000);
+	// A racial power can add a percentage for the power's element, as it does to damage.
+	const int64_t scaled = std::min<int64_t>(static_cast<int64_t>(amount) * std::max(MyPlayer->_pMagic, 0) / 10 * (100 + GetRacialElementPercent(*MyPlayer, spell)) / 100, 192000);
 	// Healing ground, a heal or shield that pulses from a buff or an aura, and life drawn back
 	// over time are the same every beat. A heal or shield that lands at once has a little luck in it.
 	const bool overTime = effect == "Zone" || IsAnyOf(effect, "Buff", "Aura") || rider == "Leech";

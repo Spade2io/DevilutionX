@@ -153,7 +153,7 @@ function numbersFor(power) {
   const amount = (base, ratio) => round(base * size * ratio * share * cdPotency * effPotency * overTime * hybrid)
   const timeWords = has('Over Time') && !has('Instant') ? ` in total over ${duration} seconds` : ''
 
-  const plainBuff = (has('Buff') || has('Debuff')) && !attack && !shielding && !has('Instant') && (has('Permanent') || has('Timed'))
+  const plainBuff = (has('Boon') || has('Affliction')) && !attack && !shielding && !has('Instant') && (has('Permanent') || has('Timed'))
   if (!plainBuff && (attack || healing || shielding)) {
     const special = has('Special Attack')
     const base = attack ? (special ? 2 : 6) : 8
@@ -173,9 +173,9 @@ function numbersFor(power) {
       note = 'shield of temporary health' + areaWords
     }
     const stat = Object.keys(STAT).find(has)
-    if (stat && (has('Buff') || has('Debuff'))) {
+    if (stat && (has('Boon') || has('Affliction'))) {
       const [value, words] = STAT[stat]
-      note += has('Debuff') && stat === 'Speed' ? `; held for ${seconds(/for about (\d+) seconds/, 3)} seconds` : `; also ${has('Timed') ? round(value * 1.5) : value} ${words}`
+      note += has('Affliction') && stat === 'Speed' ? `; held for ${seconds(/for about (\d+) seconds/, 3)} seconds` : `; also ${has('Timed') ? round(value * 1.5) : value} ${words}`
     }
     if (has('Cleanse')) note += '; also removes harmful effects'
     return { potency, potencyNote: note, manaCost, cooldown, radius }
@@ -186,7 +186,7 @@ function numbersFor(power) {
     return { potency: all ? null : 1, potencyNote: all ? 'removes every harmful effect' + areaWords.replace(' to ', ' from ') : 'harmful effect removed' + areaWords.replace(' to ', ' from '), manaCost: round(4 * areaMana * cdMana * effMana), cooldown, radius }
   }
 
-  if (has('Buff') || has('Debuff')) {
+  if (has('Boon') || has('Affliction')) {
     const stats = Object.keys(STAT).filter(has)
     const stat = stats[0] ?? 'Defensive'
     const [value, words] = STAT[stat]

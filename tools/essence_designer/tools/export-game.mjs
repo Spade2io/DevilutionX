@@ -391,6 +391,10 @@ const POWER_TAGS_FILE = path.join(REPO, 'assets/txtdata/spells/power_tags.tsv')
 const STONE_TAGS_FILE = path.join(REPO, 'assets/txtdata/spells/stone_tags.tsv')
 // The stat each essence is bound to when a character takes it.
 const ESSENCE_STATS_FILE = path.join(REPO, 'assets/txtdata/spells/essence_stats.tsv')
+// The racial powers each race is born with, from the designer's Races page. The game finds a race
+// by its name, which is the name its class goes by in classdat.tsv. An aptitude has no number of
+// its own, so it is written as 1: the game only asks whether a race has one.
+const RACES_FILE = path.join(REPO, 'assets/txtdata/classes/racial_powers.tsv')
 // How often monsters drop stones and essences, beside the game's own loot (Bryan, 2026-10-07).
 // One kill in "stoneOneIn" drops a stone; of the rest, one in "essenceOneIn" drops an essence.
 // The four rarity numbers are shares out of their total. A boss always drops one or the other,
@@ -575,6 +579,8 @@ if (check) {
   console.log(`Awakening stones with tags: ${tagStones.length} (${tagStonesAdded.length} new)` + ((data.stones ?? []).length > tagStones.length ? `; ${(data.stones ?? []).length - tagStones.length} skipped for having no tags` : ''))
   fs.writeFileSync(ESSENCE_STATS_FILE, [['essence', 'primary', 'rarity'], ...data.essences.map((e) => [e.name, e.primaryStat ?? '', RARITY_IDS.includes(e.rarity) ? e.rarity : 'common'])].map((r) => r.join('\t')).join('\r\n') + '\r\n')
   console.log('Primary stats: ' + data.essences.map((e) => `${e.name} ${e.primaryStat ?? 'NOT SET'}`).join(', '))
+  const racialRows = (data.races ?? []).flatMap((race) => race.powers.filter((p) => p.effect).map((p) => [race.name, p.name, p.effect, p.effect.endsWith('Aptitude') ? 1 : p.amount ?? 0, p.effect === 'Affinity' ? p.element ?? '' : '']))
+  fs.writeFileSync(RACES_FILE, [['race', 'name', 'effect', 'amount', 'element'], ...racialRows].map((r) => r.join('\t')).join('\r\n') + '\r\n')
   fs.writeFileSync(DROPS_FILE, [['setting', 'value'], ...Object.entries(DROPS)].map((r) => r.join('\t')).join('\r\n') + '\r\n')
   console.log('Drops: ' + Object.entries(DROPS).map(([k, v]) => `${k} ${v}`).join(', '))
   if (TEST_PRICES) console.log('TEST PRICES ARE ON: everything costs 1 gold.')

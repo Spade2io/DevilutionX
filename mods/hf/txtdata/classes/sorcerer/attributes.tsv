@@ -1,8 +1,8 @@
 Attribute	Value
 classFlags	
 baseStr	10
-baseMag	20
-baseDex	5
+baseMag	10
+baseDex	10
 baseVit	10
 maxStr	255
 maxMag	255

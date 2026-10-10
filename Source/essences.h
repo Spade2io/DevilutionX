@@ -160,9 +160,10 @@ SpellID PickPowerForStone(std::string_view itemName);
  * the game's own loot (txtdata/spells/drops.tsv). Uses the game's shared random numbers, so the
  * caller must have seeded them the same on every PC.
  * @param isBoss A boss always drops one or the other, and never a Common one while anything rarer exists.
+ * @param always Drop one or the other for certain, of any rarity (a bookcase that holds one).
  * @return The row of the item table to drop, or -1 for nothing.
  */
-int RollEssenceLoot(bool isBoss);
+int RollEssenceLoot(bool isBoss, bool always = false);
 
 /**
  * @brief Whether a player is Filthy. A character becomes Filthy on filling their fourth row (their
@@ -191,6 +192,15 @@ bool IsAbilitySlotted(SpellID spell);
 
 /** @brief Forgets all essences and abilities, e.g. before loading a different character. */
 void ResetEssences();
+
+/** @brief Called when a sidecar file is about to be read: it says whether its character has been rebased. */
+void BeginEssenceSidecarRead();
+
+/**
+ * @brief Every race now starts with 10 in each stat. A character made before that keeps what they
+ * have earned but loses the old head start of their class, once; the sidecar line "B 1" records it.
+ */
+void RebaseStartingStats(Player &player);
 
 /** @brief Writes the essences and their abilities as lines of the sidecar file. */
 void WriteEssenceSidecarLines(FILE *file);

@@ -1,0 +1,20 @@
+race	name	effect	amount	element
+Human	Human Ambition	XpGain	10	
+Human	Special Attack Aptitude	SpecialAptitude	1	
+Human	Essence Gifts	EssenceGift	5	
+Celestine	Holy Affinity	Affinity	10	Holy
+Celestine	Mana Recovery	ManaRegen	10	
+Celestine	Innate Speed	Speed	10	
+Runic	Spellborn	MaxMana	10	
+Runic	Wellspring	ManaRegen	10	
+Runic	Spell Aptitude	SpellAptitude	1	
+Runic	Magic Affinity	SpellDamage	5	
+Runic	Adaptive Resistance	Resist	5	
+Leonid	Ancestral Strength	Power	10	
+Leonid	Ancestral Swiftness	Speed	10	
+Leonid	Ancestral Stamina	MaxLife	10	
+Elf	Spell Aptitude	SpellAptitude	1	
+Elf	Nature Affinity	Affinity	10	Nature
+Elf	Life Affinity	Affinity	10	Life
+Elf	Mystic Bloodline	MaxMana	10	
+Elf	Grace	Speed	10	

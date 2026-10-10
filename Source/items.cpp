@@ -37,6 +37,7 @@
 #include "effects.h"
 #include "plrmsg.h"
 #include "essences.h"
+#include "races.h"
 #include "engine/animationinfo.h"
 #include "engine/backbuffer_state.hpp"
 #include "engine/clx_sprite.hpp"
@@ -1545,7 +1546,7 @@ void SetupAllUseful(Item &item, int iseed, int lvl)
 			idx = IDI_MANA;
 			break;
 		default:
-			idx = IDI_OIL;
+			idx = IDI_MANA; // Essence Mod: was Blacksmith Oil; oils are out of the game
 			break;
 		}
 	} else {
@@ -2537,10 +2538,15 @@ void CalcPlrPrimaryStats(Player &player, int strength, int &magic, int dexterity
 
 	// Essence Mod: "Spirit" buffs add points. (In the game's own terms Spirit is Magic.)
 	magic += GetPowerBuffPercent(player, "Spirit");
-	player._pStrength = std::clamp(strength + player._pBaseStr, 0, 750);
-	player._pMagic = std::clamp(magic + player._pBaseMag, 0, 750);
-	player._pDexterity = std::clamp(dexterity + player._pBaseDex, 0, 750);
-	player._pVitality = std::clamp(vitality + player._pBaseVit, 0, 750);
+	// Essence Mod: a racial power raises the character's own stat by a percentage (a Leonid's Power: 10 becomes
+	// 11). Points from gear and from boons are added afterwards and are not raised.
+	const auto withRace = [&player](int value, std::string_view stat) {
+		return value + value * GetRacialPercent(player._pClass, stat) / 100;
+	};
+	player._pStrength = std::clamp(strength + withRace(player._pBaseStr, "Power"), 0, 750);
+	player._pMagic = std::clamp(magic + withRace(player._pBaseMag, "Spirit"), 0, 750);
+	player._pDexterity = std::clamp(dexterity + withRace(player._pBaseDex, "Speed"), 0, 750);
+	player._pVitality = std::clamp(vitality + withRace(player._pBaseVit, "Recovery"), 0, 750);
 }
 
 void CalcPlrLightRadius(Player &player, int lrad)
@@ -2635,7 +2641,8 @@ void CalcPlrResistances(Player &player, ItemSpecialEffect iflgs, int fire, int l
 	}
 
 	// Essence Mod: a "Resist" buff or aura adds its amount to all three resistances.
-	const int resistBuff = GetPowerBuffPercent(player, "Resist");
+	// A racial power can add a few points to all three as well (a Runic's Adaptive Resistance).
+	const int resistBuff = GetPowerBuffPercent(player, "Resist") + GetRacialPercent(player._pClass, "Resist");
 	magic += resistBuff;
 	fire += resistBuff;
 	lightning += resistBuff;
@@ -2658,13 +2665,13 @@ void CalcPlrLifeMana(Player &player, int vitality, int magic, int life, int mana
 	vitality = (vitality * playerClassAttributes.itmLife) >> 6;
 	life += (vitality << 6);
 	// Essence Mod: a "MaxLife" buff raises the whole pool by a percentage, as "MaxMana" does below.
-	life += static_cast<int>(static_cast<int64_t>(life + player._pMaxHPBase) * GetPowerBuffPercent(player, "MaxLife") / 100);
+	life += static_cast<int>(static_cast<int64_t>(life + player._pMaxHPBase) * (GetPowerBuffPercent(player, "MaxLife") + GetRacialPercent(player._pClass, "MaxLife")) / 100);
 
 	magic = (magic * playerClassAttributes.itmMana) >> 6;
 	mana += (magic << 6);
 	// Essence Mod: a "MaxMana" buff raises the whole pool by a percentage. Like mana from an item,
 	// the extra arrives full and leaves with the buff.
-	mana += static_cast<int>(static_cast<int64_t>(mana + player._pMaxManaBase) * GetPowerBuffPercent(player, "MaxMana") / 100);
+	mana += static_cast<int>(static_cast<int64_t>(mana + player._pMaxManaBase) * (GetPowerBuffPercent(player, "MaxMana") + GetRacialPercent(player._pClass, "MaxMana")) / 100);
 
 	player._pMaxHP = std::clamp(life + player._pMaxHPBase, 1 << 6, 2000 << 6);
 	player._pHitPoints = std::min(life + player._pHPBase, player._pMaxHP);
@@ -3523,6 +3530,14 @@ void SpawnEssenceLoot(Monster &monster, bool sendmsg)
 	SetupItem(item);
 	if (sendmsg)
 		NetSendCmdPItem(false, CMD_DROPITEM, item.position, item);
+}
+
+void CreateEssenceLoot(Point position, bool sendmsg, bool spawn)
+{
+	const int row = RollEssenceLoot(/*isBoss=*/false, /*always=*/true);
+	if (row < 0)
+		return;
+	SetupBaseItem(position, static_cast<_item_indexes>(row), false, sendmsg, false, spawn);
 }
 
 void CreateRndItem(Point position, bool onlygood, bool sendmsg, bool delta)
@@ -4547,7 +4562,7 @@ void SpawnWitch(int lvl)
 	constexpr std::array<_item_indexes, MaxPinnedBookCount> PinnedBookTypes = { IDI_BOOK1, IDI_BOOK2, IDI_BOOK3, IDI_BOOK4 };
 
 	int bookCount = 0;
-	const int pinnedBookCount = gbIsHellfire ? RandomIntLessThan(MaxPinnedBookCount) : 0;
+	const int pinnedBookCount = 0; // Essence Mod: spellbooks are out of the game
 	const int itemCount = RandomIntBetween(10, gbIsHellfire ? NumWitchItemsHf : NumWitchItems);
 	const int maxValue = gbIsHellfire ? MaxVendorValueHf : MaxVendorValue;
 	WitchItems.clear();
@@ -4696,8 +4711,8 @@ void SpawnBoy(int lvl)
 				if (IsAnyOf(itemType, ItemType::Bow, ItemType::MediumArmor, ItemType::Shield, ItemType::Mace))
 					ivalue = INT_MAX;
 				break;
-			case HeroClass::Bard:
-				if (IsAnyOf(itemType, ItemType::Axe, ItemType::Mace, ItemType::Staff))
+			case HeroClass::Bard: // Essence Mod: the Elf, a second Rogue
+				if (IsAnyOf(itemType, ItemType::Sword, ItemType::Staff, ItemType::Axe, ItemType::Mace, ItemType::Shield))
 					ivalue = INT_MAX;
 				break;
 			case HeroClass::Barbarian:

@@ -533,6 +533,11 @@ void SpawnItem(Monster &monster, Point position, bool sendmsg, bool spawn = fals
  * makes the same roll from the same seed, as for the monster's ordinary loot.
  */
 void SpawnEssenceLoot(Monster &monster, bool sendmsg);
+/**
+ * @brief Essence Mod: puts an awakening stone or an essence on the ground, of any rarity, by the
+ * same shares monsters drop them in. Uses the shared random numbers, so the caller seeds them.
+ */
+void CreateEssenceLoot(Point position, bool sendmsg, bool spawn = false);
 void CreateRndItem(Point position, bool onlygood, bool sendmsg, bool delta);
 void CreateRndUseful(Point position, bool sendmsg);
 void CreateTypeItem(Point position, bool onlygood, ItemType itemType, int imisc, bool sendmsg, bool delta, bool spawn = false);

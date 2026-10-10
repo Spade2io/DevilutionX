@@ -2,8 +2,8 @@ name	rarity	tags
 Striking	Common	Attack|No CD
 the Auror	Common	Aura
 the Healer	Common	Healing|Shielding
-Improvement	Common	Self|Buff
-the Helper	Common	Ally|Buff
-Curses	Common	Debuff
+Improvement	Common	Self|Boon
+the Helper	Common	Ally|Boon
+Curses	Common	Affliction
 Spells	Common	Spell Attack
 Combat	Common	Special Attack

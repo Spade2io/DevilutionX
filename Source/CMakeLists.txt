@@ -33,6 +33,7 @@ set(libdevilutionx_SRCS
   dots.cpp
   essence_tint.cpp
   essences.cpp
+  races.cpp
   restrict.cpp
   special_attacks.cpp
   spell_xp.cpp

@@ -1,9 +1,9 @@
 Attribute	Value
 classFlags	TrapSense
-baseStr	5
+baseStr	10
 baseMag	10
-baseDex	15
-baseVit	15
+baseDex	10
+baseVit	10
 maxStr	255
 maxMag	255
 maxDex	255

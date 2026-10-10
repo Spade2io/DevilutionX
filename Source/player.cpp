@@ -54,6 +54,7 @@
 #include "qol/stash.h"
 #include "dots.h"
 #include "essences.h"
+#include "races.h"
 #include "special_attacks.h"
 #include "spell_xp.h"
 #include "spells.h"
@@ -3200,7 +3201,7 @@ int GetLifeRegenPerSecond(const Player &player)
 	// Base: Recovery (the Vitality stat) / 10 hit points per second, in 64ths.
 	// Spells, abilities and buffs that change health regeneration adjust the result here.
 	const int base = std::max(player._pVitality, 0) * 64 / 10;
-	return base + base * GetPowerBuffPercent(player, "LifeRegen") / 100;
+	return base + base * (GetPowerBuffPercent(player, "LifeRegen") + GetRacialPercent(player._pClass, "LifeRegen")) / 100;
 }
 
 int GetManaRegenPerSecond(const Player &player)
@@ -3208,7 +3209,7 @@ int GetManaRegenPerSecond(const Player &player)
 	// Base: Recovery (the Vitality stat) / 10 mana per second, in 64ths.
 	// Spells, abilities and buffs that change mana regeneration adjust the result here.
 	const int base = std::max(player._pVitality, 0) * 64 / 10;
-	return base + base * GetPowerBuffPercent(player, "ManaRegen") / 100;
+	return base + base * (GetPowerBuffPercent(player, "ManaRegen") + GetRacialPercent(player._pClass, "ManaRegen")) / 100;
 }
 
 /**

@@ -15,6 +15,7 @@
 
 #include "buffs.h"
 #include "essences.h"
+#include "races.h"
 #include "monster.h"
 #include "msg.h"
 #include "multi.h"
@@ -109,6 +110,12 @@ std::string DescribeGain(SpellID spell, uint32_t gained)
  * @param levelDelta Target's level minus the player's level.
  * @return The experience actually added, in 64ths of a point. Zero if none.
  */
+/** Essence Mod: a racial power can make every gain of experience larger (Human Ambition). Applied once, where a gain begins. */
+int64_t WithRacialExperience(const Player &player, int64_t gained)
+{
+	return gained + gained * GetRacialPercent(player._pClass, "XpGain") / 100;
+}
+
 uint32_t AwardSpellExperience(Player &player, SpellID spell, int64_t gained, int levelDelta)
 {
 	// Same rule the game uses for character experience: 10% more or less per level of difference.
@@ -248,7 +255,7 @@ void AddSpellExperienceForDamage(const Player &player, const Monster &monster, S
 		return;
 	}
 
-	const uint32_t worth = ExperienceForDamage(player, monster, damage, hitPointsBefore);
+	const int64_t worth = WithRacialExperience(player, ExperienceForDamage(player, monster, damage, hitPointsBefore));
 	const uint32_t added = AwardSpellExperience(*MyPlayer, spell, worth, 0);
 	if (added == 0)
 		return;
@@ -265,7 +272,7 @@ void AddAttackExperienceForDamage(const Player &player, const Monster &monster, 
 		return;
 
 	// No ability earns the attack's own experience yet; it only feeds the active buffs.
-	const uint32_t worth = ExperienceForDamage(player, monster, damage, hitPointsBefore);
+	const auto worth = static_cast<uint32_t>(WithRacialExperience(player, ExperienceForDamage(player, monster, damage, hitPointsBefore)));
 	if (worth == 0)
 		return;
 
@@ -295,7 +302,7 @@ void AddSpellExperienceForHealing(const Player &caster, const Player &target, Sp
 	const int64_t gained = static_cast<int64_t>(AverageMonsterExperienceForLevel(targetLevel)) * 64 * std::min(healed, target._pMaxHP) / target._pMaxHP;
 
 	const int levelDelta = static_cast<int>(targetLevel) - static_cast<int>(caster.getCharacterLevel());
-	const uint32_t added = AwardSpellExperience(*MyPlayer, spell, gained, levelDelta);
+	const uint32_t added = AwardSpellExperience(*MyPlayer, spell, WithRacialExperience(caster, gained), levelDelta);
 	if (added == 0)
 		return;
 
@@ -361,6 +368,7 @@ void LoadSpellExperience(const std::string &path, Player &player)
 
 	char line[64] = {};
 	if (std::fgets(line, sizeof(line), file) != nullptr && std::string_view(line).starts_with(SidecarHeader)) {
+		BeginEssenceSidecarRead();
 		while (std::fgets(line, sizeof(line), file) != nullptr) {
 			unsigned spell = 0;
 			unsigned value = 0;
@@ -389,6 +397,8 @@ void LoadSpellExperience(const std::string &path, Player &player)
 	}
 	std::fclose(file);
 	ApplyExtendedSpellSelections(player);
+	// A character from before every race started with 10 in each stat is brought into line.
+	RebaseStartingStats(player);
 	// A character from before stats grew this way is given what their powers have already earned.
 	GrantEarnedStatPoints(player, /*inGame=*/false);
 }

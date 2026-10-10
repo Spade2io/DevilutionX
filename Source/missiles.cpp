@@ -133,6 +133,16 @@ int ScaleSpellEffect(int base, int spellLevel)
 	return base;
 }
 
+/**
+ * Essence Mod: what an original spell's damage has grown to at a level of the spell: an eighth more
+ * for each level after its first, compounding, like every power. Worked in 64ths so that a small
+ * number (a Charged Bolt's 2) still grows.
+ */
+int GrowWithLevel(int amount, int spellLevel)
+{
+	return ScaleDamageForSpellLevel(amount << 6, std::max(spellLevel, 1)) >> 6;
+}
+
 int GenerateRndSum(int range, int iterations)
 {
 	int value = 0;
@@ -932,8 +942,7 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 	switch (spell) {
 	case SpellID::Firebolt:
 	case SpellID::Frostbolt: {
-		const int min = 1 + spellLevel + 1; // Essence Mod: was Spirit / 8; Spirit now multiplies the damage
-		return { min, min + 9 };
+		return { GrowWithLevel(3, spellLevel), GrowWithLevel(12, spellLevel) }; // Essence Mod: Spirit then multiplies it
 	}
 	case SpellID::Healing:
 	case SpellID::HealOther:
@@ -944,7 +953,7 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 		};
 	case SpellID::RuneOfLight:
 	case SpellID::Lightning:
-		return { 2, 3 }; // each hit; a monster in the bolt takes several
+		return { GrowWithLevel(2, spellLevel), GrowWithLevel(3, spellLevel) }; // each hit; a monster in the bolt takes several
 	case SpellID::Flash: {
 		int min = ScaleSpellEffect(myPlayer.getCharacterLevel(), spellLevel);
 		min += min / 2;
@@ -978,14 +987,14 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 	case SpellID::LightningWall:
 	case SpellID::RingOfFire: {
 		const int min = (2 * 1) + 4;
-		return { min, min + 36 };
+		return { GrowWithLevel(min, spellLevel), GrowWithLevel(min + 36, spellLevel) };
 	}
 	case SpellID::Fireball:
 	case SpellID::RuneOfFire: {
 		const int base = (2 * 1) + 4;
 		return {
-			ScaleSpellEffect(base, spellLevel),
-			ScaleSpellEffect(base + 36, spellLevel)
+			GrowWithLevel(base, spellLevel),
+			GrowWithLevel(base + 36, spellLevel)
 		};
 	} break;
 	case SpellID::Guardian: {
@@ -996,9 +1005,9 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 		};
 	} break;
 	case SpellID::ChainLightning:
-		return { 2, 3 }; // each hit of each bolt, as Lightning
+		return { GrowWithLevel(2, spellLevel), GrowWithLevel(3, spellLevel) }; // each hit of each bolt, as Lightning
 	case SpellID::FlameWave: {
-		return { 2, 11 }; // what each flame really deals; the old line showed far more
+		return { GrowWithLevel(2, spellLevel), GrowWithLevel(11, spellLevel) }; // what each flame really deals; the old line showed far more
 	}
 	case SpellID::Nova:
 	case SpellID::Immolation:
@@ -1011,7 +1020,7 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 	case SpellID::Inferno: {
 		int max = 1 + 4;
 		max += max / 2;
-		return { 3, max };
+		return { GrowWithLevel(3, spellLevel), GrowWithLevel(max, spellLevel) };
 	}
 	case SpellID::Golem:
 		return { 11, 17 };
@@ -1024,9 +1033,9 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 			ScaleSpellEffect((2 * myPlayer.getCharacterLevel()) + 40, spellLevel)
 		};
 	case SpellID::ChargedBolt:
-		return { 2, 4 }; // each bolt: 2 or 4
+		return { GrowWithLevel(2, spellLevel), GrowWithLevel(4, spellLevel) }; // each bolt: 2 or 4
 	case SpellID::HolyBolt:
-		return { 10, 19 };
+		return { GrowWithLevel(10, spellLevel), GrowWithLevel(19, spellLevel) };
 	case SpellID::BloodStar: {
 		const int min = (myPlayer._pMagic / 2) + (3 * spellLevel) - (myPlayer._pMagic / 8);
 		return { min, min };
@@ -1943,7 +1952,7 @@ void AddFirebolt(Missile &missile, AddMissileParameter &parameter)
 		switch (missile.sourceType()) {
 		case MissileSource::Player: {
 			const Player &player = *missile.sourcePlayer();
-			missile._midam = GenerateRnd(10) + 1 + missile._mispllvl + 1; // Essence Mod: was Spirit / 8
+			missile._midam = GrowWithLevel(GenerateRnd(10) + 3, missile._mispllvl); // Essence Mod: 3 to 12, an eighth more a level
 		} break;
 
 		case MissileSource::Monster:
@@ -2020,6 +2029,8 @@ void AddFireWall(Missile &missile, AddMissileParameter &parameter)
 	// Essence Mod: a player's Fire Wall no longer grows with character level; a trap's still goes by the dungeon level.
 	missile._midam += missile._misource >= 0 ? 1 : currlevel; // BUGFIX: missing parenthesis around ternary (fixed)
 	missile._midam <<= 3;
+	if (missile._misource >= 0)
+		missile._midam = ScaleDamageForSpellLevel(missile._midam, std::max(missile._mispllvl, 1)); // Essence Mod
 	UpdateMissileVelocity(missile, parameter.dst, 16);
 	const int i = missile._mispllvl;
 	missile.duration = 10;
@@ -2044,7 +2055,7 @@ void AddFireball(Missile &missile, AddMissileParameter &parameter)
 
 		// Essence Mod: no longer grows with character level.
 		const int dmg = (2 * (1 + GenerateRndSum(10, 2))) + 4;
-		missile._midam = ScaleSpellEffect(dmg, missile._mispllvl);
+		missile._midam = GrowWithLevel(dmg, missile._mispllvl);
 	}
 	UpdateMissileVelocity(missile, dst, sp);
 	missile.setDirection(GetDirection16(missile.position.start, dst));
@@ -2234,7 +2245,7 @@ void AddManaShield(Missile &missile, AddMissileParameter &parameter)
 
 void AddFlameWave(Missile &missile, AddMissileParameter &parameter)
 {
-	missile._midam = GenerateRnd(10) + 1 + 1; // Essence Mod: no longer grows with character level
+	missile._midam = GrowWithLevel(GenerateRnd(10) + 1 + 1, missile._mispllvl); // Essence Mod: no longer grows with character level
 	// Essence Mod: a wave cast by a power read from essence_powers.tsv deals that power's amount.
 	if (IsExtendedSpell(missile.sourceSpell) && IsValidSpell(missile.sourceSpell)) {
 		const Player &caster = Players[missile._misource];
@@ -3272,7 +3283,7 @@ void AddInferno(Missile &missile, AddMissileParameter &parameter)
 	missile._mlid = AddLight(missile.position.start, 1);
 	if (missile._micaster == TARGET_MONSTERS) {
 		const int i = GenerateRnd(2); // Essence Mod: no longer grows with character level
-		missile._midam = 8 * i + 16 + ((8 * i + 16) / 2);
+		missile._midam = GrowWithLevel(8 * i + 16 + ((8 * i + 16) / 2), missile._mispllvl);
 	} else {
 		const Monster &monster = Monsters[missile._misource];
 		missile._midam = RandomIntBetween(monster.minDamage, monster.maxDamage);
@@ -3295,7 +3306,7 @@ void AddChargedBolt(Missile &missile, AddMissileParameter &parameter)
 {
 	WorldTilePosition dst = parameter.dst;
 	missile._mirnd = GenerateRnd(15) + 1;
-	missile._midam = (missile._micaster == TARGET_MONSTERS) ? 2 * (GenerateRnd(2) + 1) : 15; // Essence Mod: was Spirit / 4; doubled 2026-10-09
+	missile._midam = (missile._micaster == TARGET_MONSTERS) ? GrowWithLevel(2 * (GenerateRnd(2) + 1), missile._mispllvl) : 15; // Essence Mod: was Spirit / 4; doubled 2026-10-09
 
 	if (missile.position.start == dst) {
 		dst += parameter.midir;
@@ -3326,7 +3337,8 @@ void AddHolyBolt(Missile &missile, AddMissileParameter &parameter)
 	missile.var1 = missile.position.start.x;
 	missile.var2 = missile.position.start.y;
 	missile._mlid = AddLight(missile.position.start, 8);
-	missile._midam = GenerateRnd(10) + 1 + 9; // Essence Mod: no longer grows with character level
+	// Essence Mod: no longer grows with character level; an eighth more for each level of its own.
+	missile._midam = GrowWithLevel(GenerateRnd(10) + 1 + 9, missile._mispllvl);
 }
 
 void AddResurrect(Missile &missile, AddMissileParameter & /*parameter*/)
@@ -3966,7 +3978,7 @@ void ProcessLightningControl(Missile &missile)
 		dam = GenerateRnd(currlevel) + 2 * currlevel;
 	} else if (missile._micaster == TARGET_MONSTERS) {
 		// BUGFIX: damage of missile should be encoded in missile struct; player can be dead/have left the game before missile arrives.
-		dam = (GenerateRnd(2) + 2) << 6; // Essence Mod: no longer grows with character level
+		dam = ScaleDamageForSpellLevel((GenerateRnd(2) + 2) << 6, std::max(missile._mispllvl, 1)); // Essence Mod: no longer grows with character level
 	} else {
 		const Monster &monster = Monsters[missile._misource];
 		dam = 2 * RandomIntBetween(monster.minDamage, monster.maxDamage);

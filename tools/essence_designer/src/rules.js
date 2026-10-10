@@ -46,11 +46,11 @@ export function checkPower(power, data) {
   if (cooldowns && cooldowns.length === 0 && !has('Aura')) warnings.push('Needs a Cooldown tag (No CD counts).')
 
   const aura = has('Aura')
-  // The purpose tag for dealing damage is "Attack". ("Damage" is a Stat Effect: a buff to damage dealt.)
+  // The purpose tag for dealing damage is "Attack". ("Damage" is a Stat Effect: a boon to damage dealt.)
   const damage = has('Attack')
   const stats = inGroup('Stat Effect')
-  const buff = has('Buff')
-  const debuff = has('Debuff')
+  const buff = has('Boon')
+  const debuff = has('Affliction')
   const styles = inGroup('Damage Style')
 
   if (aura) {
@@ -65,7 +65,7 @@ export function checkPower(power, data) {
     if (damage && (has('Self') || has('Ally'))) warnings.push('An attack targets Enemy, Ground or Direction.')
   }
 
-  if (has('Timed') && !buff && !debuff && !has('Shielding')) warnings.push('Timed is for buffs, debuffs and shields.')
+  if (has('Timed') && !buff && !debuff && !has('Shielding')) warnings.push('Timed is for boons, afflictions and shields.')
   if (has('Cleanse') && has('Permanent')) warnings.push('A cleanse is never Permanent.')
   if (has('Resurrect') && has('Self') && !isUltimate(tags)) warnings.push('A self-resurrect must be an Ultimate.')
   if (has('Resurrect') && !has('Healing')) warnings.push('A resurrect gives life back, so it is also tagged Healing.')
@@ -73,16 +73,16 @@ export function checkPower(power, data) {
   const weapons = inGroup('Weapon')
   if (weapons && weapons.length > 0 && !has('Special Attack')) warnings.push('Weapon tags (' + weapons.map((t) => t.name).join(', ') + ') only go on Special Attacks.')
   if (has('Cone') && !has('Direction')) warnings.push('A Cone needs Target: Direction.')
-  if (has('Permanent') && !buff && !debuff && !aura) warnings.push('Permanent is only for buffs, debuffs and auras.')
-  if ((has('Stealth') || has('Threat')) && !buff) warnings.push('Stealth and Threat only go on buffs.')
-  if ((has('Stealth') || has('Threat')) && (!has('Permanent') || has('Timed'))) warnings.push('Stealth and Threat buffs are always Permanent, never Timed.')
+  if (has('Permanent') && !buff && !debuff && !aura) warnings.push('Permanent is only for boons, afflictions and auras.')
+  if ((has('Stealth') || has('Threat')) && !buff) warnings.push('Stealth and Threat only go on boons.')
+  if ((has('Stealth') || has('Threat')) && (!has('Permanent') || has('Timed'))) warnings.push('Stealth and Threat boons are always Permanent, never Timed.')
   // Stat Effect tags say what a buff or debuff changes, so the two go together.
-  if (stats && stats.length > 0 && !buff && !debuff) warnings.push('Stat Effect tags (' + stats.map((t) => t.name).join(', ') + ') go on a Buff or a Debuff.')
-  if (stats && stats.length === 0 && (buff || debuff) && !has('Stealth') && !has('Threat')) warnings.push('A buff or debuff should carry a Stat Effect tag saying what it changes.')
+  if (stats && stats.length > 0 && !buff && !debuff) warnings.push('Stat Effect tags (' + stats.map((t) => t.name).join(', ') + ') go on a Boon or an Affliction.')
+  if (stats && stats.length === 0 && (buff || debuff) && !has('Stealth') && !has('Threat')) warnings.push('A boon or affliction should carry a Stat Effect tag saying what it changes.')
   if (stats && stats.length > 1 && (has('Defensive') || has('Offensive'))) warnings.push('Defensive and Offensive are the general fallbacks; drop them when a specific Stat Effect is tagged.')
   if (has('Everyone (allies only)') && (damage || debuff || has('Enemy'))) warnings.push('"Everyone" only reaches allies; anything that affects enemies needs a target and a radius.')
-  if (buff && !aura && (has('Enemy') || has('Ground') || has('Direction')) && !debuff && !damage) warnings.push('A buff targets Self or Ally.')
-  if (debuff && !aura && (has('Self') || has('Ally')) && !buff) warnings.push('A debuff targets Enemy or Ground.')
+  if (buff && !aura && (has('Enemy') || has('Ground') || has('Direction')) && !debuff && !damage) warnings.push('A boon targets Self or Ally.')
+  if (debuff && !aura && (has('Self') || has('Ally')) && !buff) warnings.push('An affliction targets Enemy or Ground.')
 
   // What its essences ask for.
   for (const essenceId of power.essenceIds ?? []) {

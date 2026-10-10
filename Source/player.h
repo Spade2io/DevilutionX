@@ -430,8 +430,8 @@ public:
 			return false;
 		case HeroClass::Monk:
 			return isEquipped(ItemType::Staff);
-		case HeroClass::Bard:
-			return InvBody[INVLOC_HAND_LEFT]._itype == ItemType::Sword && InvBody[INVLOC_HAND_RIGHT]._itype == ItemType::Sword;
+		case HeroClass::Bard: // Essence Mod: the Elf, a second Rogue, who does not wield two swords
+			return false;
 		case HeroClass::Barbarian:
 			return isEquipped(ItemType::Axe) || (!isEquipped(ItemType::Shield) && (isEquipped(ItemType::Mace, true) || isEquipped(ItemType::Sword, true)));
 		default:
