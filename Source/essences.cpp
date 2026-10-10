@@ -386,6 +386,12 @@ std::string_view GetEssenceName(EssenceID essence)
 		return "Dark";
 	case EssenceID::Earth:
 		return "Earth";
+	case EssenceID::Life:
+		return "Life";
+	case EssenceID::Magic:
+		return "Magic";
+	case EssenceID::Might:
+		return "Might";
 	case EssenceID::None:
 		break;
 	}

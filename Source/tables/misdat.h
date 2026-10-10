@@ -41,6 +41,7 @@ enum class DamageType : uint8_t {
 	Death,
 	Life,
 	Nature,
+	Arcane,
 };
 
 /**
@@ -58,6 +59,7 @@ constexpr DamageType GetResistanceCategory(DamageType type)
 	case DamageType::Holy:
 	case DamageType::Death:
 	case DamageType::Life:
+	case DamageType::Arcane:
 		return DamageType::Magic; // Astral
 	case DamageType::Ice:
 	case DamageType::Earth:
@@ -172,6 +174,7 @@ enum class MissileDataFlags : uint8_t {
 	Death = static_cast<uint8_t>(DamageType::Death),
 	Life = static_cast<uint8_t>(DamageType::Life),
 	Nature = static_cast<uint8_t>(DamageType::Nature),
+	Arcane = static_cast<uint8_t>(DamageType::Arcane),
 	Arrow = 1 << 5,
 	Invisible = 1 << 6,
 };

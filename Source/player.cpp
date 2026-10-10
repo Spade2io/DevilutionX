@@ -600,6 +600,9 @@ bool PlrHitMonst(Player &player, Monster &monster, bool adjacentDamage = false)
 
 	hper += player.GetMeleePiercingToHit() - player.CalculateArmorPierce(monster.armorClass, true);
 	hper = std::clamp(hper, 5, 95);
+	// Essence Mod: a special attack with the rider "SureHit" cannot miss.
+	if (specialAttack != SpellID::Invalid && IsValidSpell(specialAttack) && GetSpellData(specialAttack).rider == "SureHit")
+		hit = 0;
 
 	if (monster.tryLiftGargoyle())
 		return true;
@@ -3195,6 +3198,16 @@ void StartWarpLvl(Player &player, size_t pidx)
 
 /** Essence Mod: game ticks between regeneration pulses (20 ticks = 1 second at normal speed). */
 constexpr int RegenIntervalTicks = 20;
+
+int GetBlockBuffPercent(const Player &player)
+{
+	return GetPowerBuffPercent(player, "Block");
+}
+
+int GetToHitBuffPercent(const Player &player, bool withWeapon)
+{
+	return GetPowerBuffPercent(player, "ToHit") + (withWeapon ? GetPowerBuffPercent(player, "WeaponToHit") : 0);
+}
 
 int GetLifeRegenPerSecond(const Player &player)
 {

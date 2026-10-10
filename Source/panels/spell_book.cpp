@@ -30,6 +30,7 @@
 #include "panels/ui_panels.hpp"
 #include "options.h"
 #include "player.h"
+#include "races.h"
 #include "spell_xp.h"
 #include "tables/itemdat.h"
 #include "tables/spelldat.h"
@@ -370,7 +371,17 @@ void DrawSpellBook(const Surface &out)
 	FillRect(out, column.x, column.y, 44, 302, 0);
 
 	if (SpellbookTab == 0) {
-		DrawPlaceholderPage(out, "Racial Abilities", "Not yet implemented");
+		// The powers the character was born with: a name, and a line saying what it does.
+		const Player &shown = *InspectPlayer;
+		PrintSBookStr(out, { 0, PageTop + 7 }, StrCat(GetPlayerDataForClass(shown._pClass).className, " Racial Abilities"), UiFlags::ColorWhitegold);
+		size_t row = 0;
+		for (const RacialPowerLine &line : DescribeRacialPowers(shown)) {
+			if (row >= AbilitiesPerEssence)
+				break;
+			PrintSBookStr(out, { 0, AbilityRowTop(row) + 2 }, line.name, UiFlags::ColorWhite);
+			PrintSBookStr(out, { 0, AbilityRowTop(row) + 2 + AbilityTextLineSpacing }, line.text);
+			row++;
+		}
 		return;
 	}
 	if (!IsEssenceTab(SpellbookTab))

@@ -221,6 +221,15 @@ struct SpellCastInfo {
 	int spellLevel;
 };
 
+struct Player;
+/** Essence Mod: what a player's boons add to their chance to block, in percentage points. */
+int GetBlockBuffPercent(const Player &player);
+/**
+ * Essence Mod: what a player's boons add to their chance to hit, in percentage points. "ToHit"
+ * boons count for weapons and spells alike; "WeaponToHit" boons for weapons only.
+ */
+int GetToHitBuffPercent(const Player &player, bool withWeapon);
+
 struct Player {
 	Player() = default;
 	Player(Player &&) noexcept = default;
@@ -591,7 +600,7 @@ public:
 	 */
 	int GetMeleeToHit() const
 	{
-		return getCharacterLevel() + _pDexterity + _pIBonusToHit + getPlayerCombatData().baseMeleeToHit; // Essence Mod: +1 a point of Speed (was a half)
+		return getCharacterLevel() + _pDexterity + _pIBonusToHit + getPlayerCombatData().baseMeleeToHit + GetToHitBuffPercent(*this, true); // Essence Mod: +1 a point of Speed (was a half); boons
 	}
 
 	/**
@@ -611,7 +620,7 @@ public:
 	 */
 	int GetRangedToHit() const
 	{
-		return getCharacterLevel() + _pDexterity * 2 + _pIBonusToHit + getPlayerCombatData().baseRangedToHit; // Essence Mod: +2 a point of Speed (was 1)
+		return getCharacterLevel() + _pDexterity * 2 + _pIBonusToHit + getPlayerCombatData().baseRangedToHit + GetToHitBuffPercent(*this, true); // Essence Mod: +2 a point of Speed (was 1); boons
 	}
 
 	int GetRangedPiercingToHit() const
@@ -628,7 +637,7 @@ public:
 	 */
 	int GetMagicToHit() const
 	{
-		return _pMagic * 2 + getPlayerCombatData().baseMagicToHit; // Essence Mod: +2 a point of Spirit (was 1)
+		return _pMagic * 2 + getPlayerCombatData().baseMagicToHit + GetToHitBuffPercent(*this, false); // Essence Mod: +2 a point of Spirit (was 1); boons
 	}
 
 	/**
@@ -638,6 +647,7 @@ public:
 	int GetBlockChance(bool useLevel = true) const
 	{
 		int blkper = _pDexterity * 2 + getBaseToBlock(); // Essence Mod: twice the old share from Speed
+		blkper += GetBlockBuffPercent(*this); // Essence Mod: boons that add a chance to block (Stalwart)
 		if (useLevel)
 			blkper += getCharacterLevel() * 2;
 		return blkper;

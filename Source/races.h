@@ -33,6 +33,18 @@ namespace devilution {
 
 struct Player;
 
+/** A racial power as the spellbook shows it: its name and a short line saying what it does. */
+struct RacialPowerLine {
+	std::string name;
+	std::string text;
+};
+
+/**
+ * @brief A player's racial powers for the spellbook's first page. For the local player a Human's
+ * gifts name the essences held.
+ */
+std::vector<RacialPowerLine> DescribeRacialPowers(const Player &player);
+
 /** @brief The names of a race's racial powers, in the designer's order. */
 std::vector<std::string> GetRacialPowerNames(HeroClass heroClass);
 

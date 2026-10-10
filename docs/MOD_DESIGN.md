@@ -982,7 +982,7 @@ A power with a Weapon tag only works while that kind of weapon is equipped.
 
 ## Reducing monster resistance (decided and built 2026-10-07)
 
-A resistant monster shrugs off 75% of the damage. Bryan wanted powers that lower that by points
+A resistant monster shrugs off 50% of the damage (it was 75% until 2026-10-10, when Bryan found that painful; figures below written for 75% now start from 50). Bryan wanted powers that lower that by points
 (10 points makes it 65%), as a way to do far better against resistant monsters without handing
 everyone a blanket damage increase. His rules:
 
@@ -1144,3 +1144,14 @@ A stat percentage applies to the character's own stat only, rounded down; points
 this loses the old head start of their class once (sidecar line `B 1`) and keeps what they earned.
 Multiplayer: all of it follows from the class alone except a Human's gifts, which touch only the
 Human's own numbers on their own PC.
+
+## Monster health and resistance (2026-10-10)
+
+With stats, racial powers and growth, players hit far harder than the game was made for. Two
+blanket changes, each a single number so it can be tuned or undone:
+
+- **Every monster has three times its health.** `MonsterHealthMultiplier` in `Source/monster.h`.
+  The monster tables are untouched and still hold the original health; 1 restores it exactly.
+  Experience for a kill is unchanged (a power earns the share of the monster it removed).
+- **A resistant monster shrugs off 50%, not 75%.** `BaseMonsterResistancePercent` in
+  `Source/dots.h`. Powers that cut resistance take their points off 50.

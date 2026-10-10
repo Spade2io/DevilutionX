@@ -1,6 +1,6 @@
 race	name	effect	amount	element
 Human	Human Ambition	XpGain	10	
-Human	Special Attack Aptitude	SpecialAptitude	1	
+Human	Special Attack Apt.	SpecialAptitude	1	
 Human	Essence Gifts	EssenceGift	5	
 Celestine	Holy Affinity	Affinity	10	Holy
 Celestine	Mana Recovery	ManaRegen	10	

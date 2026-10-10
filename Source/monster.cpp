@@ -208,7 +208,7 @@ void InitMonster(Monster &monster, Direction rd, size_t typeIndex, Point positio
 	monster.animInfo.currentFrame = GenerateRnd(monster.animInfo.numberOfFrames - 1);
 
 	const int maxhp = RandomIntBetween(monster.data().hitPointsMinimum, monster.data().hitPointsMaximum);
-	monster.maxHitPoints = maxhp << 6;
+	monster.maxHitPoints = (maxhp << 6) * MonsterHealthMultiplier; // Essence Mod
 
 	if (!gbIsMultiplayer)
 		monster.maxHitPoints = std::max(monster.maxHitPoints / 2, 64);
@@ -3354,7 +3354,7 @@ std::expected<void, std::string> InitTRNForUniqueMonster(Monster &monster)
 std::expected<void, std::string> PrepareUniqueMonst(Monster &monster, UniqueMonsterType monsterType, size_t minionType, int bosspacksize, const UniqueMonsterData &uniqueMonsterData)
 {
 	monster.uniqueType = monsterType;
-	monster.maxHitPoints = uniqueMonsterData.mmaxhp << 6;
+	monster.maxHitPoints = (uniqueMonsterData.mmaxhp << 6) * MonsterHealthMultiplier; // Essence Mod
 
 	if (!gbIsMultiplayer)
 		monster.maxHitPoints = std::max(monster.maxHitPoints / 2, 64);

@@ -13,6 +13,7 @@
 #include "data/record_reader.hpp"
 #include "essences.h"
 #include "player.h"
+#include "utils/str_cat.hpp"
 
 namespace devilution {
 
@@ -73,6 +74,58 @@ std::vector<std::string> GetRacialPowerNames(HeroClass heroClass)
 			names.push_back(power.name);
 	}
 	return names;
+}
+
+std::vector<RacialPowerLine> DescribeRacialPowers(const Player &player)
+{
+	std::vector<RacialPowerLine> lines;
+	if (static_cast<size_t>(player._pClass) >= GetNumPlayerClasses())
+		return lines;
+	const std::string &race = RaceOf(player._pClass);
+	for (const RacialPower &power : AllRacialPowers()) {
+		if (power.race != race)
+			continue;
+		const std::string &effect = power.effect;
+		const int amount = power.amount;
+		std::string text;
+		if (effect == "XpGain") {
+			text = StrCat("+", amount, "% experience");
+		} else if (effect == "SpecialAptitude") {
+			text = "Stones lean to special attacks";
+		} else if (effect == "SpellAptitude") {
+			text = "Stones lean to spell attacks";
+		} else if (effect == "EssenceGift") {
+			// The local player's essences are known here; anyone else's are not.
+			std::string held;
+			if (&player == MyPlayer) {
+				for (size_t slot = 0; slot < 4; slot++) {
+					const EssenceID essence = GetEssenceInSlot(slot);
+					if (essence != EssenceID::None)
+						StrAppend(held, held.empty() ? "" : ", ", GetEssenceName(essence));
+				}
+			}
+			text = held.empty() ? StrCat("+", amount, "% for each essence held") : StrCat("+", amount, "%: ", held);
+		} else if (effect == "Affinity") {
+			text = StrCat("+", amount, "% ", power.element, " damage, heals, shields");
+		} else if (effect == "MaxLife") {
+			text = StrCat("+", amount, "% health pool");
+		} else if (effect == "MaxMana") {
+			text = StrCat("+", amount, "% mana pool");
+		} else if (effect == "ManaRegen") {
+			text = StrCat("+", amount, "% mana regeneration");
+		} else if (effect == "LifeRegen") {
+			text = StrCat("+", amount, "% health regeneration");
+		} else if (effect == "SpellDamage") {
+			text = StrCat("+", amount, "% spell damage");
+		} else if (effect == "Resist") {
+			text = StrCat("+", amount, " to all resistances");
+		} else {
+			// A stat: Power, Spirit, Speed, Recovery.
+			text = StrCat("+", amount, "% ", effect);
+		}
+		lines.push_back({ power.name, std::move(text) });
+	}
+	return lines;
 }
 
 int GetRacialPercent(HeroClass heroClass, std::string_view effect)

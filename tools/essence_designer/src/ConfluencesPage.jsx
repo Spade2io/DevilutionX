@@ -27,14 +27,19 @@ export default function ConfluencesPage({ data, update }) {
   const names = new Map(confluences.map((c) => [confluenceKey(c.essences), c.name]))
   const trios = essenceTrios(essences)
   const shown = trios.filter((trio) => showing.every((id) => trio.some((e) => e.id === id)))
-  const unnamed = trios.filter((trio) => !names.get(confluenceKey(trio.map((e) => e.id)))).length
+  const trioNames = trios.map((trio) => names.get(confluenceKey(trio.map((e) => e.id)))).filter(Boolean)
+  const unnamed = trios.length - trioNames.length
+  // Two confluences may share a name when it suits both, so the different names are counted too.
+  const unique = new Set(trioNames.map((name) => name.trim().toLowerCase())).size
 
   const tintOf = (essence) => {
     const type = (data.damageTypes ?? []).find((t) => t.id === essence.damageTypeId)
     return TINTS.find((t) => t.id === type?.itemColor)
   }
 
-  const nameTaken = (name, key) => confluences.some((c) => confluenceKey(c.essences) !== key && sameName(c.name, name))
+  // How many confluences carry each name, to mark the shared ones.
+  const uses = new Map()
+  for (const name of trioNames) uses.set(name.trim().toLowerCase(), (uses.get(name.trim().toLowerCase()) ?? 0) + 1)
 
   const rename = (trio, name) =>
     update((d) => {
@@ -58,7 +63,8 @@ export default function ConfluencesPage({ data, update }) {
       </header>
       <p className="hint">
         Three different essences make a confluence, which fills the fourth slot. The order of the three
-        does not matter. With {essences.length} essences there are {trios.length} confluences
+        does not matter. With {essences.length} essences you have <strong>{trios.length} confluences</strong>. There
+        are <strong>{unique} unique confluences</strong> among them
         {unnamed > 0 ? <>; <strong>{unnamed} still need a name</strong></> : null}. Click a name to change it.
       </p>
       <div className="trio-filter">
@@ -94,8 +100,9 @@ export default function ConfluencesPage({ data, update }) {
                     ))}
                     <td>
                       <NameInput className="confluence-name" value={names.get(key) ?? ''}
-                        check={(name) => (nameTaken(name, key) ? 'taken' : '')}
+                        check={() => ''}
                         onCommit={(name) => rename(trio, name)} />
+                      {(uses.get((names.get(key) ?? '').trim().toLowerCase()) ?? 0) > 1 && <span className="note"> shared</span>}
                     </td>
                   </tr>
                 )
@@ -103,7 +110,7 @@ export default function ConfluencesPage({ data, update }) {
             </tbody>
           </table>
         )}
-      <p className="hint">Showing {shown.length} of {trios.length}. Two confluences cannot share a name.</p>
+      <p className="hint">Showing {shown.length} of {trios.length}. Two confluences may share a name when it suits both; those are marked "shared".</p>
     </>
   )
 }

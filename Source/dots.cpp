@@ -185,7 +185,7 @@ int ScaleDamageForSpellLevel(int baseDamage, int spellLevel)
 
 void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, DamageType damageType, int damage, bool finishKill, bool overTime)
 {
-	// Resistances work as they do for a spell hit: immune takes nothing, resistant takes a quarter.
+	// Resistances work as they do for a spell hit: immune takes nothing, resistant takes half.
 	if (monster.isImmune(missile, damageType))
 		return;
 	damage = ApplyMonsterResistance(monster, missile, damageType, damage);
@@ -417,7 +417,7 @@ int RollVariance(int amount)
 
 bool IsPercentBuffStat(std::string_view stat)
 {
-	return IsAnyOf(stat, "Damage", "SpellDamage", "DotDamage", "Speed", "ManaRegen", "LifeRegen", "MaxLife", "MaxMana", "DamageTaken", "Oath", "Rebirth", "Accuracy");
+	return IsAnyOf(stat, "SpecialDamage", "ToHit", "WeaponToHit", "Damage", "SpellDamage", "DotDamage", "Speed", "ManaRegen", "LifeRegen", "MaxLife", "MaxMana", "DamageTaken", "Oath", "Rebirth", "Accuracy");
 }
 
 int GetPercentBuffAmount(std::string_view stat, int base, int shownLevel)
@@ -452,7 +452,8 @@ int ApplySpellDamageBuffs(SpellID spell, int damage)
 	const int element = GetRacialElementPercent(player, spell);
 	if (IsSpecialAttack(spell)) {
 		damage = ScaleByStat(damage, GetWeaponDamageStat(player));
-		return damage + static_cast<int>(static_cast<int64_t>(damage) * element / 100);
+		// Then the "SpecialDamage" bonus of boons, the mirror of "SpellDamage" below.
+		return damage + static_cast<int>(static_cast<int64_t>(damage) * (element + GetPowerBuffPercent(player, "SpecialDamage")) / 100);
 	}
 	// Everything else is a spell attack: Spirit, then the "SpellDamage" bonus of buffs and of race.
 	damage = ScaleByStat(damage, player._pMagic);

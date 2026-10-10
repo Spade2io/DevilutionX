@@ -303,6 +303,9 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 	}
 
 	hper = std::clamp(hper, 5, 95);
+	// Essence Mod: a shot carrying a special attack with the rider "SureHit" cannot miss.
+	if (missileData.isArrow() && IsSpecialAttack(sourceSpell) && IsValidSpell(sourceSpell) && GetSpellData(sourceSpell).rider == "SureHit")
+		hit = 0;
 
 	if (monster.mode == MonsterMode::Petrified)
 		hit = 0;
@@ -347,7 +350,7 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 		AddMissile(monster.position.tile, { 1, 0 }, Direction::South, MissileID::WeaponExplosion, TARGET_MONSTERS, player, 0, 0);
 		ApplySpecialAttackExtras(player, monster, sourceSpell, dam);
 	} else {
-		// Essence Mod: a resistant monster shrugs off three quarters, less whatever curses have taken off.
+		// Essence Mod: a resistant monster shrugs off half, less whatever curses have taken off.
 		dam = ApplyMonsterResistance(monster, t, damageType, dam);
 		// Essence Mod: anything but an arrow is a spell attack, and takes the "SpellDamage" bonus.
 		if (&player == MyPlayer && !missileData.isArrow()) {
@@ -377,6 +380,9 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 					const int leaps = spellData.durationSeconds > 0 ? spellData.durationSeconds : 2 + player.GetBaseSpellLevel(sourceSpell) / 2;
 					ChainSpellDamage(monster, sourceSpell, damageType, static_cast<int>(static_cast<int64_t>(dam) * spellData.riderAmount / 100), spellData.riderAmount, leaps);
 				}
+				// The rider "HealSelf": the caster draws life from what the bolt struck.
+				if (spellData.rider == "HealSelf")
+					NetSendCmdPowerOnPlayer(player, sourceSpell, static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.riderAmount, std::max<int>(player.GetBaseSpellLevel(sourceSpell), 1))));
 				if (const std::optional<DotID> left = ParseDotName(spellData.rider); left && !IsImmuneToDot(monster, *left)) {
 					const int stacks = AddMonsterDot(monster, *left, sourceSpell, ScaleDamageForSpellLevel(spellData.riderAmount, std::max<int>(player.GetBaseSpellLevel(sourceSpell), 1)));
 					AddFloatingNumber(monster.position.tile, { 0, 0 }, StrCat(GetDotName(*left), " x", stacks), GetSpellTextColor(sourceSpell) | UiFlags::FontSize12, 1000 + static_cast<int>(monster.getId()));
@@ -1550,9 +1556,9 @@ void AddSpectralArrow(Missile &missile, AddMissileParameter &parameter)
 	if (missile.sourceType() == MissileSource::Player) {
 		const Player &player = *missile.sourcePlayer();
 
-		if (player._pClass == HeroClass::Rogue)
+		if (IsAnyOf(player._pClass, HeroClass::Rogue, HeroClass::Bard)) // Essence Mod: the Elf is a second Rogue
 			av += (player.getCharacterLevel() - 1) / 4;
-		else if (player._pClass == HeroClass::Warrior || player._pClass == HeroClass::Bard)
+		else if (player._pClass == HeroClass::Warrior)
 			av += (player.getCharacterLevel() - 1) / 8;
 
 		if (HasAnyOf(player._pIFlags, ItemSpecialEffect::QuickAttack))
@@ -1808,9 +1814,9 @@ void AddElementalArrow(Missile &missile, AddMissileParameter &parameter)
 	int av = 32;
 	if (missile._micaster == TARGET_MONSTERS) {
 		const Player &player = Players[missile._misource];
-		if (player._pClass == HeroClass::Rogue)
+		if (IsAnyOf(player._pClass, HeroClass::Rogue, HeroClass::Bard)) // Essence Mod: the Elf is a second Rogue
 			av += (player.getCharacterLevel()) / 4;
-		else if (IsAnyOf(player._pClass, HeroClass::Warrior, HeroClass::Bard))
+		else if (player._pClass == HeroClass::Warrior)
 			av += (player.getCharacterLevel()) / 8;
 
 		if (gbIsHellfire) {
@@ -1849,9 +1855,9 @@ void AddArrow(Missile &missile, AddMissileParameter &parameter)
 		if (HasAnyOf(player._pIFlags, ItemSpecialEffect::RandomArrowVelocity)) {
 			av = RandomIntBetween(16, 47);
 		}
-		if (player._pClass == HeroClass::Rogue)
+		if (IsAnyOf(player._pClass, HeroClass::Rogue, HeroClass::Bard)) // Essence Mod: the Elf is a second Rogue
 			av += (player.getCharacterLevel() - 1) / 4;
-		else if (player._pClass == HeroClass::Warrior || player._pClass == HeroClass::Bard)
+		else if (player._pClass == HeroClass::Warrior)
 			av += (player.getCharacterLevel() - 1) / 8;
 
 		if (gbIsHellfire) {
@@ -2789,6 +2795,9 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 			// The rider "Freeze": whatever survives is held for the rider's amount in seconds. Every
 			// PC has to hold it alike, so they are all told.
 			if (extended != nullptr && extended->rider == "Freeze" && !monster.hasNoLife())
+				NetSendCmdPowerOnMonster(static_cast<uint16_t>(monsterId), spell, static_cast<uint32_t>(extended->riderAmount));
+			// The rider "ResistCut": whatever survives is left open. Every PC is told, as with a curse.
+			if (extended != nullptr && extended->rider == "ResistCut" && !monster.hasNoLife())
 				NetSendCmdPowerOnMonster(static_cast<uint16_t>(monsterId), spell, static_cast<uint32_t>(extended->riderAmount));
 			// A rider that names an effect over time leaves it behind on whatever survives the hit.
 			if (const std::optional<DotID> left = extended != nullptr ? ParseDotName(extended->rider) : std::nullopt; left && !monster.hasNoLife() && !IsImmuneToDot(monster, *left)) {

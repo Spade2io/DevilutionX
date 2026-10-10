@@ -181,6 +181,7 @@ std::expected<MissileDataFlags, std::string> ParseMissileDataFlag(std::string_vi
 	if (value == "Death") return MissileDataFlags::Death;
 	if (value == "Life") return MissileDataFlags::Life;
 	if (value == "Nature") return MissileDataFlags::Nature;
+	if (value == "Arcane") return MissileDataFlags::Arcane;
 	if (value == "Arrow") return MissileDataFlags::Arrow;
 	if (value == "Invisible") return MissileDataFlags::Invisible;
 	return std::unexpected("Unknown enum value");

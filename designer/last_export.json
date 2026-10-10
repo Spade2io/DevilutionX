@@ -309,7 +309,7 @@
     },
     {
       "id": "t_29d3e548",
-      "name": "Utlimate (120+)",
+      "name": "Ultimate (120+)",
       "groupId": "g_840a14f1",
       "parentId": null
     },
@@ -486,6 +486,30 @@
       "name": "Teleport",
       "groupId": "g_40d9d605",
       "parentId": null
+    },
+    {
+      "id": "t_6c10893c",
+      "name": "Special Attack Dmg",
+      "groupId": "g_777a6431",
+      "parentId": null
+    },
+    {
+      "id": "t_b1f56c7b",
+      "name": "Spell Attack Dmg",
+      "groupId": "g_777a6431",
+      "parentId": null
+    },
+    {
+      "id": "t_64648fe7",
+      "name": "Mana Leach",
+      "groupId": "g_777a6431",
+      "parentId": null
+    },
+    {
+      "id": "t_82608ba7",
+      "name": "Health Leach",
+      "groupId": "g_777a6431",
+      "parentId": null
     }
   ],
   "damageTypes": [
@@ -632,7 +656,7 @@
       "id": "e_566cd6e8",
       "name": "Holy",
       "description": "",
-      "rarity": "common",
+      "rarity": "rare",
       "poolSize": 20,
       "damageTypeId": "d_ac50039d",
       "tagsAll": [
@@ -865,6 +889,107 @@
         "t_bcaf43f8"
       ],
       "primaryStat": "Spirit"
+    },
+    {
+      "id": "e_c3e242a4",
+      "name": "Life",
+      "description": "",
+      "rarity": "common",
+      "poolSize": 20,
+      "damageTypeId": "d_63f57914",
+      "tagsAll": [
+        "t_a8091ad3"
+      ],
+      "tagsMost": [
+        "t_0eaf5fa3",
+        "t_f68550c3"
+      ],
+      "tagsSome": [
+        "t_50a7240a",
+        "t_78bf3c15",
+        "t_afa5e43e"
+      ],
+      "tagsFinite": [
+        "t_42d817be",
+        "t_b5fae28d",
+        "t_4f155f0e",
+        "t_1d3ef0b5"
+      ],
+      "tagsNever": [
+        "t_bcaf43f8",
+        "t_f931de44"
+      ],
+      "neverOtherGroups": [
+        "g_b6a0b51b"
+      ],
+      "primaryStat": "Recovery"
+    },
+    {
+      "id": "e_3eaf93fd",
+      "name": "Magic",
+      "description": "",
+      "rarity": "rare",
+      "poolSize": 20,
+      "damageTypeId": "d_3e299ea5",
+      "tagsAll": [],
+      "tagsMost": [
+        "t_50a7240a",
+        "t_6e51786d"
+      ],
+      "tagsSome": [
+        "t_fd59c54d",
+        "t_42d817be",
+        "t_30a3ce12",
+        "t_f5680bf7",
+        "t_b1f56c7b",
+        "t_23cff708",
+        "t_e5439584",
+        "t_d285ae97"
+      ],
+      "tagsFinite": [],
+      "tagsNever": [
+        "t_78bf3c15",
+        "t_f931de44",
+        "t_e712d8ea",
+        "t_4f155f0e",
+        "t_bcaf43f8",
+        "t_b5fae28d"
+      ],
+      "neverOtherGroups": [],
+      "primaryStat": "Spirit"
+    },
+    {
+      "id": "e_00bc5e34",
+      "name": "Might",
+      "description": "",
+      "rarity": "rare",
+      "poolSize": 20,
+      "damageTypeId": "d_e6339940",
+      "tagsAll": [],
+      "tagsMost": [
+        "t_50a7240a",
+        "t_6e51786d"
+      ],
+      "tagsSome": [
+        "t_42d817be",
+        "t_fd59c54d",
+        "t_6c10893c",
+        "t_a99e96ca",
+        "t_def04896",
+        "t_ff9bcfb1",
+        "t_f68550c3"
+      ],
+      "tagsFinite": [],
+      "tagsNever": [
+        "t_0eaf5fa3",
+        "t_78bf3c15",
+        "t_f931de44",
+        "t_bcaf43f8",
+        "t_4f155f0e",
+        "t_b5fae28d"
+      ],
+      "neverOtherGroups": [],
+      "primaryStat": "Power"
     }
   ],
   "powers": [
@@ -3141,7 +3266,7 @@
     {
       "id": "p_2d21a0b3",
       "name": "Camouflage",
-      "description": "A lasting boon on yourself. You blend into leaf and shadow: monsters are slower to notice you and prefer other targets. It stays until you die or leave the game.",
+      "description": "A lasting boon on yourself, with two gifts. You blend into leaf and shadow: monsters notice you later and prefer your allies. And striking from cover, you hit more often: 5% more, and 1% more with each level of the power. The stealth never grows; the accuracy does.",
       "status": "accepted",
       "essenceIds": [
         "e_1c094682"
@@ -3153,18 +3278,19 @@
         "t_be83c5cf",
         "t_08fdec9d",
         "t_6e51786d",
-        "t_5462244b"
+        "t_5462244b",
+        "t_def04896"
       ],
       "potency": 150,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% apparent distance: monsters treat you as half again as far away",
+      "potencyNote": "% apparent distance: monsters treat you as half again as far away; also 5 % more chance to hit, +1 for each level",
       "number": 167,
       "gameKey": "Camouflage",
       "icon": 19,
-      "shortText": "Monsters notice you less"
+      "shortText": "Stealth; +5% to hit"
     },
     {
       "id": "p_89bbc864",
@@ -3684,7 +3810,7 @@
     {
       "id": "p_37c3d958",
       "name": "Stalwart",
-      "description": "A lasting boon on yourself. You make yourself the obvious target: monsters notice you first and prefer you over your allies. It stays until you die or leave the game.",
+      "description": "A lasting boon on yourself, with two gifts. You make yourself the obvious target: monsters notice you first and prefer you over your allies. And you block more often: 5% more, and 1% more with each level of the power. The threat never grows; the blocking does.",
       "status": "accepted",
       "essenceIds": [
         "e_d0ab3dce"
@@ -3696,18 +3822,19 @@
         "t_be83c5cf",
         "t_08fdec9d",
         "t_6e51786d",
-        "t_5462244b"
+        "t_5462244b",
+        "t_8a021f56"
       ],
       "potency": 50,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% apparent distance: monsters treat you as half as far away",
+      "potencyNote": "% apparent distance: monsters treat you as half as far away; also 5 % more chance to block, +1 for each level",
       "number": 186,
       "gameKey": "Stalwart",
       "icon": 31,
-      "shortText": "Monsters prefer you"
+      "shortText": "Threat; +5% block"
     },
     {
       "id": "p_bf5fdb61",
@@ -4254,7 +4381,7 @@
     {
       "id": "p_a669856c",
       "name": "Cloak of Night",
-      "description": "A lasting boon on yourself, with two gifts. Darkness gathers around you: monsters are slower to notice you and prefer other targets. And eyes used to the dark cannot be darkened: you are immune to blindness. It stays until you die or leave the game.",
+      "description": "A lasting boon on yourself, with two gifts. You wrap yourself in shadow: monsters notice you later and prefer your allies. And the dark turns blows aside: 3 more armor, and 1 more with each level of the power. The stealth never grows; the armor does.",
       "status": "accepted",
       "essenceIds": [
         "e_dddc13cb"
@@ -4267,18 +4394,19 @@
         "t_08fdec9d",
         "t_6e51786d",
         "t_5462244b",
-        "t_8a021f56"
+        "t_8a021f56",
+        "t_a99e96ca"
       ],
       "potency": 150,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% apparent distance: monsters treat you as half again as far away; also immune to blindness",
+      "potencyNote": "% apparent distance: monsters treat you as half again as far away; also 3 armor, +1 for each level",
       "number": 205,
       "gameKey": "CloakOfNight",
       "icon": 19,
-      "shortText": "Monsters notice you less"
+      "shortText": "Stealth; +3 armor"
     },
     {
       "id": "p_062b5547",
@@ -4825,7 +4953,7 @@
     {
       "id": "p_3d85e6a2",
       "name": "Unyielding",
-      "description": "A lasting boon on yourself, with two gifts. Blows no longer stagger you: taking a hit never interrupts what you are doing. And you will not be moved or ignored: monsters notice you first and prefer you over your allies. It does not reduce damage, and its threat does not add to Monolith's.",
+      "description": "A lasting boon on yourself, with three gifts. Blows no longer stagger you: taking a hit never interrupts what you are doing. Every physical hit you take is 1 point lighter, and half a point more with each level of the power. And you will not be moved or ignored: monsters notice you first and prefer you over your allies. The threat never grows, and does not add to Monolith's.",
       "status": "accepted",
       "essenceIds": [
         "e_f60d06c1"
@@ -4838,18 +4966,19 @@
         "t_08fdec9d",
         "t_6e51786d",
         "t_5462244b",
-        "t_bcaf43f8"
+        "t_bcaf43f8",
+        "t_ad2b06f1"
       ],
       "potency": 50,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% apparent distance: monsters treat you as half as far away; also hits no longer stagger you",
+      "potencyNote": "% apparent distance: monsters treat you as half as far away; also hits no longer stagger you, and 1 point off every physical hit, +1 every two levels",
       "number": 225,
       "gameKey": "Unyielding",
       "icon": 33,
-      "shortText": "Threat; never staggered"
+      "shortText": "Threat; no stagger; -1 hit"
     },
     {
       "id": "p_32273d73",
@@ -5309,6 +5438,1670 @@
       "gameKey": "ChargedAir",
       "icon": 8,
       "shortText": "Aura: +5% spell damage"
+    },
+    {
+      "id": "p_0722c9f2",
+      "name": "Font of Life",
+      "description": "Aura. Every ally within its radius, yourself included, has a slightly larger health pool for as long as they stay near you.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_50a7240a",
+        "t_f68550c3",
+        "t_be83c5cf",
+        "t_abcc5067",
+        "t_6e51786d"
+      ],
+      "potency": 5,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": 8,
+      "growth": 12.5,
+      "potencyNote": "% maximum life, lasting, for allies in the aura",
+      "number": 239,
+      "gameKey": "FontOfLife",
+      "icon": 8,
+      "shortText": "Aura: +5% max life, rad 8"
+    },
+    {
+      "id": "p_7ced7a8f",
+      "name": "Vigor",
+      "description": "A lasting boon on yourself. Your health pool is larger.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_50a7240a",
+        "t_f68550c3",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% maximum life, lasting",
+      "number": 240,
+      "gameKey": "Vigor",
+      "icon": 18,
+      "shortText": "You have more maximum life"
+    },
+    {
+      "id": "p_530b7c5d",
+      "name": "Hearty",
+      "description": "A lasting boon on yourself. Your life comes back faster.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_50a7240a",
+        "t_afa5e43e",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% faster life regeneration, lasting",
+      "number": 241,
+      "gameKey": "Hearty",
+      "icon": 43,
+      "shortText": "You regain life faster"
+    },
+    {
+      "id": "p_c50f3ef4",
+      "name": "Bolster",
+      "description": "A lasting boon on one ally. Their health pool is a little larger. Smaller than Vigor, because it can be given away.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_50a7240a",
+        "t_f68550c3",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 5,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% maximum life, lasting",
+      "number": 242,
+      "gameKey": "Bolster",
+      "icon": 12,
+      "shortText": "Ally has more maximum life"
+    },
+    {
+      "id": "p_db35c5d8",
+      "name": "Thriving",
+      "description": "A lasting boon on one ally. Their life comes back a little faster.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_50a7240a",
+        "t_afa5e43e",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 5,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% faster life regeneration, lasting",
+      "number": 243,
+      "gameKey": "Thriving",
+      "icon": 50,
+      "shortText": "Ally regains life faster"
+    },
+    {
+      "id": "p_0bdbd0cb",
+      "name": "Surge of Life",
+      "description": "For about 20 seconds every ally in the game has a much larger health pool, and the extra arrives full. The button for the moment before a boss hits hard.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_50a7240a",
+        "t_f68550c3",
+        "t_be83c5cf",
+        "t_3aa83613",
+        "t_b0c8cbc0",
+        "t_9048f21b"
+      ],
+      "potency": 20,
+      "manaCost": 18,
+      "cooldown": 60,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% maximum life for 20 seconds, for every ally",
+      "number": 244,
+      "gameKey": "SurgeOfLife",
+      "icon": 45,
+      "shortText": "All allies: +20% life 20s"
+    },
+    {
+      "id": "p_d185a711",
+      "name": "Lifeblood",
+      "description": "For about 20 seconds your own life pours back many times faster than usual. Yours alone.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_50a7240a",
+        "t_afa5e43e",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_b0c8cbc0",
+        "t_9048f21b"
+      ],
+      "potency": 20,
+      "manaCost": 18,
+      "cooldown": 60,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% faster life regeneration for 20 seconds",
+      "number": 245,
+      "gameKey": "Lifeblood",
+      "icon": 34,
+      "shortText": "Life regen +20% for 20s"
+    },
+    {
+      "id": "p_438c81d2",
+      "name": "Lifeline",
+      "description": "The plain heal. Restores a fair amount of life to one ally, or to yourself, as often as you have mana for it.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_78bf3c15",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": 12,
+      "manaCost": 8,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "healing",
+      "number": 246,
+      "gameKey": "Lifeline",
+      "icon": 1,
+      "shortText": "Heals an ally, or you"
+    },
+    {
+      "id": "p_8fa8795f",
+      "name": "Flourish",
+      "description": "A small, cheap heal on one ally. Less life than Lifeline each cast, but more life for the mana.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_78bf3c15",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 11,
+      "manaCost": 5,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "healing",
+      "number": 247,
+      "gameKey": "Flourish",
+      "icon": 9,
+      "shortText": "Small, cheap heal"
+    },
+    {
+      "id": "p_1e72bc6c",
+      "name": "Second Wind",
+      "description": "A heal on one ally that is stronger the closer they are to death: on someone nearly dead it restores about twice as much. A short cooldown.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_78bf3c15",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_a9a0b1a6"
+      ],
+      "potency": 14,
+      "manaCost": 8,
+      "cooldown": 10,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "healing; twice that on someone under a third of their life",
+      "number": 248,
+      "gameKey": "SecondWind",
+      "icon": 3,
+      "shortText": "Heal; double if near death"
+    },
+    {
+      "id": "p_a4ec3f08",
+      "name": "Restoration",
+      "description": "Restores a large share of one ally's whole health pool at once, so the bigger the pool, the bigger the heal. It grows with every boon that enlarges the pool.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_78bf3c15",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_9048f21b"
+      ],
+      "potency": 60,
+      "manaCost": 12,
+      "cooldown": 60,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% of the ally's maximum life",
+      "number": 249,
+      "gameKey": "Restoration",
+      "icon": 40,
+      "shortText": "Restores 60% of ally life"
+    },
+    {
+      "id": "p_6a6c078d",
+      "name": "Lifelink",
+      "description": "A heal that lands on one ally and leaps on to the nearest wounded ally, and again, a little weaker each leap.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_78bf3c15",
+        "t_b06216ac",
+        "t_78e7dc4a",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 12,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "healing to the first target, less with each leap",
+      "number": 250,
+      "gameKey": "Lifelink",
+      "icon": 15,
+      "shortText": "Heal that leaps to others"
+    },
+    {
+      "id": "p_591c3aa5",
+      "name": "Life Burst",
+      "description": "A burst of life centred on one ally that also heals everyone standing close to them. A short cooldown.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_78bf3c15",
+        "t_b06216ac",
+        "t_1d3ef0b5",
+        "t_8e6b4fcf",
+        "t_a9a0b1a6"
+      ],
+      "potency": 13,
+      "manaCost": 12,
+      "cooldown": 10,
+      "radius": 2,
+      "growth": 12.5,
+      "potencyNote": "healing to each target",
+      "number": 251,
+      "gameKey": "LifeBurst",
+      "icon": 10,
+      "shortText": "Heals ally, half to nearby"
+    },
+    {
+      "id": "p_383f0f56",
+      "name": "Pulse of Life",
+      "description": "Heals every ally in the game at once, wherever they are. Weaker for each of them than a heal aimed at one.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_78bf3c15",
+        "t_be83c5cf",
+        "t_3aa83613",
+        "t_8e6b4fcf",
+        "t_9048f21b"
+      ],
+      "potency": 14,
+      "manaCost": 30,
+      "cooldown": 60,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "healing to each ally",
+      "number": 252,
+      "gameKey": "PulseOfLife",
+      "icon": 13,
+      "shortText": "Heals every ally anywhere"
+    },
+    {
+      "id": "p_2eeb8657",
+      "name": "Regrowth",
+      "description": "A heal over time on one ally: a steady amount every 2 seconds. More life in total than Lifeline for the same mana, but it takes its time.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_78bf3c15",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_b5fae28d",
+        "t_5462244b"
+      ],
+      "potency": 16,
+      "manaCost": 8,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "healing in total over 8 seconds",
+      "number": 253,
+      "gameKey": "Regrowth",
+      "icon": 21,
+      "shortText": "Heals an ally over 8s"
+    },
+    {
+      "id": "p_5d38c825",
+      "name": "Invigorate",
+      "description": "Heals you at once, and for about 20 seconds your health pool is much larger. Two effects in one cast, and yours alone.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_78bf3c15",
+        "t_50a7240a",
+        "t_f68550c3",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_b0c8cbc0",
+        "t_9048f21b"
+      ],
+      "potency": 36,
+      "manaCost": 12,
+      "cooldown": 60,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "healing; also 20 % maximum life for 20 seconds",
+      "number": 254,
+      "gameKey": "Invigorate",
+      "icon": 30,
+      "shortText": "Heals you; +20% life 20s"
+    },
+    {
+      "id": "p_1f528125",
+      "name": "Breath of Life",
+      "description": "Brings one fallen ally back to life with most of their life restored, more than any other essence's resurrection gives.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_4f155f0e",
+        "t_78bf3c15",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_9048f21b"
+      ],
+      "potency": 75,
+      "manaCost": 12,
+      "cooldown": 60,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% of their life on rising",
+      "number": 255,
+      "gameKey": "BreathOfLife",
+      "icon": 44,
+      "shortText": "Raises ally at 75% life"
+    },
+    {
+      "id": "p_e1a42c7f",
+      "name": "Genesis",
+      "description": "The Life ultimate, three effects in one cast. Every ally in the game is healed for a great deal, the fallen among them rise, and for about 30 seconds everyone's health pool is much larger.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_78bf3c15",
+        "t_4f155f0e",
+        "t_50a7240a",
+        "t_f68550c3",
+        "t_be83c5cf",
+        "t_3aa83613",
+        "t_8e6b4fcf",
+        "t_b0c8cbc0",
+        "t_29d3e548"
+      ],
+      "potency": 50,
+      "manaCost": 60,
+      "cooldown": 180,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% of life for the risen; the living are healed 30; everyone +20% maximum life for 30 seconds",
+      "number": 256,
+      "gameKey": "Genesis",
+      "icon": 24,
+      "shortText": "Raise, heal, +20% life: all"
+    },
+    {
+      "id": "p_41671ed4",
+      "name": "Siphon Life",
+      "description": "Draws the life out of one enemy: it takes Life damage, and part of what it loses comes back to you as healing. Life's everyday attack.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_78bf3c15",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": 6,
+      "manaCost": 6,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage; heals you 4",
+      "number": 257,
+      "gameKey": "SiphonLife",
+      "icon": 29,
+      "shortText": "Life damage; heals you"
+    },
+    {
+      "id": "p_5a041754",
+      "name": "Vital Surge",
+      "description": "A burst of raw life on the spot you choose. Monsters caught in it take Life damage; allies caught in it are healed. A short cooldown.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_78bf3c15",
+        "t_a9a02fc3",
+        "t_1d3ef0b5",
+        "t_8e6b4fcf",
+        "t_a9a0b1a6"
+      ],
+      "potency": 6,
+      "manaCost": 9,
+      "cooldown": 10,
+      "radius": 2,
+      "growth": 12.5,
+      "potencyNote": "damage to each target; heals 8",
+      "number": 258,
+      "gameKey": "VitalSurge",
+      "icon": 37,
+      "shortText": "Hurts foes, heals, radius 2"
+    },
+    {
+      "id": "p_ac452608",
+      "name": "Leyline",
+      "description": "Aura. Every ally within its radius, yourself included, has a slightly larger mana pool for as long as they stay near you.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_50a7240a",
+        "t_f5680bf7",
+        "t_be83c5cf",
+        "t_abcc5067",
+        "t_6e51786d"
+      ],
+      "potency": 5,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": 8,
+      "growth": 12.5,
+      "potencyNote": "% maximum mana, lasting, for allies in the aura",
+      "number": 259,
+      "gameKey": "Leyline",
+      "icon": 8,
+      "shortText": "Aura: +5% max mana, rad 8"
+    },
+    {
+      "id": "p_44157734",
+      "name": "Arcane Mind",
+      "description": "A lasting boon on yourself. Your Spirit is raised by a few points, and by one more with each level of the power.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_50a7240a",
+        "t_e5439584",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 3,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "Spirit, lasting; +1 for each level",
+      "number": 260,
+      "gameKey": "ArcaneMind",
+      "icon": 18,
+      "shortText": "You have more Spirit"
+    },
+    {
+      "id": "p_d5ab2b0c",
+      "name": "Spellcraft",
+      "description": "A lasting boon on yourself. Your spell attacks deal more damage.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_50a7240a",
+        "t_b1f56c7b",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% more spell attack damage, lasting",
+      "number": 261,
+      "gameKey": "Spellcraft",
+      "icon": 30,
+      "shortText": "Your spells hit harder"
+    },
+    {
+      "id": "p_c17c6dbf",
+      "name": "Deep Well",
+      "description": "A lasting boon on yourself. Your mana pool is larger.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_50a7240a",
+        "t_f5680bf7",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% maximum mana, lasting",
+      "number": 262,
+      "gameKey": "DeepWell",
+      "icon": 12,
+      "shortText": "You have more maximum mana"
+    },
+    {
+      "id": "p_53fb2806",
+      "name": "Meditation",
+      "description": "A lasting boon on yourself. Your mana comes back faster.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_50a7240a",
+        "t_30a3ce12",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% faster mana regeneration, lasting",
+      "number": 263,
+      "gameKey": "Meditation",
+      "icon": 43,
+      "shortText": "You regain mana faster"
+    },
+    {
+      "id": "p_055af761",
+      "name": "Insight",
+      "description": "A lasting boon on one ally. Their Spirit is raised by a point, and by one more with each level of the power. Smaller than Arcane Mind, because it can be given away.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_50a7240a",
+        "t_e5439584",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 1,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "Spirit, lasting; +1 for each level",
+      "number": 264,
+      "gameKey": "Insight",
+      "icon": 33,
+      "shortText": "Ally has more Spirit"
+    },
+    {
+      "id": "p_b5417caa",
+      "name": "Empower",
+      "description": "A lasting boon on one ally. Their spell attacks deal a little more damage.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_50a7240a",
+        "t_b1f56c7b",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 5,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% more spell attack damage, lasting",
+      "number": 265,
+      "gameKey": "Empower",
+      "icon": 34,
+      "shortText": "Ally: spells hit harder"
+    },
+    {
+      "id": "p_0fd428fc",
+      "name": "Attunement",
+      "description": "A lasting boon on one ally. Their mana comes back a little faster.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_50a7240a",
+        "t_30a3ce12",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 5,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% faster mana regeneration, lasting",
+      "number": 266,
+      "gameKey": "Attunement",
+      "icon": 50,
+      "shortText": "Ally regains mana faster"
+    },
+    {
+      "id": "p_90037573",
+      "name": "Expanded Mind",
+      "description": "A lasting boon on one ally. Their mana pool is a little larger.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_50a7240a",
+        "t_f5680bf7",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 5,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% maximum mana, lasting",
+      "number": 267,
+      "gameKey": "ExpandedMind",
+      "icon": 28,
+      "shortText": "Ally has more maximum mana"
+    },
+    {
+      "id": "p_123aeff0",
+      "name": "Arcane Surge",
+      "description": "For about 20 seconds your spell attacks deal much more damage. Yours alone.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_50a7240a",
+        "t_b1f56c7b",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_b0c8cbc0",
+        "t_9048f21b"
+      ],
+      "potency": 20,
+      "manaCost": 18,
+      "cooldown": 60,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% more spell attack damage for 20 seconds",
+      "number": 268,
+      "gameKey": "ArcaneSurge",
+      "icon": 45,
+      "shortText": "+20% spell damage for 20s"
+    },
+    {
+      "id": "p_2c6f8618",
+      "name": "Mana Font",
+      "description": "Gives a helping of mana to every ally in the game at once, wherever they are. It costs you more than any one of them receives.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_50a7240a",
+        "t_f5680bf7",
+        "t_be83c5cf",
+        "t_3aa83613",
+        "t_8e6b4fcf",
+        "t_9048f21b"
+      ],
+      "potency": 10,
+      "manaCost": 30,
+      "cooldown": 60,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "mana given to every ally",
+      "number": 269,
+      "gameKey": "ManaFont",
+      "icon": 40,
+      "shortText": "Gives every ally 10 mana"
+    },
+    {
+      "id": "p_efd258e9",
+      "name": "Ascendance",
+      "description": "The Magic ultimate, three effects in one cast, and yours alone. For about 30 seconds your spell attacks deal far more damage, your mana pours back, and your mana pool is much larger.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_50a7240a",
+        "t_b1f56c7b",
+        "t_30a3ce12",
+        "t_f5680bf7",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_b0c8cbc0",
+        "t_29d3e548"
+      ],
+      "potency": 30,
+      "manaCost": 36,
+      "cooldown": 180,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% more spell attack damage for 30 seconds; also 30 % faster mana regeneration and 30 % maximum mana",
+      "number": 270,
+      "gameKey": "Ascendance",
+      "icon": 24,
+      "shortText": "+30% spells, mana, 30s"
+    },
+    {
+      "id": "p_f4e5cd32",
+      "name": "Expose",
+      "description": "A lasting affliction on one enemy. All three of its resistances are lowered a little until it dies. Does nothing about immunity.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_fd59c54d",
+        "t_d285ae97",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "points off all three resistances, until it dies",
+      "number": 271,
+      "gameKey": "Expose",
+      "icon": 31,
+      "shortText": "Enemy: -10 all resistances"
+    },
+    {
+      "id": "p_1efad60c",
+      "name": "Unravel",
+      "description": "A lasting affliction on one enemy and everything close to it. All three of their resistances are lowered a great deal until they die. Does nothing about immunity.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_fd59c54d",
+        "t_d285ae97",
+        "t_ec9d55b3",
+        "t_1d3ef0b5",
+        "t_6e51786d",
+        "t_9048f21b"
+      ],
+      "potency": 25,
+      "manaCost": 15,
+      "cooldown": 60,
+      "radius": 2,
+      "growth": 12.5,
+      "potencyNote": "points off all three resistances, until they die",
+      "number": 272,
+      "gameKey": "Unravel",
+      "icon": 37,
+      "shortText": "-25 all resistances, rad 2"
+    },
+    {
+      "id": "p_68f9e1ad",
+      "name": "Magic Missile",
+      "description": "A bolt of raw magic at one enemy. Magic's everyday attack.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": 8,
+      "manaCost": 6,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage",
+      "number": 273,
+      "gameKey": "MagicMissile",
+      "icon": 35,
+      "shortText": "A bolt of Arcane damage"
+    },
+    {
+      "id": "p_fed7c024",
+      "name": "Arcane Burst",
+      "description": "A burst of Arcane damage on the spot you choose, hitting everything close to it.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_a9a02fc3",
+        "t_1d3ef0b5",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": 4,
+      "manaCost": 9,
+      "cooldown": 0,
+      "radius": 2,
+      "growth": 12.5,
+      "potencyNote": "damage to each target",
+      "number": 274,
+      "gameKey": "ArcaneBurst",
+      "icon": 10,
+      "shortText": "Arcane damage, radius 2"
+    },
+    {
+      "id": "p_fb8e27e0",
+      "name": "Disintegrate",
+      "description": "A very heavy hit on one enemy for a great deal of mana. Far more damage than Magic Missile each cast, far less for the mana.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_caf4787f",
+        "t_5462244b"
+      ],
+      "potency": 20,
+      "manaCost": 40,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage",
+      "number": 275,
+      "gameKey": "Disintegrate",
+      "icon": 29,
+      "shortText": "Huge hit, huge cost"
+    },
+    {
+      "id": "p_5253d9dc",
+      "name": "Arcane Barrage",
+      "description": "Arcane damage that strikes one enemy and leaps on to the nearest other enemy, and again, a little weaker each leap. A short cooldown.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_78e7dc4a",
+        "t_8e6b4fcf",
+        "t_a9a0b1a6"
+      ],
+      "potency": 10,
+      "manaCost": 9,
+      "cooldown": 10,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage to the first target, a quarter less each leap",
+      "number": 276,
+      "gameKey": "ArcaneBarrage",
+      "icon": 15,
+      "shortText": "Arcane damage that leaps"
+    },
+    {
+      "id": "p_4bf445db",
+      "name": "Arcane Lance",
+      "description": "A heavy hit on one enemy that also leaves it open: all three of its resistances are lowered until it dies. Two effects in one cast.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_fd59c54d",
+        "t_d285ae97",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_6e51786d",
+        "t_9048f21b"
+      ],
+      "potency": 24,
+      "manaCost": 12,
+      "cooldown": 60,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage; also 15 points off all three resistances",
+      "number": 277,
+      "gameKey": "ArcaneLance",
+      "icon": 36,
+      "shortText": "Heavy hit; -15 resistances"
+    },
+    {
+      "id": "p_daa2ef6f",
+      "name": "Battle Standard",
+      "description": "Aura. Every ally within its radius, yourself included, deals slightly more damage with special attacks for as long as they stay near you.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_50a7240a",
+        "t_6c10893c",
+        "t_be83c5cf",
+        "t_abcc5067",
+        "t_6e51786d"
+      ],
+      "potency": 5,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": 8,
+      "growth": 12.5,
+      "potencyNote": "% more special attack damage, for you and allies in the aura",
+      "number": 278,
+      "gameKey": "BattleStandard",
+      "icon": 8,
+      "shortText": "Aura: +5% special attacks"
+    },
+    {
+      "id": "p_913017cc",
+      "name": "Brawn",
+      "description": "A lasting boon on yourself. Your Power is raised by a few points, and by one more with each level of the power.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_50a7240a",
+        "t_ff9bcfb1",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 3,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "Power, lasting; +1 for each level",
+      "number": 279,
+      "gameKey": "Brawn",
+      "icon": 18,
+      "shortText": "+3 Power, +1 each level"
+    },
+    {
+      "id": "p_e03c4797",
+      "name": "Weapon Mastery",
+      "description": "A lasting boon on yourself. Your special attacks deal more damage.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_50a7240a",
+        "t_6c10893c",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% more special attack damage, lasting",
+      "number": 280,
+      "gameKey": "WeaponMastery",
+      "icon": 30,
+      "shortText": "Special attacks hit harder"
+    },
+    {
+      "id": "p_963ffedd",
+      "name": "Keen Eye",
+      "description": "A lasting boon on yourself. Your weapon attacks land more often.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_50a7240a",
+        "t_def04896",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% better chance to hit with weapon attacks, lasting",
+      "number": 281,
+      "gameKey": "KeenEye",
+      "icon": 33,
+      "shortText": "Your weapons hit more often"
+    },
+    {
+      "id": "p_b14e62b8",
+      "name": "Thick Hide",
+      "description": "A lasting boon on yourself. Your armor is raised.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_50a7240a",
+        "t_a99e96ca",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "armor, lasting",
+      "number": 282,
+      "gameKey": "ThickHide",
+      "icon": 12,
+      "shortText": "You have more armor"
+    },
+    {
+      "id": "p_c83fc244",
+      "name": "Unbowed",
+      "description": "A lasting boon on yourself, with two gifts. Your health pool is larger, and hits no longer stagger you: nothing interrupts your swing.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_50a7240a",
+        "t_f68550c3",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% maximum life, lasting; also hits no longer stagger you",
+      "number": 283,
+      "gameKey": "Unbowed",
+      "icon": 25,
+      "shortText": "+10% life; never staggered"
+    },
+    {
+      "id": "p_751de191",
+      "name": "Embolden",
+      "description": "A lasting boon on one ally. Their Power is raised by a point, and by one more with each level of the power. Smaller than Brawn, because it can be given away.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_50a7240a",
+        "t_ff9bcfb1",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 1,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "Power, lasting; +1 for each level",
+      "number": 284,
+      "gameKey": "Embolden",
+      "icon": 34,
+      "shortText": "Ally: +1 Power, +1 a level"
+    },
+    {
+      "id": "p_4999e748",
+      "name": "Sharpen",
+      "description": "A lasting boon on one ally. Their special attacks deal a little more damage.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_50a7240a",
+        "t_6c10893c",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 5,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% more special attack damage, lasting",
+      "number": 285,
+      "gameKey": "Sharpen",
+      "icon": 44,
+      "shortText": "Ally: special attacks +5%"
+    },
+    {
+      "id": "p_802d4fad",
+      "name": "Guiding Hand",
+      "description": "A lasting boon on one ally. Their weapon attacks land a little more often.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_50a7240a",
+        "t_def04896",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 5,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% better chance to hit with weapon attacks, lasting",
+      "number": 286,
+      "gameKey": "GuidingHand",
+      "icon": 50,
+      "shortText": "Ally hits more often"
+    },
+    {
+      "id": "p_7292d9bc",
+      "name": "Fortify",
+      "description": "A lasting boon on one ally. Their armor is raised a little, and by a point more with each level of the power.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_50a7240a",
+        "t_a99e96ca",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 5,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "armor, lasting; +1 for each level",
+      "number": 287,
+      "gameKey": "Fortify",
+      "icon": 7,
+      "shortText": "Ally has more armor"
+    },
+    {
+      "id": "p_c0a75358",
+      "name": "Battle Fury",
+      "description": "For about 20 seconds your special attacks deal much more damage. Yours alone.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_50a7240a",
+        "t_6c10893c",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_b0c8cbc0",
+        "t_9048f21b"
+      ],
+      "potency": 20,
+      "manaCost": 18,
+      "cooldown": 60,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% more special attack damage for 20 seconds",
+      "number": 288,
+      "gameKey": "BattleFury",
+      "icon": 45,
+      "shortText": "+20% special attacks, 20s"
+    },
+    {
+      "id": "p_45ae2f96",
+      "name": "Rallying Cry",
+      "description": "For about 20 seconds every ally in the game has more armor and lands their weapon attacks more often. Two effects in one cast.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_50a7240a",
+        "t_a99e96ca",
+        "t_def04896",
+        "t_be83c5cf",
+        "t_3aa83613",
+        "t_b0c8cbc0",
+        "t_9048f21b"
+      ],
+      "potency": 15,
+      "manaCost": 25,
+      "cooldown": 60,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "armor for every ally for 20 seconds; also 15 % better chance to hit",
+      "number": 289,
+      "gameKey": "RallyingCry",
+      "icon": 48,
+      "shortText": "All: armor and to-hit 20s"
+    },
+    {
+      "id": "p_d18cb94e",
+      "name": "Juggernaut",
+      "description": "The Might ultimate, three effects in one cast, and yours alone. For about 30 seconds your special attacks deal far more damage, your health pool is much larger, and your armor is far higher.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_50a7240a",
+        "t_6c10893c",
+        "t_f68550c3",
+        "t_a99e96ca",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_b0c8cbc0",
+        "t_29d3e548"
+      ],
+      "potency": 30,
+      "manaCost": 36,
+      "cooldown": 180,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% more special attack damage for 30 seconds; also 30 % maximum life and 30 armor",
+      "number": 290,
+      "gameKey": "Juggernaut",
+      "icon": 24,
+      "shortText": "+30% attacks, life, armor"
+    },
+    {
+      "id": "p_931978bc",
+      "name": "Heavy Blow",
+      "description": "A weapon strike with extra damage. Might's everyday attack.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": 2,
+      "manaCost": 2,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit",
+      "number": 291,
+      "gameKey": "HeavyBlow",
+      "icon": 47,
+      "shortText": "Strike with extra damage"
+    },
+    {
+      "id": "p_c1f3f3c9",
+      "name": "Sweeping Strike",
+      "description": "A weapon strike that carries the same hit to every other enemy close to the target.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_1d3ef0b5",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": 1,
+      "manaCost": 4,
+      "cooldown": 0,
+      "radius": 2,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit to each target",
+      "number": 292,
+      "gameKey": "SweepingStrike",
+      "icon": 46,
+      "shortText": "Hits target and neighbours"
+    },
+    {
+      "id": "p_9c6d9f37",
+      "name": "Precise Strike",
+      "description": "A weapon strike that cannot miss. Little extra damage, but it always lands.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": 1,
+      "manaCost": 2,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit; cannot miss",
+      "number": 293,
+      "gameKey": "PreciseStrike",
+      "icon": 38,
+      "shortText": "A strike that cannot miss"
+    },
+    {
+      "id": "p_5390950e",
+      "name": "Mighty Blow",
+      "description": "A weapon strike with a great deal of extra damage. A short cooldown.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_a9a0b1a6"
+      ],
+      "potency": 9,
+      "manaCost": 4,
+      "cooldown": 8,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit",
+      "number": 294,
+      "gameKey": "MightyBlow",
+      "icon": 22,
+      "shortText": "Strike with heavy damage"
+    },
+    {
+      "id": "p_32102ec6",
+      "name": "Staggering Blow",
+      "description": "A weapon strike that leaves the enemy reeling: it misses more often until it dies. A short cooldown.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_fd59c54d",
+        "t_def04896",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_6e51786d",
+        "t_a9a0b1a6"
+      ],
+      "potency": 4,
+      "manaCost": 3,
+      "cooldown": 10,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit; the enemy has 20% less chance to hit until it dies",
+      "number": 295,
+      "gameKey": "StaggeringBlow",
+      "icon": 31,
+      "shortText": "Strike; target misses more"
+    },
+    {
+      "id": "p_6bb7271e",
+      "name": "Sunder",
+      "description": "A weapon strike that breaks the enemy's guard: it takes more damage from everything until it dies. A long cooldown, for the monster that matters.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_fd59c54d",
+        "t_23cff708",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_6e51786d",
+        "t_9048f21b"
+      ],
+      "potency": 9,
+      "manaCost": 3,
+      "cooldown": 45,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit; the enemy takes 15% more damage until it dies",
+      "number": 296,
+      "gameKey": "Sunder",
+      "icon": 36,
+      "shortText": "Target takes more damage"
+    },
+    {
+      "id": "p_6d3136d7",
+      "name": "Intimidate",
+      "description": "A lasting affliction on one enemy and everything close to it. They all miss more often until they die.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_fd59c54d",
+        "t_def04896",
+        "t_ec9d55b3",
+        "t_1d3ef0b5",
+        "t_6e51786d",
+        "t_9048f21b"
+      ],
+      "potency": 20,
+      "manaCost": 12,
+      "cooldown": 45,
+      "radius": 2,
+      "growth": 12.5,
+      "potencyNote": "% less chance to hit, for each target, until it dies",
+      "number": 297,
+      "gameKey": "Intimidate",
+      "icon": 37,
+      "shortText": "Foes miss more, radius 2"
     }
   ],
   "confluences": [
@@ -5759,6 +7552,878 @@
         "e_f60d06c1"
       ],
       "name": "Rampart"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_566cd6e8",
+        "e_c3e242a4"
+      ],
+      "name": "Rebirth"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_4021590a",
+        "e_566cd6e8"
+      ],
+      "name": "Sunfire"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_4021590a",
+        "e_566cd6e8"
+      ],
+      "name": "Crusader"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_4021590a",
+        "e_c3e242a4"
+      ],
+      "name": "Summer"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_3eaf93fd",
+        "e_4021590a"
+      ],
+      "name": "Shaman"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_1c094682",
+        "e_4021590a"
+      ],
+      "name": "Barbarian"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_c253b238",
+        "e_c3e242a4"
+      ],
+      "name": "Hotspring"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_4021590a",
+        "e_c253b238"
+      ],
+      "name": "Elementalist"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_4021590a",
+        "e_c253b238"
+      ],
+      "name": "Steel"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_c3e242a4",
+        "e_f60d06c1"
+      ],
+      "name": "Crucible"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_4021590a",
+        "e_f60d06c1"
+      ],
+      "name": "Alchemy"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_4021590a",
+        "e_f60d06c1"
+      ],
+      "name": "Hammer"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_c3e242a4",
+        "e_dddc13cb"
+      ],
+      "name": "Cauldron"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_4021590a",
+        "e_dddc13cb"
+      ],
+      "name": "Warlock"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_4021590a",
+        "e_dddc13cb"
+      ],
+      "name": "Destroyer"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_4021590a",
+        "e_c3e242a4"
+      ],
+      "name": "Zeal"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_3eaf93fd",
+        "e_4021590a"
+      ],
+      "name": "Evoker"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_057f86d1",
+        "e_4021590a"
+      ],
+      "name": "Berserker"
+    },
+    {
+      "essences": [
+        "e_4021590a",
+        "e_c3e242a4",
+        "e_d0ab3dce"
+      ],
+      "name": "Hearth"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_4021590a",
+        "e_d0ab3dce"
+      ],
+      "name": "Battlemage"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_4021590a",
+        "e_d0ab3dce"
+      ],
+      "name": "Legionnaire"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_4021590a",
+        "e_c3e242a4"
+      ],
+      "name": "Elixir"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_4021590a",
+        "e_c3e242a4"
+      ],
+      "name": "Gladiator"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_3eaf93fd",
+        "e_4021590a"
+      ],
+      "name": "Flameblade"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_566cd6e8",
+        "e_c3e242a4"
+      ],
+      "name": "Paradise"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_3eaf93fd",
+        "e_566cd6e8"
+      ],
+      "name": "Mystic"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_1c094682",
+        "e_566cd6e8"
+      ],
+      "name": "Avenger"
+    },
+    {
+      "essences": [
+        "e_566cd6e8",
+        "e_c253b238",
+        "e_c3e242a4"
+      ],
+      "name": "Baptism"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_566cd6e8",
+        "e_c253b238"
+      ],
+      "name": "Seer"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_566cd6e8",
+        "e_c253b238"
+      ],
+      "name": "Knight"
+    },
+    {
+      "essences": [
+        "e_566cd6e8",
+        "e_c3e242a4",
+        "e_f60d06c1"
+      ],
+      "name": "Eden"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_566cd6e8",
+        "e_f60d06c1"
+      ],
+      "name": "Runestone"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_566cd6e8",
+        "e_f60d06c1"
+      ],
+      "name": "Champion"
+    },
+    {
+      "essences": [
+        "e_566cd6e8",
+        "e_c3e242a4",
+        "e_dddc13cb"
+      ],
+      "name": "Purgatory"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_566cd6e8",
+        "e_dddc13cb"
+      ],
+      "name": "Heresy"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_566cd6e8",
+        "e_dddc13cb"
+      ],
+      "name": "Executioner"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_566cd6e8",
+        "e_c3e242a4"
+      ],
+      "name": "Seraph"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_3eaf93fd",
+        "e_566cd6e8"
+      ],
+      "name": "Oracle"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_057f86d1",
+        "e_566cd6e8"
+      ],
+      "name": "Valkyrie"
+    },
+    {
+      "essences": [
+        "e_566cd6e8",
+        "e_c3e242a4",
+        "e_d0ab3dce"
+      ],
+      "name": "Paladin"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_566cd6e8",
+        "e_d0ab3dce"
+      ],
+      "name": "Sigil"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_566cd6e8",
+        "e_d0ab3dce"
+      ],
+      "name": "Templar"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_566cd6e8",
+        "e_c3e242a4"
+      ],
+      "name": "Divinity"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_566cd6e8",
+        "e_c3e242a4"
+      ],
+      "name": "Hero"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_3eaf93fd",
+        "e_566cd6e8"
+      ],
+      "name": "Justicar"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_c253b238",
+        "e_c3e242a4"
+      ],
+      "name": "Verdance"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_3eaf93fd",
+        "e_c253b238"
+      ],
+      "name": "Fey"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_1c094682",
+        "e_c253b238"
+      ],
+      "name": "Rapids"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_c3e242a4",
+        "e_f60d06c1"
+      ],
+      "name": "Grove"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_3eaf93fd",
+        "e_f60d06c1"
+      ],
+      "name": "Druid"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_1c094682",
+        "e_f60d06c1"
+      ],
+      "name": "Savage"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_c3e242a4",
+        "e_dddc13cb"
+      ],
+      "name": "Undergrowth"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_3eaf93fd",
+        "e_dddc13cb"
+      ],
+      "name": "Coven"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_1c094682",
+        "e_dddc13cb"
+      ],
+      "name": "Hunter"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_1c094682",
+        "e_c3e242a4"
+      ],
+      "name": "Wildheart"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_1c094682",
+        "e_3eaf93fd"
+      ],
+      "name": "Stormcaller"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_057f86d1",
+        "e_1c094682"
+      ],
+      "name": "Stampede"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_c3e242a4",
+        "e_d0ab3dce"
+      ],
+      "name": "Evergreen"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_3eaf93fd",
+        "e_d0ab3dce"
+      ],
+      "name": "Enchanter"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_1c094682",
+        "e_d0ab3dce"
+      ],
+      "name": "Protector"
+    },
+    {
+      "essences": [
+        "e_1c094682",
+        "e_3eaf93fd",
+        "e_c3e242a4"
+      ],
+      "name": "Faerie"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_1c094682",
+        "e_c3e242a4"
+      ],
+      "name": "Beast"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_1c094682",
+        "e_3eaf93fd"
+      ],
+      "name": "Totem"
+    },
+    {
+      "essences": [
+        "e_c253b238",
+        "e_c3e242a4",
+        "e_f60d06c1"
+      ],
+      "name": "Oasis"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_c253b238",
+        "e_f60d06c1"
+      ],
+      "name": "Crystal"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_c253b238",
+        "e_f60d06c1"
+      ],
+      "name": "Glacier"
+    },
+    {
+      "essences": [
+        "e_c253b238",
+        "e_c3e242a4",
+        "e_dddc13cb"
+      ],
+      "name": "Leech"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_c253b238",
+        "e_dddc13cb"
+      ],
+      "name": "Illusion"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_c253b238",
+        "e_dddc13cb"
+      ],
+      "name": "Corsair"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_c253b238",
+        "e_c3e242a4"
+      ],
+      "name": "Lifestream"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_3eaf93fd",
+        "e_c253b238"
+      ],
+      "name": "Squall"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_057f86d1",
+        "e_c253b238"
+      ],
+      "name": "Typhoon"
+    },
+    {
+      "essences": [
+        "e_c253b238",
+        "e_c3e242a4",
+        "e_d0ab3dce"
+      ],
+      "name": "Haven"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_c253b238",
+        "e_d0ab3dce"
+      ],
+      "name": "Mirror"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_c253b238",
+        "e_d0ab3dce"
+      ],
+      "name": "Breakwater"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_c253b238",
+        "e_c3e242a4"
+      ],
+      "name": "Fountain"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_c253b238",
+        "e_c3e242a4"
+      ],
+      "name": "Endurance"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_3eaf93fd",
+        "e_c253b238"
+      ],
+      "name": "Frostblade"
+    },
+    {
+      "essences": [
+        "e_c3e242a4",
+        "e_dddc13cb",
+        "e_f60d06c1"
+      ],
+      "name": "Marrow"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_dddc13cb",
+        "e_f60d06c1"
+      ],
+      "name": "Necropolis"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_dddc13cb",
+        "e_f60d06c1"
+      ],
+      "name": "Ravager"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_c3e242a4",
+        "e_f60d06c1"
+      ],
+      "name": "Golem"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_3eaf93fd",
+        "e_f60d06c1"
+      ],
+      "name": "Lodestone"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_057f86d1",
+        "e_f60d06c1"
+      ],
+      "name": "Earthshaker"
+    },
+    {
+      "essences": [
+        "e_c3e242a4",
+        "e_d0ab3dce",
+        "e_f60d06c1"
+      ],
+      "name": "Titan"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_d0ab3dce",
+        "e_f60d06c1"
+      ],
+      "name": "Obelisk"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_d0ab3dce",
+        "e_f60d06c1"
+      ],
+      "name": "Colossus"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_c3e242a4",
+        "e_f60d06c1"
+      ],
+      "name": "Geomancer"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_c3e242a4",
+        "e_f60d06c1"
+      ],
+      "name": "Giant"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_3eaf93fd",
+        "e_f60d06c1"
+      ],
+      "name": "Runesmith"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_c3e242a4",
+        "e_dddc13cb"
+      ],
+      "name": "Reanimator"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_3eaf93fd",
+        "e_dddc13cb"
+      ],
+      "name": "Hex"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_057f86d1",
+        "e_dddc13cb"
+      ],
+      "name": "Reaver"
+    },
+    {
+      "essences": [
+        "e_c3e242a4",
+        "e_d0ab3dce",
+        "e_dddc13cb"
+      ],
+      "name": "Revenant"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_d0ab3dce",
+        "e_dddc13cb"
+      ],
+      "name": "Shroud"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_d0ab3dce",
+        "e_dddc13cb"
+      ],
+      "name": "Blackguard"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_c3e242a4",
+        "e_dddc13cb"
+      ],
+      "name": "Lich"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_c3e242a4",
+        "e_dddc13cb"
+      ],
+      "name": "Vampire"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_3eaf93fd",
+        "e_dddc13cb"
+      ],
+      "name": "Death Knight"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_c3e242a4",
+        "e_d0ab3dce"
+      ],
+      "name": "Stormheart"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_3eaf93fd",
+        "e_d0ab3dce"
+      ],
+      "name": "Conduit"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_057f86d1",
+        "e_d0ab3dce"
+      ],
+      "name": "Ironclad"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_3eaf93fd",
+        "e_c3e242a4"
+      ],
+      "name": "Animus"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_057f86d1",
+        "e_c3e242a4"
+      ],
+      "name": "Adrenaline"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_057f86d1",
+        "e_3eaf93fd"
+      ],
+      "name": "Stormblade"
+    },
+    {
+      "essences": [
+        "e_3eaf93fd",
+        "e_c3e242a4",
+        "e_d0ab3dce"
+      ],
+      "name": "Wardstone"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_c3e242a4",
+        "e_d0ab3dce"
+      ],
+      "name": "Fortress"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_3eaf93fd",
+        "e_d0ab3dce"
+      ],
+      "name": "Spellsword"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_3eaf93fd",
+        "e_c3e242a4"
+      ],
+      "name": "Paragon"
     }
   ],
   "stones": [
@@ -5829,6 +8494,36 @@
         "t_e712d8ea"
       ],
       "gameName": "Combat"
+    },
+    {
+      "id": "s_259a8c35",
+      "name": "Patience",
+      "tags": [
+        "t_42d817be",
+        "t_b5fae28d",
+        "t_fd59c54d"
+      ],
+      "gameName": "Patience"
+    },
+    {
+      "id": "s_044964ba",
+      "name": "Glory",
+      "tags": [
+        "t_9048f21b",
+        "t_29d3e548",
+        "t_42d817be"
+      ],
+      "gameName": "Glory"
+    },
+    {
+      "id": "s_f73eb190",
+      "name": "Presence",
+      "tags": [
+        "t_50a7240a",
+        "t_bcaf43f8",
+        "t_be83c5cf"
+      ],
+      "gameName": "Presence"
     }
   ],
   "races": [
@@ -5846,7 +8541,7 @@
         },
         {
           "id": "rp_0002",
-          "name": "Special Attack Aptitude",
+          "name": "Special Attack Apt.",
           "effect": "SpecialAptitude",
           "amount": 0,
           "element": ""

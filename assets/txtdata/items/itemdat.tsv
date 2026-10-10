@@ -170,7 +170,7 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	ESSENCE	Misc	NONE	Fire Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Firebolt	true	50
 	0	Misc	Unequippable	ESSENCE	Misc	NONE	Lightning Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Lightning	true	50
 	0	Misc	Unequippable	ESSENCE	Misc	NONE	Water Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Frostbolt	true	50
-	0	Misc	Unequippable	ESSENCE	Misc	NONE	Holy Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	HolyBolt	true	50
+	0	Misc	Unequippable	ESSENCE	Misc	NONE	Holy Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	HolyBolt	true	250
 	0	Misc	Unequippable	ESSENCE	Misc	NONE	Nature Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	HealingTouch	true	250
 	0	Misc	Unequippable	ESSENCE	Misc	NONE	Shield Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Barrier	true	250
 	0	Misc	Unequippable	ESSENCE	Misc	NONE	Dark Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Corruption	true	50
@@ -184,3 +184,9 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Spells	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Combat	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
 	0	Misc	Unequippable	SPECTRAL_ELIXIR	Misc	NONE	Crystal Wash	Wash	1	0	0	0	0	0	0	0	0		CRYSTALWASH	Null	true	10
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Patience	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	200
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Glory	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	200
+	0	Misc	Unequippable	ESSENCE	Misc	NONE	Life Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Lifeline	true	50
+	0	Misc	Unequippable	ESSENCE	Misc	NONE	Magic Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	MagicMissile	true	250
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Presence	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	200
+	0	Misc	Unequippable	ESSENCE	Misc	NONE	Might Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	HeavyBlow	true	250

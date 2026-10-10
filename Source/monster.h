@@ -210,6 +210,15 @@ struct CMonster {
 
 extern CMonster LevelMonsterTypes[MaxLvlMTypes];
 
+/**
+ * Essence Mod: every monster's health is its table value times this (Bryan, 2026-10-10). The
+ * tables (monstdat.tsv, unique_monstdat.tsv) still hold the original numbers, so setting this to 1
+ * puts every monster back exactly as it was. It applies to ordinary and unique monsters alike,
+ * before the game's own halving in single player and its Nightmare and Hell increases. A player's
+ * golem is not touched.
+ */
+constexpr int MonsterHealthMultiplier = 3;
+
 struct Monster { // note: missing field _mAFNum
 	std::unique_ptr<uint8_t[]> uniqueMonsterTRN;
 	/**

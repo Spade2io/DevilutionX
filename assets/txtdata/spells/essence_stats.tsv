@@ -1,9 +1,12 @@
 essence	primary	rarity
 Fire	Power	common
-Holy	Spirit	common
+Holy	Spirit	rare
 Nature	Recovery	rare
 Water	Recovery	common
 Earth	Power	common
 Dark	Spirit	common
 Lightning	Speed	common
 Shield	Spirit	rare
+Life	Recovery	common
+Magic	Spirit	rare
+Might	Power	rare

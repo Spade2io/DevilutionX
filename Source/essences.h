@@ -38,7 +38,10 @@ enum class EssenceID : uint8_t {
 	Shield,
 	Dark,
 	Earth,
-	LAST = Earth,
+	Life,
+	Magic,
+	Might,
+	LAST = Might,
 };
 
 /**

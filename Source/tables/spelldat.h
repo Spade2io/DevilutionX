@@ -294,6 +294,8 @@ struct SpellData {
 	uint8_t cleanseStacks = 0;
 	/** Essence Mod: quarter stacks more it removes for each level of the power. */
 	uint8_t cleanseQuarterStacks = 0;
+	/** Essence Mod: a heal or a resurrection that also leaves its stat boon: the boon's size. Zero for none. */
+	uint8_t boonAmount = 0;
 	/** Essence Mod: for a power from essence_powers.tsv, the short line the spellbook shows under it. */
 	std::string description;
 	/**

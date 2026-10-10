@@ -214,6 +214,12 @@ DamageType GetSpellDamageType(SpellID spell)
 		return DamageType::Shadow;
 	case EssenceID::Earth:
 		return DamageType::Earth;
+	case EssenceID::Life:
+		return DamageType::Life;
+	case EssenceID::Magic:
+		return DamageType::Arcane;
+	case EssenceID::Might: // its powers are Physical; only its stone is red
+		return DamageType::Physical;
 	case EssenceID::None:
 		break;
 	}
@@ -261,6 +267,8 @@ UiFlags GetDamageTypeTextColor(DamageType damageType)
 		return UiFlags::ColorOrange;
 	case DamageType::Nature:
 		return UiFlags::ColorGold; // the lettering's own dull yellow
+	case DamageType::Arcane:
+		return UiFlags::ColorUiSilver; // drawn dull red in the game, as Bleed is
 	}
 	return UiFlags::ColorWhitegold;
 }
@@ -303,6 +311,12 @@ std::optional<EssenceTint> GetEssenceTint(EssenceID essence)
 		return EssenceTint::DullBlue;
 	case EssenceID::Earth:
 		return EssenceTint::DullBeige;
+	case EssenceID::Life:
+		return EssenceTint::VividOrange;
+	case EssenceID::Magic: // Arcane
+		return EssenceTint::DullBeige;
+	case EssenceID::Might: // the designer gives it Fire's colour
+		return EssenceTint::VividRed;
 	case EssenceID::None:
 		break;
 	}

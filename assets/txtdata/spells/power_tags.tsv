@@ -3,13 +3,13 @@ Radiance	Holy|Healing|Self|Aura|Permanent
 Mend	Holy|Healing|Ally|Single Target|Instant|No CD
 DivineLight	Holy|Healing|Ally|Single Target|Instant|No CD
 PatientPrayer	Holy|Healing|Ally|Single Target|Instant|Efficient|Skirmish (<15)
-LayOnHands	Holy|Healing|Cleanse|Ally|Single Target|Instant|Utlimate (120+)
+LayOnHands	Holy|Healing|Cleanse|Ally|Single Target|Instant|Ultimate (120+)
 Purify	Holy|Cleanse|Healing|Ally|Single Target|Instant|No CD
 Absolution	Holy|Cleanse|Ally|Splash|Instant|Skirmish (<15)
 ChorusOfLight	Holy|Healing|Ally|Chain|Instant|Skirmish (<15)
 SecondDawn	Holy|Resurrect|Healing|Ally|Single Target|Instant|Battle (<60)
 GuardianAngel	Holy|Resurrect|Healing|Boon|Defensive|Ally|Single Target|Battle (<60)|Permanent
-Miracle	Holy|Resurrect|Healing|Cleanse|Self|Everyone (allies only)|Instant|Utlimate (120+)
+Miracle	Holy|Resurrect|Healing|Cleanse|Self|Everyone (allies only)|Instant|Ultimate (120+)
 WardOfPurity	Holy|Boon|Defensive|Cleanse|Ally|Single Target|Timed|Battle (<60)
 Vigil	Holy|Boon|Healing|Ally|Single Target|Health Regen|Permanent|No CD
 Benediction	Holy|Boon|Ally|Single Target|HP|Permanent|No CD
@@ -38,7 +38,7 @@ HighTide	Water|Boon|Mana Regen|Self|Everyone (allies only)|Timed|Battle (<60)
 Reservoir	Water|Boon|MP|Ally|Single Target|Permanent|No CD
 ManaTide	Water|Boon|MP|Ally|Single Target|Instant|Skirmish (<15)
 DeepFreeze	Water|Affliction|Speed|Enemy|Splash|Timed|Battle (<60)
-GreatFlood	Water|Attack|Healing|Cleanse|Spell Attack|Ground|Blanket|Instant|Utlimate (120+)
+GreatFlood	Water|Attack|Healing|Cleanse|Spell Attack|Ground|Blanket|Instant|Ultimate (120+)
 FireAura	Fire|Attack|Self|Aura|Permanent|Threat
 Firebolt	Fire|Attack|Spell Attack|Enemy|Single Target|Instant|No CD
 Fireball	Fire|Attack|Spell Attack|Enemy|Splash|Instant|No CD
@@ -52,7 +52,7 @@ Ignite	Fire|Attack|Special Attack|Enemy|Single Target|Instant|Over Time|No CD
 FlameCleave	Fire|Attack|Special Attack|Enemy|Splash|Instant|Skirmish (<15)
 MeltArmor	Fire|Attack|Special Attack|Affliction|Offensive|Enemy|Single Target|Instant|Battle (<60)|Permanent
 StokeTheFlames	Fire|Boon|Damage|Self|Single Target|Timed|Battle (<60)
-Phoenix	Fire|Resurrect|Healing|Self|Single Target|Instant|Utlimate (120+)
+Phoenix	Fire|Resurrect|Healing|Self|Single Target|Instant|Ultimate (120+)
 Smolder	Fire|Attack|Spell Attack|Enemy|Single Target|Over Time|No CD
 Wildfire	Fire|Attack|Spell Attack|Enemy|Splash|Over Time|Skirmish (<15)
 Meteor	Fire|Attack|Spell Attack|Enemy|Splash|Instant|Battle (<60)
@@ -83,8 +83,8 @@ Barkskin	Nature|Boon|Resistance|Ally|Single Target|Permanent|No CD
 Canopy	Nature|Boon|Resistance|Self|Everyone (allies only)|Timed|Battle (<60)
 Ironwood	Nature|Boon|Armor|Ally|Single Target|Permanent|No CD
 Oakheart	Nature|Boon|HP|Ally|Single Target|Permanent|No CD
-Camouflage	Nature|Boon|Stealth|Self|Single Target|Permanent|No CD
-WorldTree	Nature|Healing|Cleanse|Resurrect|Ground|Blanket|Over Time|Utlimate (120+)
+Camouflage	Nature|Boon|Stealth|Self|Single Target|Permanent|No CD|Accuracy
+WorldTree	Nature|Healing|Cleanse|Resurrect|Ground|Blanket|Over Time|Ultimate (120+)
 Aegis	Physical|Shielding|Self|Aura|Permanent
 ShieldBash	Physical|Attack|Special Attack|Shield|Enemy|Single Target|Instant|No CD
 ShieldSlam	Physical|Attack|Special Attack|Shield|Enemy|Single Target|Instant|Skirmish (<15)
@@ -102,9 +102,9 @@ HoldTheLine	Physical|Boon|Armor|Self|Everyone (allies only)|Permanent|No CD
 StoutHeart	Physical|Boon|HP|Ally|Single Target|Permanent|No CD
 Resilience	Physical|Boon|Health Regen|Self|Single Target|Permanent|No CD
 Oathbound	Physical|Boon|Defensive|Ally|Single Target|Permanent|No CD
-Stalwart	Physical|Boon|Threat|Self|Single Target|Permanent|No CD
+Stalwart	Physical|Boon|Threat|Self|Single Target|Permanent|No CD|Defensive
 Brace	Physical|Boon|Armor|Resistance|Self|Single Target|Timed|Battle (<60)
-Unbreakable	Physical|Boon|Defensive|Self|Everyone (allies only)|Timed|Utlimate (120+)
+Unbreakable	Physical|Boon|Defensive|Self|Everyone (allies only)|Timed|Ultimate (120+)
 PallOfShadow	Shadow|Affliction|Astral Resist|Self|Aura|Permanent
 Corruption	Shadow|Attack|Spell Attack|Enemy|Single Target|Over Time|No CD
 CreepingRot	Shadow|Attack|Spell Attack|Enemy|Single Target|Over Time|Efficient|No CD
@@ -113,7 +113,7 @@ Blight	Shadow|Attack|Spell Attack|Enemy|Splash|Over Time|No CD
 PlagueWind	Shadow|Attack|Spell Attack|Direction|Cone|Over Time|Skirmish (<15)
 Contagion	Shadow|Attack|Spell Attack|Enemy|Chain|Over Time|No CD
 Drain	Shadow|Attack|Healing|Spell Attack|Enemy|Single Target|Over Time|Efficient|No CD
-BlackSun	Shadow|Attack|Spell Attack|Ground|Blanket|Instant|Over Time|Utlimate (120+)
+BlackSun	Shadow|Attack|Spell Attack|Ground|Blanket|Instant|Over Time|Ultimate (120+)
 UmbralStrike	Shadow|Attack|Special Attack|Enemy|Single Target|Instant|Over Time|No CD
 NightBlade	Shadow|Attack|Special Attack|Enemy|Single Target|Instant|Efficient|No CD
 Rupture	Shadow|Attack|Special Attack|Enemy|Single Target|Instant|Skirmish (<15)
@@ -122,7 +122,7 @@ Murk	Shadow|Affliction|Accuracy|Enemy|Splash|Timed|Battle (<60)
 NightTerrors	Shadow|Attack|Affliction|Accuracy|Spell Attack|Enemy|Single Target|Over Time|Timed|Skirmish (<15)
 Wither	Shadow|Attack|Affliction|Offensive|Spell Attack|Enemy|Single Target|Over Time|Permanent|Skirmish (<15)
 SoulRend	Shadow|Affliction|Astral Resist|Enemy|Single Target|Permanent|Battle (<60)
-CloakOfNight	Shadow|Boon|Stealth|Self|Single Target|Permanent|No CD|Defensive
+CloakOfNight	Shadow|Boon|Stealth|Self|Single Target|Permanent|No CD|Defensive|Armor
 Malice	Shadow|Boon|Damage|Self|Single Target|Permanent|No CD
 NightsEdge	Shadow|Boon|Damage|Self|Single Target|Permanent|No CD
 Bedrock	Earth|Boon|Phys DR|Self|Aura|Permanent
@@ -130,7 +130,7 @@ StoneSpike	Earth|Attack|Spell Attack|Ground|Splash|Instant|No CD
 Tremor	Earth|Attack|Spell Attack|Ground|Splash|Over Time|Skirmish (<15)
 Earthquake	Earth|Attack|Spell Attack|Ground|Blanket|Over Time|Battle (<60)
 Landslide	Earth|Attack|Spell Attack|Ground|Blanket|Instant|No CD
-Upheaval	Earth|Attack|Affliction|Speed|Spell Attack|Ground|Blanket|Instant|Timed|Utlimate (120+)
+Upheaval	Earth|Attack|Affliction|Speed|Spell Attack|Ground|Blanket|Instant|Timed|Ultimate (120+)
 StoneFist	Earth|Attack|Special Attack|Enemy|Single Target|Instant|No CD
 Boulder	Earth|Attack|Spell Attack|Enemy|Single Target|Instant|No CD
 Shockwave	Earth|Attack|Special Attack|Enemy|Splash|Instant|No CD
@@ -142,7 +142,7 @@ DigIn	Earth|Boon|Phys DR|Self|Single Target|Timed|Battle (<60)
 StoneWall	Earth|Boon|Phys DR|Self|Everyone (allies only)|Timed|Battle (<60)
 EarthenMight	Earth|Boon|Power|Self|Single Target|Permanent|No CD
 Monolith	Earth|Boon|Threat|Self|Single Target|Permanent|No CD|HP
-Unyielding	Earth|Boon|Defensive|Self|Single Target|Permanent|No CD|Threat
+Unyielding	Earth|Boon|Defensive|Self|Single Target|Permanent|No CD|Threat|Phys DR
 Lightning	Lightning|Attack|Spell Attack|Direction|Cone|Instant|No CD
 ChainLightning	Lightning|Attack|Spell Attack|Enemy|Chain|Instant|No CD
 ChargedBolt	Lightning|Attack|Spell Attack|Direction|Cone|Instant|No CD
@@ -151,7 +151,7 @@ Arc	Lightning|Attack|Spell Attack|Enemy|Chain|Instant|No CD
 ForkedLightning	Lightning|Attack|Spell Attack|Enemy|Chain|Instant|Skirmish (<15)
 Thunderstrike	Lightning|Attack|Spell Attack|Enemy|Single Target|Instant|Skirmish (<15)
 BallLightning	Lightning|Attack|Spell Attack|Enemy|Chain|Instant|Battle (<60)
-Tempest	Lightning|Attack|Spell Attack|Enemy|Chain|Instant|Utlimate (120+)
+Tempest	Lightning|Attack|Spell Attack|Enemy|Chain|Instant|Ultimate (120+)
 ShockingGrasp	Lightning|Attack|Special Attack|Enemy|Chain|Instant|Skirmish (<15)
 StormsFocus	Lightning|Boon|Spirit|Self|Single Target|Permanent|No CD
 Amplify	Lightning|Boon|Damage|Self|Single Target|Permanent|No CD
@@ -160,3 +160,62 @@ Quickening	Lightning|Boon|Speed|Self|Single Target|Permanent|No CD
 Dynamo	Lightning|Boon|Mana Regen|Self|Single Target|Permanent|No CD
 Teleport	Lightning|Teleport|Ground|Single Target|Instant|No CD
 ChargedAir	Lightning|Boon|Damage|Self|Aura|Permanent
+FontOfLife	Life|Boon|HP|Self|Aura|Permanent
+Vigor	Life|Boon|HP|Self|Single Target|Permanent|No CD
+Hearty	Life|Boon|Health Regen|Self|Single Target|Permanent|No CD
+Bolster	Life|Boon|HP|Ally|Single Target|Permanent|No CD
+Thriving	Life|Boon|Health Regen|Ally|Single Target|Permanent|No CD
+SurgeOfLife	Life|Boon|HP|Self|Everyone (allies only)|Timed|Battle (<60)
+Lifeblood	Life|Boon|Health Regen|Self|Single Target|Timed|Battle (<60)
+Lifeline	Life|Healing|Ally|Single Target|Instant|No CD
+Flourish	Life|Healing|Ally|Single Target|Instant|Efficient|No CD
+SecondWind	Life|Healing|Ally|Single Target|Instant|Skirmish (<15)
+Restoration	Life|Healing|Ally|Single Target|Instant|Battle (<60)
+Lifelink	Life|Healing|Ally|Chain|Instant|No CD
+LifeBurst	Life|Healing|Ally|Splash|Instant|Skirmish (<15)
+PulseOfLife	Life|Healing|Self|Everyone (allies only)|Instant|Battle (<60)
+Regrowth	Life|Healing|Ally|Single Target|Over Time|No CD
+Invigorate	Life|Healing|Boon|HP|Self|Single Target|Instant|Timed|Battle (<60)
+BreathOfLife	Life|Resurrect|Healing|Ally|Single Target|Instant|Battle (<60)
+Genesis	Life|Healing|Resurrect|Boon|HP|Self|Everyone (allies only)|Instant|Timed|Ultimate (120+)
+SiphonLife	Life|Attack|Spell Attack|Healing|Enemy|Single Target|Instant|No CD
+VitalSurge	Life|Attack|Spell Attack|Healing|Ground|Splash|Instant|Skirmish (<15)
+Leyline	Arcane|Boon|MP|Self|Aura|Permanent
+ArcaneMind	Arcane|Boon|Spirit|Self|Single Target|Permanent|No CD
+Spellcraft	Arcane|Boon|Spell Attack Dmg|Self|Single Target|Permanent|No CD
+DeepWell	Arcane|Boon|MP|Self|Single Target|Permanent|No CD
+Meditation	Arcane|Boon|Mana Regen|Self|Single Target|Permanent|No CD
+Insight	Arcane|Boon|Spirit|Ally|Single Target|Permanent|No CD
+Empower	Arcane|Boon|Spell Attack Dmg|Ally|Single Target|Permanent|No CD
+Attunement	Arcane|Boon|Mana Regen|Ally|Single Target|Permanent|No CD
+ExpandedMind	Arcane|Boon|MP|Ally|Single Target|Permanent|No CD
+ArcaneSurge	Arcane|Boon|Spell Attack Dmg|Self|Single Target|Timed|Battle (<60)
+ManaFont	Arcane|Boon|MP|Self|Everyone (allies only)|Instant|Battle (<60)
+Ascendance	Arcane|Boon|Spell Attack Dmg|Mana Regen|MP|Self|Single Target|Timed|Ultimate (120+)
+Expose	Arcane|Affliction|Resistance|Enemy|Single Target|Permanent|No CD
+Unravel	Arcane|Affliction|Resistance|Enemy|Splash|Permanent|Battle (<60)
+MagicMissile	Arcane|Attack|Spell Attack|Enemy|Single Target|Instant|No CD
+ArcaneBurst	Arcane|Attack|Spell Attack|Ground|Splash|Instant|No CD
+Disintegrate	Arcane|Attack|Spell Attack|Enemy|Single Target|Instant|Inefficient|No CD
+ArcaneBarrage	Arcane|Attack|Spell Attack|Enemy|Chain|Instant|Skirmish (<15)
+ArcaneLance	Arcane|Attack|Spell Attack|Affliction|Resistance|Enemy|Single Target|Instant|Permanent|Battle (<60)
+BattleStandard	Physical|Boon|Special Attack Dmg|Self|Aura|Permanent
+Brawn	Physical|Boon|Power|Self|Single Target|Permanent|No CD
+WeaponMastery	Physical|Boon|Special Attack Dmg|Self|Single Target|Permanent|No CD
+KeenEye	Physical|Boon|Accuracy|Self|Single Target|Permanent|No CD
+ThickHide	Physical|Boon|Armor|Self|Single Target|Permanent|No CD
+Unbowed	Physical|Boon|HP|Self|Single Target|Permanent|No CD
+Embolden	Physical|Boon|Power|Ally|Single Target|Permanent|No CD
+Sharpen	Physical|Boon|Special Attack Dmg|Ally|Single Target|Permanent|No CD
+GuidingHand	Physical|Boon|Accuracy|Ally|Single Target|Permanent|No CD
+Fortify	Physical|Boon|Armor|Ally|Single Target|Permanent|No CD
+BattleFury	Physical|Boon|Special Attack Dmg|Self|Single Target|Timed|Battle (<60)
+RallyingCry	Physical|Boon|Armor|Accuracy|Self|Everyone (allies only)|Timed|Battle (<60)
+Juggernaut	Physical|Boon|Special Attack Dmg|HP|Armor|Self|Single Target|Timed|Ultimate (120+)
+HeavyBlow	Physical|Attack|Special Attack|Enemy|Single Target|Instant|No CD
+SweepingStrike	Physical|Attack|Special Attack|Enemy|Splash|Instant|No CD
+PreciseStrike	Physical|Attack|Special Attack|Enemy|Single Target|Instant|No CD
+MightyBlow	Physical|Attack|Special Attack|Enemy|Single Target|Instant|Skirmish (<15)
+StaggeringBlow	Physical|Attack|Special Attack|Affliction|Accuracy|Enemy|Single Target|Instant|Permanent|Skirmish (<15)
+Sunder	Physical|Attack|Special Attack|Affliction|Offensive|Enemy|Single Target|Instant|Permanent|Battle (<60)
+Intimidate	Physical|Affliction|Accuracy|Enemy|Splash|Permanent|Battle (<60)

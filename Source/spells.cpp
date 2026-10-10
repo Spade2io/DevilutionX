@@ -412,6 +412,13 @@ void ApplyPowerToMonster(const Player &caster, Monster &monster, SpellID spell, 
 		say(spellData.sNameText);
 		return;
 	}
+	// The rider "ResistCut" on an attack: what it struck loses that many points from all three
+	// resistances until it dies.
+	if (spellData.rider == "ResistCut") {
+		CutMonsterResistance(monster, spell, 7, amount, -1);
+		say(spellData.sNameText);
+		return;
+	}
 	// "Curse" with the stat "Accuracy", or the rider "Accuracy" on another effect: the monster
 	// misses more often, for the power's duration or, with none, for as long as it lives.
 	if ((spellData.effect == "Curse" && spellData.buffStat == "Accuracy") || spellData.rider == "Accuracy") {
@@ -453,6 +460,9 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 			const int pulses = spellData.durationSeconds / 2;
 			ActivatePowerBuff(target, spell, std::max(static_cast<int>(static_cast<int64_t>(target._pMaxHP) * spellData.riderAmount / 100 / pulses), 1), caster);
 		}
+		// A resurrection that also leaves a boon (Genesis) leaves it on the risen too.
+		if (spellData.boonAmount != 0 && effect == "Resurrect")
+			ActivatePowerBuff(target, spell, spellData.boonAmount, caster);
 		if (&target == MyPlayer) {
 			PendingRevivePercent = effect == "Zone" ? 30 : std::clamp(amount, 1, 100);
 			NetSendCmd(true, CMD_PLRALIVE);
@@ -519,6 +529,13 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 	// "HealPercent" gives the amount as a percentage of the player's maximum life.
 	if (effect == "HealPercent")
 		amount = static_cast<int>(static_cast<int64_t>(target._pMaxHP) * std::min(amount, 100) / 100);
+	// The rider "Desperate": the heal is that much stronger on someone under a third of their life.
+	if (rider == "Desperate" && target._pHitPoints < target._pMaxHP / 3)
+		amount += static_cast<int>(static_cast<int64_t>(amount) * spellData.riderAmount / 100);
+	// A heal that also leaves a boon (Invigorate, Genesis): the boon first, so a larger health
+	// pool is there to be filled.
+	if (spellData.boonAmount != 0 && IsAnyOf(effect, "Heal", "Resurrect"))
+		ActivatePowerBuff(target, spell, spellData.boonAmount, caster);
 	if (IsAnyOf(effect, "Heal", "HealPercent", "ChainHeal", "Resurrect", "Zone") || rider.starts_with("Heal")) {
 		const int healed = std::clamp(target._pMaxHP - target._pHitPoints, 0, amount);
 		AddSpellExperienceForHealing(caster, target, spell, healed);

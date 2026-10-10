@@ -7,3 +7,6 @@ the Helper	Common	Ally|Boon
 Curses	Common	Affliction
 Spells	Common	Spell Attack
 Combat	Common	Special Attack
+Patience	Rare	Attack|Over Time|Affliction
+Glory	Rare	Battle (<60)|Ultimate (120+)|Attack
+Presence	Rare	Boon|Threat|Self

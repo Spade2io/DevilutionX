@@ -111,8 +111,8 @@ void SetMonsterAccuracyPenalty(Monster &monster, int percent, int ticks);
 /** @brief What is taken off a monster's chance to hit a player, in percentage points. */
 int GetMonsterAccuracyPenalty(const Monster &monster);
 
-/** How much of the damage a resistant monster shrugs off before anything reduces it: three quarters. */
-constexpr int BaseMonsterResistancePercent = 75;
+/** How much of the damage a resistant monster shrugs off before anything reduces it: half. */
+constexpr int BaseMonsterResistancePercent = 50; // was 75 until 2026-10-10: Bryan found three quarters painful
 
 /**
  * @brief Which resistances a stat name reduces: "ElementalResistCut", "NaturalResistCut",
@@ -130,7 +130,7 @@ uint8_t GetResistCutCategories(std::string_view stat);
 void CutMonsterResistance(Monster &monster, SpellID spell, uint8_t categories, int points, int ticks);
 
 /**
- * @brief Damage of a kind to a monster after its resistance. A resistant monster shrugs off 75%;
+ * @brief Damage of a kind to a monster after its resistance. A resistant monster shrugs off 50%;
  * curses on it and cursing auras near it take points off that, never below none. An immune
  * monster is not handled here: this is for damage that is known to get through.
  */

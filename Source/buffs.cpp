@@ -310,12 +310,25 @@ int GetPowerBuffPercent(const Player &player, std::string_view stat)
 		if (spellData.buffStat == stat)
 			percent += buff.amount;
 		// A buff's rider can name a second stat it changes, by the rider's own amount.
-		else if (!spellData.buffStat.empty() && spellData.rider == stat && stat != "Distance") {
+		// The rider may name several, with bars between them ("ManaRegen|MaxMana").
+		else if (!spellData.buffStat.empty() && stat != "Distance" && StrCat("|", spellData.rider, "|").find(StrCat("|", stat, "|")) != std::string::npos) {
 			percent += spellData.riderAmount;
 			// The armor that comes with a damage reduction buff (Stoneskin) gains a point for each
 			// level of the power. It is a self buff, so the level is the player's own.
 			if (stat == "Armor" && spellData.buffStat == "DmgReduction" && !buff.fromOther)
 				percent += ShownPowerLevel(player.GetBaseSpellLevel(buff.spell));
+			// A chance to block riding on a self boon (Stalwart) gains a point a level, and points
+			// off a physical hit (Unyielding) half a point a level, or a whole one from 5 up.
+			// So does a chance to hit (Camouflage), and the armor that comes with a stealth boon
+			// (Cloak of Night).
+			if (IsAnyOf(stat, "Block", "ToHit") && !buff.fromOther)
+				percent += ShownPowerLevel(player.GetBaseSpellLevel(buff.spell));
+			if (stat == "Armor" && spellData.buffStat == "Distance" && !buff.fromOther)
+				percent += ShownPowerLevel(player.GetBaseSpellLevel(buff.spell));
+			if (stat == "DmgReduction" && !buff.fromOther) {
+				const int level = ShownPowerLevel(player.GetBaseSpellLevel(buff.spell));
+				percent += spellData.riderAmount >= 5 ? level : level / 2;
+			}
 		}
 	}
 	return percent;

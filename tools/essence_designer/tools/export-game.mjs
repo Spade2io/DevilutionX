@@ -1,5 +1,5 @@
 // Writes the designer's powers into the files the game reads.
-// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire, Water, Holy, Nature, Shield, Dark, Earth and Lightning)
+// Usage: node tools/export-game.mjs [--check] [essence names...]     (default: Fire, Water, Holy, Nature, Shield, Dark, Earth, Lightning, Life, Magic and Might)
 //
 // What it writes:
 //   assets/txtdata/spells/essence_powers.tsv  one row per power the game does not already have
@@ -21,7 +21,7 @@ const POWERS_FILE = path.join(REPO, 'assets/txtdata/spells/essence_powers.tsv')
 const ITEMS_FILE = path.join(REPO, 'assets/txtdata/items/itemdat.tsv')
 const check = process.argv.includes('--check')
 const wanted = process.argv.slice(2).filter((a) => !a.startsWith('--'))
-const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy', 'Nature', 'Shield', 'Dark', 'Earth', 'Lightning']
+const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy', 'Nature', 'Shield', 'Dark', 'Earth', 'Lightning', 'Life', 'Magic', 'Might']
 
 // Powers the game already has as hand-written spells. They keep their original numbers and are
 // not exported; the name on the right is the game's own name for the spell.
@@ -55,6 +55,9 @@ const ICONS = {
   'Earthshatter': 7, 'Crushing Blow': 34, 'Mire': 31, 'Stoneskin': 12, 'Dig In': 30, 'Stone Wall': 48, 'Earthen Might': 18, 'Monolith': 25, 'Unyielding': 33,
   'Charged Air': 8, 'Spark': 38, 'Arc': 2, 'Forked Lightning': 15, 'Thunderstrike': 24, 'Ball Lightning': 10, 'Tempest': 45, 'Shocking Grasp': 22,
   "Storm's Focus": 18, 'Amplify': 30, 'Overcharge': 34, 'Quickening': 27, 'Dynamo': 50,
+  'Font of Life': 8, 'Vigor': 18, 'Hearty': 43, 'Bolster': 12, 'Thriving': 50, 'Surge of Life': 45, 'Lifeblood': 34, 'Lifeline': 1, 'Flourish': 9, 'Second Wind': 3, 'Restoration': 40, 'Lifelink': 15, 'Life Burst': 10, 'Pulse of Life': 13, 'Regrowth': 21, 'Invigorate': 30, 'Breath of Life': 44, 'Genesis': 24, 'Siphon Life': 29, 'Vital Surge': 37,
+  'Leyline': 8, 'Arcane Mind': 18, 'Spellcraft': 30, 'Deep Well': 12, 'Meditation': 43, 'Insight': 33, 'Empower': 34, 'Attunement': 50, 'Expanded Mind': 28, 'Arcane Surge': 45, 'Mana Font': 40, 'Ascendance': 24, 'Expose': 31, 'Unravel': 37, 'Magic Missile': 35, 'Arcane Burst': 10, 'Disintegrate': 29, 'Arcane Barrage': 15, 'Arcane Lance': 36,
+  'Battle Standard': 8, 'Brawn': 18, 'Weapon Mastery': 30, 'Keen Eye': 33, 'Thick Hide': 12, 'Unbowed': 25, 'Embolden': 34, 'Sharpen': 44, 'Guiding Hand': 50, 'Fortify': 7, 'Battle Fury': 45, 'Rallying Cry': 48, 'Juggernaut': 24, 'Heavy Blow': 47, 'Sweeping Strike': 46, 'Precise Strike': 38, 'Mighty Blow': 22, 'Staggering Blow': 31, 'Sunder': 36, 'Intimidate': 37,
   'Wellspring': 8, 'Tidal Wave': 13, 'Deep Freeze': 7, 'Wash Away': 4, 'Purging Rain': 21, 'Monsoon': 3, 'Great Flood': 24,
 }
 // The short line the spellbook shows under each power. There is room for about 28 letters.
@@ -109,6 +112,9 @@ const SHORT_TEXT = {
   'Judgment': 'Heavy; more to undead/demon', 'Atonement': 'Strike that heals an ally', 'Searing Light': 'Holy damage, radius 2',
   'Dawnburst': 'Hurts foes, heals, radius 4',
   'Searing Brand': 'All hits deal extra fire', 'Fan the Flames': 'Ally acts 5% faster',
+  'Battle Standard': 'Aura: +5% special attacks', 'Brawn': '+3 Power, +1 each level', 'Weapon Mastery': 'Special attacks hit harder', 'Keen Eye': 'Your weapons hit more often', 'Thick Hide': 'You have more armor', 'Unbowed': '+10% life; never staggered', 'Embolden': 'Ally: +1 Power, +1 a level', 'Sharpen': 'Ally: special attacks +5%', 'Guiding Hand': 'Ally hits more often', 'Fortify': 'Ally has more armor', 'Battle Fury': '+20% special attacks, 20s', 'Rallying Cry': 'All: armor and to-hit 20s', 'Juggernaut': '+30% attacks, life, armor', 'Heavy Blow': 'Strike with extra damage', 'Sweeping Strike': 'Hits target and neighbours', 'Precise Strike': 'A strike that cannot miss', 'Mighty Blow': 'Strike with heavy damage', 'Staggering Blow': 'Strike; target misses more', 'Sunder': 'Target takes more damage', 'Intimidate': 'Foes miss more, radius 2',
+  'Leyline': 'Aura: +5% max mana, rad 8', 'Arcane Mind': 'You have more Spirit', 'Spellcraft': 'Your spells hit harder', 'Deep Well': 'You have more maximum mana', 'Meditation': 'You regain mana faster', 'Insight': 'Ally has more Spirit', 'Empower': 'Ally: spells hit harder', 'Attunement': 'Ally regains mana faster', 'Expanded Mind': 'Ally has more maximum mana', 'Arcane Surge': '+20% spell damage for 20s', 'Mana Font': 'Gives every ally 10 mana', 'Ascendance': '+30% spells, mana, 30s', 'Expose': 'Enemy: -10 all resistances', 'Unravel': '-25 all resistances, rad 2', 'Magic Missile': 'A bolt of Arcane damage', 'Arcane Burst': 'Arcane damage, radius 2', 'Disintegrate': 'Huge hit, huge cost', 'Arcane Barrage': 'Arcane damage that leaps', 'Arcane Lance': 'Heavy hit; -15 resistances',
+  'Font of Life': 'Aura: +5% max life, rad 8', 'Vigor': 'You have more maximum life', 'Hearty': 'You regain life faster', 'Bolster': 'Ally has more maximum life', 'Thriving': 'Ally regains life faster', 'Surge of Life': 'All allies: +20% life 20s', 'Lifeblood': 'Life regen +20% for 20s', 'Lifeline': 'Heals an ally, or you', 'Flourish': 'Small, cheap heal', 'Second Wind': 'Heal; double if near death', 'Restoration': 'Restores 60% of ally life', 'Lifelink': 'Heal that leaps to others', 'Life Burst': 'Heals ally, half to nearby', 'Pulse of Life': 'Heals every ally anywhere', 'Regrowth': 'Heals an ally over 8s', 'Invigorate': 'Heals you; +20% life 20s', 'Breath of Life': 'Raises ally at 75% life', 'Genesis': 'Raise, heal, +20% life: all', 'Siphon Life': 'Life damage; heals you', 'Vital Surge': 'Hurts foes, heals, radius 2',
 }
 // What each built power does in the game. "missile" is the game projectile that carries the cast;
 // "effect" names what lands. A power not listed here has no behaviour yet: it can be learned, and
@@ -200,9 +206,9 @@ const SHORT_TEXT = {
 //         kind, the most damaging first; 99 is all of them. "cleanseQuarters" is how many quarter
 //         stacks it gains a level. A zone removes that many each tick. "cooldownDrop" is the
 //         seconds a cooldown shrinks by each level.
-//   Reducing resistance: a resistant monster shrugs off 75% of the damage. An Aura or a Curse
+//   Reducing resistance: a resistant monster shrugs off 50% of the damage (75% until 2026-10-10). An Aura or a Curse
 //         with the stat ElementalResistCut, NaturalResistCut, AstralResistCut or AllResistCut
-//         takes its potency in points off that (10 makes it 65%), never below none. Different
+//         takes its potency in points off that (10 makes it 40%), never below none. Different
 //         powers add up. Immunity is not touched; only AstralStrip and Kindle remove immunity.
 //   More Buff stats: DotDamage (percent more from the caster's effects over time), WeaponDot
 //         (each weapon hit adds the effect over time its rider names; potency is the total).
@@ -227,10 +233,89 @@ const SHORT_TEXT = {
 //   More Buff stats: Spirit (points), WalkSpeed (frames off each step; 1 is about an eighth
 //         faster and 2 is the most allowed), SpellDamage (percent more from spell attacks, not
 //         from weapon attacks made through a power).
+//   The Heal rider "Desperate": riderPercent more healing on someone under a third of their life.
+//   "boon" on a Heal or a Resurrect: it also leaves the boon its stat names, of that fixed size,
+//         for its duration (Invigorate, Genesis). The size does not grow with the power's level.
+//   The Bolt rider "HealSelf": the caster is healed for riderHeal when the bolt hits.
+//   A boon's rider may name several stats with bars between them (Ascendance: "ManaRegen|MaxMana"),
+//         each raised by riderPercent.
+//   The Burst rider "ResistCut": what it strikes loses riderPercent points from all three
+//         resistances until it dies (Arcane Lance).
+//   More rider stats on a self boon: Block (riderPercent more chance to block, one more a level:
+//         Stalwart) and DmgReduction (points off a physical hit, half a point more a level:
+//         Unyielding).
+//   And ToHit (riderPercent more chance to hit with weapons and spells, one more a level:
+//         Camouflage). Armor riding on a stealth or threat boon gains a point a level too (Cloak
+//         of Night).
+//   More Buff stats: SpecialDamage (percent more from special attacks), WeaponToHit (points on
+//         the chance to hit with weapons; ToHit counts for spells as well).
+//   More Strike riders: SureHit (the strike cannot miss), Accuracy (the monster struck misses
+//         riderPercent more often until it dies).
+//   An essence's damage type only colours its stone. The game takes each essence's powers'
+//         damage type from GetSpellDamageType in essence_tint.cpp (Might: Physical).
 //   Buff: switches a buff on for the caster, or for the player aimed at if the power is tagged Ally. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10
 const BEHAVIOUR = {
+  'Battle Standard': { missile: 'StrengthBuff', effect: 'Aura', stat: 'SpecialDamage', duration: 0 },
+  'Brawn': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Power', duration: 0 },
+  'Weapon Mastery': { missile: 'StrengthBuff', effect: 'Buff', stat: 'SpecialDamage', duration: 0 },
+  'Keen Eye': { missile: 'StrengthBuff', effect: 'Buff', stat: 'WeaponToHit', duration: 0 },
+  'Thick Hide': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Armor', duration: 0 },
+  'Unbowed': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0, rider: 'NoStagger', riderPercent: 1 },
+  'Embolden': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Power', duration: 0 },
+  'Sharpen': { missile: 'StrengthBuff', effect: 'Buff', stat: 'SpecialDamage', duration: 0 },
+  'Guiding Hand': { missile: 'StrengthBuff', effect: 'Buff', stat: 'WeaponToHit', duration: 0 },
+  'Fortify': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Armor', duration: 0 },
+  'Battle Fury': { missile: 'StrengthBuff', effect: 'Buff', stat: 'SpecialDamage', duration: 20 },
+  'Rallying Cry': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Armor', duration: 20, rider: 'WeaponToHit', riderPercent: 15 },
+  'Juggernaut': { missile: 'StrengthBuff', effect: 'Buff', stat: 'SpecialDamage', duration: 30, rider: 'MaxLife|Armor', riderPercent: 30 },
+  'Heavy Blow': { effect: 'Strike' },
+  'Sweeping Strike': { effect: 'Strike', spread: true },
+  'Precise Strike': { effect: 'Strike', rider: 'SureHit', riderPercent: 1 },
+  'Mighty Blow': { effect: 'Strike' },
+  'Staggering Blow': { effect: 'Strike', rider: 'Accuracy', riderPercent: 20 },
+  'Sunder': { effect: 'Strike', rider: 'Vulnerable', riderPercent: 15 },
+  'Intimidate': { missile: 'Corruption', effect: 'Curse', stat: 'Accuracy', duration: 0 },
+  'Leyline': { missile: 'StrengthBuff', effect: 'Aura', stat: 'MaxMana', duration: 0 },
+  'Arcane Mind': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Spirit', duration: 0 },
+  'Spellcraft': { missile: 'StrengthBuff', effect: 'Buff', stat: 'SpellDamage', duration: 0 },
+  'Deep Well': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxMana', duration: 0 },
+  'Meditation': { missile: 'StrengthBuff', effect: 'Buff', stat: 'ManaRegen', duration: 0 },
+  'Insight': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Spirit', duration: 0 },
+  'Empower': { missile: 'StrengthBuff', effect: 'Buff', stat: 'SpellDamage', duration: 0 },
+  'Attunement': { missile: 'StrengthBuff', effect: 'Buff', stat: 'ManaRegen', duration: 0 },
+  'Expanded Mind': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxMana', duration: 0 },
+  'Arcane Surge': { missile: 'StrengthBuff', effect: 'Buff', stat: 'SpellDamage', duration: 20 },
+  'Mana Font': { missile: 'StrengthBuff', effect: 'Mana' },
+  'Ascendance': { missile: 'StrengthBuff', effect: 'Buff', stat: 'SpellDamage', duration: 30, rider: 'ManaRegen|MaxMana', riderPercent: 30 },
+  'Expose': { missile: 'Corruption', effect: 'Curse', stat: 'AllResistCut', duration: 0 },
+  'Unravel': { missile: 'Corruption', effect: 'Curse', stat: 'AllResistCut', duration: 0 },
+  'Magic Missile': { missile: 'PowerBolt', effect: 'Bolt' },
+  'Arcane Burst': { missile: 'Corruption', effect: 'GroundBurst' },
+  'Disintegrate': { missile: 'Corruption', effect: 'Burst' },
+  'Arcane Barrage': { missile: 'Corruption', effect: 'ChainBurst' },
+  'Arcane Lance': { missile: 'Corruption', effect: 'Burst', rider: 'ResistCut', riderPercent: 15 },
+  'Font of Life': { missile: 'StrengthBuff', effect: 'Aura', stat: 'MaxLife', duration: 0 },
+  'Vigor': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0 },
+  'Hearty': { missile: 'StrengthBuff', effect: 'Buff', stat: 'LifeRegen', duration: 0 },
+  'Bolster': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0 },
+  'Thriving': { missile: 'StrengthBuff', effect: 'Buff', stat: 'LifeRegen', duration: 0 },
+  'Surge of Life': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 20 },
+  'Lifeblood': { missile: 'StrengthBuff', effect: 'Buff', stat: 'LifeRegen', duration: 20 },
+  'Lifeline': { missile: 'StrengthBuff', effect: 'Heal' },
+  'Flourish': { missile: 'StrengthBuff', effect: 'Heal' },
+  'Second Wind': { missile: 'StrengthBuff', effect: 'Heal', rider: 'Desperate', riderPercent: 100 },
+  'Restoration': { missile: 'StrengthBuff', effect: 'HealPercent' },
+  'Lifelink': { missile: 'StrengthBuff', effect: 'ChainHeal' },
+  'Life Burst': { missile: 'StrengthBuff', effect: 'Heal' },
+  'Pulse of Life': { missile: 'StrengthBuff', effect: 'Heal' },
+  'Regrowth': { missile: 'StrengthBuff', effect: 'Buff', stat: 'HealPulse', duration: 8, overTime: true },
+  'Invigorate': { missile: 'StrengthBuff', effect: 'Heal', stat: 'MaxLife', duration: 20, boon: 20 },
+  'Breath of Life': { missile: 'StrengthBuff', effect: 'Resurrect' },
+  'Genesis': { missile: 'StrengthBuff', effect: 'Resurrect', rider: 'Heal', riderHeal: 30, stat: 'MaxLife', duration: 30, boon: 20 },
+  'Siphon Life': { missile: 'PowerBolt', effect: 'Bolt', rider: 'HealSelf', riderHeal: 4 },
+  'Vital Surge': { missile: 'Corruption', effect: 'GroundBurst', rider: 'Heal', riderHeal: 8 },
   'Smolder': { missile: 'Corruption', effect: 'Burn' },
   'Wildfire': { missile: 'Corruption', effect: 'Burn' },
   'Meteor': { missile: 'Corruption', effect: 'Burst' },
@@ -291,7 +376,7 @@ const BEHAVIOUR = {
   'Stone Wall': { missile: 'StrengthBuff', effect: 'Buff', stat: 'DmgReduction', duration: 15 },
   'Earthen Might': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Power', duration: 0 },
   'Monolith': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'MaxLife', riderPercent: 10 },
-  'Unyielding': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'NoStagger', riderPercent: 1 },
+  'Unyielding': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'NoStagger|DmgReduction', riderPercent: 1 },
   'Pall of Shadow': { missile: 'StrengthBuff', effect: 'Aura', stat: 'AstralResistCut', duration: 0 },
   'Creeping Rot': { missile: 'Corruption', effect: 'Corruption' },
   'Shadow Bolt': { missile: 'PowerBolt', effect: 'Bolt', rider: 'Corruption', riderTotal: 4 },
@@ -308,7 +393,7 @@ const BEHAVIOUR = {
   'Night Terrors': { missile: 'Corruption', effect: 'Corruption', rider: 'Accuracy', riderPercent: 15, duration: 20 },
   'Wither': { missile: 'Corruption', effect: 'Corruption', rider: 'Wither', riderPercent: 25 },
   'Soul Rend': { missile: 'Corruption', effect: 'Curse', stat: 'AstralStrip', duration: 0, cooldownDrop: 2 },
-  'Cloak of Night': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0 },
+  'Cloak of Night': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'Armor', riderPercent: 3 },
   'Malice': { missile: 'StrengthBuff', effect: 'Buff', stat: 'DotDamage', duration: 0 },
   "Night's Edge": { missile: 'StrengthBuff', effect: 'Buff', stat: 'WeaponDot', duration: 0, perTick: true, rider: 'Corruption', riderPercent: 0 },
   'Aegis': { missile: 'StrengthBuff', effect: 'Aura', stat: 'ShieldPulse', duration: 0 },
@@ -328,7 +413,7 @@ const BEHAVIOUR = {
   'Stout Heart': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0 },
   'Resilience': { missile: 'StrengthBuff', effect: 'Buff', stat: 'LifeRegen', duration: 0 },
   'Oathbound': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Oath', duration: 0 },
-  'Stalwart': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0 },
+  'Stalwart': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'Block', riderPercent: 5 },
   'Brace': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Armor', duration: 20, rider: 'Resist', riderPercent: 30 },
   'Unbreakable': { missile: 'StrengthBuff', effect: 'Buff', stat: 'DamageTaken', duration: 12 },
   'Ironbark': { missile: 'StrengthBuff', effect: 'Aura', stat: 'Resist', duration: 0 },
@@ -349,7 +434,7 @@ const BEHAVIOUR = {
   'Canopy': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Resist', duration: 20 },
   'Ironwood': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Armor', duration: 0 },
   'Oakheart': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0 },
-  'Camouflage': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0 },
+  'Camouflage': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'ToHit', riderPercent: 5 },
   'World Tree': { missile: 'StrengthBuff', effect: 'Zone', duration: 30, rider: 'CleanseRaise', riderPercent: 1, cleanse: 2, cleanseQuarters: 4 },
   'Radiance': { missile: 'StrengthBuff', effect: 'Aura', stat: 'HealPulse', duration: 0 },
   'Mend': { missile: 'StrengthBuff', effect: 'Heal' },
@@ -482,9 +567,11 @@ const row = ({ power, essence }) => {
     // Cleansing: stacks of harmful effects removed at level 0 (99 is all of them), and the
     // quarter stacks gained with each level.
     behaviour?.cleanse ?? 0, behaviour?.cleanseQuarters ?? 0,
+    // A heal or a resurrection that also leaves its stat boon: the boon's size.
+    behaviour?.boon ?? 0,
   ].join('\t')
 }
-const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount', 'stat', 'duration', 'ally', 'weapon', 'cooldownDrop', 'cleanse', 'cleanseGrowth'].join('\t')
+const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount', 'stat', 'duration', 'ally', 'weapon', 'cooldownDrop', 'cleanse', 'cleanseGrowth', 'boon'].join('\t')
 const powersText = [header, ...exported.map(row)].join('\r\n') + '\r\n'
 
 // Stones. A power no longer has a stone of its own: those were for testing and are taken out of

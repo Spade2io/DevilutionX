@@ -269,6 +269,7 @@ void LoadExtendedSpellData()
 		reader.readInt("cooldownDrop", item.cooldownDropSeconds);
 		reader.readInt("cleanse", item.cleanseStacks);
 		reader.readInt("cleanseGrowth", item.cleanseQuarterStacks);
+		reader.readInt("boon", item.boonAmount);
 		item.sBookLvl = 1;
 		ExtendedSpellKeys.emplace_back(std::move(key), static_cast<SpellID>(number));
 	}

@@ -258,6 +258,11 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 			NetSendCmdPowerOnPlayer(*wounded, attack, static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack))));
 	}
 
+	// "Accuracy": the target misses more often until it dies. Every PC works out the hits on its
+	// own player, so they are all told.
+	if (spellData.rider == "Accuracy" && !target.hasNoLife())
+		NetSendCmdPowerOnMonster(static_cast<uint16_t>(target.getId()), attack, static_cast<uint32_t>(spellData.riderAmount));
+
 	// "Vulnerable": the target takes more damage from then on. The rider's amount is the percentage.
 	if (spellData.rider == "Vulnerable" && !target.hasNoLife()) {
 		const int percent = ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack));
