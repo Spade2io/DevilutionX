@@ -56,8 +56,13 @@ std::size_t selhero_SaveCount = 0;
 _uiheroinfo selhero_heros[MAX_CHARACTERS];
 _uiheroinfo selhero_heroInfo;
 char textStats[6][4];
-/** Essence Mod: the names of the shown hero's racial powers, which the box lists in place of the four stats. */
+/**
+ * Essence Mod: the box under the portrait does two jobs. While a character is being made it lists
+ * the chosen race's racial powers by name; for a character that exists it shows their four stats.
+ * Both sets of lines are always there, and whichever is not wanted is left empty.
+ */
 char textRacial[5][40];
+char textStatLabels[4][12];
 const char *title = "";
 _selhero_selections selhero_result;
 bool selhero_navigateYesNo;
@@ -98,7 +103,7 @@ void SelheroFree()
 	UnloadScrollBar();
 }
 
-void SelheroSetStats()
+void SelheroSetStats(bool creating)
 {
 	SELHERO_DIALOG_HERO_IMG->setSprite(UiGetHeroDialogSprite(static_cast<size_t>(selhero_heroInfo.heroclass)));
 	CopyUtf8(textStats[0], StrCat(selhero_heroInfo.level), sizeof(textStats[0]));
@@ -107,9 +112,15 @@ void SelheroSetStats()
 	CopyUtf8(textStats[3], StrCat(selhero_heroInfo.dexterity), sizeof(textStats[3]));
 	CopyUtf8(textStats[4], StrCat(selhero_heroInfo.vitality), sizeof(textStats[4]));
 	CopyUtf8(textStats[5], StrCat(selhero_heroInfo.saveNumber), sizeof(textStats[5]));
-	const std::vector<std::string> racial = GetRacialPowerNames(selhero_heroInfo.heroclass);
+	const std::vector<std::string> racial = creating ? GetRacialPowerNames(selhero_heroInfo.heroclass) : std::vector<std::string> {};
 	for (size_t i = 0; i < 5; i++)
 		CopyUtf8(textRacial[i], i < racial.size() ? racial[i] : std::string {}, sizeof(textRacial[i]));
+	constexpr std::string_view StatLabels[] = { "Power:", "Spirit:", "Speed:", "Recovery:" };
+	for (size_t i = 0; i < 4; i++) {
+		CopyUtf8(textStatLabels[i], creating ? std::string_view {} : StatLabels[i], sizeof(textStatLabels[i]));
+		if (creating)
+			textStats[i + 1][0] = '\0';
+	}
 }
 
 void RenderDifficultyIndicators()
@@ -147,7 +158,7 @@ void SelheroListFocus(size_t value)
 	const UiFlags baseFlags = UiFlags::AlignCenter | UiFlags::FontSize30;
 	if (selhero_SaveCount != 0 && value < selhero_SaveCount) {
 		memcpy(&selhero_heroInfo, &selhero_heros[value], sizeof(selhero_heroInfo));
-		SelheroSetStats();
+		SelheroSetStats(/*creating=*/false);
 		SELLIST_DIALOG_DELETE_BUTTON->SetFlags(baseFlags | UiFlags::ColorUiGold);
 		selhero_isSavegame = true;
 		return;
@@ -158,6 +169,10 @@ void SelheroListFocus(size_t value)
 		strcpy(textStat, "--");
 	for (char *name : textRacial)
 		name[0] = '\0';
+	// The "New Hero" line: no character to show, so the stats are dashes under their labels.
+	constexpr std::string_view StatLabels[] = { "Power:", "Spirit:", "Speed:", "Recovery:" };
+	for (size_t i = 0; i < 4; i++)
+		CopyUtf8(textStatLabels[i], StatLabels[i], sizeof(textStatLabels[i]));
 	SELLIST_DIALOG_DELETE_BUTTON->SetFlags(baseFlags | UiFlags::ColorUiSilver | UiFlags::ElementDisabled);
 	selhero_isSavegame = false;
 }
@@ -218,7 +233,7 @@ void SelheroListSelect(size_t value)
 		UiInitList(SelheroClassSelectorFocus, SelheroClassSelectorSelect, SelheroClassSelectorEsc, vecSelDlgItems, true);
 		memset(&selhero_heroInfo.name, 0, sizeof(selhero_heroInfo.name));
 		selhero_heroInfo.saveNumber = pfile_ui_get_first_unused_save_num();
-		SelheroSetStats();
+		SelheroSetStats(/*creating=*/true);
 		title = selhero_isMultiPlayer ? _("New Multi Player Hero").data() : _("New Single Player Hero").data();
 		selhero_isSavegame = false;
 		return;
@@ -271,7 +286,7 @@ void SelheroClassSelectorFocus(size_t value)
 	selhero_heroInfo.dexterity = defaults.dexterity;
 	selhero_heroInfo.vitality = defaults.vitality;
 
-	SelheroSetStats();
+	SelheroSetStats(/*creating=*/true);
 }
 
 bool ShouldPrefillHeroName()
@@ -523,8 +538,16 @@ void selhero_Init()
 	vecSelHeroDialog.push_back(std::make_unique<UiArtText>(_("Level:").data(), MakeSdlRect(labelX, uiPosition.y + 323, labelWidth, statHeight), labelFlags));
 	vecSelHeroDialog.push_back(std::make_unique<UiArtText>(textStats[0], MakeSdlRect(valueX, uiPosition.y + 323, valueWidth, statHeight), valueFlags));
 
-	// Essence Mod: every race starts with the same four stats, so the box lists the race's racial
-	// powers by name instead.
+	// Essence Mod: the four stats of a character that exists. The lines are empty while one is being made.
+	int existingY = uiPosition.y + 358;
+	for (size_t i = 0; i < 4; i++) {
+		vecSelHeroDialog.push_back(std::make_unique<UiArtText>(textStatLabels[i], MakeSdlRect(labelX, existingY, labelWidth, statHeight), labelFlags));
+		vecSelHeroDialog.push_back(std::make_unique<UiArtText>(textStats[i + 1], MakeSdlRect(valueX, existingY, valueWidth, statHeight), valueFlags));
+		existingY += statHeight;
+	}
+
+	// Essence Mod: every race starts with the same four stats, so while a character is being made
+	// the box lists the race's racial powers by name instead. These lines are empty otherwise.
 	constexpr int RacialHeight = 18;
 	int statY = uiPosition.y + 350;
 	for (char *name : textRacial) {

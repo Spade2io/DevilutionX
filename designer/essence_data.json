@@ -8455,12 +8455,12 @@
     },
     {
       "id": "s_6e5a61a0",
-      "name": "Improvement",
+      "name": "Self Improvement",
       "tags": [
         "t_be83c5cf",
         "t_50a7240a"
       ],
-      "gameName": "Improvement"
+      "gameName": "Self Improvement"
     },
     {
       "id": "s_57421316",
@@ -8557,6 +8557,62 @@
         "t_f68550c3"
       ],
       "gameName": "the Warrior"
+    },
+    {
+      "id": "s_029e5210",
+      "name": "Dueling",
+      "tags": [
+        "t_42d817be",
+        "t_08fdec9d"
+      ],
+      "gameName": "Dueling"
+    },
+    {
+      "id": "s_44122d22",
+      "name": "Cleaving",
+      "tags": [
+        "t_42d817be",
+        "t_1d3ef0b5"
+      ],
+      "gameName": "Cleaving"
+    },
+    {
+      "id": "s_3655d687",
+      "name": "Group Cohesion",
+      "tags": [
+        "t_78bf3c15",
+        "t_c99a2f16",
+        "t_1d3ef0b5"
+      ],
+      "gameName": "Group Cohesion"
+    },
+    {
+      "id": "s_a9fca878",
+      "name": "Envelopment",
+      "tags": [
+        "t_fd0fb5ff"
+      ],
+      "gameName": "Envelopment"
+    },
+    {
+      "id": "s_957d7f60",
+      "name": "Lasting Development",
+      "tags": [
+        "t_50a7240a",
+        "t_6e51786d",
+        "t_be83c5cf"
+      ],
+      "gameName": "Lasting Development"
+    },
+    {
+      "id": "s_11d7dc93",
+      "name": "Persisting Aid",
+      "tags": [
+        "t_50a7240a",
+        "t_6e51786d",
+        "t_b06216ac"
+      ],
+      "gameName": "Persisting Aid"
     }
   ],
   "races": [

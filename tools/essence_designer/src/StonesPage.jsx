@@ -19,6 +19,12 @@ export default function StonesPage({ data, update }) {
   const powers = data.powers ?? []
   const essences = data.essences ?? []
 
+  // Shown by rarity (Common first, a stone with no tags last), then by name. The data keeps its own order.
+  const RARITY_ORDER = ['Common', 'Rare', 'Epic', 'Legendary', '']
+  const sorted = [...stones].sort((a, b) =>
+    RARITY_ORDER.indexOf(stoneRarity(a.tags.length)) - RARITY_ORDER.indexOf(stoneRarity(b.tags.length))
+    || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+
   const nameProblem = (name, exceptId) =>
     stones.some((s) => s.id !== exceptId && sameName(s.name, name)) ? 'A stone with that name already exists.'
       : powers.some((p) => sameName(p.name, name)) ? 'A power has that name, and every power already has a stone called that.'
@@ -68,7 +74,7 @@ export default function StonesPage({ data, update }) {
                 </tr>
               </thead>
               <tbody>
-                {stones.map((stone) => {
+                {sorted.map((stone) => {
                   const match = matchesOf(stone)
                   const rarity = stoneRarity(stone.tags.length)
                   return (

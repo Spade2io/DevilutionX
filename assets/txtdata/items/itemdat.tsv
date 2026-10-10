@@ -178,7 +178,7 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Striking	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of the Auror	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of the Healer	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
-	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Improvement	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Self Improvement	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of the Helper	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Curses	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Spells	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
@@ -193,3 +193,9 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of the Wizard	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	0
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of the Knight	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	0
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of the Warrior	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	0
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Dueling	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Cleaving	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Group Cohesion	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	200
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Envelopment	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	50
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Lasting Development	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	200
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Persisting Aid	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	200

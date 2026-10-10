@@ -334,8 +334,8 @@ void DrawExtraStats(const Surface &out, Point panelPosition)
 		std::string value;
 	};
 	const Line lines[] = {
-		{ "Health regeneration", StrCat(FormatSixtyFourthsPerSecond(GetLifeRegenPerSecond(player)), " per 3 seconds") },
-		{ "Mana regeneration", StrCat(FormatSixtyFourthsPerSecond(GetManaRegenPerSecond(player)), " per second") },
+		{ "Health regen", StrCat(FormatSixtyFourthsPerSecond(GetLifeRegenPerSecond(player)), " per 3 seconds") },
+		{ "Mana regen", StrCat(FormatSixtyFourthsPerSecond(GetManaRegenPerSecond(player)), " per second") },
 		// The chance to block a monster of the player's own level: their level adds 2 a level and
 		// the monster's takes 2 a level, so the two cancel. Blocking needs a shield (or, for a
 		// Leonid, a staff or bare hands).
@@ -345,7 +345,7 @@ void DrawExtraStats(const Surface &out, Point panelPosition)
 	constexpr int Padding = 8;
 	constexpr int LineHeight = 16;
 	constexpr int Width = 290;
-	constexpr int LabelWidth = 160;
+	constexpr int LabelWidth = 110;
 	const int height = static_cast<int>(std::size(lines) + 1) * LineHeight + Padding * 2;
 	const Point origin { panelPosition.x + SidePanelSize.width + 6, panelPosition.y + 8 };
 

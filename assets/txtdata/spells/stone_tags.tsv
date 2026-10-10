@@ -2,7 +2,7 @@ name	rarity	tags
 Striking	Common	Attack|No CD
 the Auror	Common	Aura
 the Healer	Common	Healing|Shielding
-Improvement	Common	Self|Boon
+Self Improvement	Common	Self|Boon
 the Helper	Common	Ally|Boon
 Curses	Common	Affliction
 Spells	Common	Spell Attack
@@ -13,3 +13,9 @@ Presence	Rare	Boon|Threat|Self
 the Wizard	Epic	Boon|Spirit|MP|Spell Attack Dmg
 the Knight	Epic	Boon|HP|Armor|Threat
 the Warrior	Epic	Boon|Power|Special Attack Dmg|HP
+Dueling	Common	Attack|Single Target
+Cleaving	Common	Attack|Splash
+Group Cohesion	Rare	Healing|Shielding|Splash
+Envelopment	Common	Blanket
+Lasting Development	Rare	Boon|Permanent|Self
+Persisting Aid	Rare	Boon|Permanent|Ally
