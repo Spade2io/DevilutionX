@@ -312,7 +312,9 @@ int GetPowerBuffPercent(const Player &player, std::string_view stat)
 		// A buff's rider can name a second stat it changes, by the rider's own amount.
 		// The rider may name several, with bars between them ("ManaRegen|MaxMana").
 		else if (!spellData.buffStat.empty() && stat != "Distance" && StrCat("|", spellData.rider, "|").find(StrCat("|", stat, "|")) != std::string::npos) {
-			percent += spellData.riderAmount;
+			// Regeneration or a larger pool riding on another boon (Ascendance, Juggernaut, Monolith)
+			// counts double, as every boon of those kinds is double size.
+			percent += IsAnyOf(stat, "ManaRegen", "LifeRegen", "MaxLife", "MaxMana") ? 2 * spellData.riderAmount : spellData.riderAmount;
 			// The armor that comes with a damage reduction buff (Stoneskin) gains a point for each
 			// level of the power. It is a self buff, so the level is the player's own.
 			if (stat == "Armor" && spellData.buffStat == "DmgReduction" && !buff.fromOther)

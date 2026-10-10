@@ -428,6 +428,10 @@ int GetPercentBuffAmount(std::string_view stat, int base, int shownLevel)
 	// level 10); a self-only one starts at 10% and gains 3% (40%).
 	if (stat == "Speed")
 		halves = base <= 5 ? 4 : 6;
+	// Regeneration and the size of the health and mana pools (Bryan, 2026-10-10): twice the size
+	// of other percentage boons, and twice the step: 10% gains 2 a level, 20% gains 3, 40% gains 4.
+	if (IsAnyOf(stat, "ManaRegen", "LifeRegen", "MaxLife", "MaxMana"))
+		halves = 2 * (base <= 10 ? 2 : base <= 20 ? 3 : base <= 40 ? 4 : 5);
 	return base + halves * std::max(shownLevel, 0) / 2;
 }
 

@@ -3,18 +3,18 @@ Human	Human Ambition	XpGain	10
 Human	Special Attack Apt.	SpecialAptitude	1	
 Human	Essence Gifts	EssenceGift	5	
 Celestine	Holy Affinity	Affinity	10	Holy
-Celestine	Mana Recovery	ManaRegen	10	
+Celestine	Mana Recovery	ManaRegen	20	
 Celestine	Innate Speed	Speed	10	
-Runic	Spellborn	MaxMana	10	
-Runic	Wellspring	ManaRegen	10	
+Runic	Spellborn	MaxMana	20	
+Runic	Wellspring	ManaRegen	20	
 Runic	Spell Aptitude	SpellAptitude	1	
 Runic	Magic Affinity	SpellDamage	5	
 Runic	Adaptive Resistance	Resist	5	
 Leonid	Ancestral Strength	Power	10	
 Leonid	Ancestral Swiftness	Speed	10	
-Leonid	Ancestral Stamina	MaxLife	10	
+Leonid	Ancestral Stamina	MaxLife	20	
 Elf	Spell Aptitude	SpellAptitude	1	
 Elf	Nature Affinity	Affinity	10	Nature
 Elf	Life Affinity	Affinity	10	Life
-Elf	Mystic Bloodline	MaxMana	10	
+Elf	Mystic Bloodline	MaxMana	20	
 Elf	Grace	Speed	10	

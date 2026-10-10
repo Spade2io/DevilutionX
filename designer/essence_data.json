@@ -1345,12 +1345,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 5,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% faster life regeneration, lasting",
+      "potencyNote": "% faster life regeneration, lasting; +2 for each level",
       "number": 142,
       "gameKey": "Vigil",
       "icon": 43,
@@ -1373,12 +1373,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 5,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% maximum life, lasting",
+      "potencyNote": "% maximum life, lasting; +2 for each level",
       "number": 143,
       "gameKey": "Benediction",
       "icon": 18,
@@ -1566,12 +1566,12 @@
         "t_abcc5067",
         "t_6e51786d"
       ],
-      "potency": 5,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": 8,
       "growth": 12.5,
-      "potencyNote": "% faster mana regeneration, lasting, for allies in the aura",
+      "potencyNote": "% faster mana regeneration, lasting, for allies in the aura; +2 for each level",
       "number": 111,
       "gameKey": "Wellspring",
       "icon": 8,
@@ -1951,12 +1951,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 5,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% faster mana regeneration, lasting",
+      "potencyNote": "% faster mana regeneration, lasting; +2 for each level",
       "number": 124,
       "gameKey": "Clarity",
       "icon": 43,
@@ -1979,12 +1979,12 @@
         "t_b0c8cbc0",
         "t_9048f21b"
       ],
-      "potency": 20,
+      "potency": 40,
       "manaCost": 18,
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% faster mana regeneration for 20 seconds, for every ally",
+      "potencyNote": "% faster mana regeneration for 20 seconds, for every ally; +4 for each level",
       "number": 125,
       "gameKey": "HighTide",
       "icon": 50,
@@ -2007,12 +2007,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 5,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% maximum mana, lasting",
+      "potencyNote": "% maximum mana, lasting; +2 for each level",
       "number": 126,
       "gameKey": "Reservoir",
       "icon": 12,
@@ -3252,12 +3252,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 5,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% maximum life, lasting",
+      "potencyNote": "% maximum life, lasting; +2 for each level",
       "number": 166,
       "gameKey": "Oakheart",
       "icon": 18,
@@ -3740,12 +3740,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 5,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% maximum life, lasting",
+      "potencyNote": "% maximum life, lasting; +2 for each level",
       "number": 183,
       "gameKey": "StoutHeart",
       "icon": 18,
@@ -3768,12 +3768,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 20,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% faster life regeneration, lasting",
+      "potencyNote": "% faster life regeneration, lasting; +3 for each level",
       "number": 184,
       "gameKey": "Resilience",
       "icon": 43,
@@ -4944,11 +4944,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% apparent distance: monsters treat you as half as far away; also 10% maximum life",
+      "potencyNote": "% apparent distance: monsters treat you as half as far away; also 20% maximum life",
       "number": 224,
       "gameKey": "Monolith",
       "icon": 25,
-      "shortText": "Threat; +10% max life"
+      "shortText": "Threat; +20% max life"
     },
     {
       "id": "p_3d85e6a2",
@@ -5378,12 +5378,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 20,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% faster mana regeneration, lasting",
+      "potencyNote": "% faster mana regeneration, lasting; +3 for each level",
       "number": 237,
       "gameKey": "Dynamo",
       "icon": 50,
@@ -5455,16 +5455,16 @@
         "t_abcc5067",
         "t_6e51786d"
       ],
-      "potency": 5,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": 8,
       "growth": 12.5,
-      "potencyNote": "% maximum life, lasting, for allies in the aura",
+      "potencyNote": "% maximum life, lasting, for allies in the aura; +2 for each level",
       "number": 239,
       "gameKey": "FontOfLife",
       "icon": 8,
-      "shortText": "Aura: +5% max life, rad 8"
+      "shortText": "Aura: +10% max life, rad 8"
     },
     {
       "id": "p_7ced7a8f",
@@ -5483,12 +5483,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 20,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% maximum life, lasting",
+      "potencyNote": "% maximum life, lasting; +3 for each level",
       "number": 240,
       "gameKey": "Vigor",
       "icon": 18,
@@ -5511,12 +5511,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 20,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% faster life regeneration, lasting",
+      "potencyNote": "% faster life regeneration, lasting; +3 for each level",
       "number": 241,
       "gameKey": "Hearty",
       "icon": 43,
@@ -5539,12 +5539,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 5,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% maximum life, lasting",
+      "potencyNote": "% maximum life, lasting; +2 for each level",
       "number": 242,
       "gameKey": "Bolster",
       "icon": 12,
@@ -5567,12 +5567,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 5,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% faster life regeneration, lasting",
+      "potencyNote": "% faster life regeneration, lasting; +2 for each level",
       "number": 243,
       "gameKey": "Thriving",
       "icon": 50,
@@ -5595,16 +5595,16 @@
         "t_b0c8cbc0",
         "t_9048f21b"
       ],
-      "potency": 20,
+      "potency": 40,
       "manaCost": 18,
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% maximum life for 20 seconds, for every ally",
+      "potencyNote": "% maximum life for 20 seconds, for every ally; +4 for each level",
       "number": 244,
       "gameKey": "SurgeOfLife",
       "icon": 45,
-      "shortText": "All allies: +20% life 20s"
+      "shortText": "All allies: +40% life 20s"
     },
     {
       "id": "p_d185a711",
@@ -5623,16 +5623,16 @@
         "t_b0c8cbc0",
         "t_9048f21b"
       ],
-      "potency": 20,
+      "potency": 40,
       "manaCost": 18,
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% faster life regeneration for 20 seconds",
+      "potencyNote": "% faster life regeneration for 20 seconds; +4 for each level",
       "number": 245,
       "gameKey": "Lifeblood",
       "icon": 34,
-      "shortText": "Life regen +20% for 20s"
+      "shortText": "Life regen +40% for 20s"
     },
     {
       "id": "p_438c81d2",
@@ -5875,11 +5875,11 @@
       "cooldown": 60,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "healing; also 20 % maximum life for 20 seconds",
+      "potencyNote": "healing; also 40 % maximum life for 20 seconds",
       "number": 254,
       "gameKey": "Invigorate",
       "icon": 30,
-      "shortText": "Heals you; +20% life 20s"
+      "shortText": "Heals you; +40% life 20s"
     },
     {
       "id": "p_1f528125",
@@ -5934,11 +5934,11 @@
       "cooldown": 180,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% of life for the risen; the living are healed 30; everyone +20% maximum life for 30 seconds",
+      "potencyNote": "% of life for the risen; the living are healed 30; everyone +40% maximum life for 30 seconds",
       "number": 256,
       "gameKey": "Genesis",
       "icon": 24,
-      "shortText": "Raise, heal, +20% life: all"
+      "shortText": "Raise, heal, +40% life: all"
     },
     {
       "id": "p_41671ed4",
@@ -6014,16 +6014,16 @@
         "t_abcc5067",
         "t_6e51786d"
       ],
-      "potency": 5,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": 8,
       "growth": 12.5,
-      "potencyNote": "% maximum mana, lasting, for allies in the aura",
+      "potencyNote": "% maximum mana, lasting, for allies in the aura; +2 for each level",
       "number": 259,
       "gameKey": "Leyline",
       "icon": 8,
-      "shortText": "Aura: +5% max mana, rad 8"
+      "shortText": "Aura: +10% max mana, rad 8"
     },
     {
       "id": "p_44157734",
@@ -6098,12 +6098,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 20,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% maximum mana, lasting",
+      "potencyNote": "% maximum mana, lasting; +3 for each level",
       "number": 262,
       "gameKey": "DeepWell",
       "icon": 12,
@@ -6126,12 +6126,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 20,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% faster mana regeneration, lasting",
+      "potencyNote": "% faster mana regeneration, lasting; +3 for each level",
       "number": 263,
       "gameKey": "Meditation",
       "icon": 43,
@@ -6210,12 +6210,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 5,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% faster mana regeneration, lasting",
+      "potencyNote": "% faster mana regeneration, lasting; +2 for each level",
       "number": 266,
       "gameKey": "Attunement",
       "icon": 50,
@@ -6238,12 +6238,12 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 5,
+      "potency": 10,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% maximum mana, lasting",
+      "potencyNote": "% maximum mana, lasting; +2 for each level",
       "number": 267,
       "gameKey": "ExpandedMind",
       "icon": 28,
@@ -6308,7 +6308,7 @@
     {
       "id": "p_efd258e9",
       "name": "Ascendance",
-      "description": "The Magic ultimate, three effects in one cast, and yours alone. For about 30 seconds your spell attacks deal far more damage, your mana pours back, and your mana pool is much larger.",
+      "description": "The Magic ultimate, three effects in one cast, and yours alone. For about 30 seconds your spell attacks deal far more damage, your mana pours back much faster, and your mana pool is much larger.",
       "status": "accepted",
       "essenceIds": [
         "e_3eaf93fd"
@@ -6329,11 +6329,11 @@
       "cooldown": 180,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% more spell attack damage for 30 seconds; also 30 % faster mana regeneration and 30 % maximum mana",
+      "potencyNote": "% more spell attack damage for 30 seconds; also 60 % faster mana regeneration and 60 % maximum mana",
       "number": 270,
       "gameKey": "Ascendance",
       "icon": 24,
-      "shortText": "+30% spells, mana, 30s"
+      "shortText": "+30% spells; +60% mana, 30s"
     },
     {
       "id": "p_f4e5cd32",
@@ -6691,16 +6691,16 @@
         "t_6e51786d",
         "t_5462244b"
       ],
-      "potency": 10,
+      "potency": 20,
       "manaCost": 10,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% maximum life, lasting; also hits no longer stagger you",
+      "potencyNote": "% maximum life, lasting; +3 for each level; also hits no longer stagger you",
       "number": 283,
       "gameKey": "Unbowed",
       "icon": 25,
-      "shortText": "+10% life; never staggered"
+      "shortText": "+20% life; never staggered"
     },
     {
       "id": "p_751de191",
@@ -6895,11 +6895,11 @@
       "cooldown": 180,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% more special attack damage for 30 seconds; also 30 % maximum life and 30 armor",
+      "potencyNote": "% more special attack damage for 30 seconds; also 60 % maximum life and 30 armor",
       "number": 290,
       "gameKey": "Juggernaut",
       "icon": 24,
-      "shortText": "+30% attacks, life, armor"
+      "shortText": "+30% attacks, armor; +60% life"
     },
     {
       "id": "p_931978bc",
@@ -8571,7 +8571,7 @@
           "id": "rp_0005",
           "name": "Mana Recovery",
           "effect": "ManaRegen",
-          "amount": 10,
+          "amount": 20,
           "element": ""
         },
         {
@@ -8592,14 +8592,14 @@
           "id": "rp_0007",
           "name": "Spellborn",
           "effect": "MaxMana",
-          "amount": 10,
+          "amount": 20,
           "element": ""
         },
         {
           "id": "rp_0008",
           "name": "Wellspring",
           "effect": "ManaRegen",
-          "amount": 10,
+          "amount": 20,
           "element": ""
         },
         {
@@ -8648,7 +8648,7 @@
           "id": "rp_0014",
           "name": "Ancestral Stamina",
           "effect": "MaxLife",
-          "amount": 10,
+          "amount": 20,
           "element": ""
         }
       ]
@@ -8683,7 +8683,7 @@
           "id": "rp_0018",
           "name": "Mystic Bloodline",
           "effect": "MaxMana",
-          "amount": 10,
+          "amount": 20,
           "element": ""
         },
         {

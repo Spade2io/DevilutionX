@@ -242,7 +242,7 @@ std::string GetPowerNumbersText(const Player &player, SpellID spell, int level)
 			else if (rides("DmgReduction"))
 				text = StrCat(data.riderAmount + (data.riderAmount >= 5 ? shown : shown / 2), " off each physical hit");
 			else if (rides("MaxLife"))
-				text = StrCat("+", data.riderAmount, "% life");
+				text = StrCat("+", 2 * data.riderAmount, "% life"); // a pool riding on another boon counts double
 		} else if (stat == "DamageTaken") {
 			text = StrCat("-", amount, "% damage taken");
 		} else if (stat == "Oath") {

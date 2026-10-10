@@ -10,7 +10,7 @@ Meteor	107	Meteor	Fire	CastFire	20	Fire,Targeted	Corruption	0	20	24	45	Heavy hit
 Kindling	108	Kindling	Fire	CastFire	15	Fire,Targeted	Corruption	0	15	37	60	Strips Elemental resistance	Curse	1	2		0	ElementalStrip	0	0		2	0	0	0
 SearingBrand	109	Searing Brand	Fire	CastFire	2	Fire,Targeted		0	2	31	12	All hits deal extra fire	Strike	192	0	Branded	128		0	0		0	0	0	0
 FanTheFlames	110	Fan the Flames	Fire	CastFire	10	Fire,AllowedInTown	StrengthBuff	0	10	33	0	Ally acts 5% faster	Buff	5	0		0	Speed	0	1		0	0	0	0
-Wellspring	111	Wellspring	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: mana regen, radius 8	Aura	5	8		0	ManaRegen	0	0		0	0	0	0
+Wellspring	111	Wellspring	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: mana regen, radius 8	Aura	10	8		0	ManaRegen	0	0		0	0	0	0
 GlacialSpike	112	Glacial Spike	Water	CastFire	6	Magic,Targeted	Corruption	0	6	29	10	Heavy ice hit, one enemy	Burst	1152	0		0		0	0		0	0	0	0
 IceBurst	113	Ice Burst	Water	CastFire	9	Magic	Corruption	0	9	10	0	Ice damage, radius 2	GroundBurst	256	2		0		0	0		0	0	0	0
 Hailstorm	114	Hailstorm	Water	CastFire	12	Magic	Corruption	0	12	45	12	Ice damage, radius 4	GroundBurst	512	4		0		0	0		0	0	0	0
@@ -23,9 +23,9 @@ Springwater	120	Springwater	Water	CastHealing	12	Magic,AllowedInTown	StrengthBuf
 WashAway	121	Wash Away	Water	CastHealing	3	Magic,AllowedInTown	StrengthBuff	0	3	4	0	Cleanses and heals an ally	Heal	320	0	Cleanse	1		0	1		0	1	2	0
 PurgingRain	122	Purging Rain	Water	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	21	12	Cleanses allies, radius 4	Cleanse	1	4		0		0	0		0	1	4	0
 Monsoon	123	Monsoon	Water	CastHealing	24	Magic,AllowedInTown	StrengthBuff	0	24	3	60	Big heal + cleanse, rad 4	Heal	1152	4	Cleanse	99		0	0		0	1	4	0
-Clarity	124	Clarity	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	Ally regains mana faster	Buff	5	0		0	ManaRegen	0	1		0	0	0	0
-HighTide	125	High Tide	Water	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	50	60	All allies: mana regen 20s	Buff	20	99		0	ManaRegen	20	0		0	0	0	0
-Reservoir	126	Reservoir	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	Ally has more maximum mana	Buff	5	0		0	MaxMana	0	1		0	0	0	0
+Clarity	124	Clarity	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	Ally regains mana faster	Buff	10	0		0	ManaRegen	0	1		0	0	0	0
+HighTide	125	High Tide	Water	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	50	60	All allies: mana regen 20s	Buff	40	99		0	ManaRegen	20	0		0	0	0	0
+Reservoir	126	Reservoir	Water	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	Ally has more maximum mana	Buff	10	0		0	MaxMana	0	1		0	0	0	0
 ManaTide	127	Mana Tide	Water	CastHealing	20	Magic,AllowedInTown	StrengthBuff	0	20	28	10	Gives an ally 15 mana	Mana	960	0		0		0	1		0	0	0	0
 DeepFreeze	128	Deep Freeze	Water	CastFire	18	Magic,Targeted	Corruption	0	18	7	45	Holds foes still 6s, rad 2	Freeze	6	2		0		0	0		0	0	0	0
 GreatFlood	129	Great Flood	Water	CastFire	36	Magic	Corruption	0	36	24	180	Hurts foes, heals, radius 6	GroundBurst	896	6	HealCleanse	1856		0	0		0	3	4	0
@@ -41,8 +41,8 @@ SecondDawn	138	Second Dawn	Holy	CastHealing	30	Magic,AllowedInTown	StrengthBuff	
 GuardianAngel	139	Guardian Angel	Holy	CastHealing	30	Magic,AllowedInTown	StrengthBuff	0	30	44	60	Ally rises once on death	Buff	20	0		0	Rebirth	0	1		0	0	0	0
 Miracle	140	Miracle	Holy	CastHealing	60	Magic,AllowedInTown	StrengthBuff	0	60	24	240	Raises and heals everyone	Resurrect	30	99	HealCleanse	960		0	0		0	3	4	0
 WardOfPurity	141	Ward of Purity	Holy	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	12	60	Cleanse; wards for 20s	Buff	20	0	Cleanse	1	Ward	20	1		3	1	0	0
-Vigil	142	Vigil	Holy	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	Ally regains life faster	Buff	5	0		0	LifeRegen	0	1		0	0	0	0
-Benediction	143	Benediction	Holy	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	Ally has more maximum life	Buff	5	0		0	MaxLife	0	1		0	0	0	0
+Vigil	142	Vigil	Holy	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	Ally regains life faster	Buff	10	0		0	LifeRegen	0	1		0	0	0	0
+Benediction	143	Benediction	Holy	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	Ally has more maximum life	Buff	10	0		0	MaxLife	0	1		0	0	0	0
 Smite	144	Smite	Holy	CastFire	2	Magic,Targeted		0	2	41	0	Strike dealing holy damage	Strike	128	0		0		0	0		0	0	0	0
 Judgment	145	Judgment	Holy	CastFire	4	Magic,Targeted		0	4	34	10	Heavy; more to undead/demon	Strike	576	0	Bane	50		0	0		0	0	0	0
 Atonement	146	Atonement	Holy	CastFire	3	Magic,Targeted		0	3	33	0	Strike that heals an ally	Strike	128	0	HealAlly	704		0	0		0	0	0	0
@@ -65,7 +65,7 @@ NewGrowth	162	New Growth	Nature	CastHealing	30	Magic,AllowedInTown	StrengthBuff	
 Barkskin	163	Barkskin	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	Ally: +10 resistances	Buff	10	0		0	Resist	0	1		0	0	0	0
 Canopy	164	Canopy	Nature	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	45	60	All allies: resist for 20s	Buff	15	99		0	Resist	20	0		0	0	0	0
 Ironwood	165	Ironwood	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	7	0	Ally has more armor	Buff	10	0		0	Armor	0	1		0	0	0	0
-Oakheart	166	Oakheart	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	Ally has more maximum life	Buff	5	0		0	MaxLife	0	1		0	0	0	0
+Oakheart	166	Oakheart	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	Ally has more maximum life	Buff	10	0		0	MaxLife	0	1		0	0	0	0
 Camouflage	167	Camouflage	Nature	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	19	0	Stealth; +5% to hit	Buff	150	0	ToHit	5	Distance	0	0		0	0	0	0
 WorldTree	168	World Tree	Nature	CastHealing	60	Magic,AllowedInTown	StrengthBuff	0	60	24	240	Healing ground, 30s, rad 6	Zone	256	6	CleanseRaise	1		30	0		0	2	4	0
 Aegis	169	Aegis	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: small shield per 10s	Aura	128	8		0	ShieldPulse	0	0		0	0	0	0
@@ -82,8 +82,8 @@ Phalanx	179	Phalanx	Shield	CastHealing	30	Magic,AllowedInTown	StrengthBuff	0	30	
 Bulwark	180	Bulwark	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	25	0	You have more armor	Buff	10	0		0	Armor	0	0		0	0	0	0
 SpellWard	181	Spell Ward	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	21	0	Ally: +10 resistances	Buff	10	0		0	Resist	0	1		0	0	0	0
 HoldTheLine	182	Hold the Line	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	33	0	All allies: +5 armor	Buff	5	99		0	Armor	0	0		0	0	0	0
-StoutHeart	183	Stout Heart	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	Ally has more maximum life	Buff	5	0		0	MaxLife	0	1		0	0	0	0
-Resilience	184	Resilience	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	You regain life faster	Buff	10	0		0	LifeRegen	0	0		0	0	0	0
+StoutHeart	183	Stout Heart	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	Ally has more maximum life	Buff	10	0		0	MaxLife	0	1		0	0	0	0
+Resilience	184	Resilience	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	You regain life faster	Buff	20	0		0	LifeRegen	0	0		0	0	0	0
 Oathbound	185	Oathbound	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	40	0	You take 20% of ally damage	Buff	20	0		0	Oath	0	1		0	0	0	0
 Stalwart	186	Stalwart	Shield	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	31	0	Threat; +5% block	Buff	50	0	Block	5	Distance	0	0		0	0	0	0
 Brace	187	Brace	Shield	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	30	60	+30 armor and resist, 20s	Buff	30	0	Resist	30	Armor	20	0		0	0	0	0
@@ -123,7 +123,7 @@ Stoneskin	220	Stoneskin	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	
 DigIn	221	Dig In	Earth	CastHealing	15	Magic,AllowedInTown	StrengthBuff	0	15	30	60	-5 physical dmg for 20s	Buff	5	0		0	DmgReduction	20	0		0	0	0	0
 StoneWall	222	Stone Wall	Earth	CastHealing	25	Magic,AllowedInTown	StrengthBuff	0	25	48	60	All allies: -3 phys, 15s	Buff	3	99		0	DmgReduction	15	0		0	0	0	0
 EarthenMight	223	Earthen Might	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	+3 Power, +1 each level	Buff	3	0		0	Power	0	0		0	0	0	0
-Monolith	224	Monolith	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	25	0	Threat; +10% max life	Buff	50	0	MaxLife	10	Distance	0	0		0	0	0	0
+Monolith	224	Monolith	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	25	0	Threat; +20% max life	Buff	50	0	MaxLife	10	Distance	0	0		0	0	0	0
 Unyielding	225	Unyielding	Earth	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	33	0	Threat; no stagger; -1 hit	Buff	50	0	NoStagger|DmgReduction	1	Distance	0	0		0	0	0	0
 Spark	226	Spark	Lightning	CastLightning	2	Lightning,Targeted	PowerBolt	0	2	38	0	Cheap little bolt	Bolt	320	0		0		0	0		0	0	0	0
 Arc	227	Arc	Lightning	CastLightning	9	Lightning,Targeted	Corruption	0	9	2	0	Lightning that leaps	ChainBurst	320	0	Keep	75		0	0		0	0	0	0
@@ -136,15 +136,15 @@ StormsFocus	233	Storm's Focus	Lightning	CastLightning	10	Lightning,AllowedInTown
 Amplify	234	Amplify	Lightning	CastLightning	10	Lightning,AllowedInTown	StrengthBuff	0	10	30	0	+10% damage dealt	Buff	10	0		0	Damage	0	0		0	0	0	0
 Overcharge	235	Overcharge	Lightning	CastLightning	15	Lightning,AllowedInTown	StrengthBuff	0	15	34	60	+20% damage for 20s	Buff	20	0		0	Damage	20	0		0	0	0	0
 Quickening	236	Quickening	Lightning	CastLightning	10	Lightning,AllowedInTown	StrengthBuff	0	10	27	0	You walk faster	Buff	1	0		0	WalkSpeed	0	0		0	0	0	0
-Dynamo	237	Dynamo	Lightning	CastLightning	10	Lightning,AllowedInTown	StrengthBuff	0	10	50	0	Mana comes back faster	Buff	10	0		0	ManaRegen	0	0		0	0	0	0
+Dynamo	237	Dynamo	Lightning	CastLightning	10	Lightning,AllowedInTown	StrengthBuff	0	10	50	0	Mana comes back faster	Buff	20	0		0	ManaRegen	0	0		0	0	0	0
 ChargedAir	238	Charged Air	Lightning	CastLightning	10	Lightning,AllowedInTown	StrengthBuff	0	10	8	0	Aura: +5% spell damage	Aura	5	8		0	SpellDamage	0	0		0	0	0	0
-FontOfLife	239	Font of Life	Life	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: +5% max life, rad 8	Aura	5	8		0	MaxLife	0	0		0	0	0	0
-Vigor	240	Vigor	Life	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	You have more maximum life	Buff	10	0		0	MaxLife	0	0		0	0	0	0
-Hearty	241	Hearty	Life	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	You regain life faster	Buff	10	0		0	LifeRegen	0	0		0	0	0	0
-Bolster	242	Bolster	Life	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	Ally has more maximum life	Buff	5	0		0	MaxLife	0	1		0	0	0	0
-Thriving	243	Thriving	Life	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	50	0	Ally regains life faster	Buff	5	0		0	LifeRegen	0	1		0	0	0	0
-SurgeOfLife	244	Surge of Life	Life	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	45	60	All allies: +20% life 20s	Buff	20	99		0	MaxLife	20	0		0	0	0	0
-Lifeblood	245	Lifeblood	Life	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	34	60	Life regen +20% for 20s	Buff	20	0		0	LifeRegen	20	0		0	0	0	0
+FontOfLife	239	Font of Life	Life	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: +10% max life, rad 8	Aura	10	8		0	MaxLife	0	0		0	0	0	0
+Vigor	240	Vigor	Life	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	You have more maximum life	Buff	20	0		0	MaxLife	0	0		0	0	0	0
+Hearty	241	Hearty	Life	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	You regain life faster	Buff	20	0		0	LifeRegen	0	0		0	0	0	0
+Bolster	242	Bolster	Life	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	Ally has more maximum life	Buff	10	0		0	MaxLife	0	1		0	0	0	0
+Thriving	243	Thriving	Life	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	50	0	Ally regains life faster	Buff	10	0		0	LifeRegen	0	1		0	0	0	0
+SurgeOfLife	244	Surge of Life	Life	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	45	60	All allies: +40% life 20s	Buff	40	99		0	MaxLife	20	0		0	0	0	0
+Lifeblood	245	Lifeblood	Life	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	34	60	Life regen +40% for 20s	Buff	40	0		0	LifeRegen	20	0		0	0	0	0
 Lifeline	246	Lifeline	Life	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	1	0	Heals an ally, or you	Heal	768	0		0		0	1		0	0	0	0
 Flourish	247	Flourish	Life	CastHealing	5	Magic,AllowedInTown	StrengthBuff	0	5	9	0	Small, cheap heal	Heal	704	0		0		0	1		0	0	0	0
 SecondWind	248	Second Wind	Life	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	3	10	Heal; double if near death	Heal	896	0	Desperate	100		0	1		0	0	0	0
@@ -153,23 +153,23 @@ Lifelink	250	Lifelink	Life	CastHealing	12	Magic,AllowedInTown	StrengthBuff	0	12	
 LifeBurst	251	Life Burst	Life	CastHealing	12	Magic,AllowedInTown	StrengthBuff	0	12	10	10	Heals ally, half to nearby	Heal	832	2		0		0	1		0	0	0	0
 PulseOfLife	252	Pulse of Life	Life	CastHealing	30	Magic,AllowedInTown	StrengthBuff	0	30	13	60	Heals every ally anywhere	Heal	896	99		0		0	0		0	0	0	0
 Regrowth	253	Regrowth	Life	CastHealing	8	Magic,AllowedInTown	StrengthBuff	0	8	21	0	Heals an ally over 8s	Buff	256	0		0	HealPulse	8	1		0	0	0	0
-Invigorate	254	Invigorate	Life	CastHealing	12	Magic,AllowedInTown	StrengthBuff	0	12	30	60	Heals you; +20% life 20s	Heal	2304	0		0	MaxLife	20	0		0	0	0	20
+Invigorate	254	Invigorate	Life	CastHealing	12	Magic,AllowedInTown	StrengthBuff	0	12	30	60	Heals you; +40% life 20s	Heal	2304	0		0	MaxLife	20	0		0	0	0	40
 BreathOfLife	255	Breath of Life	Life	CastHealing	12	Magic,AllowedInTown	StrengthBuff	0	12	44	60	Raises ally at 75% life	Resurrect	75	0		0		0	0		0	0	0	0
-Genesis	256	Genesis	Life	CastHealing	60	Magic,AllowedInTown	StrengthBuff	0	60	24	180	Raise, heal, +20% life: all	Resurrect	50	99	Heal	1920	MaxLife	30	0		0	0	0	20
+Genesis	256	Genesis	Life	CastHealing	60	Magic,AllowedInTown	StrengthBuff	0	60	24	180	Raise, heal, +40% life: all	Resurrect	50	99	Heal	1920	MaxLife	30	0		0	0	0	40
 SiphonLife	257	Siphon Life	Life	CastFire	6	Magic,Targeted	PowerBolt	0	6	29	0	Life damage; heals you	Bolt	384	0	HealSelf	256		0	0		0	0	0	0
 VitalSurge	258	Vital Surge	Life	CastFire	9	Magic	Corruption	0	9	37	10	Hurts foes, heals, radius 2	GroundBurst	384	2	Heal	512		0	0		0	0	0	0
-Leyline	259	Leyline	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: +5% max mana, rad 8	Aura	5	8		0	MaxMana	0	0		0	0	0	0
+Leyline	259	Leyline	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: +10% max mana, rad 8	Aura	10	8		0	MaxMana	0	0		0	0	0	0
 ArcaneMind	260	Arcane Mind	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	You have more Spirit	Buff	3	0		0	Spirit	0	0		0	0	0	0
 Spellcraft	261	Spellcraft	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	30	0	Your spells hit harder	Buff	10	0		0	SpellDamage	0	0		0	0	0	0
-DeepWell	262	Deep Well	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	You have more maximum mana	Buff	10	0		0	MaxMana	0	0		0	0	0	0
-Meditation	263	Meditation	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	You regain mana faster	Buff	10	0		0	ManaRegen	0	0		0	0	0	0
+DeepWell	262	Deep Well	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	You have more maximum mana	Buff	20	0		0	MaxMana	0	0		0	0	0	0
+Meditation	263	Meditation	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	You regain mana faster	Buff	20	0		0	ManaRegen	0	0		0	0	0	0
 Insight	264	Insight	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	33	0	Ally has more Spirit	Buff	1	0		0	Spirit	0	1		0	0	0	0
 Empower	265	Empower	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	34	0	Ally: spells hit harder	Buff	5	0		0	SpellDamage	0	1		0	0	0	0
-Attunement	266	Attunement	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	50	0	Ally regains mana faster	Buff	5	0		0	ManaRegen	0	1		0	0	0	0
-ExpandedMind	267	Expanded Mind	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	28	0	Ally has more maximum mana	Buff	5	0		0	MaxMana	0	1		0	0	0	0
+Attunement	266	Attunement	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	50	0	Ally regains mana faster	Buff	10	0		0	ManaRegen	0	1		0	0	0	0
+ExpandedMind	267	Expanded Mind	Magic	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	28	0	Ally has more maximum mana	Buff	10	0		0	MaxMana	0	1		0	0	0	0
 ArcaneSurge	268	Arcane Surge	Magic	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	45	60	+20% spell damage for 20s	Buff	20	0		0	SpellDamage	20	0		0	0	0	0
 ManaFont	269	Mana Font	Magic	CastHealing	30	Magic,AllowedInTown	StrengthBuff	0	30	40	60	Gives every ally 10 mana	Mana	640	99		0		0	0		0	0	0	0
-Ascendance	270	Ascendance	Magic	CastHealing	36	Magic,AllowedInTown	StrengthBuff	0	36	24	180	+30% spells, mana, 30s	Buff	30	0	ManaRegen|MaxMana	30	SpellDamage	30	0		0	0	0	0
+Ascendance	270	Ascendance	Magic	CastHealing	36	Magic,AllowedInTown	StrengthBuff	0	36	24	180	+30% spells; +60% mana, 30s	Buff	30	0	ManaRegen|MaxMana	30	SpellDamage	30	0		0	0	0	0
 Expose	271	Expose	Magic	CastFire	10	Magic,Targeted	Corruption	0	10	31	0	Enemy: -10 all resistances	Curse	10	0		0	AllResistCut	0	0		0	0	0	0
 Unravel	272	Unravel	Magic	CastFire	15	Magic,Targeted	Corruption	0	15	37	60	-25 all resistances, rad 2	Curse	25	2		0	AllResistCut	0	0		0	0	0	0
 MagicMissile	273	Magic Missile	Magic	CastFire	6	Magic,Targeted	PowerBolt	0	6	35	0	A bolt of Arcane damage	Bolt	512	0		0		0	0		0	0	0	0
@@ -182,14 +182,14 @@ Brawn	279	Brawn	Might	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	
 WeaponMastery	280	Weapon Mastery	Might	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	30	0	Special attacks hit harder	Buff	10	0		0	SpecialDamage	0	0		0	0	0	0
 KeenEye	281	Keen Eye	Might	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	33	0	Your weapons hit more often	Buff	10	0		0	WeaponToHit	0	0		0	0	0	0
 ThickHide	282	Thick Hide	Might	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	You have more armor	Buff	10	0		0	Armor	0	0		0	0	0	0
-Unbowed	283	Unbowed	Might	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	25	0	+10% life; never staggered	Buff	10	0	NoStagger	1	MaxLife	0	0		0	0	0	0
+Unbowed	283	Unbowed	Might	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	25	0	+20% life; never staggered	Buff	20	0	NoStagger	1	MaxLife	0	0		0	0	0	0
 Embolden	284	Embolden	Might	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	34	0	Ally: +1 Power, +1 a level	Buff	1	0		0	Power	0	1		0	0	0	0
 Sharpen	285	Sharpen	Might	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	44	0	Ally: special attacks +5%	Buff	5	0		0	SpecialDamage	0	1		0	0	0	0
 GuidingHand	286	Guiding Hand	Might	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	50	0	Ally hits more often	Buff	5	0		0	WeaponToHit	0	1		0	0	0	0
 Fortify	287	Fortify	Might	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	7	0	Ally has more armor	Buff	5	0		0	Armor	0	1		0	0	0	0
 BattleFury	288	Battle Fury	Might	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	45	60	+20% special attacks, 20s	Buff	20	0		0	SpecialDamage	20	0		0	0	0	0
 RallyingCry	289	Rallying Cry	Might	CastHealing	25	Magic,AllowedInTown	StrengthBuff	0	25	48	60	All: armor and to-hit 20s	Buff	15	99	WeaponToHit	15	Armor	20	0		0	0	0	0
-Juggernaut	290	Juggernaut	Might	CastHealing	36	Magic,AllowedInTown	StrengthBuff	0	36	24	180	+30% attacks, life, armor	Buff	30	0	MaxLife|Armor	30	SpecialDamage	30	0		0	0	0	0
+Juggernaut	290	Juggernaut	Might	CastHealing	36	Magic,AllowedInTown	StrengthBuff	0	36	24	180	+30% attacks, armor; +60% life	Buff	30	0	MaxLife|Armor	30	SpecialDamage	30	0		0	0	0	0
 HeavyBlow	291	Heavy Blow	Might	CastFire	2	Magic,Targeted		0	2	47	0	Strike with extra damage	Strike	128	0		0		0	0		0	0	0	0
 SweepingStrike	292	Sweeping Strike	Might	CastFire	4	Magic,Targeted		0	4	46	0	Hits target and neighbours	Strike	64	2		0		0	0		0	0	0	0
 PreciseStrike	293	Precise Strike	Might	CastFire	2	Magic,Targeted		0	2	38	0	A strike that cannot miss	Strike	64	0	SureHit	1		0	0		0	0	0	0

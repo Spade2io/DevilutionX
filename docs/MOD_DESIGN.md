@@ -1155,3 +1155,16 @@ blanket changes, each a single number so it can be tuned or undone:
   Experience for a kill is unchanged (a power earns the share of the monster it removed).
 - **A resistant monster shrugs off 50%, not 75%.** `BaseMonsterResistancePercent` in
   `Source/dots.h`. Powers that cut resistance take their points off 50.
+
+## Regeneration and pool boons are double size (2026-10-10)
+
+Regeneration is Recovery / 10 a second, so a 5% boon to it was one point every 21 seconds at 10
+Recovery. Every mana and health regeneration boon is therefore twice the size of other percentage
+boons and gains twice as much a level: for others or an aura 10% +2 a level; for yourself 20% +3;
+on a cooldown 40% +4. Regeneration riding on another boon (Ascendance) counts double as well, and
+the racial ones (Mana Recovery, Wellspring) are 20%. `GetPercentBuffAmount` in `dots.cpp`.
+
+The same was done for boons that enlarge the health pool or the mana pool, the same day and for
+the same reason (5% of a new character's 40 life is 2): 10% +2 for others, 20% +3 for yourself,
+40% +4 on a cooldown; double when riding on another boon (Monolith, Juggernaut, Ascendance); 40%
+when left by a heal or a resurrection (Invigorate, Genesis); 20% for the racial ones.

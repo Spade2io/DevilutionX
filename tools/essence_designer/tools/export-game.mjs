@@ -253,6 +253,9 @@ const SHORT_TEXT = {
 //         riderPercent more often until it dies).
 //   An essence's damage type only colours its stone. The game takes each essence's powers'
 //         damage type from GetSpellDamageType in essence_tint.cpp (Might: Physical).
+//   Regeneration and pool sizes are double the size of other percentage boons and gain twice as
+//         much a level (2026-10-10). As a rider (riderPercent) they are counted double by the
+//         game: write the ordinary size here (Monolith 10 is +20% life).
 //   Buff: switches a buff on for the caster, or for the player aimed at if the power is tagged Ally. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10
@@ -311,9 +314,9 @@ const BEHAVIOUR = {
   'Life Burst': { missile: 'StrengthBuff', effect: 'Heal' },
   'Pulse of Life': { missile: 'StrengthBuff', effect: 'Heal' },
   'Regrowth': { missile: 'StrengthBuff', effect: 'Buff', stat: 'HealPulse', duration: 8, overTime: true },
-  'Invigorate': { missile: 'StrengthBuff', effect: 'Heal', stat: 'MaxLife', duration: 20, boon: 20 },
+  'Invigorate': { missile: 'StrengthBuff', effect: 'Heal', stat: 'MaxLife', duration: 20, boon: 40 },
   'Breath of Life': { missile: 'StrengthBuff', effect: 'Resurrect' },
-  'Genesis': { missile: 'StrengthBuff', effect: 'Resurrect', rider: 'Heal', riderHeal: 30, stat: 'MaxLife', duration: 30, boon: 20 },
+  'Genesis': { missile: 'StrengthBuff', effect: 'Resurrect', rider: 'Heal', riderHeal: 30, stat: 'MaxLife', duration: 30, boon: 40 },
   'Siphon Life': { missile: 'PowerBolt', effect: 'Bolt', rider: 'HealSelf', riderHeal: 4 },
   'Vital Surge': { missile: 'Corruption', effect: 'GroundBurst', rider: 'Heal', riderHeal: 8 },
   'Smolder': { missile: 'Corruption', effect: 'Burn' },
