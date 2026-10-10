@@ -78,7 +78,7 @@ export default function StonesPage({ data, update }) {
                           onCommit={(name) => change(stone.id, { name })} />
                       </td>
                       <td className="stone-tags">
-                        <TagInput allTags={stone.tags.length < MAX_STONE_TAGS ? data.tags : []} groups={data.tagGroups} value={stone.tags}
+                        <TagInput allTags={data.tags} full={stone.tags.length >= MAX_STONE_TAGS} groups={data.tagGroups} value={stone.tags}
                           placeholder="Type part of a tag name, then Tab"
                           onAdd={(tag) => { if (stone.tags.length < MAX_STONE_TAGS) change(stone.id, { tags: [...stone.tags, tag] }) }}
                           onRemove={(tag) => change(stone.id, { tags: stone.tags.filter((t) => t !== tag) })} />

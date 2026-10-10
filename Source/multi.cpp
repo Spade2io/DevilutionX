@@ -5,6 +5,8 @@
  */
 #include "multi.h"
 
+#include "essence_version.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -602,9 +604,10 @@ void InitGameInfo()
 	sgGameInitInfo.size = sizeof(sgGameInitInfo);
 	sgGameInitInfo.isSpawn = gbIsSpawn ? 1 : 0;
 	sgGameInitInfo.programid = GetGameId();
-	sgGameInitInfo.versionMajor = PROJECT_VERSION_MAJOR;
-	sgGameInitInfo.versionMinor = PROJECT_VERSION_MINOR;
-	sgGameInitInfo.versionPatch = PROJECT_VERSION_PATCH;
+	// Essence Mod: the game says which release of the mod it is, not which DevilutionX (see essence_version.h).
+	sgGameInitInfo.versionMajor = EssenceModFamily;
+	sgGameInitInfo.versionMinor = EssenceModRelease;
+	sgGameInitInfo.versionPatch = 0;
 	const Options &options = GetOptions();
 	sgGameInitInfo.nTickRate = *options.Gameplay.tickRate;
 	sgGameInitInfo.bRunInTown = *options.Gameplay.runInTown ? 1 : 0;

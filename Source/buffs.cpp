@@ -168,6 +168,16 @@ void PulseFireAura(Player &player)
 
 } // namespace
 
+int GetFireAuraDamage(const Player &player)
+{
+	return FireAuraDamage(player);
+}
+
+int GetFireAuraRadius(const Player &player)
+{
+	return FireAuraRadius(player);
+}
+
 SpellID GetBuffSpell(BuffID buff)
 {
 	switch (buff) {

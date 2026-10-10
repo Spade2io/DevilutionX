@@ -3198,6 +3198,8 @@ void StartWarpLvl(Player &player, size_t pidx)
 
 /** Essence Mod: game ticks between regeneration pulses (20 ticks = 1 second at normal speed). */
 constexpr int RegenIntervalTicks = 20;
+/** Essence Mod: health comes back on every third pulse, that is every 3 seconds; mana on every one. */
+constexpr int LifeRegenPulses = 3;
 
 int GetBlockBuffPercent(const Player &player)
 {
@@ -3226,7 +3228,7 @@ int GetManaRegenPerSecond(const Player &player)
 }
 
 /**
- * @brief Essence Mod: restores life and mana once a second.
+ * @brief Essence Mod: restores mana once a second and life once every three seconds.
  *
  * Both are stored in 64ths of a point, so fractions of a point add up correctly.
  * The tick counter lives in memory only and is never saved.
@@ -3241,8 +3243,14 @@ void RegenerateLifeAndMana(Player &player)
 	if (player._pHitPoints >> 6 <= 0)
 		return;
 
-	if (player._pHitPoints < player._pMaxHP) {
-		const int amount = GetLifeRegenPerSecond(player);
+	// Health ticks more slowly than mana: the same amount, once every three seconds.
+	static int pulsesSinceLifeRegen = 0;
+	const bool lifePulse = ++pulsesSinceLifeRegen >= LifeRegenPulses;
+	if (lifePulse)
+		pulsesSinceLifeRegen = 0;
+
+	if (lifePulse && player._pHitPoints < player._pMaxHP) {
+		const int amount = GetLifeRegenPerSecond(player); // the amount of one pulse, which now comes every 3 seconds
 		player._pHitPoints = std::min(player._pHitPoints + amount, player._pMaxHP);
 		player._pHPBase = std::min(player._pHPBase + amount, player._pMaxHPBase);
 		RedrawComponent(PanelDrawComponent::Health);

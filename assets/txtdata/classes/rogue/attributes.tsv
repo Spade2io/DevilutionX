@@ -8,7 +8,7 @@ maxStr	255
 maxMag	255
 maxDex	255
 maxVit	255
-blockBonus	20
+blockBonus	10
 adjLife	0
 adjMana	0
 lvlLife	0

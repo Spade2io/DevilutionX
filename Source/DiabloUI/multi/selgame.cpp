@@ -1,5 +1,7 @@
 #include "DiabloUI/multi/selgame.h"
 
+#include "essence_version.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -91,9 +93,10 @@ void selgame_Free()
 bool IsGameCompatible(const GameData &data)
 {
 	// TODO GetGameId is now only used cosmetic (gamelist icon), we need to check the enabled mods in addition to the below check
-	return data.versionMajor == PROJECT_VERSION_MAJOR
-	    && data.versionMinor == PROJECT_VERSION_MINOR
-	    && data.versionPatch == PROJECT_VERSION_PATCH
+	// Essence Mod: only the same release of the mod may join (see essence_version.h).
+	return data.versionMajor == EssenceModFamily
+	    && data.versionMinor == EssenceModRelease
+	    && data.versionPatch == 0
 	    && data.isSpawn == (gbIsSpawn ? 1 : 0);
 }
 
@@ -105,7 +108,9 @@ static std::string GetErrorMessageIncompatibility(const GameData &data)
 		else
 			return std::string(_("You need to full version of the game to join this game."));
 	}
-	return FormatRuntime(_(/* TRANSLATORS: Error message when somebody tries to join a game running another version. */ "Your version {:s} does not match the host {:d}.{:d}.{:d}."), PROJECT_VERSION, data.versionMajor, data.versionMinor, data.versionPatch);
+	if (data.versionMajor != EssenceModFamily)
+		return std::string("The host is not running the Essence Mod.");
+	return StrCat("You have Essence Mod release ", static_cast<int>(EssenceModRelease), "; the host has release ", static_cast<int>(data.versionMinor), ". Everyone needs the same one.");
 }
 
 void UiInitGameSelectionList(std::string_view search)

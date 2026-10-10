@@ -1186,3 +1186,10 @@ Armor or resistance riding on another boon grows an eighth as well (Brace's resi
 Reinforce's armor, Juggernaut's armor), except where it already had the flat point (Stoneskin,
 Cloak of Night). A rider's growth uses the level of the player wearing the boon, so it applies when
 you cast it on yourself; on an ally it stays at its starting size.
+
+## Health regeneration ticks every three seconds (2026-10-10)
+
+Mana still comes back once a second (Recovery / 10 each time). Health comes back by the same
+amount but only once every three seconds, so it is a third as fast: Bryan wanted staying alive to
+be a little harder. `LifeRegenPulses` in `player.cpp`. Boons to health regeneration raise the
+size of each pulse, not how often it comes.

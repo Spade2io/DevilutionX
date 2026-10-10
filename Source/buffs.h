@@ -185,6 +185,12 @@ int GetBuffStrengthBonus(const Player &player);
 /** @brief Fire damage Flaming Weapon adds to each weapon hit, in 64ths of a hit point. Zero when the buff is off. */
 int GetFlamingWeaponDamage(const Player &player);
 
+/** @brief What each pulse of a player's Fire Aura deals before Spirit, in 64ths of a hit point. */
+int GetFireAuraDamage(const Player &player);
+
+/** @brief How many tiles a player's Fire Aura reaches. */
+int GetFireAuraRadius(const Player &player);
+
 /** @brief Runs auras for one game tick: every 2 seconds a damage aura pulses around its owner. */
 void ProcessBuffs();
 

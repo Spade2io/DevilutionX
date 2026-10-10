@@ -8524,6 +8524,39 @@
         "t_be83c5cf"
       ],
       "gameName": "Presence"
+    },
+    {
+      "id": "s_e4c16063",
+      "name": "the Wizard",
+      "tags": [
+        "t_50a7240a",
+        "t_e5439584",
+        "t_f5680bf7",
+        "t_b1f56c7b"
+      ],
+      "gameName": "the Wizard"
+    },
+    {
+      "id": "s_bdc64927",
+      "name": "the Knight",
+      "tags": [
+        "t_50a7240a",
+        "t_f68550c3",
+        "t_a99e96ca",
+        "t_bcaf43f8"
+      ],
+      "gameName": "the Knight"
+    },
+    {
+      "id": "s_c553f03d",
+      "name": "the Warrior",
+      "tags": [
+        "t_50a7240a",
+        "t_ff9bcfb1",
+        "t_6c10893c",
+        "t_f68550c3"
+      ],
+      "gameName": "the Warrior"
     }
   ],
   "races": [

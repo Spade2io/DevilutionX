@@ -95,18 +95,23 @@ std::vector<RacialPowerLine> DescribeRacialPowers(const Player &player)
 		} else if (effect == "SpellAptitude") {
 			text = "Stones lean to spell attacks";
 		} else if (effect == "EssenceGift") {
-			// The local player's essences are known here; anyone else's are not.
-			std::string held;
+			// One gift for each essence held, named for it. The local player's essences are known
+			// here; anyone else's are not.
+			bool any = false;
 			if (&player == MyPlayer) {
 				for (size_t slot = 0; slot < 4; slot++) {
 					const EssenceID essence = GetEssenceInSlot(slot);
-					if (essence != EssenceID::None)
-						StrAppend(held, held.empty() ? "" : ", ", GetEssenceName(essence));
+					if (essence == EssenceID::None)
+						continue;
+					lines.push_back({ StrCat(GetEssenceName(essence), " Gift"), StrCat("+", amount, "% ", GetEssenceName(essence), " Damage, Healing & Shields") });
+					any = true;
 				}
 			}
-			text = held.empty() ? StrCat("+", amount, "% for each essence held") : StrCat("+", amount, "%: ", held);
+			if (any)
+				continue;
+			text = StrCat("+", amount, "% to the powers of each essence held");
 		} else if (effect == "Affinity") {
-			text = StrCat("+", amount, "% ", power.element, " damage, heals, shields");
+			text = StrCat("+", amount, "% ", power.element, " Damage, Healing & Shields");
 		} else if (effect == "MaxLife") {
 			text = StrCat("+", amount, "% health pool");
 		} else if (effect == "MaxMana") {

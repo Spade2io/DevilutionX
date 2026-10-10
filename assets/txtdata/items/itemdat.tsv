@@ -190,3 +190,6 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	ESSENCE	Misc	NONE	Magic Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	MagicMissile	true	250
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Presence	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	200
 	0	Misc	Unequippable	ESSENCE	Misc	NONE	Might Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	HeavyBlow	true	250
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of the Wizard	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	0
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of the Knight	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	0
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of the Warrior	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	0

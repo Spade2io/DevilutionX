@@ -34,6 +34,7 @@
 #include "options.h"
 #include "player.h"
 #include "races.h"
+#include "special_attacks.h"
 #include "spell_xp.h"
 #include "tables/itemdat.h"
 #include "tables/spelldat.h"
@@ -171,6 +172,18 @@ std::string GetPowerNumbersText(const Player &player, SpellID spell, int level)
 	if (level == 0)
 		return {};
 	if (!IsExtendedSpell(spell) || !IsValidSpell(spell)) {
+		// The four hand-written Fire powers have numbers of their own.
+		const auto dealt = [&](int amount) { return FormatBookAmount(ApplyDamageBuffs(player, ApplySpellDamageBuffs(spell, amount))); };
+		switch (spell) {
+		case SpellID::FireAura:
+			return StrCat(dealt(GetFireAuraDamage(player)), " damage per 2s, rad ", GetFireAuraRadius(player));
+		case SpellID::FlamingWeapon:
+			return StrCat("+", dealt(GetFlamingWeaponDamage(player)), " fire damage per hit");
+		case SpellID::FlameStrike:
+			return StrCat("+", dealt(GetFlameStrikeBonusDamage(player)), " damage");
+		default:
+			break;
+		}
 		// One of the game's own spells: its range, after Spirit and the player's boons.
 		const auto [min, max] = GetDamageAmt(spell, level);
 		if (min == -1)
@@ -522,13 +535,21 @@ void DrawSpellBook(const Surface &out)
 	if (SpellbookTab == 0) {
 		// The powers the character was born with: a name, and a line saying what it does.
 		const Player &shown = *InspectPlayer;
-		PrintSBookStr(out, { 0, PageTop + 7 }, StrCat(GetPlayerDataForClass(shown._pClass).className, " Racial Abilities"), UiFlags::ColorWhitegold);
+		// There are no icons on this page, so its lines run the whole width of it.
+		const auto print = [&out](int y, std::string_view text, UiFlags flags) {
+			DrawString(out, text, Rectangle { GetPanelPosition(UiPanels::Spell, { IconX + 2, y }), Size { SPLICONLENGTH - IconX + SpellBookDescription.width - 4, AbilityTextLineSpacing } }, { .flags = flags });
+		};
+		print(PageTop + 7, StrCat(GetPlayerDataForClass(shown._pClass).className, " Racial Abilities"), UiFlags::ColorWhitegold);
+		// A name and a line under it for each; a Human with four essences has six.
+		constexpr int EntryHeight = 2 * AbilityTextLineSpacing + 6;
+		constexpr size_t MostEntries = 7;
 		size_t row = 0;
 		for (const RacialPowerLine &line : DescribeRacialPowers(shown)) {
-			if (row >= AbilitiesPerEssence)
+			if (row >= MostEntries)
 				break;
-			PrintSBookStr(out, { 0, AbilityRowTop(row) + 2 }, line.name, UiFlags::ColorWhite);
-			PrintSBookStr(out, { 0, AbilityRowTop(row) + 2 + AbilityTextLineSpacing }, line.text);
+			const int top = PageTop + HeaderRowHeight + static_cast<int>(row) * EntryHeight;
+			print(top, line.name, UiFlags::ColorWhitegold);
+			print(top + AbilityTextLineSpacing, line.text, UiFlags::ColorWhite);
 			row++;
 		}
 		return;

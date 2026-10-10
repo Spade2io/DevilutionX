@@ -37,6 +37,8 @@
 #include "controls/plrctrls.h"
 #include "controls/remap_keyboard.h"
 #include "diablo.h"
+
+#include "essence_version.h"
 #include "diablo_msg.hpp"
 #include "discord/discord.h"
 #include "buffs.h"
@@ -1231,7 +1233,8 @@ void DiabloInitScreen()
 
 void SetApplicationVersions()
 {
-	*BufCopy(gszProductName, PROJECT_NAME, " v", PROJECT_VERSION) = '\0';
+	// Essence Mod: the main menu names the mod and its release, so anyone can see which they have.
+	*BufCopy(gszProductName, "Essence Mod release ", static_cast<int>(EssenceModRelease)) = '\0';
 	*BufCopy(gszVersionNumber, "version ", PROJECT_VERSION) = '\0';
 }
 

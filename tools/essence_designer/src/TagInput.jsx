@@ -14,7 +14,8 @@ import { useRef, useState } from 'react'
 // Dragging: a tag carries its id under a label only this app uses, so stray drops are ignored.
 export const DRAG_TYPE = 'application/x-essence-tag'
 
-export default function TagInput({ allTags, groups, value, onAdd, onRemove, placeholder }) {
+// "full" marks a line that already holds as many tags as it may: it still shows them, but offers no more.
+export default function TagInput({ allTags, groups, value, onAdd, onRemove, placeholder, full }) {
   const [text, setText] = useState('')
   const [highlight, setHighlight] = useState(0)
   const [focused, setFocused] = useState(false)
@@ -25,7 +26,7 @@ export default function TagInput({ allTags, groups, value, onAdd, onRemove, plac
   const groupName = (tag) => groups.find((g) => g.id === tag.groupId)?.name ?? ''
 
   const search = text.trim().toLowerCase()
-  const matches = search
+  const matches = search && !full
     ? allTags
         .filter((t) => !value.includes(t.id) && t.name.toLowerCase().includes(search))
         // Names that start with what was typed come first.
@@ -47,7 +48,7 @@ export default function TagInput({ allTags, groups, value, onAdd, onRemove, plac
     const id = e.dataTransfer.getData(DRAG_TYPE)
     if (!id) return
     e.preventDefault()
-    if (byId(id) && !value.includes(id)) onAdd(id)
+    if (!full && byId(id) && !value.includes(id)) onAdd(id)
   }
 
   const onKeyDown = (e) => {

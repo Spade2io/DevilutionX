@@ -334,8 +334,12 @@ void DrawExtraStats(const Surface &out, Point panelPosition)
 		std::string value;
 	};
 	const Line lines[] = {
-		{ "Health regeneration", StrCat(FormatSixtyFourthsPerSecond(GetLifeRegenPerSecond(player)), " per second") },
+		{ "Health regeneration", StrCat(FormatSixtyFourthsPerSecond(GetLifeRegenPerSecond(player)), " per 3 seconds") },
 		{ "Mana regeneration", StrCat(FormatSixtyFourthsPerSecond(GetManaRegenPerSecond(player)), " per second") },
+		// The chance to block a monster of the player's own level: their level adds 2 a level and
+		// the monster's takes 2 a level, so the two cancel. Blocking needs a shield (or, for a
+		// Leonid, a staff or bare hands).
+		{ "Block chance", StrCat(std::clamp(player.GetBlockChance(/*useLevel=*/false), 0, 100), player._pBlockFlag ? "% vs your level" : "% with a shield") },
 	};
 
 	constexpr int Padding = 8;
