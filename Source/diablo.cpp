@@ -916,11 +916,8 @@ void RunGameLoop(interface_mode uMsg)
 			}
 			DebugCmdsFromCommandLine.clear();
 		}
-#else
-		if (gbIsMultiplayer && IsAssetIntegrityViolated) {
-			app_fatal(_("Cannot play Multiplayer with overridden *.lua, *.tsv, or *.sol assets."));
-		}
 #endif
+		// Essence Mod: no refusal of multiplayer over loose rule tables (see InitMultiPlayerMenu).
 
 		SDL_Event event;
 		uint16_t modState;

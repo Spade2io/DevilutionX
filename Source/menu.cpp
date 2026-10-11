@@ -81,12 +81,9 @@ bool InitSinglePlayerMenu()
 
 bool InitMultiPlayerMenu()
 {
-#ifndef _DEBUG
-	if (IsAssetIntegrityViolated || HasLooseLogicAssets()) {
-		UiSelOkDialog(_("Multi Player Game").data(), _("Cannot play Multiplayer with overridden *.lua, *.tsv, or *.sol assets.").data(), false);
-		return true;
-	}
-#endif
+	// Essence Mod: DevilutionX refuses multiplayer here when its rule tables are loose files. The
+	// mod ships them loose on purpose; players are kept on matching rules by the mod's release
+	// number instead (essence_version.h), so the refusal is gone.
 	gbIsMultiplayer = true;
 	return InitMenu(SELHERO_CONNECT);
 }
