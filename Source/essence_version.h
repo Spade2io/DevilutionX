@@ -20,5 +20,7 @@ namespace devilution {
 constexpr uint8_t EssenceModFamily = 77;
 /** The release handed out. Everyone in a game must be on the same one. */
 constexpr uint8_t EssenceModRelease = 1;
+/** The name that release goes by, shown on the main menu and on its download. Change it with the number above. */
+constexpr char EssenceModVersionName[] = "1.0";
 
 } // namespace devilution

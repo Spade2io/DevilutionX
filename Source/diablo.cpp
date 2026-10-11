@@ -1234,7 +1234,7 @@ void DiabloInitScreen()
 void SetApplicationVersions()
 {
 	// Essence Mod: the main menu names the mod and its release, so anyone can see which they have.
-	*BufCopy(gszProductName, "Essence Mod release ", static_cast<int>(EssenceModRelease)) = '\0';
+	*BufCopy(gszProductName, "Essence Mod v", EssenceModVersionName) = '\0';
 	*BufCopy(gszVersionNumber, "version ", PROJECT_VERSION) = '\0';
 }
 
