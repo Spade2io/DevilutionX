@@ -332,7 +332,8 @@ int GetRiderAmount(const Player &player, const ReachingBuff &buff, const SpellDa
 	// Regeneration or a larger pool riding on another boon (Ascendance, Juggernaut, Monolith)
 	// counts double, as every boon of those kinds is double size.
 	int amount = IsAnyOf(stat, "ManaRegen", "LifeRegen", "MaxLife", "MaxMana") ? 2 * spellData.riderAmount : spellData.riderAmount;
-	if (buff.fromOther)
+	// Life leech is kept very small on purpose: it never grows.
+	if (buff.fromOther || stat == "LifeLeech")
 		return amount;
 	const int level = ShownPowerLevel(player.GetBaseSpellLevel(buff.spell));
 	// The armor that comes with a damage reduction boon (Stoneskin) or with a stealth boon (Cloak
@@ -369,6 +370,28 @@ int GetPowerBuffPercent(const Player &player, std::string_view stat)
 			percent += GetRiderAmount(player, buff, spellData, stat);
 	}
 	return percent;
+}
+
+void LeechLifeFromDamage(int damage)
+{
+	// What is left over from earlier hits, in thousandths of a 64th of a hit point. One percent of
+	// a small hit is less than the game can count, so the scraps are kept until they add up.
+	static int64_t carried = 0;
+
+	Player &player = *MyPlayer;
+	if (damage <= 0 || player.hasNoLife())
+		return;
+	const int tenths = GetPowerBuffPercent(player, "LifeLeech");
+	if (tenths <= 0)
+		return;
+	carried += static_cast<int64_t>(damage) * tenths;
+	const int gained = static_cast<int>(carried / 1000);
+	carried %= 1000;
+	if (gained <= 0 || player._pHitPoints >= player._pMaxHP)
+		return;
+	player._pHitPoints = std::min(player._pHitPoints + gained, player._pMaxHP);
+	player._pHPBase = std::min(player._pHPBase + gained, player._pMaxHPBase);
+	RedrawComponent(PanelDrawComponent::Health);
 }
 
 void CompoundHealsOverTime(const Player &caster, SpellID spell, int percent)
@@ -437,6 +460,8 @@ std::string DescribeBuffEffect(std::string_view stat, int amount, const SpellDat
 		return StrCat("+", amount, "% accuracy");
 	if (stat == "Block")
 		return StrCat("+", amount, "% block");
+	if (stat == "LifeLeech")
+		return StrCat(amount / 10, amount % 10 != 0 ? StrCat(".", amount % 10) : std::string(), "% life leech");
 	if (stat == "WalkSpeed")
 		return "faster walking";
 	if (stat == "NoStagger")

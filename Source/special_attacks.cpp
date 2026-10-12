@@ -184,6 +184,11 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 			Monster &other = Monsters[monsterId];
 			DealSpellTickDamage(other, attack, MissileID::WeaponExplosion, damageType, damage);
 			AddMissile(other.position.tile, { 1, 0 }, Direction::South, MissileID::WeaponExplosion, TARGET_MONSTERS, player, 0, 0);
+			// A sweeping strike leaves its effect over time on everything it lands on (Rending Sweep).
+			if (const std::optional<DotID> dot = ParseDotName(spellData.rider); dot && !other.hasNoLife() && !IsImmuneToDot(other, *dot)) {
+				const int stacks = AddMonsterDot(other, *dot, attack, ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack)));
+				AddFloatingNumber(other.position.tile, { 0, 0 }, StrCat(GetDotName(*dot), " x", stacks), GetDamageTypeTextColor(GetDotDamageType(*dot)) | UiFlags::FontSize12, 1000 + monsterId);
+			}
 		}
 	}
 
@@ -191,8 +196,17 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 	if (const std::optional<DotID> dot = ParseDotName(spellData.rider); dot && !target.hasNoLife() && !IsImmuneToDot(target, *dot)) {
 		const int stacks = AddMonsterDot(target, *dot, attack, ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack)));
 		// A separate id from the damage numbers, so the game does not merge the two.
-		AddFloatingNumber(target.position.tile, { 0, 0 }, StrCat(GetDotName(*dot), " x", stacks), GetDamageTypeTextColor(*dot == DotID::Corruption ? DamageType::Shadow : DamageType::Fire) | UiFlags::FontSize12, 1000 + static_cast<int>(target.getId()));
+		AddFloatingNumber(target.position.tile, { 0, 0 }, StrCat(GetDotName(*dot), " x", stacks), GetDamageTypeTextColor(GetDotDamageType(*dot)) | UiFlags::FontSize12, 1000 + static_cast<int>(target.getId()));
 	}
+
+	// The stat "Wither" on a strike: every effect over time on the target deals more until it
+	// dies, by the power's "boon" amount as a percentage (Exsanguinate).
+	if (spellData.buffStat == "Wither" && spellData.boonAmount > 0 && !target.hasNoLife())
+		WitherMonster(target, spellData.boonAmount);
+
+	// "HealSelf": the striker is healed for the rider's amount when the blow lands.
+	if (spellData.rider == "HealSelf")
+		NetSendCmdPowerOnPlayer(player, attack, static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.riderAmount, SpellLevelOf(player, attack))));
 
 	// "Branded": every direct hit on the target deals extra fire from then on. The rider's amount
 	// is that extra damage, in 64ths of a hit point. The strike that applies it sets it off as well.
@@ -229,8 +243,10 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 
 	// "Rupture": the hit deals extra damage for the Corruption still ticking on the target. The
 	// rider's amount is the share of it, as a percentage. The Corruption is not used up.
+	// A Blood power counts the Bleed on the target instead (Burst Vessel).
 	if (spellData.rider == "Rupture" && !target.hasNoLife()) {
-		const int extra = static_cast<int>(static_cast<int64_t>(GetMonsterDotRemaining(target, DotID::Corruption)) * spellData.riderAmount / 100);
+		const DotID counted = damageType == DamageType::Bleed ? DotID::Bleed : DotID::Corruption;
+		const int extra = static_cast<int>(static_cast<int64_t>(GetMonsterDotRemaining(target, counted)) * spellData.riderAmount / 100);
 		if (extra > 0)
 			DealSpellTickDamage(target, attack, MissileID::WeaponExplosion, damageType, extra);
 	}

@@ -210,7 +210,7 @@ std::string GetPowerNumbersText(const Player &player, SpellID spell, int level)
 		text = StrCat(damage(data.effectAmount), " damage");
 	} else if (effect == "Strike") {
 		text = StrCat("+", damage(data.effectAmount), " damage");
-	} else if (IsAnyOf(effect, "Burn", "Corruption", "Cone", "Chain")) {
+	} else if (IsAnyOf(effect, "Burn", "Corruption", "Bleed", "Cone", "Chain")) {
 		text = StrCat(damage(data.effectAmount), " damage per 2s, 20s");
 	} else if (effect == "DamageZone") {
 		text = StrCat(damage(data.effectAmount), " damage per 2s");
@@ -251,7 +251,9 @@ std::string GetPowerNumbersText(const Player &player, SpellID spell, int level)
 			text = StrCat(given(data.effectAmount), " shield per 10s");
 		} else if (stat == "Distance") {
 			// Stealth and threat never grow; the second effect riding on them does.
-			if (rides("Block"))
+			if (rides("LifeLeech"))
+				text = StrCat(data.riderAmount / 10, "% life leech");
+			else if (rides("Block"))
 				text = StrCat("+", data.riderAmount + shown, "% block");
 			else if (rides("ToHit"))
 				text = StrCat("+", data.riderAmount + shown, "% to hit");

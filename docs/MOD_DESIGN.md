@@ -1193,3 +1193,19 @@ Mana still comes back once a second (Recovery / 10 each time). Health comes back
 amount but only once every three seconds, so it is a third as fast: Bryan wanted staying alive to
 be a little harder. `LifeRegenPulses` in `player.cpp`. Boons to health regeneration raise the
 size of each pulse, not how often it comes.
+
+## The Blood essence, Bleed and life leech (2026-10-11)
+Blood is the twelfth essence (rare, bound to Recovery, dull red). It is for a tank and for a
+damage-over-time character, at range or with a weapon: six spell attacks, six special attacks,
+six boons, an aura and a Compounding power. With it there are 220 confluences, all named.
+- **Bleed** is a third effect over time, beside Burn and Corruption, and works exactly as they do
+  (shared bucket, a tick every 2 seconds, 20 seconds from the latest application). It is Natural
+  damage, so a monster that resists or is immune to Natural damage resists or ignores it.
+- **Life leech** is new and kept very small (Bryan: "real minimal"): 1% of the damage dealt comes
+  back as health from a boon on yourself, 0.5% from one that can go on others. It is a second
+  effect on a boon (rider `LifeLeech`, in tenths of a percent). Claude's choices, not yet
+  confirmed by Bryan: boons with leech add up; it never grows with level; Crimson Feast, a
+  20-second cooldown boon, gives 3%. Scraps too small to count are carried to the next hit.
+- A strike that sweeps now leaves its effect over time on everything it lands on.
+- Efficient special attacks are +1 for half a point of mana (they were +2 for 1, which was Heavy
+  Blow at half price). Static Jolt costs 3 mana.

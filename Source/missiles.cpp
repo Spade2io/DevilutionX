@@ -374,6 +374,7 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 		if (&player == MyPlayer) {
 			// The spell that was cast earns the experience; without one, go by the kind of projectile.
 			AddSpellExperienceForDamage(player, monster, sourceSpell != SpellID::Invalid ? sourceSpell : GetSpellForMissile(t), dam, monster.hitPoints);
+			LeechLifeFromDamage(std::min(dam, monster.hitPoints)); // Essence Mod: life leech from boons
 			ApplyMonsterDamage(damageType, monster, dam);
 			// Essence Mod: a data-file power's projectile leaves behind the effect over time its rider names.
 			if (IsExtendedSpell(sourceSpell) && IsValidSpell(sourceSpell) && !monster.hasNoLife()) {
@@ -2670,7 +2671,7 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	// Compounding is a percentage that gains 2 with each level of the power.
 	if (isCompound)
 		amount = GetSpellData(spell).effectAmount + 2 * ShownPowerLevel(player.GetBaseSpellLevel(spell));
-	const UiFlags textColor = isKindle ? GetSpellTextColor(spell) : GetDamageTypeTextColor(dot == DotID::Corruption ? DamageType::Shadow : DamageType::Fire);
+	const UiFlags textColor = isKindle ? GetSpellTextColor(spell) : GetDamageTypeTextColor(GetDotDamageType(dot));
 
 	// The monster under the cursor, and with a radius every monster standing within it.
 	std::vector<int> targets;
@@ -2838,6 +2839,11 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 		if (extended->rider == "Wither")
 			WitherMonster(monster, extended->riderAmount);
 	}
+
+	// A burst on the ground whose stat is "HealSelf" also heals the caster, for its "boon" amount
+	// in hit points, growing as a heal does (Blood Moon).
+	if (&player == MyPlayer && isGround && extended != nullptr && extended->buffStat == "HealSelf" && extended->boonAmount > 0)
+		NetSendCmdPowerOnPlayer(player, spell, static_cast<uint32_t>(scaled(extended->boonAmount * 64)));
 
 	// The rider "Leech": if it took hold of anything, the caster draws life back over time.
 	if (&player == MyPlayer && landedOnAny && extended != nullptr && extended->rider == "Leech")

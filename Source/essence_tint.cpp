@@ -220,6 +220,8 @@ DamageType GetSpellDamageType(SpellID spell)
 		return DamageType::Arcane;
 	case EssenceID::Might: // its powers are Physical; only its stone is red
 		return DamageType::Physical;
+	case EssenceID::Blood:
+		return DamageType::Bleed;
 	case EssenceID::None:
 		break;
 	}
@@ -317,6 +319,8 @@ std::optional<EssenceTint> GetEssenceTint(EssenceID essence)
 		return EssenceTint::DullBeige;
 	case EssenceID::Might: // the designer gives it Fire's colour
 		return EssenceTint::VividRed;
+	case EssenceID::Blood: // Bleed
+		return EssenceTint::DullRed;
 	case EssenceID::None:
 		break;
 	}

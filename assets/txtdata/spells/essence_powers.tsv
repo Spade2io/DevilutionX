@@ -97,7 +97,7 @@ Contagion	194	Contagion	Dark	CastFire	22	Magic,Targeted	Corruption	0	22	15	0	Cor
 Drain	195	Drain	Dark	CastFire	1	Magic,Targeted	Corruption	0	1	29	0	Corruption that heals you	Corruption	32	0	Leech	32	HealPulse	20	0		0	0	0	0	0
 BlackSun	196	Black Sun	Dark	CastFire	36	Magic	Corruption	0	36	24	180	Hit + Corruption, radius 6	GroundBurst	1536	6	Corruption	256		0	0		0	0	0	0	0
 UmbralStrike	197	Umbral Strike	Dark	CastFire	3	Magic,Targeted		0	3	22	0	Strike leaving Corruption	Strike	64	0	Corruption	26		0	0		0	0	0	0	0
-NightBlade	198	Night Blade	Dark	CastFire	1	Magic,Targeted		0	1	47	0	Cheap shadow strike	Strike	128	0		0		0	0		0	0	0	0	0
+NightBlade	198	Night Blade	Dark	CastFire	0	Magic,Targeted		0	0	47	0	Cheap shadow strike	Strike	64	0		0		0	0		0	0	0	0	32
 Rupture	199	Rupture	Dark	CastFire	2	Magic,Targeted		0	2	34	8	Strike: more per Corruption	Strike	320	0	Rupture	50		0	0		0	0	0	0	0
 Blind	200	Blind	Dark	CastFire	6	Magic,Targeted	Corruption	0	6	30	6	Foe misses more	Curse	10	0		0	Accuracy	0	0		0	0	0	0	0
 Murk	201	Murk	Dark	CastFire	18	Magic,Targeted	Corruption	0	18	31	40	Foes miss a lot for 12s	Curse	30	2		0	Accuracy	12	0		0	0	0	0	0
@@ -203,11 +203,31 @@ IceShard	300	Ice Shard	Water	CastFire	1	Magic,Targeted	PowerBolt	0	1	29	0	Cheap 
 Rebuke	301	Rebuke	Holy	CastFire	1	Magic,Targeted	Corruption	0	1	10	0	Cheap Holy damage	Burst	256	0		0		0	0		0	0	0	0	21
 Thorn	302	Thorn	Nature	CastFire	1	Magic,Targeted	PowerBolt	0	1	35	0	Cheap bolt of Nature	Bolt	256	0		0		0	0		0	0	0	0	21
 Overgrowth	303	Overgrowth	Nature	CastFire	15	Magic	StrengthBuff	0	15	50	10	Feeds every heal over time	CompoundHeals	10	99		0		0	0		0	0	0	0	0
-ShieldJab	304	Shield Jab	Shield	CastFire	1	Magic,Targeted		0	1	22	0	Cheap shield strike	Strike	128	0		0		0	0	Shield	0	0	0	0	0
+ShieldJab	304	Shield Jab	Shield	CastFire	0	Magic,Targeted		0	0	22	0	Cheap shield strike	Strike	64	0		0		0	0	Shield	0	0	0	0	32
 DuskBolt	305	Dusk Bolt	Dark	CastFire	1	Magic,Targeted	PowerBolt	0	1	36	0	Cheap bolt of Shadow	Bolt	256	0		0		0	0		0	0	0	0	21
 Fester	306	Fester	Dark	CastFire	10	Magic,Targeted	Corruption	0	10	37	10	Feeds your damage over time	Compound	10	0		0		0	0		0	0	0	0	0
-StoneEdge	307	Stone Edge	Earth	CastFire	1	Magic,Targeted		0	1	47	0	Cheap Earth weapon strike	Strike	128	0		0		0	0		0	0	0	0	0
-StaticJolt	308	Static Jolt	Lightning	CastLightning	2	Lightning,Targeted	Corruption	0	2	15	0	Cheap shock that leaps	ChainBurst	192	0		0		0	0		0	0	0	0	0
+StoneEdge	307	Stone Edge	Earth	CastFire	0	Magic,Targeted		0	0	47	0	Cheap Earth weapon strike	Strike	64	0		0		0	0		0	0	0	0	32
+StaticJolt	308	Static Jolt	Lightning	CastLightning	3	Lightning,Targeted	Corruption	0	3	15	0	Cheap shock that leaps	ChainBurst	192	0		0		0	0		0	0	0	0	0
 Wilt	309	Wilt	Life	CastFire	1	Magic,Targeted	PowerBolt	0	1	32	0	Cheap bolt of Life	Bolt	256	0		0		0	0		0	0	0	0	21
 ArcaneDart	310	Arcane Dart	Magic	CastFire	1	Magic,Targeted	PowerBolt	0	1	38	0	Cheap bolt of Arcane	Bolt	256	0		0		0	0		0	0	0	0	21
-QuickStrike	311	Quick Strike	Might	CastFire	1	Magic,Targeted		0	1	38	0	Cheap weapon strike	Strike	128	0		0		0	0		0	0	0	0	0
+QuickStrike	311	Quick Strike	Might	CastFire	0	Magic,Targeted		0	0	38	0	Cheap weapon strike	Strike	64	0		0		0	0		0	0	0	0	32
+Bloodletting	312	Bloodletting	Blood	CastFire	4	Magic,Targeted	Corruption	0	4	30	0	Bleeding on one enemy	Bleed	64	0		0		0	0		0	0	0	0	0
+Needle	313	Needle	Blood	CastFire	1	Magic,Targeted	Corruption	0	1	36	0	Cheap Bleeding	Bleed	38	0		0		0	0		0	0	0	0	21
+BloodLance	314	Blood Lance	Blood	CastFire	4	Magic,Targeted	PowerBolt	0	4	29	0	Bolt that leaves Bleeding	Bolt	192	0	Bleed	26		0	0		0	0	0	0	0
+BloodMist	315	Blood Mist	Blood	CastFire	8	Magic,Targeted	Corruption	0	8	31	0	Bleeding, radius 2	Bleed	45	2		0		0	0		0	0	0	0	0
+CrimsonSpray	316	Crimson Spray	Blood	CastFire	9	Magic	Corruption	0	9	33	10	Cone of heavy Bleeding	Cone	115	0	Bleed	0		0	0		0	0	0	0	0
+BloodMoon	317	Blood Moon	Blood	CastFire	36	Magic	Corruption	0	36	24	180	Hit + Bleeding, heals you	GroundBurst	1536	6	Bleed	256	HealSelf	0	0		0	0	0	30	0
+Rend	318	Rend	Blood	CastFire	3	Magic,Targeted		0	3	22	0	Strike leaving Bleeding	Strike	64	0	Bleed	26		0	0		0	0	0	0	0
+RendingSweep	319	Rending Sweep	Blood	CastFire	5	Magic,Targeted		0	5	46	0	Sweep leaving Bleeding	Strike	64	2	Bleed	19		0	0		0	0	0	0	0
+SanguineStrike	320	Sanguine Strike	Blood	CastFire	3	Magic,Targeted		0	3	47	0	Strike that heals you	Strike	128	0	HealSelf	512		0	0		0	0	0	0	0
+OpenVein	321	Open Vein	Blood	CastFire	4	Magic,Targeted		0	4	34	8	Strike; heavy Bleeding	Strike	256	0	Bleed	77		0	0		0	0	0	0	0
+BurstVessel	322	Burst Vessel	Blood	CastFire	2	Magic,Targeted		0	2	38	8	Strike: more per Bleeding	Strike	320	0	Rupture	50		0	0		0	0	0	0	0
+Exsanguinate	323	Exsanguinate	Blood	CastFire	5	Magic,Targeted		0	5	36	45	Huge Bleeding; dots +25%	Strike	384	0	Bleed	192	Wither	0	0		0	0	0	25	0
+Hemorrhage	324	Hemorrhage	Blood	CastFire	10	Magic,Targeted	Corruption	0	10	37	10	Feeds your damage over time	Compound	10	0		0		0	0		0	0	0	0	0
+Pulse	325	Pulse	Blood	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	8	0	Aura: faster health regen	Aura	10	8		0	LifeRegen	0	0		0	0	0	0	0
+BloodInTheWater	326	Blood in the Water	Blood	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	48	0	Threat; 1% life leech	Buff	50	0	LifeLeech	10	Distance	0	0		0	0	0	0	0
+ThickBlood	327	Thick Blood	Blood	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	18	0	You have more maximum life	Buff	20	0		0	MaxLife	0	0		0	0	0	0	0
+Bloodthirst	328	Bloodthirst	Blood	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	43	0	Regen; 1% life leech	Buff	20	0	LifeLeech	10	LifeRegen	0	0		0	0	0	0	0
+BloodPact	329	Blood Pact	Blood	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	12	0	Ally: life; 0.5% leech	Buff	10	0	LifeLeech	5	MaxLife	0	1		0	0	0	0	0
+QuickenBlood	330	Quicken Blood	Blood	CastHealing	10	Magic,AllowedInTown	StrengthBuff	0	10	50	0	Ally regains life faster	Buff	10	0		0	LifeRegen	0	1		0	0	0	0	0
+CrimsonFeast	331	Crimson Feast	Blood	CastHealing	18	Magic,AllowedInTown	StrengthBuff	0	18	45	60	+40% life, 3% leech, 20s	Buff	40	0	LifeLeech	30	MaxLife	20	0		0	0	0	0	0

@@ -14,8 +14,8 @@ import { checkPower } from './rules.js'
 // potency rises per level.
 
 const NUMBERS = [
-  { field: 'potency', label: 'Potency', help: 'damage or healing amount' },
-  { field: 'manaCost', label: 'Mana cost' },
+  { field: 'potency', label: 'Potency', help: 'damage or healing amount', decimals: true },
+  { field: 'manaCost', label: 'Mana cost', decimals: true },
   { field: 'cooldown', label: 'Cooldown (s)', decimals: true },
   { field: 'radius', label: 'Radius', help: 'tiles; for areas and auras' },
   { field: 'growth', label: 'Growth % / level', decimals: true },

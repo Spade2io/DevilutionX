@@ -21,7 +21,7 @@ const POWERS_FILE = path.join(REPO, 'assets/txtdata/spells/essence_powers.tsv')
 const ITEMS_FILE = path.join(REPO, 'assets/txtdata/items/itemdat.tsv')
 const check = process.argv.includes('--check')
 const wanted = process.argv.slice(2).filter((a) => !a.startsWith('--'))
-const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy', 'Nature', 'Shield', 'Dark', 'Earth', 'Lightning', 'Life', 'Magic', 'Might']
+const essenceNames = wanted.length ? wanted : ['Fire', 'Water', 'Holy', 'Nature', 'Shield', 'Dark', 'Earth', 'Lightning', 'Life', 'Magic', 'Might', 'Blood']
 
 // Powers the game already has as hand-written spells. They keep their original numbers and are
 // not exported; the name on the right is the game's own name for the spell.
@@ -262,10 +262,39 @@ const SHORT_TEXT = {
 //   The Bolt rider "SureHit": the bolt never misses what it reaches (Magic Missile).
 //   The rider stat HitRecovery: frames off the stagger after a hit, one more at levels 5 and 10
 //         (Unbowed, Unyielding). It replaced NoStagger on 2026-10-11.
+//   Bleed works as Burn and Corruption do, for the Blood essence; it is Natural damage. A Strike
+//         that spreads leaves its effect over time on everything it lands on. The Strike rider
+//         Rupture counts Bleed for a Blood power.
+//   Life leech: a boon's rider "LifeLeech" gives back that share of the damage the player deals
+//         as health, in TENTHS of a percent (10 is 1%). Every such boon adds up. It never grows.
+//   A second fixed effect, named by "stat" with its size in "boon": on a GroundBurst, HealSelf
+//         heals the caster that many hit points (Blood Moon); on a Strike, Wither makes effects
+//         over time on the target deal that percent more until it dies (Exsanguinate).
+//   The Strike rider "HealSelf": the striker is healed for riderHeal when the blow lands.
 //   Buff: switches a buff on for the caster, or for the player aimed at if the power is tagged Ally. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10
 const BEHAVIOUR = {
+  'Bloodletting': { missile: 'Corruption', effect: 'Bleed' },
+  'Needle': { missile: 'Corruption', effect: 'Bleed' },
+  'Blood Lance': { missile: 'PowerBolt', effect: 'Bolt', rider: 'Bleed', riderTotal: 4 },
+  'Blood Mist': { missile: 'Corruption', effect: 'Bleed' },
+  'Crimson Spray': { missile: 'Corruption', effect: 'Cone', rider: 'Bleed', riderPercent: 0 },
+  'Blood Moon': { missile: 'Corruption', effect: 'GroundBurst', rider: 'Bleed', riderTotal: 40, stat: 'HealSelf', boon: 30 },
+  'Rend': { effect: 'Strike', rider: 'Bleed', riderTotal: 4 },
+  'Rending Sweep': { effect: 'Strike', spread: true, rider: 'Bleed', riderTotal: 3 },
+  'Sanguine Strike': { effect: 'Strike', rider: 'HealSelf', riderHeal: 8 },
+  'Open Vein': { effect: 'Strike', rider: 'Bleed', riderTotal: 12 },
+  'Burst Vessel': { effect: 'Strike', rider: 'Rupture', riderPercent: 50 },
+  'Exsanguinate': { effect: 'Strike', rider: 'Bleed', riderTotal: 30, stat: 'Wither', boon: 25 },
+  'Hemorrhage': { missile: 'Corruption', effect: 'Compound' },
+  'Pulse': { missile: 'StrengthBuff', effect: 'Aura', stat: 'LifeRegen', duration: 0 },
+  'Blood in the Water': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'LifeLeech', riderPercent: 10 },
+  'Thick Blood': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0 },
+  'Bloodthirst': { missile: 'StrengthBuff', effect: 'Buff', stat: 'LifeRegen', duration: 0, rider: 'LifeLeech', riderPercent: 10 },
+  'Blood Pact': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0, rider: 'LifeLeech', riderPercent: 5 },
+  'Quicken Blood': { missile: 'StrengthBuff', effect: 'Buff', stat: 'LifeRegen', duration: 0 },
+  'Crimson Feast': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 20, rider: 'LifeLeech', riderPercent: 30 },
   'Ember': { missile: 'PowerBolt', effect: 'Bolt' },
   'Ice Shard': { missile: 'PowerBolt', effect: 'Bolt' },
   'Stone Edge': { effect: 'Strike' },
@@ -557,7 +586,7 @@ const row = ({ power, essence }) => {
   const mana = Math.floor(manaSixtyFourths / 64)
   const behaviour = BEHAVIOUR[power.name]
   // Amounts are in 64ths of a hit point, the unit the game counts damage in.
-  const amount = behaviour?.perTick || ['Burn', 'Corruption', 'Cone', 'Chain'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
+  const amount = behaviour?.perTick || ['Burn', 'Corruption', 'Bleed', 'Cone', 'Chain'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
     // A curse with no number of its own (a strip) still needs one, to be sent at all.
     : behaviour?.effect === 'Curse' ? Math.max(1, Math.round(power.potency ?? 1))
     : behaviour?.effect === 'Bolt' ? Math.round((power.potency ?? 0) * 64)

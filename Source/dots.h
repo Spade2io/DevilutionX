@@ -49,7 +49,8 @@ void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, Dam
 enum class DotID : uint8_t {
 	Corruption,
 	Burn,
-	LAST = Burn,
+	Bleed,
+	LAST = Bleed,
 };
 
 /** @brief The effect with this name ("Burn", "Corruption"), if there is one. */
@@ -57,6 +58,9 @@ std::optional<DotID> ParseDotName(std::string_view name);
 
 /** @brief The name shown to the player, e.g. "Burn". */
 std::string_view GetDotName(DotID dot);
+
+/** @brief The kind of damage the effect deals, which also gives the colour of its words. */
+DamageType GetDotDamageType(DotID dot);
 
 /** @brief Whether a monster shrugs the effect off entirely. */
 bool IsImmuneToDot(const Monster &monster, DotID dot);

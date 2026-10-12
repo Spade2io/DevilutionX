@@ -328,7 +328,7 @@ PowerKind GetPowerKind(SpellID spell)
 	const SpellData &spellData = GetSpellData(spell);
 	if (spellData.effect == "Aura" || (spellData.effect == "Buff" && spellData.durationSeconds == 0))
 		return PowerKind::LastingBuff;
-	if (IsAnyOf(spellData.effect, "Burst", "GroundBurst", "ChainBurst", "Strike", "Bolt", "Wave", "Cone", "Chain", "DamageZone", "Burn", "Corruption"))
+	if (IsAnyOf(spellData.effect, "Burst", "GroundBurst", "ChainBurst", "Strike", "Bolt", "Wave", "Cone", "Chain", "DamageZone", "Burn", "Corruption", "Bleed"))
 		return PowerKind::Attack;
 	return PowerKind::Other;
 }
@@ -536,7 +536,7 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 	// pool is there to be filled.
 	if (spellData.boonAmount != 0 && IsAnyOf(effect, "Heal", "Resurrect"))
 		ActivatePowerBuff(target, spell, spellData.boonAmount, caster);
-	if (IsAnyOf(effect, "Heal", "HealPercent", "ChainHeal", "Resurrect", "Zone") || rider.starts_with("Heal")) {
+	if (IsAnyOf(effect, "Heal", "HealPercent", "ChainHeal", "Resurrect", "Zone") || rider.starts_with("Heal") || spellData.buffStat == "HealSelf") {
 		const int healed = std::clamp(target._pMaxHP - target._pHitPoints, 0, amount);
 		AddSpellExperienceForHealing(caster, target, spell, healed);
 		target._pHitPoints = std::min(target._pHitPoints + amount, target._pMaxHP);

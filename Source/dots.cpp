@@ -57,6 +57,8 @@ struct DotDefinition {
 constexpr DotDefinition Definitions[] = {
 	{ "Corruption", MissileID::Corruption, DamageType::Shadow, EssenceTint::Shadow },
 	{ "Burn", MissileID::Firebolt, DamageType::Fire, EssenceTint::VividRed },
+	// Bleed is Natural damage: a monster that resists or is immune to that kind shrugs it off alike.
+	{ "Bleed", MissileID::BloodStar, DamageType::Bleed, EssenceTint::DullRed },
 };
 
 const DotDefinition &DefinitionOf(DotID dot)
@@ -198,6 +200,7 @@ void DealSpellTickDamage(Monster &monster, SpellID spell, MissileID missile, Dam
 		damage = RollVariance(damage); // a little luck in every hit; a beat of something over time is steady
 	damage = ApplyMonsterVulnerability(monster, ApplyDamageBuffs(player, ApplySpellDamageBuffs(spell, damage)));
 	AddSpellExperienceForDamage(player, monster, spell, damage, monster.hitPoints);
+	LeechLifeFromDamage(std::min(damage, monster.hitPoints));
 	ApplyMonsterDamage(damageType, monster, damage);
 	if (monster.hasNoLife()) {
 		if (finishKill)
@@ -229,6 +232,11 @@ std::optional<DotID> ParseDotName(std::string_view name)
 std::string_view GetDotName(DotID dot)
 {
 	return DefinitionOf(dot).name;
+}
+
+DamageType GetDotDamageType(DotID dot)
+{
+	return DefinitionOf(dot).damageType;
 }
 
 bool IsImmuneToDot(const Monster &monster, DotID dot)
@@ -513,7 +521,7 @@ uint32_t ScaleGivenAmountBySpirit(SpellID spell, uint32_t amount)
 		isLife = false;
 	} else {
 		// An attack that gives a player something: life or a shield riding on it.
-		isLife = IsAnyOf(rider, "HealAlly", "Leech", "ShieldPerHit") || rider.starts_with("Heal") || (rider == "Guard" && stat == "Shield");
+		isLife = IsAnyOf(rider, "HealAlly", "Leech", "ShieldPerHit") || rider.starts_with("Heal") || stat == "HealSelf" || (rider == "Guard" && stat == "Shield");
 	}
 	if (!isLife)
 		return amount;

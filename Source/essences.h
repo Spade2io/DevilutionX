@@ -41,7 +41,8 @@ enum class EssenceID : uint8_t {
 	Life,
 	Magic,
 	Might,
-	LAST = Might,
+	Blood,
+	LAST = Blood,
 };
 
 /**

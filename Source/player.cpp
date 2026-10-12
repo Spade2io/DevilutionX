@@ -730,6 +730,8 @@ bool PlrHitMonst(Player &player, Monster &monster, bool adjacentDamage = false)
 			if (&player == MyPlayer)
 				dam = ApplyMonsterVulnerability(monster, dam);
 			AddAttackExperienceForDamage(player, monster, dam, monster.hitPoints); // Essence Mod
+			if (&player == MyPlayer)
+				LeechLifeFromDamage(std::min(dam, monster.hitPoints)); // Essence Mod: life leech from boons
 			ApplyMonsterDamage(DamageType::Physical, monster, dam);
 		}
 		// Essence Mod: a branded monster takes extra fire on every direct hit.

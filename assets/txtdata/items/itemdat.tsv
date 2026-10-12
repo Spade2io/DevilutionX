@@ -201,3 +201,5 @@ IDI_ARENAPOT	0	Misc	Unequippable	ARENA_POTION	Misc	NONE	Arena Potion		7	0	0	0	0	
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Persisting Aid	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	200
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Efficiency	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	200
 	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Exorbitancy	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	200
+	0	Misc	Unequippable	AWAKENING_STONE	Misc	NONE	Awakening Stone of Compounding	Stone	1	0	0	0	0	0	0	0	0		AWAKENINGSTONE	Null	true	0
+	0	Misc	Unequippable	ESSENCE	Misc	NONE	Blood Essence	Essence	1	0	0	0	0	0	0	0	0		ESSENCE	Bloodletting	true	250

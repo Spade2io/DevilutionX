@@ -999,6 +999,38 @@
       ],
       "neverOtherGroups": [],
       "primaryStat": "Power"
+    },
+    {
+      "id": "e_10b5142b",
+      "name": "Blood",
+      "description": "",
+      "rarity": "rare",
+      "poolSize": 20,
+      "damageTypeId": "d_1ef377b0",
+      "tagsAll": [
+        "t_ac8a7ceb"
+      ],
+      "tagsMost": [
+        "t_b5fae28d"
+      ],
+      "tagsSome": [
+        "t_42d817be",
+        "t_82608ba7",
+        "t_f68550c3",
+        "t_50a7240a",
+        "t_afa5e43e"
+      ],
+      "tagsFinite": [
+        "t_db6d20e4",
+        "t_bcaf43f8"
+      ],
+      "tagsNever": [
+        "t_f931de44"
+      ],
+      "neverOtherGroups": [
+        "g_b6a0b51b"
+      ],
+      "primaryStat": "Recovery"
     }
   ],
   "powers": [
@@ -4201,8 +4233,8 @@
         "t_f407f67c",
         "t_5462244b"
       ],
-      "potency": 2,
-      "manaCost": 1,
+      "potency": 1,
+      "manaCost": 0.5,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -7216,8 +7248,8 @@
         "t_f407f67c",
         "t_5462244b"
       ],
-      "potency": 2,
-      "manaCost": 1,
+      "potency": 1,
+      "manaCost": 0.5,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -7246,8 +7278,8 @@
         "t_f407f67c",
         "t_5462244b"
       ],
-      "potency": 2,
-      "manaCost": 1,
+      "potency": 1,
+      "manaCost": 0.5,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -7304,8 +7336,8 @@
         "t_f407f67c",
         "t_5462244b"
       ],
-      "potency": 2,
-      "manaCost": 1,
+      "potency": 1,
+      "manaCost": 0.5,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -7478,7 +7510,7 @@
         "t_5462244b"
       ],
       "potency": 3,
-      "manaCost": 2,
+      "manaCost": 3,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -7516,6 +7548,581 @@
       "icon": 32,
       "number": 309,
       "gameKey": "Wilt"
+    },
+    {
+      "id": "p_a9e1ab2f",
+      "name": "Bloodletting",
+      "description": "Opens a wound on one enemy from a distance. No damage at once: all of it is Bleeding over 20 seconds. Blood's everyday spell.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_b5fae28d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 4,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "Bleeding in total over 20 seconds",
+      "icon": 30,
+      "shortText": "Bleeding on one enemy",
+      "number": 312,
+      "gameKey": "Bloodletting"
+    },
+    {
+      "id": "p_d81cdf1d",
+      "name": "Needle",
+      "description": "A pinprick that bleeds, for very little mana. A small wound each cast, but a great deal of Bleeding for the mana.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_b5fae28d",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 6,
+      "manaCost": 1.33,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "Bleeding in total over 20 seconds",
+      "icon": 36,
+      "shortText": "Cheap Bleeding",
+      "number": 313,
+      "gameKey": "Needle"
+    },
+    {
+      "id": "p_8d4fc819",
+      "name": "Blood Lance",
+      "description": "A bolt that hurts when it lands and leaves the enemy Bleeding.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_b5fae28d",
+        "t_5462244b"
+      ],
+      "potency": 3,
+      "manaCost": 4,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage at once, then 4 Bleeding over 20 seconds",
+      "icon": 29,
+      "shortText": "Bolt that leaves Bleeding",
+      "number": 314,
+      "gameKey": "BloodLance"
+    },
+    {
+      "id": "p_b290ff49",
+      "name": "Blood Mist",
+      "description": "A red mist around one enemy. It and every enemy close to it start Bleeding.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_1d3ef0b5",
+        "t_b5fae28d",
+        "t_5462244b"
+      ],
+      "potency": 7,
+      "manaCost": 8,
+      "cooldown": 0,
+      "radius": 2,
+      "growth": 12.5,
+      "potencyNote": "Bleeding in total over 20 seconds to each target",
+      "icon": 31,
+      "shortText": "Bleeding, radius 2",
+      "number": 315,
+      "gameKey": "BloodMist"
+    },
+    {
+      "id": "p_c72b4968",
+      "name": "Crimson Spray",
+      "description": "A spray of blades in a cone in front of you. Every enemy it reaches is left Bleeding heavily.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_2b933c62",
+        "t_278e85ad",
+        "t_b5fae28d",
+        "t_a9a0b1a6"
+      ],
+      "potency": 18,
+      "manaCost": 9,
+      "cooldown": 10,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "Bleeding in total over 20 seconds to each target",
+      "icon": 33,
+      "shortText": "Cone of heavy Bleeding",
+      "number": 316,
+      "gameKey": "CrimsonSpray"
+    },
+    {
+      "id": "p_60cfe305",
+      "name": "Blood Moon",
+      "description": "Blood's ultimate. Every enemy in a wide area is hurt at once and left Bleeding heavily, and you are healed.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_78bf3c15",
+        "t_a9a02fc3",
+        "t_fd0fb5ff",
+        "t_8e6b4fcf",
+        "t_b5fae28d",
+        "t_29d3e548"
+      ],
+      "potency": 24,
+      "manaCost": 36,
+      "cooldown": 180,
+      "radius": 6,
+      "growth": 12.5,
+      "potencyNote": "damage at once to each target, then 40 Bleeding over 20 seconds; heals you 30",
+      "icon": 24,
+      "shortText": "Hit + Bleeding, heals you",
+      "number": 317,
+      "gameKey": "BloodMoon"
+    },
+    {
+      "id": "p_43f3f499",
+      "name": "Rend",
+      "description": "A weapon strike that tears. A little extra damage on the hit, and the enemy is left Bleeding. Blood's everyday strike.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_b5fae28d",
+        "t_5462244b"
+      ],
+      "potency": 1,
+      "manaCost": 3,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit, then 4 Bleeding over 20 seconds",
+      "icon": 22,
+      "shortText": "Strike leaving Bleeding",
+      "number": 318,
+      "gameKey": "Rend"
+    },
+    {
+      "id": "p_03dd4851",
+      "name": "Rending Sweep",
+      "description": "A wide strike. The enemy you hit and every enemy next to it take the blow and are left Bleeding.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_1d3ef0b5",
+        "t_8e6b4fcf",
+        "t_b5fae28d",
+        "t_5462244b"
+      ],
+      "potency": 1,
+      "manaCost": 5,
+      "cooldown": 0,
+      "radius": 2,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit to each target, then 3 Bleeding over 20 seconds on each",
+      "icon": 46,
+      "shortText": "Sweep leaving Bleeding",
+      "number": 319,
+      "gameKey": "RendingSweep"
+    },
+    {
+      "id": "p_0ab22c42",
+      "name": "Sanguine Strike",
+      "description": "A weapon strike that feeds you. Extra damage on the hit, and you are healed when it lands.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_42d817be",
+        "t_78bf3c15",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_5462244b"
+      ],
+      "potency": 2,
+      "manaCost": 3,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit; heals you 8",
+      "icon": 47,
+      "shortText": "Strike that heals you",
+      "number": 320,
+      "gameKey": "SanguineStrike"
+    },
+    {
+      "id": "p_dbdcaa06",
+      "name": "Open Vein",
+      "description": "A deep cut. A good deal of extra damage on the hit, and a heavy Bleeding left behind.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_b5fae28d",
+        "t_a9a0b1a6"
+      ],
+      "potency": 4,
+      "manaCost": 4,
+      "cooldown": 8,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit, then 12 Bleeding over 20 seconds",
+      "icon": 34,
+      "shortText": "Strike; heavy Bleeding",
+      "number": 321,
+      "gameKey": "OpenVein"
+    },
+    {
+      "id": "p_2854ab19",
+      "name": "Burst Vessel",
+      "description": "A strike that cashes in a wound. Extra damage on the hit, and half of all the Bleeding still to come on that enemy lands at once as well. The Bleeding itself carries on.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_a9a0b1a6"
+      ],
+      "potency": 5,
+      "manaCost": 2,
+      "cooldown": 8,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit, plus half of the Bleeding still to tick on the enemy",
+      "icon": 38,
+      "shortText": "Strike: more per Bleeding",
+      "number": 322,
+      "gameKey": "BurstVessel"
+    },
+    {
+      "id": "p_64de6a88",
+      "name": "Exsanguinate",
+      "description": "A killing wound for one tough enemy. A heavy hit, a very heavy Bleeding, and from then on every effect over time on that enemy deals a quarter more until it dies.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_42d817be",
+        "t_fd59c54d",
+        "t_23cff708",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_b5fae28d",
+        "t_6e51786d",
+        "t_9048f21b"
+      ],
+      "potency": 6,
+      "manaCost": 5,
+      "cooldown": 45,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit, then 30 Bleeding over 20 seconds; damage over time on the enemy deals 25% more until it dies",
+      "icon": 36,
+      "shortText": "Huge Bleeding; dots +25%",
+      "number": 323,
+      "gameKey": "Exsanguinate"
+    },
+    {
+      "id": "p_0a6be394",
+      "name": "Hemorrhage",
+      "description": "Compounding. Every effect over time you have on one enemy, Bleeding and any other kind alike, goes back to its full duration and grows stronger: by a tenth, and a fiftieth more with each level of the power. Each cast builds on the last.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_db6d20e4",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_b5fae28d",
+        "t_a9a0b1a6"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 10,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% stronger effects over time on the enemy, and back to full duration; +2 for each level",
+      "icon": 37,
+      "shortText": "Feeds your damage over time",
+      "number": 324,
+      "gameKey": "Hemorrhage"
+    },
+    {
+      "id": "p_c1a8e195",
+      "name": "Pulse",
+      "description": "Blood's aura. You and every ally near you regain health faster, for as long as the aura is on.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_50a7240a",
+        "t_afa5e43e",
+        "t_be83c5cf",
+        "t_abcc5067",
+        "t_6e51786d"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": 8,
+      "growth": 12.5,
+      "potencyNote": "% faster life regeneration, lasting, for you and allies in the aura; +2 for each level",
+      "icon": 8,
+      "shortText": "Aura: faster health regen",
+      "number": 325,
+      "gameKey": "Pulse"
+    },
+    {
+      "id": "p_944cb410",
+      "name": "Blood in the Water",
+      "description": "A lasting boon on yourself, with two gifts. Monsters smell blood and come for you first, ahead of your allies. And a little of every bit of damage you deal comes back to you as health. The threat never grows.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_50a7240a",
+        "t_bcaf43f8",
+        "t_82608ba7",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 50,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% apparent distance: monsters treat you as half as far away; also 1% of the damage you deal returns as health",
+      "icon": 48,
+      "shortText": "Threat; 1% life leech",
+      "number": 326,
+      "gameKey": "BloodInTheWater"
+    },
+    {
+      "id": "p_1a3d0f5c",
+      "name": "Thick Blood",
+      "description": "A lasting boon on yourself: a larger health pool.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_50a7240a",
+        "t_f68550c3",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 20,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% maximum life, lasting; +3 for each level",
+      "icon": 18,
+      "shortText": "You have more maximum life",
+      "number": 327,
+      "gameKey": "ThickBlood"
+    },
+    {
+      "id": "p_6c92fa63",
+      "name": "Bloodthirst",
+      "description": "A lasting boon on yourself, with two gifts. You regain health faster, and a little of every bit of damage you deal comes back to you as health.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_50a7240a",
+        "t_afa5e43e",
+        "t_82608ba7",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 20,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% faster life regeneration, lasting; +3 for each level; also 1% of the damage you deal returns as health",
+      "icon": 43,
+      "shortText": "Regen; 1% life leech",
+      "number": 328,
+      "gameKey": "Bloodthirst"
+    },
+    {
+      "id": "p_6e2e684d",
+      "name": "Blood Pact",
+      "description": "A lasting boon for you or an ally, with two gifts: a larger health pool, and a very little of the damage they deal comes back to them as health.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_50a7240a",
+        "t_f68550c3",
+        "t_82608ba7",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% maximum life, lasting; +2 for each level; also 0.5% of the damage they deal returns as health",
+      "icon": 12,
+      "shortText": "Ally: life; 0.5% leech",
+      "number": 329,
+      "gameKey": "BloodPact"
+    },
+    {
+      "id": "p_295eec63",
+      "name": "Quicken Blood",
+      "description": "A lasting boon for you or an ally: they regain health faster.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_50a7240a",
+        "t_afa5e43e",
+        "t_b06216ac",
+        "t_08fdec9d",
+        "t_6e51786d",
+        "t_5462244b"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% faster life regeneration, lasting; +2 for each level",
+      "icon": 50,
+      "shortText": "Ally regains life faster",
+      "number": 330,
+      "gameKey": "QuickenBlood"
+    },
+    {
+      "id": "p_539294ae",
+      "name": "Crimson Feast",
+      "description": "For 20 seconds your health pool swells and you feed on the fight: a larger share of the damage you deal comes back as health. For the worst moment of a battle.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_10b5142b"
+      ],
+      "tags": [
+        "t_ac8a7ceb",
+        "t_50a7240a",
+        "t_f68550c3",
+        "t_82608ba7",
+        "t_be83c5cf",
+        "t_08fdec9d",
+        "t_b0c8cbc0",
+        "t_9048f21b"
+      ],
+      "potency": 40,
+      "manaCost": 18,
+      "cooldown": 60,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% maximum life for 20 seconds; +4 for each level; also 3% of the damage you deal returns as health",
+      "icon": 45,
+      "shortText": "+40% life, 3% leech, 20s",
+      "number": 331,
+      "gameKey": "CrimsonFeast"
     }
   ],
   "confluences": [
@@ -8838,6 +9445,446 @@
         "e_c3e242a4"
       ],
       "name": "Paragon"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_4021590a",
+        "e_566cd6e8"
+      ],
+      "name": "Purge"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_4021590a",
+        "e_c253b238"
+      ],
+      "name": "Scald"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_4021590a",
+        "e_f60d06c1"
+      ],
+      "name": "Altar"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_4021590a",
+        "e_dddc13cb"
+      ],
+      "name": "Sacrifice"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_10b5142b",
+        "e_4021590a"
+      ],
+      "name": "Bloodlust"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_4021590a",
+        "e_d0ab3dce"
+      ],
+      "name": "Ironblood"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_3eaf93fd",
+        "e_4021590a"
+      ],
+      "name": "Bloodfire"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_10b5142b",
+        "e_4021590a"
+      ],
+      "name": "Warlord"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_1c094682",
+        "e_566cd6e8"
+      ],
+      "name": "Offering"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_566cd6e8",
+        "e_f60d06c1"
+      ],
+      "name": "Sepulcher"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_566cd6e8",
+        "e_dddc13cb"
+      ],
+      "name": "Martyr"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_10b5142b",
+        "e_566cd6e8"
+      ],
+      "name": "Zealot"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_566cd6e8",
+        "e_d0ab3dce"
+      ],
+      "name": "Oathkeeper"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_566cd6e8",
+        "e_c3e242a4"
+      ],
+      "name": "Grail"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_3eaf93fd",
+        "e_566cd6e8"
+      ],
+      "name": "Stigmata"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_10b5142b",
+        "e_566cd6e8"
+      ],
+      "name": "Penitent"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_1c094682",
+        "e_c253b238"
+      ],
+      "name": "Piranha"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_1c094682",
+        "e_f60d06c1"
+      ],
+      "name": "Thornback"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_1c094682",
+        "e_dddc13cb"
+      ],
+      "name": "Nightshade"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_10b5142b",
+        "e_1c094682"
+      ],
+      "name": "Raptor"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_1c094682",
+        "e_d0ab3dce"
+      ],
+      "name": "Thornhide"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_1c094682",
+        "e_c3e242a4"
+      ],
+      "name": "Heartwood"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_1c094682",
+        "e_3eaf93fd"
+      ],
+      "name": "Witch Doctor"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_10b5142b",
+        "e_1c094682"
+      ],
+      "name": "Direwolf"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_c253b238",
+        "e_f60d06c1"
+      ],
+      "name": "Bog"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_c253b238",
+        "e_dddc13cb"
+      ],
+      "name": "Lamprey"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_10b5142b",
+        "e_c253b238"
+      ],
+      "name": "Bloodrain"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_c253b238",
+        "e_d0ab3dce"
+      ],
+      "name": "Crimson Tide"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_3eaf93fd",
+        "e_c253b238"
+      ],
+      "name": "Scarlet Tide"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_10b5142b",
+        "e_c253b238"
+      ],
+      "name": "Shark"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_dddc13cb",
+        "e_f60d06c1"
+      ],
+      "name": "Catacomb"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_10b5142b",
+        "e_f60d06c1"
+      ],
+      "name": "Warpath"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_c3e242a4",
+        "e_f60d06c1"
+      ],
+      "name": "Sinew"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_3eaf93fd",
+        "e_f60d06c1"
+      ],
+      "name": "Bloodstone"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_10b5142b",
+        "e_f60d06c1"
+      ],
+      "name": "Ogre"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_10b5142b",
+        "e_dddc13cb"
+      ],
+      "name": "Assassin"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_d0ab3dce",
+        "e_dddc13cb"
+      ],
+      "name": "Dreadguard"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_c3e242a4",
+        "e_dddc13cb"
+      ],
+      "name": "Nosferatu"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_3eaf93fd",
+        "e_dddc13cb"
+      ],
+      "name": "Hemomancer"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_10b5142b",
+        "e_dddc13cb"
+      ],
+      "name": "Butcher"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_10b5142b",
+        "e_d0ab3dce"
+      ],
+      "name": "Shocktrooper"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_10b5142b",
+        "e_c3e242a4"
+      ],
+      "name": "Heartbeat"
+    },
+    {
+      "essences": [
+        "e_057f86d1",
+        "e_10b5142b",
+        "e_3eaf93fd"
+      ],
+      "name": "Bloodstorm"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_057f86d1",
+        "e_10b5142b"
+      ],
+      "name": "Frenzy"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_c3e242a4",
+        "e_d0ab3dce"
+      ],
+      "name": "Undying"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_3eaf93fd",
+        "e_d0ab3dce"
+      ],
+      "name": "Bloodrune"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_3eaf93fd",
+        "e_c3e242a4"
+      ],
+      "name": "Transfusion"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_10b5142b",
+        "e_c3e242a4"
+      ],
+      "name": "Lionheart"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_10b5142b",
+        "e_3eaf93fd"
+      ],
+      "name": "Bloodblade"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_1c094682",
+        "e_4021590a"
+      ],
+      "name": "Emberthorn"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_4021590a",
+        "e_c3e242a4"
+      ],
+      "name": "Hotblood"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_566cd6e8",
+        "e_c253b238"
+      ],
+      "name": "Ablution"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_c253b238",
+        "e_c3e242a4"
+      ],
+      "name": "Vitality"
+    },
+    {
+      "essences": [
+        "e_10b5142b",
+        "e_d0ab3dce",
+        "e_f60d06c1"
+      ],
+      "name": "Ironhide"
+    },
+    {
+      "essences": [
+        "e_00bc5e34",
+        "e_10b5142b",
+        "e_d0ab3dce"
+      ],
+      "name": "Goliath"
     }
   ],
   "stones": [
@@ -9047,6 +10094,17 @@
         "t_78bf3c15"
       ],
       "gameName": "Exorbitancy"
+    },
+    {
+      "id": "s_d0216944",
+      "name": "Compounding",
+      "tags": [
+        "t_db6d20e4",
+        "t_b5fae28d",
+        "t_a9a0b1a6",
+        "t_8e6b4fcf"
+      ],
+      "gameName": "Compounding"
     }
   ],
   "races": [

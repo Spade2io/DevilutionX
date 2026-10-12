@@ -392,6 +392,8 @@ std::string_view GetEssenceName(EssenceID essence)
 		return "Magic";
 	case EssenceID::Might:
 		return "Might";
+	case EssenceID::Blood:
+		return "Blood";
 	case EssenceID::None:
 		break;
 	}
