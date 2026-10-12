@@ -333,7 +333,7 @@ int GetRiderAmount(const Player &player, const ReachingBuff &buff, const SpellDa
 	// counts double, as every boon of those kinds is double size.
 	int amount = IsAnyOf(stat, "ManaRegen", "LifeRegen", "MaxLife", "MaxMana") ? 2 * spellData.riderAmount : spellData.riderAmount;
 	// Life leech is kept very small on purpose: it never grows.
-	if (buff.fromOther || stat == "LifeLeech")
+	if (buff.fromOther || IsAnyOf(stat, "LifeLeech", "ManaLeech"))
 		return amount;
 	const int level = ShownPowerLevel(player.GetBaseSpellLevel(buff.spell));
 	// The armor that comes with a damage reduction boon (Stoneskin) or with a stealth boon (Cloak
@@ -377,10 +377,22 @@ void LeechLifeFromDamage(int damage)
 	// What is left over from earlier hits, in thousandths of a 64th of a hit point. One percent of
 	// a small hit is less than the game can count, so the scraps are kept until they add up.
 	static int64_t carried = 0;
+	static int64_t carriedMana = 0;
 
 	Player &player = *MyPlayer;
 	if (damage <= 0 || player.hasNoLife())
 		return;
+	// Mana leech works the same way, from the "ManaLeech" second effects.
+	if (const int tenths = GetPowerBuffPercent(player, "ManaLeech"); tenths > 0 && !HasAnyOf(player._pIFlags, ItemSpecialEffect::NoMana)) {
+		carriedMana += static_cast<int64_t>(damage) * tenths;
+		const int gained = static_cast<int>(carriedMana / 1000);
+		carriedMana %= 1000;
+		if (gained > 0 && player._pMana < player._pMaxMana) {
+			player._pMana = std::min(player._pMana + gained, player._pMaxMana);
+			player._pManaBase = std::min(player._pManaBase + gained, player._pMaxManaBase);
+			RedrawComponent(PanelDrawComponent::Mana);
+		}
+	}
 	const int tenths = GetPowerBuffPercent(player, "LifeLeech");
 	if (tenths <= 0)
 		return;
@@ -461,7 +473,9 @@ std::string DescribeBuffEffect(std::string_view stat, int amount, const SpellDat
 	if (stat == "Block")
 		return StrCat("+", amount, "% block");
 	if (stat == "LifeLeech")
-		return StrCat(amount / 10, amount % 10 != 0 ? StrCat(".", amount % 10) : std::string(), "% life leech");
+		return StrCat(amount / 10, amount % 10 != 0 ? StrCat(".", amount % 10) : std::string(), "% health leech");
+	if (stat == "ManaLeech")
+		return StrCat(amount / 10, amount % 10 != 0 ? StrCat(".", amount % 10) : std::string(), "% mana leech");
 	if (stat == "WalkSpeed")
 		return "faster walking";
 	if (stat == "NoStagger")

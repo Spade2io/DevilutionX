@@ -252,7 +252,7 @@ std::string GetPowerNumbersText(const Player &player, SpellID spell, int level)
 		} else if (stat == "Distance") {
 			// Stealth and threat never grow; the second effect riding on them does.
 			if (rides("LifeLeech"))
-				text = StrCat(data.riderAmount / 10, "% life leech");
+				text = StrCat(data.riderAmount / 10, "% health leech");
 			else if (rides("Block"))
 				text = StrCat("+", data.riderAmount + shown, "% block");
 			else if (rides("ToHit"))

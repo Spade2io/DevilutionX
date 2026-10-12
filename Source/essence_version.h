@@ -19,8 +19,8 @@ namespace devilution {
 /** Stands where DevilutionX puts its major version. No DevilutionX release will ever be 77. */
 constexpr uint8_t EssenceModFamily = 77;
 /** The release handed out. Everyone in a game must be on the same one. */
-constexpr uint8_t EssenceModRelease = 1;
+constexpr uint8_t EssenceModRelease = 2;
 /** The name that release goes by, shown on the main menu and on its download. Change it with the number above. */
-constexpr char EssenceModVersionName[] = "1.0";
+constexpr char EssenceModVersionName[] = "1.01";
 
 } // namespace devilution

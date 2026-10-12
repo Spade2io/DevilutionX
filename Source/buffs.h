@@ -79,9 +79,10 @@ bool ActivatePowerBuff(Player &player, SpellID spell, int amount, const Player &
 int GetPowerBuffPercent(const Player &player, std::string_view stat);
 
 /**
- * @brief Life leech: the local player takes back a small share of damage they have just dealt to a
- * monster, as health. The share is the sum of the "LifeLeech" second effects on their boons, in
- * tenths of a percent (10 is 1%). Call it on the player's own PC only.
+ * @brief Leech: the local player takes back a small share of damage they have just dealt to a
+ * monster, as health and as mana. The shares are the sums of the "LifeLeech" and "ManaLeech"
+ * second effects on their boons, in tenths of a percent (10 is 1%). Call it on the player's own
+ * PC only.
  * @param damage What the monster actually lost, in 64ths of a hit point.
  */
 void LeechLifeFromDamage(int damage);

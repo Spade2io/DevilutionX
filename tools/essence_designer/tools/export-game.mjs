@@ -267,6 +267,7 @@ const SHORT_TEXT = {
 //         Rupture counts Bleed for a Blood power.
 //   Life leech: a boon's rider "LifeLeech" gives back that share of the damage the player deals
 //         as health, in TENTHS of a percent (10 is 1%). Every such boon adds up. It never grows.
+//         "ManaLeech" does the same for mana; no power has it yet.
 //   A second fixed effect, named by "stat" with its size in "boon": on a GroundBurst, HealSelf
 //         heals the caster that many hit points (Blood Moon); on a Strike, Wither makes effects
 //         over time on the target deal that percent more until it dies (Exsanguinate).

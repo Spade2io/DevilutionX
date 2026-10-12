@@ -1,5 +1,6 @@
 #include "panels/charpanel.hpp"
 
+#include "buffs.h"
 #include "dots.h"
 
 #include <cstdint>
@@ -7,6 +8,7 @@
 
 #include <algorithm>
 #include <string>
+#include <vector>
 
 #include <function_ref.hpp>
 
@@ -333,7 +335,7 @@ void DrawExtraStats(const Surface &out, Point panelPosition)
 		std::string_view label;
 		std::string value;
 	};
-	const Line lines[] = {
+	std::vector<Line> lines = {
 		{ "Health regen", StrCat(FormatSixtyFourthsPerSecond(GetLifeRegenPerSecond(player)), " per 3 seconds") },
 		{ "Mana regen", StrCat(FormatSixtyFourthsPerSecond(GetManaRegenPerSecond(player)), " per second") },
 		// The chance to block a monster of the player's own level: their level adds 2 a level and
@@ -341,12 +343,18 @@ void DrawExtraStats(const Surface &out, Point panelPosition)
 		// Leonid, a staff or bare hands).
 		{ "Block chance", StrCat(std::clamp(player.GetBlockChance(/*useLevel=*/false), 0, 100), player._pBlockFlag ? "% vs your level" : "% with a shield") },
 	};
+	// Leech from boons, in tenths of a percent. Each is listed only when the player has some.
+	const auto leech = [](int tenths) { return StrCat(tenths / 10, ".", tenths % 10, "% of damage dealt"); };
+	if (const int tenths = GetPowerBuffPercent(player, "LifeLeech"); tenths > 0)
+		lines.push_back({ "Health leech", leech(tenths) });
+	if (const int tenths = GetPowerBuffPercent(player, "ManaLeech"); tenths > 0)
+		lines.push_back({ "Mana leech", leech(tenths) });
 
 	constexpr int Padding = 8;
 	constexpr int LineHeight = 16;
 	constexpr int Width = 290;
 	constexpr int LabelWidth = 110;
-	const int height = static_cast<int>(std::size(lines) + 1) * LineHeight + Padding * 2;
+	const int height = static_cast<int>(lines.size() + 1) * LineHeight + Padding * 2;
 	const Point origin { panelPosition.x + SidePanelSize.width + 6, panelPosition.y + 8 };
 
 	DrawHalfTransparentRectTo(out, origin.x, origin.y, Width, height);
