@@ -2830,7 +2830,7 @@ void StartPlrHit(Player &player, int dam, bool forcehit)
 
 	RedrawComponent(PanelDrawComponent::Health);
 	// Essence Mod: a player with a "NoStagger" buff still cries out when hit, but the blow never
-	// interrupts what they are doing.
+	// interrupts what they are doing. (No power gives this any more: see "HitRecovery" below.)
 	if (GetPowerBuffPercent(player, "NoStagger") > 0)
 		return;
 	if (player._pClass == HeroClass::Barbarian) {
@@ -2853,6 +2853,9 @@ void StartPlrHit(Player &player, int dam, bool forcehit)
 	} else {
 		skippedAnimationFrames = 0;
 	}
+	// Essence Mod: a "HitRecovery" boon takes its frames off as well, on top of gear. Two frames of
+	// stagger are always left, so a hit never costs nothing.
+	skippedAnimationFrames = static_cast<int8_t>(std::clamp(skippedAnimationFrames + GetPowerBuffPercent(player, "HitRecovery"), 0, std::max(player._pHFrames - 2, 0)));
 
 	NewPlrAnim(player, player_graphic::Hit, pd, AnimationDistributionFlags::None, skippedAnimationFrames);
 

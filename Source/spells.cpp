@@ -125,7 +125,7 @@ int GetManaAmount(const Player &player, SpellID sn)
 	if (spellData.buffStat == "WalkSpeed")
 		levels = levels / 5 * 5;
 
-	int ma = spellData.sManaCost == 255 ? player._pMaxManaBase : spellData.sManaCost << 6; // mana amount, in 64ths
+	int ma = spellData.sManaCost == 255 ? player._pMaxManaBase : (spellData.sManaCost << 6) + spellData.manaFraction; // mana amount, in 64ths
 	if (sn == SpellID::Healing || sn == SpellID::HealOther)
 		ma = GetSpellData(SpellID::Healing).sManaCost << 6;
 	ma = std::max(ma, 0);

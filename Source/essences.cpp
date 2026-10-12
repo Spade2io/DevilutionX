@@ -905,13 +905,36 @@ SpellID PickPowerForStone(std::string_view itemName)
 	return pool[std::uniform_int_distribution<size_t>(0, pool.size() - 1)(generator)];
 }
 
+bool IsConfluencePower(SpellID spell)
+{
+	if (!ConfluenceTaken || spell == SpellID::Invalid)
+		return false;
+	const auto &row = Abilities[ConfluenceSlot];
+	return std::find(row.begin(), row.end(), spell) != row.end();
+}
+
+int WithConfluenceBoost(SpellID spell, int64_t amount)
+{
+	constexpr int ConfluenceBoostPercent = 25;
+	if (IsConfluencePower(spell))
+		amount += amount * ConfluenceBoostPercent / 100;
+	return static_cast<int>(std::min<int64_t>(amount, INT32_MAX));
+}
+
 void SlotLearnedAbility(SpellID spell)
 {
 	if (IsAbilitySlotted(spell))
 		return;
-	const size_t slot = RowWithRoomFor(GetSpellEssence(spell));
+	size_t slot = RowWithRoomFor(GetSpellEssence(spell));
 	if (slot >= AbilitySlotCount)
 		return;
+	// With room in both the essence's own row and the confluence's, it is an even chance which the
+	// power goes to. The draw is this player's alone.
+	if (slot < EssenceSlotCount && ConfluenceTaken && RowHasRoom(ConfluenceSlot)) {
+		static std::mt19937 generator { std::random_device {}() };
+		if (std::uniform_int_distribution<int>(0, 1)(generator) == 1)
+			slot = ConfluenceSlot;
+	}
 	auto &row = Abilities[slot];
 	const auto free = std::find(row.begin(), row.end(), SpellID::Invalid);
 	if (free != row.end())

@@ -63,6 +63,7 @@
 #include "debug.h"
 #endif
 #include "engine/backbuffer_state.hpp"
+#include "essences.h"
 #include "engine/points_in_rectangle_range.hpp"
 #include "engine/random.hpp"
 #include "game_mode.hpp"
@@ -305,6 +306,9 @@ bool MonsterMHit(const Player &player, Monster &monster, int mindam, int maxdam,
 	hper = std::clamp(hper, 5, 95);
 	// Essence Mod: a shot carrying a special attack with the rider "SureHit" cannot miss.
 	if (missileData.isArrow() && IsSpecialAttack(sourceSpell) && IsValidSpell(sourceSpell) && GetSpellData(sourceSpell).rider == "SureHit")
+		hit = 0;
+	// So is a bolt whose power carries it (Magic Missile). It still has to reach its target.
+	if (t == MissileID::PowerBolt && IsExtendedSpell(sourceSpell) && IsValidSpell(sourceSpell) && GetSpellData(sourceSpell).rider == "SureHit")
 		hit = 0;
 
 	if (monster.mode == MonsterMode::Petrified)
@@ -948,7 +952,7 @@ DamageRange GetDamageAmt(SpellID spell, int spellLevel)
 	switch (spell) {
 	case SpellID::Firebolt:
 	case SpellID::Frostbolt: {
-		return { GrowWithLevel(3, spellLevel), GrowWithLevel(12, spellLevel) }; // Essence Mod: Spirit then multiplies it
+		return { GrowWithLevel(4, spellLevel), GrowWithLevel(14, spellLevel) }; // Essence Mod: Spirit then multiplies it
 	}
 	case SpellID::Healing:
 	case SpellID::HealOther:
@@ -1958,7 +1962,7 @@ void AddFirebolt(Missile &missile, AddMissileParameter &parameter)
 		switch (missile.sourceType()) {
 		case MissileSource::Player: {
 			const Player &player = *missile.sourcePlayer();
-			missile._midam = GrowWithLevel(GenerateRnd(10) + 3, missile._mispllvl); // Essence Mod: 3 to 12, an eighth more a level
+			missile._midam = GrowWithLevel(GenerateRnd(11) + 4, missile._mispllvl); // Essence Mod: 4 to 14 (about 1.5 a point of mana), an eighth more a level
 		} break;
 
 		case MissileSource::Monster:
@@ -2606,6 +2610,7 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	bool isKindle = false;
 	bool isFreeze = false;
 	bool isCurse = false;
+	bool isCompound = false;
 	DamageType burstDamageType = DamageType::Fire;
 	MissileID burstImmunityMissile = MissileID::Firebolt;
 	int amount = 1 * 64;
@@ -2637,6 +2642,8 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 			isFreeze = true;
 		} else if (spellData.effect == "Curse") {
 			isCurse = true;
+		} else if (spellData.effect == "Compound") {
+			isCompound = true;
 		} else if (const std::optional<DotID> shaped = ParseDotName(spellData.rider); (isCone || isChain) && shaped) {
 			// A cone or a chain lays down the effect over time its rider names.
 			dot = *shaped;
@@ -2657,6 +2664,12 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	// A curse that is a percentage grows by a set step each level, like a percentage buff.
 	if (isCurse && IsExtendedSpell(spell) && IsValidSpell(spell) && IsPercentBuffStat(GetSpellData(spell).buffStat))
 		amount = GetPercentBuffAmount(GetSpellData(spell).buffStat, GetSpellData(spell).effectAmount, ShownPowerLevel(player.GetBaseSpellLevel(spell)));
+	// A curse cast from the confluence row is a quarter stronger. Only the caster's PC sends it.
+	if (isCurse && &player == MyPlayer && !isFreeze)
+		amount = WithConfluenceBoost(spell, amount);
+	// Compounding is a percentage that gains 2 with each level of the power.
+	if (isCompound)
+		amount = GetSpellData(spell).effectAmount + 2 * ShownPowerLevel(player.GetBaseSpellLevel(spell));
 	const UiFlags textColor = isKindle ? GetSpellTextColor(spell) : GetDamageTypeTextColor(dot == DotID::Corruption ? DamageType::Shadow : DamageType::Fire);
 
 	// The monster under the cursor, and with a radius every monster standing within it.
@@ -2772,6 +2785,12 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 
 		// A separate id from the damage numbers, so the game does not merge the two.
 		const int textId = 1000 + monsterId;
+		if (isCompound) {
+			// The caster's own effects over time on this monster: back to full, and stronger.
+			const int kinds = CompoundMonsterDots(monster, spell, amount);
+			AddFloatingNumber(monster.position.tile, { 0, 0 }, kinds > 0 ? StrCat("Compounded +", amount, "%") : std::string("Nothing to compound"), GetSpellTextColor(spell) | UiFlags::FontSize12, textId);
+			continue;
+		}
 		if (isCurse) {
 			// A curse on the monster itself. Every PC has to know of it, so they are all told.
 			NetSendCmdPowerOnMonster(static_cast<uint16_t>(monsterId), spell, static_cast<uint32_t>(amount));
@@ -2959,6 +2978,10 @@ uint32_t GetPowerCastAmount(const Player &caster, SpellID spell)
 	// A percentage grows by a set step each level.
 	if (IsAnyOf(spellData.effect, "Buff", "Aura") && IsPercentBuffStat(spellData.buffStat))
 		amount = static_cast<uint32_t>(GetPercentBuffAmount(spellData.buffStat, spellData.effectAmount, ShownPowerLevel(caster.GetBaseSpellLevel(spell))));
+	// A power in the confluence row is a quarter stronger. Healing and shields get theirs where
+	// Spirit is applied; stealth and threat never change.
+	if (&caster == MyPlayer && !IsAnyOf(spellData.buffStat, "Distance", "HealPulse", "ShieldPulse", "Shield") && IsAnyOf(spellData.effect, "Buff", "Aura", "Mana", "HealPercent", "Resurrect"))
+		amount = static_cast<uint32_t>(WithConfluenceBoost(spell, amount));
 	return amount;
 }
 
@@ -2975,6 +2998,14 @@ void AddStrengthBuff(Missile &missile, AddMissileParameter &parameter)
 	// "Heal", "Buff" and "Mana" land on players. Only the caster's own PC decides who and how
 	// much; it then tells every PC, its own included, and each of them applies it.
 	const SpellID spell = missile.sourceSpell;
+	// "CompoundHeals": every heal over time on every player goes back to full and grows stronger.
+	// All the PCs keep those heals, so they are all told, with the percentage.
+	if (IsExtendedSpell(spell) && IsValidSpell(spell) && GetSpellData(spell).effect == "CompoundHeals") {
+		const Player &caster = Players[missile._misource];
+		if (&caster == MyPlayer)
+			NetSendCmdParam2(true, CMD_COMPOUNDHEALS, static_cast<uint16_t>(spell), static_cast<uint16_t>(GetSpellData(spell).effectAmount + 2 * ShownPowerLevel(caster.GetBaseSpellLevel(spell))));
+		return;
+	}
 	if (IsExtendedSpell(spell) && IsValidSpell(spell) && IsAnyOf(GetSpellData(spell).effect, "Heal", "Buff", "Mana", "Aura", "Cleanse", "HealPercent", "ChainHeal", "Resurrect", "Shield")) {
 		const SpellData &spellData = GetSpellData(spell);
 		const Player &caster = Players[missile._misource];

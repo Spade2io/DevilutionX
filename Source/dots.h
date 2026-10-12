@@ -71,6 +71,14 @@ bool IsImmuneToDot(const Monster &monster, DotID dot);
 int AddMonsterDot(Monster &monster, DotID dot, SpellID spell, int damagePerTick);
 
 /**
+ * @brief Compounding: every effect over time the local player has on a monster goes back to its
+ * full duration and becomes stronger by a percentage. The extra is kept as the compounding power's
+ * own share of each effect, so that power earns the experience for what it added.
+ * @return How many kinds of effect it acted on.
+ */
+int CompoundMonsterDots(Monster &monster, SpellID spell, int percent);
+
+/**
  * @brief Makes a monster take more damage from the local player, for as long as it lives.
  * Applying it again does not add up: the larger percentage counts.
  * Like the effects above, it is held on this PC only.

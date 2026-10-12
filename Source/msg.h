@@ -436,6 +436,11 @@ enum _cmd_id : uint8_t {
 	//
 	// body (TCmdParam1)
 	CMD_FILTHY,
+	// Essence Mod: the sender has cast a compounding power for heals: every heal over time on every
+	// player goes back to full duration and grows stronger.
+	//
+	// body (TCmdParam2): the power's spell id, the percentage
+	CMD_COMPOUNDHEALS,
 	// Fake command; set current player for succeeding mega pkt buffer messages.
 	//
 	// body (TFakeCmdPlr)

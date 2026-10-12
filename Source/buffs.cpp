@@ -31,6 +31,7 @@
 #include "panels/spell_icons.hpp"
 #include "player.h"
 #include "plrmsg.h"
+#include "spell_xp.h"
 #include "spells.h"
 #include "tables/misdat.h"
 #include "utils/str_cat.hpp"
@@ -347,6 +348,12 @@ int GetRiderAmount(const Player &player, const ReachingBuff &buff, const SpellDa
 	// Points off a physical hit (Unyielding): half a point a level, or a whole one from 5 up.
 	if (stat == "DmgReduction")
 		amount += spellData.riderAmount >= 5 ? level : level / 2;
+	// Frames off the stagger after a hit (Unbowed, Unyielding): one more at level 5 and at level 10.
+	if (stat == "HitRecovery")
+		return std::min(amount + level / 5, 3);
+	// A power in the confluence row is a quarter stronger. Only this PC knows its own player's.
+	if (&player == MyPlayer)
+		amount = WithConfluenceBoost(buff.spell, amount);
 	return amount;
 }
 
@@ -362,6 +369,31 @@ int GetPowerBuffPercent(const Player &player, std::string_view stat)
 			percent += GetRiderAmount(player, buff, spellData, stat);
 	}
 	return percent;
+}
+
+void CompoundHealsOverTime(const Player &caster, SpellID spell, int percent)
+{
+	percent = std::clamp(percent, 0, 100);
+	bool any = false;
+	for (size_t i = 0; i < PowerBuffs.size(); i++) {
+		Player &target = Players[i];
+		for (PowerBuff &buff : PowerBuffs[i]) {
+			if (buff.ticksLeft <= 0 || !IsValidSpell(buff.spell))
+				continue;
+			const SpellData &spellData = GetSpellData(buff.spell);
+			if (spellData.buffStat != "HealPulse" || spellData.durationSeconds <= 0)
+				continue;
+			const int added = static_cast<int>(static_cast<int64_t>(buff.amount) * percent / 100);
+			buff.amount += added;
+			buff.ticksLeft = spellData.durationSeconds * TicksPerSecond;
+			any = true;
+			// The compounding power earns the experience for the healing it added: one pulse every 2 seconds.
+			if (&caster == MyPlayer)
+				AddSpellExperienceForHealing(caster, target, spell, added * (spellData.durationSeconds / 2));
+		}
+	}
+	if (&caster == MyPlayer && caster.isOnActiveLevel())
+		AddFloatingNumber(caster.position.tile, { 0, 0 }, any ? StrCat("Compounded +", percent, "%") : std::string("Nothing to compound"), GetSpellTextColor(spell) | UiFlags::FontSize12, 2000 + caster.getId());
 }
 
 /** One effect of a boon in a few plain words, with its size: "+3 Spirit". Empty for one with nothing to say. */
@@ -409,6 +441,8 @@ std::string DescribeBuffEffect(std::string_view stat, int amount, const SpellDat
 		return "faster walking";
 	if (stat == "NoStagger")
 		return "never staggered";
+	if (stat == "HitRecovery")
+		return StrCat("recover from hits ", amount, amount == 1 ? " frame sooner" : " frames sooner");
 	if (stat == "Distance")
 		return amount > 100 ? "stealth" : "threat";
 	if (stat == "HealPulse")

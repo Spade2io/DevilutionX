@@ -272,7 +272,7 @@ void AddSpellExperienceForDamage(const Player &player, const Monster &monster, S
 	// One line for the whole gain, however many buffs are sharing in it.
 	std::string message = DescribeGain(spell, added);
 	ShareExperienceWithActiveBuffs(*MyPlayer, added / multiplier, message);
-	EventPlrMsg(message, UiFlags::ColorWhite);
+	EventXpMsg(message);
 }
 
 void AddAttackExperienceForDamage(const Player &player, const Monster &monster, int damage, int hitPointsBefore)
@@ -288,7 +288,7 @@ void AddAttackExperienceForDamage(const Player &player, const Monster &monster, 
 	std::string message;
 	ShareExperienceWithActiveBuffs(*MyPlayer, worth, message);
 	if (!message.empty())
-		EventPlrMsg(message, UiFlags::ColorWhite);
+		EventXpMsg(message);
 }
 
 unsigned AverageMonsterExperienceForLevel(unsigned level)
@@ -318,7 +318,7 @@ void AddSpellExperienceForHealing(const Player &caster, const Player &target, Sp
 	// Every source of spell experience feeds the active buffs, not only damage.
 	std::string message = DescribeGain(spell, added);
 	ShareExperienceWithActiveBuffs(*MyPlayer, added, message);
-	EventPlrMsg(message, UiFlags::ColorWhite);
+	EventXpMsg(message);
 }
 
 uint32_t GetSpellExperience(SpellID spell)

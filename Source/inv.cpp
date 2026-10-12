@@ -1667,6 +1667,39 @@ void CheckInvScrn(bool isShiftHeld, bool isCtrlHeld)
 	}
 }
 
+/**
+ * Essence Mod: in multiplayer a pile of gold is split evenly among the players on the same level
+ * as the one who picks it up. What does not divide evenly, and any share that does not fit in a
+ * bag, stays with the one who clicked. Every PC works this out the same way as the pile is taken,
+ * so nothing extra has to be sent.
+ */
+void ShareGoldPile(Player &clicker, Item &gold)
+{
+	if (!gbIsMultiplayer || gold._itype != ItemType::Gold)
+		return;
+	std::vector<Player *> others;
+	for (Player &other : Players) {
+		if (&other == &clicker || !other.plractive || other._pLvlChanging)
+			continue;
+		if (other.plrlevel != clicker.plrlevel || other.plrIsOnSetLevel != clicker.plrIsOnSetLevel)
+			continue;
+		others.push_back(&other);
+	}
+	if (others.empty())
+		return;
+	const int share = gold._ivalue / static_cast<int>(others.size() + 1);
+	if (share <= 0)
+		return;
+	for (Player *other : others) {
+		const int left = AddGoldToInventory(*other, share);
+		other->_pGold = CalculateGold(*other);
+		gold._ivalue -= share - left;
+		if (other == MyPlayer && left < share)
+			PlaySFX(SfxID::ItemGold);
+	}
+	SetPlrHandGoldCurs(gold);
+}
+
 void InvGetItem(Player &player, int ii)
 {
 	Item &item = Items[ii];
@@ -1679,6 +1712,7 @@ void InvGetItem(Player &player, int ii)
 	CheckQuestItem(player, item);
 	item.updateRequiredStatsCacheForPlayer(player);
 
+	ShareGoldPile(player, item);
 	if (item._itype == ItemType::Gold && GoldAutoPlace(player, item)) {
 		if (MyPlayer == &player) {
 			// Non-gold items (or gold when you have a full inventory) go to the hand then provide audible feedback on
@@ -1753,6 +1787,7 @@ void AutoGetItem(Player &player, Item *itemPointer, int ii)
 	bool done;
 	bool autoEquipped = false;
 
+	ShareGoldPile(player, item);
 	if (item._itype == ItemType::Gold) {
 		done = GoldAutoPlace(player, item);
 		if (!done) {

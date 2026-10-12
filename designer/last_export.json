@@ -510,6 +510,12 @@
       "name": "Health Leach",
       "groupId": "g_777a6431",
       "parentId": null
+    },
+    {
+      "id": "t_db6d20e4",
+      "name": "Compounding",
+      "groupId": "g_40d9d605",
+      "parentId": null
     }
   ],
   "damageTypes": [
@@ -648,7 +654,8 @@
       ],
       "tagsFinite": [
         "t_4f155f0e",
-        "t_bcaf43f8"
+        "t_bcaf43f8",
+        "t_db6d20e4"
       ],
       "primaryStat": "Power"
     },
@@ -716,7 +723,8 @@
       ],
       "tagsFinite": [
         "t_4f155f0e",
-        "t_f931de44"
+        "t_f931de44",
+        "t_db6d20e4"
       ],
       "primaryStat": "Recovery"
     },
@@ -816,7 +824,8 @@
       ],
       "tagsFinite": [
         "t_f931de44",
-        "t_7d14c833"
+        "t_7d14c833",
+        "t_db6d20e4"
       ],
       "primaryStat": "Spirit"
     },
@@ -1594,12 +1603,12 @@
         "t_8e6b4fcf",
         "t_5462244b"
       ],
-      "potency": 6,
+      "potency": 9,
       "manaCost": 6,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "damage"
+      "potencyNote": "damage (4 to 14 in the game)"
     },
     {
       "id": "p_fa342df9",
@@ -2144,12 +2153,12 @@
         "t_8e6b4fcf",
         "t_5462244b"
       ],
-      "potency": 6,
+      "potency": 9,
       "manaCost": 6,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "damage"
+      "potencyNote": "damage (4 to 14 in the game)"
     },
     {
       "id": "p_c4986bad",
@@ -4679,7 +4688,7 @@
         "t_8e6b4fcf",
         "t_5462244b"
       ],
-      "potency": 6,
+      "potency": 7.5,
       "manaCost": 5,
       "cooldown": 0,
       "radius": null,
@@ -4953,7 +4962,7 @@
     {
       "id": "p_3d85e6a2",
       "name": "Unyielding",
-      "description": "A lasting boon on yourself, with three gifts. Blows no longer stagger you: taking a hit never interrupts what you are doing. Every physical hit you take is 1 point lighter, and half a point more with each level of the power. And you will not be moved or ignored: monsters notice you first and prefer you over your allies. The threat never grows, and does not add to Monolith's.",
+      "description": "A lasting boon on yourself, with three gifts. You recover from hits sooner: one frame, two from level 5, three at level 10. Every physical hit you take is 1 point lighter, and half a point more with each level of the power. And you will not be moved or ignored: monsters notice you first and prefer you over your allies. The threat never grows, and does not add to Monolith's.",
       "status": "accepted",
       "essenceIds": [
         "e_f60d06c1"
@@ -4974,11 +4983,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% apparent distance: monsters treat you as half as far away; also hits no longer stagger you, and 1 point off every physical hit, +1 every two levels",
+      "potencyNote": "% apparent distance: monsters treat you as half as far away; also recover from hits 1 frame sooner (2 at level 5, 3 at level 10), and 1 point off every physical hit, +1 every two levels",
       "number": 225,
       "gameKey": "Unyielding",
       "icon": 33,
-      "shortText": "Threat; no stagger; -1 hit"
+      "shortText": "Threat; recovery; -1 hit"
     },
     {
       "id": "p_32273d73",
@@ -5070,8 +5079,8 @@
         "t_f407f67c",
         "t_5462244b"
       ],
-      "potency": 5,
-      "manaCost": 2,
+      "potency": 4,
+      "manaCost": 1.33,
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
@@ -5958,7 +5967,7 @@
         "t_8e6b4fcf",
         "t_5462244b"
       ],
-      "potency": 6,
+      "potency": 7.2,
       "manaCost": 6,
       "cooldown": 0,
       "radius": null,
@@ -6394,7 +6403,7 @@
     {
       "id": "p_68f9e1ad",
       "name": "Magic Missile",
-      "description": "A bolt of raw magic at one enemy. Magic's everyday attack.",
+      "description": "A bolt of raw magic at one enemy that never misses: it still has to reach its target, but once it does it always lands. Magic's everyday attack.",
       "status": "accepted",
       "essenceIds": [
         "e_3eaf93fd"
@@ -6417,7 +6426,7 @@
       "number": 273,
       "gameKey": "MagicMissile",
       "icon": 35,
-      "shortText": "A bolt of Arcane damage"
+      "shortText": "A bolt that never misses"
     },
     {
       "id": "p_fed7c024",
@@ -6677,7 +6686,7 @@
     {
       "id": "p_c83fc244",
       "name": "Unbowed",
-      "description": "A lasting boon on yourself, with two gifts. Your health pool is larger, and hits no longer stagger you: nothing interrupts your swing.",
+      "description": "A lasting boon on yourself, with two gifts. Your health pool is larger, and you recover from hits sooner: one frame, two from level 5, three at level 10. It adds to hit recovery from gear, and two frames of stagger are always left.",
       "status": "accepted",
       "essenceIds": [
         "e_00bc5e34"
@@ -6696,11 +6705,11 @@
       "cooldown": 0,
       "radius": null,
       "growth": 12.5,
-      "potencyNote": "% maximum life, lasting; +3 for each level; also hits no longer stagger you",
+      "potencyNote": "% maximum life, lasting; +3 for each level; also recover from hits 1 frame sooner (2 at level 5, 3 at level 10)",
       "number": 283,
       "gameKey": "Unbowed",
       "icon": 25,
-      "shortText": "+20% life; never staggered"
+      "shortText": "+20% life; faster recovery"
     },
     {
       "id": "p_751de191",
@@ -7102,6 +7111,411 @@
       "gameKey": "Intimidate",
       "icon": 37,
       "shortText": "Foes miss more, radius 2"
+    },
+    {
+      "id": "p_863cd825",
+      "name": "Ember",
+      "description": "A small bolt of fire for very little mana. Less damage than Firebolt each cast, but far more for the mana.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_4021590a"
+      ],
+      "tags": [
+        "t_73143798",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 4,
+      "manaCost": 1.33,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage",
+      "shortText": "Cheap bolt of fire",
+      "icon": 2,
+      "number": 298,
+      "gameKey": "Ember"
+    },
+    {
+      "id": "p_78efccd3",
+      "name": "Conflagrate",
+      "description": "Compounding. Every effect over time you have on one enemy, Burn and any other kind alike, goes back to its full duration and grows stronger: by a tenth, and a fiftieth more with each level of the power. Each cast builds on the last.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_4021590a"
+      ],
+      "tags": [
+        "t_73143798",
+        "t_db6d20e4",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_a9a0b1a6",
+        "t_b5fae28d"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 10,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% stronger effects over time on the enemy, and back to full duration; +2 for each level",
+      "shortText": "Feeds your damage over time",
+      "icon": 46,
+      "number": 299,
+      "gameKey": "Conflagrate"
+    },
+    {
+      "id": "p_bca68b54",
+      "name": "Ice Shard",
+      "description": "A small shard of ice for very little mana. Light damage each cast, but a great deal for the mana.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c253b238"
+      ],
+      "tags": [
+        "t_1bbbeedf",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 4,
+      "manaCost": 1.33,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage",
+      "shortText": "Cheap bolt of ice",
+      "icon": 29,
+      "number": 300,
+      "gameKey": "IceShard"
+    },
+    {
+      "id": "p_ba8820bd",
+      "name": "Stone Edge",
+      "description": "A weapon strike with a little extra Earth damage, for almost no mana.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_f60d06c1"
+      ],
+      "tags": [
+        "t_ab4104b3",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 2,
+      "manaCost": 1,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit",
+      "shortText": "Cheap Earth weapon strike",
+      "icon": 47,
+      "number": 307,
+      "gameKey": "StoneEdge"
+    },
+    {
+      "id": "p_3ba0ecc8",
+      "name": "Shield Jab",
+      "description": "A quick strike with the shield for almost no mana. A little extra damage on the hit.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_d0ab3dce"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_9497c556",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 2,
+      "manaCost": 1,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit",
+      "shortText": "Cheap shield strike",
+      "icon": 22,
+      "number": 304,
+      "gameKey": "ShieldJab"
+    },
+    {
+      "id": "p_96e54997",
+      "name": "Arcane Dart",
+      "description": "A small dart of raw magic for very little mana. Light damage each cast, but a great deal for the mana.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_3eaf93fd"
+      ],
+      "tags": [
+        "t_c1e11c0e",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 4,
+      "manaCost": 1.33,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage",
+      "shortText": "Cheap bolt of Arcane",
+      "icon": 38,
+      "number": 310,
+      "gameKey": "ArcaneDart"
+    },
+    {
+      "id": "p_39842544",
+      "name": "Quick Strike",
+      "description": "A fast weapon strike with a little extra damage, for almost no mana.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_00bc5e34"
+      ],
+      "tags": [
+        "t_59593fe1",
+        "t_42d817be",
+        "t_e712d8ea",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 2,
+      "manaCost": 1,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "bonus damage on the hit",
+      "shortText": "Cheap weapon strike",
+      "icon": 38,
+      "number": 311,
+      "gameKey": "QuickStrike"
+    },
+    {
+      "id": "p_49606497",
+      "name": "Rebuke",
+      "description": "A flash of Holy damage on one enemy for very little mana. It lands on the enemy at once and cannot miss.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_566cd6e8"
+      ],
+      "tags": [
+        "t_66c62b9b",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 4,
+      "manaCost": 1.33,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage",
+      "shortText": "Cheap Holy damage",
+      "icon": 10,
+      "number": 301,
+      "gameKey": "Rebuke"
+    },
+    {
+      "id": "p_df669505",
+      "name": "Thorn",
+      "description": "A thorn flung at one enemy for very little mana. Nature's one attack: light, but a great deal for the mana.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_1c094682"
+      ],
+      "tags": [
+        "t_ee2f6864",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 4,
+      "manaCost": 1.33,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage",
+      "shortText": "Cheap bolt of Nature",
+      "icon": 35,
+      "number": 302,
+      "gameKey": "Thorn"
+    },
+    {
+      "id": "p_facc5538",
+      "name": "Overgrowth",
+      "description": "Compounding. Every heal over time on every ally, whoever cast it, goes back to its full duration and grows stronger: by a tenth, and a fiftieth more with each level of the power. Each cast builds on the last.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_1c094682"
+      ],
+      "tags": [
+        "t_ee2f6864",
+        "t_db6d20e4",
+        "t_78bf3c15",
+        "t_be83c5cf",
+        "t_3aa83613",
+        "t_8e6b4fcf",
+        "t_a9a0b1a6",
+        "t_b5fae28d"
+      ],
+      "potency": 10,
+      "manaCost": 15,
+      "cooldown": 10,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% stronger heals over time on every ally, and back to full duration; +2 for each level",
+      "shortText": "Feeds every heal over time",
+      "icon": 50,
+      "number": 303,
+      "gameKey": "Overgrowth"
+    },
+    {
+      "id": "p_cb3a6977",
+      "name": "Dusk Bolt",
+      "description": "A plain bolt of Shadow for very little mana. It leaves nothing behind, but does a great deal for the mana.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_dddc13cb"
+      ],
+      "tags": [
+        "t_ef105fcc",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 4,
+      "manaCost": 1.33,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage",
+      "shortText": "Cheap bolt of Shadow",
+      "icon": 36,
+      "number": 305,
+      "gameKey": "DuskBolt"
+    },
+    {
+      "id": "p_775a5b70",
+      "name": "Fester",
+      "description": "Compounding. Every effect over time you have on one enemy, Corruption and any other kind alike, goes back to its full duration and grows stronger: by a tenth, and a fiftieth more with each level of the power. Each cast builds on the last.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_dddc13cb"
+      ],
+      "tags": [
+        "t_ef105fcc",
+        "t_db6d20e4",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_a9a0b1a6",
+        "t_b5fae28d"
+      ],
+      "potency": 10,
+      "manaCost": 10,
+      "cooldown": 10,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "% stronger effects over time on the enemy, and back to full duration; +2 for each level",
+      "shortText": "Feeds your damage over time",
+      "icon": 37,
+      "number": 306,
+      "gameKey": "Fester"
+    },
+    {
+      "id": "p_768f4cbc",
+      "name": "Static Jolt",
+      "description": "A small shock that strikes one enemy and leaps on to the nearest others, a quarter weaker each leap, for very little mana.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_057f86d1"
+      ],
+      "tags": [
+        "t_df3e9612",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_78e7dc4a",
+        "t_8e6b4fcf",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 3,
+      "manaCost": 2,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage to the first target, a quarter less each leap",
+      "shortText": "Cheap shock that leaps",
+      "icon": 15,
+      "number": 308,
+      "gameKey": "StaticJolt"
+    },
+    {
+      "id": "p_6a98c013",
+      "name": "Wilt",
+      "description": "A small bolt that withers one enemy, for very little mana. Light damage, but a great deal for the mana.",
+      "status": "accepted",
+      "essenceIds": [
+        "e_c3e242a4"
+      ],
+      "tags": [
+        "t_a8091ad3",
+        "t_42d817be",
+        "t_0eaf5fa3",
+        "t_ec9d55b3",
+        "t_08fdec9d",
+        "t_8e6b4fcf",
+        "t_f407f67c",
+        "t_5462244b"
+      ],
+      "potency": 4,
+      "manaCost": 1.33,
+      "cooldown": 0,
+      "radius": null,
+      "growth": 12.5,
+      "potencyNote": "damage",
+      "shortText": "Cheap bolt of Life",
+      "icon": 32,
+      "number": 309,
+      "gameKey": "Wilt"
     }
   ],
   "confluences": [
@@ -8613,6 +9027,26 @@
         "t_b06216ac"
       ],
       "gameName": "Persisting Aid"
+    },
+    {
+      "id": "s_f5ba39ec",
+      "name": "Efficiency",
+      "tags": [
+        "t_f407f67c",
+        "t_42d817be",
+        "t_78bf3c15"
+      ],
+      "gameName": "Efficiency"
+    },
+    {
+      "id": "s_ebd83e41",
+      "name": "Exorbitancy",
+      "tags": [
+        "t_caf4787f",
+        "t_42d817be",
+        "t_78bf3c15"
+      ],
+      "gameName": "Exorbitancy"
     }
   ],
   "races": [

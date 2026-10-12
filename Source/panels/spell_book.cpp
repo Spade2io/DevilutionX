@@ -199,7 +199,7 @@ std::string GetPowerNumbersText(const Player &player, SpellID spell, int level)
 	// Damage takes the stat behind it and the player's boons; healing and shields take Spirit.
 	const auto damage = [&](int base) { return FormatBookAmount(ApplyDamageBuffs(player, ApplySpellDamageBuffs(spell, grown(base)))); };
 	const auto given = [&](int base) {
-		return FormatBookAmount(static_cast<int64_t>(grown(base)) * std::max(player._pMagic, 0) / 10 * (100 + GetRacialElementPercent(player, spell)) / 100);
+		return FormatBookAmount(WithConfluenceBoost(spell, static_cast<int64_t>(grown(base)) * std::max(player._pMagic, 0) / 10 * (100 + GetRacialElementPercent(player, spell)) / 100));
 	};
 	const std::string barred = StrCat("|", data.rider, "|");
 	const auto rides = [&](std::string_view name) { return barred.find(StrCat("|", name, "|")) != std::string::npos; };
@@ -225,6 +225,11 @@ std::string GetPowerNumbersText(const Player &player, SpellID spell, int level)
 		timed = true;
 	} else if (effect == "HealPercent") {
 		text = StrCat(std::min(grown(data.effectAmount), 100), "% of their life");
+	} else if (effect == "Compound") {
+		// It changes the effects already on the monster; it is not a boon on the caster.
+		text = StrCat("All dots refreshed +", data.effectAmount + 2 * shown, "% dmg");
+	} else if (effect == "CompoundHeals") {
+		text = StrCat("All hots refreshed +", data.effectAmount + 2 * shown, "% healing");
 	} else if (IsAnyOf(effect, "Resurrect", "Rebirth")) {
 		text = StrCat("Rise at ", std::clamp(grown(data.effectAmount), 1, 100), "% life");
 	} else if (effect == "Mana") {
@@ -233,9 +238,9 @@ std::string GetPowerNumbersText(const Player &player, SpellID spell, int level)
 		text = StrCat("Held ", data.effectAmount, "s");
 	} else if (effect == "Curse") {
 		if (stat == "Accuracy")
-			text = StrCat("-", std::min(GetPercentBuffAmount(stat, data.effectAmount, shown), 95), "% to hit");
+			text = StrCat("-", std::min(WithConfluenceBoost(spell, GetPercentBuffAmount(stat, data.effectAmount, shown)), 95), "% to hit");
 		else if (GetResistCutCategories(stat) != 0)
-			text = StrCat("-", grown(data.effectAmount), " resistance");
+			text = StrCat("-", WithConfluenceBoost(spell, grown(data.effectAmount)), " resistance");
 		timed = true;
 	} else if (IsAnyOf(effect, "Buff", "Aura")) {
 		const int amount = static_cast<int>(GetPowerCastAmount(player, spell));
@@ -452,7 +457,9 @@ void DrawAbilityRow(const Surface &out, const Player &player, SpellID sn, size_t
 	// Line 2: cost and cooldown on the left, and on the right the power's numbers for this
 	// character as they stand. This is the game's smallest lettering, so when the two would not
 	// fit side by side the words are shortened, a step at a time, until they do.
-	const int mana = GetManaAmount(player, sn) >> 6;
+	// Whole numbers are shown whole; a small cost with a fraction is shown to one decimal place.
+	const int manaSixtyFourths = GetManaAmount(player, sn);
+	const std::string mana = manaSixtyFourths % 64 == 0 || manaSixtyFourths >= 10 * 64 ? StrCat(manaSixtyFourths >> 6) : FormatBookAmount(manaSixtyFourths);
 	const int cooldownSeconds = GetSpellCooldownTicks(sn) / 20;
 	std::string numbers = GetPowerNumbersText(player, sn, level);
 	const auto costText = [&](std::string_view manaWord, std::string_view cooldownWord) {

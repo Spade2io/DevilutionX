@@ -256,16 +256,36 @@ const SHORT_TEXT = {
 //   Regeneration and pool sizes are double the size of other percentage boons and gain twice as
 //         much a level (2026-10-10). As a rider (riderPercent) they are counted double by the
 //         game: write the ordinary size here (Monolith 10 is +20% life).
+//   Compound: every effect over time the caster has on the target goes back to full duration and
+//         grows by the potency as a percentage, 2 more a level. CompoundHeals does the same for
+//         every heal over time on every player.
+//   The Bolt rider "SureHit": the bolt never misses what it reaches (Magic Missile).
+//   The rider stat HitRecovery: frames off the stagger after a hit, one more at levels 5 and 10
+//         (Unbowed, Unyielding). It replaced NoStagger on 2026-10-11.
 //   Buff: switches a buff on for the caster, or for the player aimed at if the power is tagged Ally. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10
 const BEHAVIOUR = {
+  'Ember': { missile: 'PowerBolt', effect: 'Bolt' },
+  'Ice Shard': { missile: 'PowerBolt', effect: 'Bolt' },
+  'Stone Edge': { effect: 'Strike' },
+  'Shield Jab': { effect: 'Strike' },
+  'Arcane Dart': { missile: 'PowerBolt', effect: 'Bolt' },
+  'Quick Strike': { effect: 'Strike' },
+  'Rebuke': { missile: 'Corruption', effect: 'Burst' },
+  'Thorn': { missile: 'PowerBolt', effect: 'Bolt' },
+  'Dusk Bolt': { missile: 'PowerBolt', effect: 'Bolt' },
+  'Static Jolt': { missile: 'Corruption', effect: 'ChainBurst' },
+  'Wilt': { missile: 'PowerBolt', effect: 'Bolt' },
+  'Conflagrate': { missile: 'Corruption', effect: 'Compound' },
+  'Fester': { missile: 'Corruption', effect: 'Compound' },
+  'Overgrowth': { missile: 'StrengthBuff', effect: 'CompoundHeals' },
   'Battle Standard': { missile: 'StrengthBuff', effect: 'Aura', stat: 'SpecialDamage', duration: 0 },
   'Brawn': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Power', duration: 0 },
   'Weapon Mastery': { missile: 'StrengthBuff', effect: 'Buff', stat: 'SpecialDamage', duration: 0 },
   'Keen Eye': { missile: 'StrengthBuff', effect: 'Buff', stat: 'WeaponToHit', duration: 0 },
   'Thick Hide': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Armor', duration: 0 },
-  'Unbowed': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0, rider: 'NoStagger', riderPercent: 1 },
+  'Unbowed': { missile: 'StrengthBuff', effect: 'Buff', stat: 'MaxLife', duration: 0, rider: 'HitRecovery', riderPercent: 1 },
   'Embolden': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Power', duration: 0 },
   'Sharpen': { missile: 'StrengthBuff', effect: 'Buff', stat: 'SpecialDamage', duration: 0 },
   'Guiding Hand': { missile: 'StrengthBuff', effect: 'Buff', stat: 'WeaponToHit', duration: 0 },
@@ -294,7 +314,7 @@ const BEHAVIOUR = {
   'Ascendance': { missile: 'StrengthBuff', effect: 'Buff', stat: 'SpellDamage', duration: 30, rider: 'ManaRegen|MaxMana', riderPercent: 30 },
   'Expose': { missile: 'Corruption', effect: 'Curse', stat: 'AllResistCut', duration: 0 },
   'Unravel': { missile: 'Corruption', effect: 'Curse', stat: 'AllResistCut', duration: 0 },
-  'Magic Missile': { missile: 'PowerBolt', effect: 'Bolt' },
+  'Magic Missile': { missile: 'PowerBolt', effect: 'Bolt', rider: 'SureHit', riderPercent: 1 },
   'Arcane Burst': { missile: 'Corruption', effect: 'GroundBurst' },
   'Disintegrate': { missile: 'Corruption', effect: 'Burst' },
   'Arcane Barrage': { missile: 'Corruption', effect: 'ChainBurst' },
@@ -379,7 +399,7 @@ const BEHAVIOUR = {
   'Stone Wall': { missile: 'StrengthBuff', effect: 'Buff', stat: 'DmgReduction', duration: 15 },
   'Earthen Might': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Power', duration: 0 },
   'Monolith': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'MaxLife', riderPercent: 10 },
-  'Unyielding': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'NoStagger|DmgReduction', riderPercent: 1 },
+  'Unyielding': { missile: 'StrengthBuff', effect: 'Buff', stat: 'Distance', duration: 0, rider: 'HitRecovery|DmgReduction', riderPercent: 1 },
   'Pall of Shadow': { missile: 'StrengthBuff', effect: 'Aura', stat: 'AstralResistCut', duration: 0 },
   'Creeping Rot': { missile: 'Corruption', effect: 'Corruption' },
   'Shadow Bolt': { missile: 'PowerBolt', effect: 'Bolt', rider: 'Corruption', riderTotal: 4 },
@@ -532,7 +552,9 @@ const row = ({ power, essence }) => {
   // Every buff and heal can be cast in town, cooldown ones included.
   const inTown = ['Buff', 'Heal', 'Mana', 'Aura', 'Cleanse', 'HealPercent', 'ChainHeal', 'Resurrect', 'Zone', 'Shield'].includes(BEHAVIOUR[power.name]?.effect)
   const flags = [element, ...(tags.includes('Enemy') ? ['Targeted'] : []), ...(inTown ? ['AllowedInTown'] : [])].join(',')
-  const mana = Math.min(250, Math.max(0, Math.round(power.manaCost ?? 0)))
+  // A cost may carry a fraction (1.33): the whole points go in manaCost, the rest in manaFraction as 64ths.
+  const manaSixtyFourths = Math.min(250 * 64, Math.max(0, Math.round((power.manaCost ?? 0) * 64)))
+  const mana = Math.floor(manaSixtyFourths / 64)
   const behaviour = BEHAVIOUR[power.name]
   // Amounts are in 64ths of a hit point, the unit the game counts damage in.
   const amount = behaviour?.perTick || ['Burn', 'Corruption', 'Cone', 'Chain'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64 / TICKS_PER_EFFECT)
@@ -544,7 +566,7 @@ const row = ({ power, essence }) => {
     : behaviour?.effect === 'Shield' ? Math.round((power.potency ?? 0) * 64)
     : ['Burst', 'GroundBurst', 'ChainBurst', 'Strike', 'Heal', 'Mana', 'Wave', 'ChainHeal'].includes(behaviour?.effect) ? Math.round((power.potency ?? 0) * 64)
     : behaviour?.effect === 'Cleanse' ? Math.round(power.potency ?? 99)
-    : ['Aura', 'Freeze', 'GroundFreeze', 'HealPercent', 'Resurrect'].includes(behaviour?.effect) ? Math.round(power.potency ?? 0)
+    : ['Aura', 'Freeze', 'GroundFreeze', 'HealPercent', 'Resurrect', 'Compound', 'CompoundHeals'].includes(behaviour?.effect) ? Math.round(power.potency ?? 0)
     : behaviour?.effect === 'Buff' || behaviour?.effect === 'Rebirth' ? Math.round(power.potency ?? 0)
     : 0
   // A strike only reaches past its target when it is marked to spread.
@@ -572,9 +594,11 @@ const row = ({ power, essence }) => {
     behaviour?.cleanse ?? 0, behaviour?.cleanseQuarters ?? 0,
     // A heal or a resurrection that also leaves its stat boon: the boon's size.
     behaviour?.boon ?? 0,
+    // The part of a point of mana beyond the whole number, in 64ths.
+    manaSixtyFourths % 64,
   ].join('\t')
 }
-const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount', 'stat', 'duration', 'ally', 'weapon', 'cooldownDrop', 'cleanse', 'cleanseGrowth', 'boon'].join('\t')
+const header = ['id', 'number', 'name', 'essence', 'soundId', 'manaCost', 'flags', 'missiles', 'manaMultiplier', 'minMana', 'icon', 'cooldown', 'description', 'effect', 'amount', 'radius', 'rider', 'riderAmount', 'stat', 'duration', 'ally', 'weapon', 'cooldownDrop', 'cleanse', 'cleanseGrowth', 'boon', 'manaFraction'].join('\t')
 const powersText = [header, ...exported.map(row)].join('\r\n') + '\r\n'
 
 // Stones. A power no longer has a stone of its own: those were for testing and are taken out of

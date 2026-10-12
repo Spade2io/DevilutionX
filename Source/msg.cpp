@@ -203,6 +203,7 @@ std::string_view CmdIdString(_cmd_id cmd)
 	case CMD_SHIELDSTRIKE: return "CMD_SHIELDSTRIKE";
 	case CMD_CANCELBUFF: return "CMD_CANCELBUFF";
 	case CMD_FILTHY: return "CMD_FILTHY";
+	case CMD_COMPOUNDHEALS: return "CMD_COMPOUNDHEALS";
 	case FAKE_CMD_SETID: return "FAKE_CMD_SETID";
 	case FAKE_CMD_DROPID: return "FAKE_CMD_DROPID";
 	case CMD_INVALID: return "CMD_INVALID";
@@ -2627,6 +2628,14 @@ size_t OnFilthy(const TCmdParam1 &message, Player &player)
 	return sizeof(message);
 }
 
+size_t OnCompoundHeals(const TCmdParam2 &message, Player &player)
+{
+	if (gbBufferMsgs != 1)
+		CompoundHealsOverTime(player, static_cast<SpellID>(Swap16LE(message.wParam1)), Swap16LE(message.wParam2));
+
+	return sizeof(message);
+}
+
 size_t OnCancelBuff(const TCmdParam1 &message, Player &player)
 {
 	if (gbBufferMsgs != 1)
@@ -3592,6 +3601,8 @@ size_t ParseCmd(uint8_t pnum, const TCmd *pCmd, size_t maxCmdSize)
 		return HandleCmd(OnCancelBuff, player, pCmd, maxCmdSize);
 	case CMD_FILTHY:
 		return HandleCmd(OnFilthy, player, pCmd, maxCmdSize);
+	case CMD_COMPOUNDHEALS:
+		return HandleCmd(OnCompoundHeals, player, pCmd, maxCmdSize);
 	default:
 		break;
 	}

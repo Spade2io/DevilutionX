@@ -201,6 +201,16 @@ uint64_t GetSlottedAbilityMask();
 /** Whether a spell sits in one of the player's essence ability slots. Works for every spell number. */
 bool IsAbilitySlotted(SpellID spell);
 
+/** @brief Whether a power sits in the local player's confluence row. */
+bool IsConfluencePower(SpellID spell);
+
+/**
+ * @brief A power in the confluence row is a quarter stronger: its damage, healing and shields, the
+ * size of its boons and afflictions. Returns the amount raised by 25% for such a power, and the
+ * amount itself for any other. Only the local player's confluence is known here.
+ */
+int WithConfluenceBoost(SpellID spell, int64_t amount);
+
 /** @brief Forgets all essences and abilities, e.g. before loading a different character. */
 void ResetEssences();
 

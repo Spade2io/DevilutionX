@@ -79,6 +79,12 @@ bool ActivatePowerBuff(Player &player, SpellID spell, int amount, const Player &
 int GetPowerBuffPercent(const Player &player, std::string_view stat);
 
 /**
+ * @brief Compounding for heals: every heal over time on every player goes back to its full
+ * duration and becomes stronger by a percentage. Run on every PC when the caster's says so.
+ */
+void CompoundHealsOverTime(const Player &caster, SpellID spell, int percent);
+
+/**
  * @brief How far away a player seems to monsters, as a percentage of the real distance.
  * 100 is normal. Above it the player is stealthy: monsters prefer other targets and notice the
  * player only from closer. A buff with the stat "Distance" sets it; such buffs do not add up.

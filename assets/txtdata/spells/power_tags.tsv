@@ -219,3 +219,17 @@ MightyBlow	Physical|Attack|Special Attack|Enemy|Single Target|Instant|Skirmish (
 StaggeringBlow	Physical|Attack|Special Attack|Affliction|Accuracy|Enemy|Single Target|Instant|Permanent|Skirmish (<15)
 Sunder	Physical|Attack|Special Attack|Affliction|Offensive|Enemy|Single Target|Instant|Permanent|Battle (<60)
 Intimidate	Physical|Affliction|Accuracy|Enemy|Splash|Permanent|Battle (<60)
+Ember	Fire|Attack|Spell Attack|Enemy|Single Target|Instant|Efficient|No CD
+Conflagrate	Fire|Compounding|Enemy|Single Target|Instant|Skirmish (<15)|Over Time
+IceShard	Water|Attack|Spell Attack|Enemy|Single Target|Instant|Efficient|No CD
+StoneEdge	Earth|Attack|Special Attack|Enemy|Single Target|Instant|Efficient|No CD
+ShieldJab	Physical|Shield|Attack|Special Attack|Enemy|Single Target|Instant|Efficient|No CD
+ArcaneDart	Arcane|Attack|Spell Attack|Enemy|Single Target|Instant|Efficient|No CD
+QuickStrike	Physical|Attack|Special Attack|Enemy|Single Target|Instant|Efficient|No CD
+Rebuke	Holy|Attack|Spell Attack|Enemy|Single Target|Instant|Efficient|No CD
+Thorn	Nature|Attack|Spell Attack|Enemy|Single Target|Instant|Efficient|No CD
+Overgrowth	Nature|Compounding|Healing|Self|Everyone (allies only)|Instant|Skirmish (<15)|Over Time
+DuskBolt	Shadow|Attack|Spell Attack|Enemy|Single Target|Instant|Efficient|No CD
+Fester	Shadow|Compounding|Enemy|Single Target|Instant|Skirmish (<15)|Over Time
+StaticJolt	Lightning|Attack|Spell Attack|Enemy|Chain|Instant|Efficient|No CD
+Wilt	Life|Attack|Spell Attack|Enemy|Single Target|Instant|Efficient|No CD

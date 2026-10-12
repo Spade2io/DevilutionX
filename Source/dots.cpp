@@ -19,6 +19,7 @@
 #include "special_attacks.h"
 #include "essence_tint.h"
 #include "monster.h"
+#include "essences.h"
 #include "player.h"
 #include "races.h"
 #include "spell_xp.h"
@@ -266,6 +267,33 @@ int AddMonsterDot(Monster &monster, DotID dot, SpellID spell, int damagePerTick)
 	return active->stacks;
 }
 
+int CompoundMonsterDots(Monster &monster, SpellID spell, int percent)
+{
+	int kinds = 0;
+	for (ActiveDot &active : MonsterDots[monster.getId()]) {
+		int64_t total = 0;
+		for (const DotShare &share : active.shares)
+			total += share.damagePerTick;
+		const int extra = static_cast<int>(total * percent / 100);
+		if (extra <= 0)
+			continue;
+		kinds++;
+		active.ticksLeft = EffectDuration;
+		bool added = false;
+		for (DotShare &share : active.shares) {
+			if (share.spell == spell) {
+				share.damagePerTick += extra;
+				added = true;
+				break;
+			}
+		}
+		if (!added)
+			active.shares.push_back(DotShare { spell, extra });
+		FlashMonster(monster, DefinitionOf(active.id).tint);
+	}
+	return kinds;
+}
+
 bool MakeMonsterVulnerable(Monster &monster, int percent)
 {
 	int &current = MonsterVulnerability[monster.getId()];
@@ -457,12 +485,13 @@ int ApplySpellDamageBuffs(SpellID spell, int damage)
 	if (IsSpecialAttack(spell)) {
 		damage = ScaleByStat(damage, GetWeaponDamageStat(player));
 		// Then the "SpecialDamage" bonus of boons, the mirror of "SpellDamage" below.
-		return damage + static_cast<int>(static_cast<int64_t>(damage) * (element + GetPowerBuffPercent(player, "SpecialDamage")) / 100);
+		// Last of all, a power in the confluence row is a quarter stronger.
+		return WithConfluenceBoost(spell, damage + static_cast<int64_t>(damage) * (element + GetPowerBuffPercent(player, "SpecialDamage")) / 100);
 	}
 	// Everything else is a spell attack: Spirit, then the "SpellDamage" bonus of buffs and of race.
 	damage = ScaleByStat(damage, player._pMagic);
 	const int percent = GetPowerBuffPercent(player, "SpellDamage") + GetRacialPercent(player._pClass, "SpellDamage") + element;
-	return damage + static_cast<int>(static_cast<int64_t>(damage) * percent / 100);
+	return WithConfluenceBoost(spell, damage + static_cast<int64_t>(damage) * percent / 100);
 }
 
 uint32_t ScaleGivenAmountBySpirit(SpellID spell, uint32_t amount)
@@ -490,7 +519,7 @@ uint32_t ScaleGivenAmountBySpirit(SpellID spell, uint32_t amount)
 		return amount;
 	// The most a PC will accept for one of these is 3000 hit points.
 	// A racial power can add a percentage for the power's element, as it does to damage.
-	const int64_t scaled = std::min<int64_t>(static_cast<int64_t>(amount) * std::max(MyPlayer->_pMagic, 0) / 10 * (100 + GetRacialElementPercent(*MyPlayer, spell)) / 100, 192000);
+	const int64_t scaled = std::min<int64_t>(WithConfluenceBoost(spell, static_cast<int64_t>(amount) * std::max(MyPlayer->_pMagic, 0) / 10 * (100 + GetRacialElementPercent(*MyPlayer, spell)) / 100), 192000);
 	// Healing ground, a heal or shield that pulses from a buff or an aura, and life drawn back
 	// over time are the same every beat. A heal or shield that lands at once has a little luck in it.
 	const bool overTime = effect == "Zone" || IsAnyOf(effect, "Buff", "Aura") || rider == "Leech";

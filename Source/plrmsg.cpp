@@ -41,6 +41,8 @@ struct PlayerMessage {
 	size_t prefixLength;
 	/** The line height of the text */
 	int lineHeight;
+	/** Essence Mod: a gain of experience. Only one is kept, and it is drawn two lines long at most. */
+	bool isExperience = false;
 };
 
 std::array<PlayerMessage, 8> Messages;
@@ -74,7 +76,27 @@ void EventPlrMsg(std::string_view text, UiFlags style)
 	message.text = std::string(text);
 	message.prefixLength = 0;
 	message.lineHeight = GetLineHeight(message.text, GameFont12) + 3;
+	message.isExperience = false;
 	AddMessageToChatLog(text);
+}
+
+void EventXpMsg(std::string_view text)
+{
+	// Take the last gain off the screen: the new one stands in its place.
+	const auto old = std::find_if(Messages.begin(), Messages.end(), [](const PlayerMessage &message) { return message.isExperience; });
+	if (old != Messages.end()) {
+		std::move(old + 1, Messages.end(), old);
+		Messages.back() = {};
+	}
+
+	PlayerMessage &message = GetNextMessage();
+	message.style = UiFlags::ColorWhite;
+	message.time = SDL_GetTicks();
+	message.text = std::string(text);
+	message.prefixLength = 0;
+	message.lineHeight = GetLineHeight(message.text, GameFont12) + 3;
+	message.isExperience = true;
+	// Kept out of the chat log, which it would bury.
 }
 
 void SendPlrMsg(Player &player, std::string_view text)
@@ -88,6 +110,7 @@ void SendPlrMsg(Player &player, std::string_view text)
 	message.text = from + std::string(text);
 	message.prefixLength = from.size();
 	message.lineHeight = GetLineHeight(message.text, GameFont12) + 3;
+	message.isExperience = false;
 	AddMessageToChatLog(text, &player);
 }
 
@@ -124,6 +147,15 @@ void DrawPlrMsg(const Surface &out)
 			break;
 
 		std::string text = WordWrapString(message.text, width);
+		// A gain of experience is cut off after two lines.
+		if (message.isExperience) {
+			const size_t firstBreak = text.find('\n');
+			const size_t secondBreak = firstBreak == std::string::npos ? firstBreak : text.find('\n', firstBreak + 1);
+			if (secondBreak != std::string::npos) {
+				text.resize(secondBreak);
+				text += " ...";
+			}
+		}
 		const int chatlines = CountLinesOfText(text);
 		y -= message.lineHeight * chatlines;
 

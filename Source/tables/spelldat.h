@@ -296,6 +296,8 @@ struct SpellData {
 	uint8_t cleanseQuarterStacks = 0;
 	/** Essence Mod: a heal or a resurrection that also leaves its stat boon: the boon's size. Zero for none. */
 	uint8_t boonAmount = 0;
+	/** Essence Mod: the part of a point of mana the power costs beyond sManaCost, in 64ths (21 is a third). */
+	uint8_t manaFraction = 0;
 	/** Essence Mod: for a power from essence_powers.tsv, the short line the spellbook shows under it. */
 	std::string description;
 	/**
