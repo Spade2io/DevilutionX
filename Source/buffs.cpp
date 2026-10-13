@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "control/control.hpp"
 #include "cooldowns.h"
 #include "diablo.h"
 #include "dots.h"
@@ -24,6 +25,7 @@
 #include "essences.h"
 #include "qol/floatingnumbers.h"
 #include "items.h"
+#include "meter.h"
 #include "missiles.h"
 #include "monster.h"
 #include "msg.h"
@@ -34,6 +36,7 @@
 #include "spell_xp.h"
 #include "spells.h"
 #include "tables/misdat.h"
+#include "utils/display.h"
 #include "utils/str_cat.hpp"
 
 namespace devilution {
@@ -66,10 +69,97 @@ struct PowerBuff {
 	int amount;
 	/** Who cast it. A buff from someone else is drawn in a different colour. */
 	uint8_t caster;
+	/** The caster's level in the power as shown, as their PC said when casting; -1 if unknown. */
+	int8_t casterLevel = -1;
+	/** Whether it is in the caster's confluence row. */
+	bool casterConfluence = false;
+	/** Rises with every cast in the game, the same on every PC: tells which boon is the newer. */
+	uint32_t serial = 0;
 };
+
+/** The serial the next cast will carry. */
+uint32_t NextBuffSerial = 1;
+
+/** Game ticks until the local player's lasting boons are sent again, twice over; 0 is not waiting. */
+std::array<int, 2> BoonResendCountdowns {};
+
+
 
 /** The data-file buffs each player has running. Memory only; never saved. */
 std::array<std::vector<PowerBuff>, MAX_PLRS> PowerBuffs;
+
+/** What the local player has left of the shield an aura gave them. It is renewed every pulse. */
+int AuraShieldLeft = 0;
+
+/** Damage the local player's shields have absorbed and not yet reported, by who cast each. */
+struct AbsorbedByShield {
+	uint8_t caster;
+	SpellID spell;
+	/** In 64ths of a hit point. */
+	int amount;
+};
+std::vector<AbsorbedByShield> AbsorbedPending;
+
+/** What each other player's PC last said their shield total is, in hit points. */
+std::array<int, MAX_PLRS> ShieldTotals {};
+/** The total this PC last told the others, and game ticks until it may tell them again. */
+int ShieldTotalSent = 0;
+int ShieldReportCountdown = 0;
+
+void NoteAbsorbed(uint8_t caster, SpellID spell, int amount)
+{
+	if (amount <= 0)
+		return;
+	for (AbsorbedByShield &entry : AbsorbedPending) {
+		if (entry.caster == caster && entry.spell == spell) {
+			entry.amount += amount;
+			return;
+		}
+	}
+	AbsorbedPending.push_back({ caster, spell, amount });
+}
+
+int LocalShieldTotal()
+{
+	if (MyPlayer == nullptr)
+		return 0;
+	int total = AuraShieldLeft;
+	for (const PowerBuff &buff : PowerBuffs[MyPlayer->getId()]) {
+		if (GetSpellData(buff.spell).buffStat == "Shield")
+			total += std::max(buff.amount, 0);
+	}
+	return (total + 32) >> 6;
+}
+
+/**
+ * About once a second: whoever cast each shield is told what it absorbed, so its power earns the
+ * experience, and the other PCs are told this player's shield total if it has changed.
+ */
+void ReportShields()
+{
+	if (--ShieldReportCountdown > 0 || MyPlayer == nullptr)
+		return;
+	ShieldReportCountdown = TicksPerSecond;
+
+	for (AbsorbedByShield &entry : AbsorbedPending) {
+		if (entry.caster == MyPlayerId) {
+			CreditShieldAbsorbed(entry.spell, entry.amount, *MyPlayer);
+			entry.amount = 0;
+		} else if (entry.amount >= 16) {
+			// Sent in quarter hit points; what is smaller waits for the next report.
+			const int quarters = std::min(entry.amount / 16, 65535);
+			NetSendCmdParam4(false, CMD_SHIELDABSORBED, entry.caster, static_cast<uint16_t>(entry.spell), static_cast<uint16_t>(quarters), 0);
+			entry.amount -= quarters * 16;
+		}
+	}
+	std::erase_if(AbsorbedPending, [](const AbsorbedByShield &entry) { return entry.amount <= 0; });
+
+	const int total = std::min(LocalShieldTotal(), 65535);
+	if (gbIsMultiplayer && total != ShieldTotalSent) {
+		ShieldTotalSent = total;
+		NetSendCmdParam1(false, CMD_SHIELDTOTAL, static_cast<uint16_t>(total));
+	}
+}
 
 /** A passive power that has just acted for the local player and still owes its casting motion. */
 SpellID PendingCastMotion = SpellID::Invalid;
@@ -232,13 +322,18 @@ void ClearBuffs(Player &player)
 {
 	BuffsOf(player).fill(false);
 	PowerBuffs[player.getId()].clear();
+	ShieldTotals[player.getId()] = 0;
+	if (&player == MyPlayer) {
+		AuraShieldLeft = 0;
+		AbsorbedPending.clear();
+	}
 	if (&player == MyPlayer) {
 		RebirthProtectionLeft = 0;
 		PendingCastMotion = SpellID::Invalid;
 	}
 }
 
-bool ActivatePowerBuff(Player &player, SpellID spell, int amount, const Player &caster)
+bool ActivatePowerBuff(Player &player, SpellID spell, int amount, const Player &caster, PowerCastInfo info)
 {
 	if (!IsValidSpell(spell))
 		return false;
@@ -253,13 +348,20 @@ bool ActivatePowerBuff(Player &player, SpellID spell, int amount, const Player &
 			return false;
 		buff.ticksLeft = ticks;
 		buff.caster = caster.getId();
+		buff.serial = NextBuffSerial++;
+		// The second effects go by the caster's level, so a change of level alone needs working out again.
+		const bool levelChanged = buff.casterLevel != info.level || buff.casterConfluence != info.confluence;
+		buff.casterLevel = info.level;
+		buff.casterConfluence = info.confluence;
+		if (levelChanged && buff.amount == amount)
+			CalcPlrInv(player, true);
 		if (buff.amount != amount) {
 			buff.amount = amount;
 			CalcPlrInv(player, true);
 		}
 		return true;
 	}
-	buffs.push_back(PowerBuff { spell, ticks, amount, caster.getId() });
+	buffs.push_back(PowerBuff { spell, ticks, amount, caster.getId(), info.level, info.confluence, NextBuffSerial++ });
 	CalcPlrInv(player, true);
 	return true;
 }
@@ -287,6 +389,11 @@ struct ReachingBuff {
 	int ticksLeft;
 	/** Whether another player is the source: they cast it on this player, or it is their aura. */
 	bool fromOther;
+	/** The caster's level in the power as shown, and whether it is in their confluence row; -1 if unknown. */
+	int8_t casterLevel = -1;
+	bool casterConfluence = false;
+	/** Who cast it, or whose aura it is. */
+	uint8_t owner = 0;
 };
 
 /**
@@ -297,7 +404,7 @@ std::vector<ReachingBuff> GetReachingBuffs(const Player &player)
 {
 	std::vector<ReachingBuff> reaching;
 	for (const PowerBuff &buff : PowerBuffs[player.getId()])
-		reaching.push_back({ buff.spell, buff.amount, buff.ticksLeft, buff.caster != player.getId() });
+		reaching.push_back({ buff.spell, buff.amount, buff.ticksLeft, buff.caster != player.getId(), buff.casterLevel, buff.casterConfluence, buff.caster });
 	for (const Player &other : Players) {
 		if (!AuraOwnerReaches(other, player))
 			continue;
@@ -307,10 +414,13 @@ std::vector<ReachingBuff> GetReachingBuffs(const Player &player)
 				continue;
 			const auto held = std::find_if(reaching.begin(), reaching.end(), [&](const ReachingBuff &entry) { return entry.spell == buff.spell; });
 			if (held == reaching.end()) {
-				reaching.push_back({ buff.spell, buff.amount, -1, true });
+				reaching.push_back({ buff.spell, buff.amount, -1, true, buff.casterLevel, buff.casterConfluence, other.getId() });
 			} else if (buff.amount > held->amount) {
 				held->amount = buff.amount;
 				held->fromOther = true;
+				held->casterLevel = buff.casterLevel;
+				held->casterConfluence = buff.casterConfluence;
+				held->owner = other.getId();
 			}
 		}
 	}
@@ -329,13 +439,29 @@ bool RiderNames(const SpellData &spellData, std::string_view stat)
  */
 int GetRiderAmount(const Player &player, const ReachingBuff &buff, const SpellData &spellData, std::string_view stat)
 {
+	// The level and the confluence boost are the caster's. For the local player's own boon the
+	// live figures are used, so it grows the moment the power does; otherwise it is what the
+	// caster's PC said when it was cast or last sent.
+	const bool ownAndLocal = &player == MyPlayer && !buff.fromOther;
+	const int level = ownAndLocal ? ShownPowerLevel(player.GetBaseSpellLevel(buff.spell)) : std::max<int>(buff.casterLevel, 0);
+	const bool confluence = ownAndLocal ? IsConfluencePower(buff.spell) : buff.casterConfluence;
+	const auto boosted = [confluence](int amount) { return confluence ? amount + amount / 4 : amount; };
+
+	// Leech, in thousandths of a percent. The table gives its start in tenths. It gains a quarter
+	// of a percent a level on a boon for yourself, an eighth on one that can go on others, and
+	// half a percent on one that lasts only a while (Bryan, 2026-10-12).
+	if (IsAnyOf(stat, "LifeLeech", "ManaLeech")) {
+		const bool forOthers = spellData.targetsAlly || spellData.effectRadius >= 99 || spellData.effect == "Aura";
+		const int step = spellData.durationSeconds > 0 ? 500 : forOthers ? 125 : 250;
+		return boosted(spellData.riderAmount * 100 + step * level);
+	}
+
+	int amount = spellData.riderAmount;
 	// Regeneration or a larger pool riding on another boon (Ascendance, Juggernaut, Monolith)
-	// counts double, as every boon of those kinds is double size.
-	int amount = IsAnyOf(stat, "ManaRegen", "LifeRegen", "MaxLife", "MaxMana") ? 2 * spellData.riderAmount : spellData.riderAmount;
-	// Life leech is kept very small on purpose: it never grows.
-	if (buff.fromOther || IsAnyOf(stat, "LifeLeech", "ManaLeech"))
-		return amount;
-	const int level = ShownPowerLevel(player.GetBaseSpellLevel(buff.spell));
+	// counts double, as every boon of those kinds is double size, and grows by the step a boon
+	// of that size gets (2026-10-13; these never grew before).
+	if (IsAnyOf(stat, "ManaRegen", "LifeRegen", "MaxLife", "MaxMana"))
+		return boosted(GetPercentBuffAmount(stat, 2 * amount, level));
 	// The armor that comes with a damage reduction boon (Stoneskin) or with a stealth boon (Cloak
 	// of Night) gains a point a level. So does a chance to block (Stalwart) or to hit (Camouflage).
 	if (stat == "Armor" && IsAnyOf(spellData.buffStat, "DmgReduction", "Distance"))
@@ -343,7 +469,7 @@ int GetRiderAmount(const Player &player, const ReachingBuff &buff, const SpellDa
 	// Any other armor or resistance riding on a boon (Brace, Reinforce, Juggernaut) grows as armor
 	// and resistance boons do: an eighth more each level.
 	else if (IsAnyOf(stat, "Armor", "Resist"))
-		amount = ScaleDamageForSpellLevel(amount, std::max<int>(player.GetBaseSpellLevel(buff.spell), 1));
+		amount = ScaleDamageForSpellLevel(amount, level + 1);
 	if (IsAnyOf(stat, "Block", "ToHit"))
 		amount += level;
 	// Points off a physical hit (Unyielding): half a point a level, or a whole one from 5 up.
@@ -352,10 +478,7 @@ int GetRiderAmount(const Player &player, const ReachingBuff &buff, const SpellDa
 	// Frames off the stagger after a hit (Unbowed, Unyielding): one more at level 5 and at level 10.
 	if (stat == "HitRecovery")
 		return std::min(amount + level / 5, 3);
-	// A power in the confluence row is a quarter stronger. Only this PC knows its own player's.
-	if (&player == MyPlayer)
-		amount = WithConfluenceBoost(buff.spell, amount);
-	return amount;
+	return boosted(amount);
 }
 
 int GetPowerBuffPercent(const Player &player, std::string_view stat)
@@ -374,7 +497,8 @@ int GetPowerBuffPercent(const Player &player, std::string_view stat)
 
 void LeechLifeFromDamage(int damage)
 {
-	// What is left over from earlier hits, in thousandths of a 64th of a hit point. One percent of
+	// What is left over from earlier hits, in hundred-thousandths of a 64th of a hit point (the
+	// leech sizes below are thousandths of a percent, though the variables are still named "tenths"). One percent of
 	// a small hit is less than the game can count, so the scraps are kept until they add up.
 	static int64_t carried = 0;
 	static int64_t carriedMana = 0;
@@ -385,8 +509,8 @@ void LeechLifeFromDamage(int damage)
 	// Mana leech works the same way, from the "ManaLeech" second effects.
 	if (const int tenths = GetPowerBuffPercent(player, "ManaLeech"); tenths > 0 && !HasAnyOf(player._pIFlags, ItemSpecialEffect::NoMana)) {
 		carriedMana += static_cast<int64_t>(damage) * tenths;
-		const int gained = static_cast<int>(carriedMana / 1000);
-		carriedMana %= 1000;
+		const int gained = static_cast<int>(carriedMana / 100000);
+		carriedMana %= 100000;
 		if (gained > 0 && player._pMana < player._pMaxMana) {
 			player._pMana = std::min(player._pMana + gained, player._pMaxMana);
 			player._pManaBase = std::min(player._pManaBase + gained, player._pMaxManaBase);
@@ -397,13 +521,71 @@ void LeechLifeFromDamage(int damage)
 	if (tenths <= 0)
 		return;
 	carried += static_cast<int64_t>(damage) * tenths;
-	const int gained = static_cast<int>(carried / 1000);
-	carried %= 1000;
+	const int gained = static_cast<int>(carried / 100000);
+	carried %= 100000;
 	if (gained <= 0 || player._pHitPoints >= player._pMaxHP)
 		return;
+	MeterAddLeech(std::min(gained, player._pMaxHP - player._pHitPoints));
 	player._pHitPoints = std::min(player._pHitPoints + gained, player._pMaxHP);
 	player._pHPBase = std::min(player._pHPBase + gained, player._pMaxHPBase);
 	RedrawComponent(PanelDrawComponent::Health);
+}
+
+std::string FormatLeechPercent(int thousandths)
+{
+	std::string text = StrCat(thousandths / 1000);
+	int rest = thousandths % 1000;
+	if (rest == 0)
+		return text;
+	// Up to three decimal places, without trailing zeros: 1250 is "1.25", 625 is "0.625".
+	std::string digits = StrCat(rest / 100, rest / 10 % 10, rest % 10);
+	while (!digits.empty() && digits.back() == '0')
+		digits.pop_back();
+	return StrCat(text, ".", digits);
+}
+
+void CreditShieldAbsorbed(SpellID spell, int amount, const Player &wearer)
+{
+	if (MyPlayer == nullptr || amount <= 0 || !IsValidSpell(spell))
+		return;
+	AddSpellExperienceForHealing(*MyPlayer, wearer, spell, amount);
+}
+
+int GetShieldTotal(const Player &player)
+{
+	return &player == MyPlayer ? LocalShieldTotal() : ShieldTotals[player.getId()];
+}
+
+void SetShieldTotalOf(const Player &player, int hitPoints)
+{
+	ShieldTotals[player.getId()] = std::max(hitPoints, 0);
+}
+
+void ResendLastingBoons(SpellID only)
+{
+	if (MyPlayer == nullptr || MyPlayer->hasNoLife())
+		return;
+	std::vector<std::pair<uint8_t, SpellID>> sends;
+	for (const Player &target : Players) {
+		if (!target.plractive)
+			continue;
+		for (const PowerBuff &buff : PowerBuffs[target.getId()]) {
+			// Lasting ones this player cast and still knows. A timed boon is left to its own clock.
+			if (buff.ticksLeft >= 0 || buff.caster != MyPlayerId || (only != SpellID::Invalid && buff.spell != only))
+				continue;
+			if (!IsValidSpell(buff.spell) || !IsAnyOf(GetSpellData(buff.spell).effect, "Buff", "Aura") || MyPlayer->GetBaseSpellLevel(buff.spell) == 0)
+				continue;
+			sends.emplace_back(target.getId(), buff.spell);
+		}
+	}
+	for (const auto &[targetId, spell] : sends)
+		NetSendCmdPowerOnPlayer(Players[targetId], spell, GetPowerCastAmount(*MyPlayer, spell), /*quiet=*/true);
+}
+
+void ScheduleBoonResend()
+{
+	BoonResendCountdowns[0] = 5 * TicksPerSecond;
+	BoonResendCountdowns[1] = 20 * TicksPerSecond;
 }
 
 void CompoundHealsOverTime(const Player &caster, SpellID spell, int percent)
@@ -434,8 +616,10 @@ void CompoundHealsOverTime(const Player &caster, SpellID spell, int percent)
 /** One effect of a boon in a few plain words, with its size: "+3 Spirit". Empty for one with nothing to say. */
 std::string DescribeBuffEffect(std::string_view stat, int amount, const SpellData &spellData)
 {
-	if (IsAnyOf(stat, "Power", "Spirit"))
+	if (IsAnyOf(stat, "Power", "Spirit", "Recovery"))
 		return StrCat("+", amount, " ", stat);
+	if (stat == "SpeedStat")
+		return StrCat("+", amount, " Speed");
 	if (stat == "Speed")
 		return StrCat("+", amount, "% attack and casting speed");
 	if (stat == "Damage")
@@ -473,9 +657,9 @@ std::string DescribeBuffEffect(std::string_view stat, int amount, const SpellDat
 	if (stat == "Block")
 		return StrCat("+", amount, "% block");
 	if (stat == "LifeLeech")
-		return StrCat(amount / 10, amount % 10 != 0 ? StrCat(".", amount % 10) : std::string(), "% health leech");
+		return StrCat(FormatLeechPercent(amount), "% health leech");
 	if (stat == "ManaLeech")
-		return StrCat(amount / 10, amount % 10 != 0 ? StrCat(".", amount % 10) : std::string(), "% mana leech");
+		return StrCat(FormatLeechPercent(amount), "% mana leech");
 	if (stat == "WalkSpeed")
 		return "faster walking";
 	if (stat == "NoStagger")
@@ -533,20 +717,37 @@ constexpr int FireAuraDistanceRatio = 50;
 
 int GetPlayerDistanceRatio(const Player &player)
 {
-	int ratio = 100;
+	// Threat is under 100, stealth over it. Of each kind the strongest counts. With both on, the
+	// one cast most recently decides how monsters see the player (Bryan, 2026-10-12).
+	int threat = 100;
+	int stealth = 100;
+	uint32_t threatSerial = 0;
+	uint32_t stealthSerial = 0;
+	const auto consider = [&](int ratio, uint32_t serial) {
+		if (ratio < 100) {
+			threat = std::min(threat, ratio);
+			threatSerial = std::max(threatSerial, serial);
+		} else if (ratio > 100) {
+			stealth = std::max(stealth, ratio);
+			stealthSerial = std::max(stealthSerial, serial);
+		}
+	};
 	// The Fire Aura draws monsters to its owner. Only the owner: it gives allies nothing.
 	if (IsBuffActive(player, BuffID::FireAura))
-		ratio = FireAuraDistanceRatio;
+		consider(FireAuraDistanceRatio, 0);
 	for (const PowerBuff &buff : PowerBuffs[player.getId()]) {
-		// The one furthest from normal counts.
 		const SpellData &spellData = GetSpellData(buff.spell);
-		if (spellData.buffStat == "Distance" && std::abs(buff.amount - 100) > std::abs(ratio - 100))
-			ratio = buff.amount;
+		if (spellData.buffStat == "Distance")
+			consider(buff.amount, buff.serial);
 		// A buff that is mainly about something else can carry threat or stealth as its second gift.
-		if (!spellData.buffStat.empty() && spellData.rider == "Distance" && std::abs(spellData.riderAmount - 100) > std::abs(ratio - 100))
-			ratio = spellData.riderAmount;
+		if (!spellData.buffStat.empty() && spellData.rider == "Distance")
+			consider(spellData.riderAmount, buff.serial);
 	}
-	return ratio;
+	if (stealth == 100)
+		return threat;
+	if (threat == 100)
+		return stealth;
+	return threatSerial >= stealthSerial ? threat : stealth;
 }
 
 int GetPlayerNoticeRange(const Player &player)
@@ -568,9 +769,6 @@ bool HasHealOverTimeFrom(const Player &target, const Player &caster)
 	return false;
 }
 
-/** What the local player has left of the shield an aura gave them. It is renewed every pulse. */
-int AuraShieldLeft = 0;
-
 int AbsorbDamageWithShields(Player &player, int damage)
 {
 	if (&player != MyPlayer || damage <= 0)
@@ -580,6 +778,15 @@ int AbsorbDamageWithShields(Player &player, int damage)
 	const int fromAura = std::min(AuraShieldLeft, damage);
 	AuraShieldLeft -= fromAura;
 	damage -= fromAura;
+	if (fromAura > 0) {
+		// The aura's shield is credited to whoever's shield aura is reaching this player.
+		for (const ReachingBuff &reaching : GetReachingBuffs(player)) {
+			if (GetSpellData(reaching.spell).buffStat == "ShieldPulse") {
+				NoteAbsorbed(reaching.owner, reaching.spell, fromAura);
+				break;
+			}
+		}
+	}
 
 	std::vector<PowerBuff> &buffs = PowerBuffs[player.getId()];
 	bool emptied = false;
@@ -591,6 +798,7 @@ int AbsorbDamageWithShields(Player &player, int damage)
 		const int taken = std::min(buff.amount, damage);
 		buff.amount -= taken;
 		damage -= taken;
+		NoteAbsorbed(buff.caster, buff.spell, taken);
 		emptied |= buff.amount <= 0;
 	}
 	if (emptied) {
@@ -838,11 +1046,19 @@ void ProcessBuffTimers()
 {
 	PulseHealingAuras();
 	PulseShieldAuras();
+	ReportShields();
 	ProcessFilth();
 	RefreshAuraStats();
 
 	if (RebirthProtectionLeft > 0)
 		RebirthProtectionLeft--;
+
+	// A newcomer was not there to hear the boons cast: send them again once they have loaded,
+	// and once more a little later in case they were slow.
+	for (int &countdown : BoonResendCountdowns) {
+		if (countdown > 0 && --countdown == 0)
+			ResendLastingBoons(SpellID::Invalid);
+	}
 
 	if (PendingCastMotion != SpellID::Invalid && MyPlayer != nullptr) {
 		if (StartCastMotion(*MyPlayer, PendingCastMotion) || --PendingCastMotionTicks <= 0)
@@ -919,6 +1135,14 @@ bool CancelBuffUnderCursor()
 	constexpr int Left = 68;
 
 	Rectangle iconArea { Point { Left, Margin }, Size { IconWidth, IconHeight } };
+	// When the row reaches the edge of the screen it carries on below, as DrawBuffBar draws it.
+	const auto advance = [&] {
+		iconArea.position.x += IconWidth + Gap;
+		if (iconArea.position.x + IconWidth > gnScreenWidth - Margin) {
+			iconArea.position.x = Left;
+			iconArea.position.y += IconHeight + Gap;
+		}
+	};
 	const auto cancel = [](SpellID spell) {
 		NetSendCmdParam1(true, CMD_CANCELBUFF, static_cast<uint16_t>(spell));
 	};
@@ -930,7 +1154,7 @@ bool CancelBuffUnderCursor()
 			cancel(GetBuffSpell(buff));
 			return true;
 		}
-		iconArea.position.x += IconWidth + Gap;
+		advance();
 	}
 	for (const ReachingBuff &reaching : GetReachingBuffs(player)) {
 		if (iconArea.contains(MousePosition)) {
@@ -940,7 +1164,7 @@ bool CancelBuffUnderCursor()
 				cancel(reaching.spell);
 			return true;
 		}
-		iconArea.position.x += IconWidth + Gap;
+		advance();
 	}
 	return false;
 }
@@ -964,6 +1188,31 @@ void DrawBuffBar(const Surface &out)
 
 	// Icons are drawn from their bottom-left corner.
 	Point position { Left, Margin + IconHeight - 1 };
+	// When the row reaches the edge of the screen it carries on in a row below.
+	const auto advance = [&] {
+		position.x += IconWidth + Gap;
+		if (position.x + IconWidth > gnScreenWidth - Margin) {
+			position.x = Left;
+			position.y += IconHeight + Gap;
+		}
+	};
+	// The description goes under the lowest row, so it has to be known how many rows there are.
+	int iconCount = static_cast<int>(GetReachingBuffs(player).size()) + (IsFilthy(player) ? 1 : 0);
+	for (size_t i = 0; i < BuffCount; i++) {
+		if (IsBuffActive(player, static_cast<BuffID>(i)))
+			iconCount++;
+	}
+	const int perRow = std::max((gnScreenWidth - Margin - Left + Gap) / (IconWidth + Gap), 1);
+	const int rows = std::max((iconCount + perRow - 1) / perRow, 1);
+	const int descriptionTop = Margin + rows * (IconHeight + Gap) - Gap + 2;
+
+	// The local player's shields, added up, just above the health globe. Gone when there are none.
+	if (const int shield = GetShieldTotal(player); shield > 0) {
+		// The globe's top stands 13 pixels above the panel and is 62 wide, starting 107 from its left.
+		const Point globe = GetMainPanel().position + Displacement { 107, -28 };
+		DrawString(out, StrCat(shield), Rectangle { globe, Size { 62, 12 } },
+		    { .flags = UiFlags::ColorGold | UiFlags::AlignCenter | UiFlags::FontSize12 | UiFlags::Outlined });
+	}
 	for (size_t i = 0; i < BuffCount; i++) {
 		const auto buff = static_cast<BuffID>(i);
 		if (!IsBuffActive(player, buff))
@@ -975,11 +1224,11 @@ void DrawBuffBar(const Surface &out)
 		const Rectangle iconArea { Point { position.x, position.y - IconHeight + 1 }, Size { IconWidth, IconHeight } };
 		if (iconArea.contains(MousePosition)) {
 			DrawString(out, WordWrapString(DescribeBuff(player, buff), DescriptionWidth),
-			    Rectangle { Point { Left, Margin + IconHeight + 2 }, Size { DescriptionWidth, 3 * DescriptionLineHeight } },
+			    Rectangle { Point { Left, descriptionTop }, Size { DescriptionWidth, 3 * DescriptionLineHeight } },
 			    { .flags = UiFlags::ColorWhitegold, .lineHeight = DescriptionLineHeight });
 		}
 
-		position.x += IconWidth + Gap;
+		advance();
 	}
 
 	// Buffs read from essence_powers.tsv follow, with the seconds left on those that run out, and
@@ -998,11 +1247,11 @@ void DrawBuffBar(const Surface &out)
 		}
 		if (iconArea.contains(MousePosition)) {
 			DrawString(out, WordWrapString(DescribePowerBuff(player, buff), DescriptionWidth),
-			    Rectangle { Point { Left, Margin + IconHeight + 2 }, Size { DescriptionWidth, 3 * DescriptionLineHeight } },
+			    Rectangle { Point { Left, descriptionTop }, Size { DescriptionWidth, 3 * DescriptionLineHeight } },
 			    { .flags = UiFlags::ColorWhitegold, .lineHeight = DescriptionLineHeight });
 		}
 
-		position.x += IconWidth + Gap;
+		advance();
 	}
 
 	// Filthy comes last, greyed, so that it never moves the icons a click would cancel.
@@ -1012,7 +1261,7 @@ void DrawBuffBar(const Surface &out)
 		const Rectangle iconArea { Point { position.x, position.y - IconHeight + 1 }, Size { IconWidth, IconHeight } };
 		if (iconArea.contains(MousePosition)) {
 			DrawString(out, WordWrapString("Filthy: the grime of your old self is all over you. A Crystal Wash from Pepin washes it off.", DescriptionWidth),
-			    Rectangle { Point { Left, Margin + IconHeight + 2 }, Size { DescriptionWidth, 3 * DescriptionLineHeight } },
+			    Rectangle { Point { Left, descriptionTop }, Size { DescriptionWidth, 3 * DescriptionLineHeight } },
 			    { .flags = UiFlags::ColorWhitegold, .lineHeight = DescriptionLineHeight });
 		}
 	}

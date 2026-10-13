@@ -1,4 +1,6 @@
 #include "control_panel.hpp"
+
+#include "meter.h"
 #include "control.hpp"
 #include "control_chat.hpp"
 #include "control_flasks.hpp"
@@ -62,7 +64,7 @@ const Rectangle &GetRightPanel()
 }
 bool IsLeftPanelOpen()
 {
-	return CharFlag || QuestLogIsOpen || IsStashOpen || IsVisualStoreOpen;
+	return CharFlag || QuestLogIsOpen || IsStashOpen || IsVisualStoreOpen || MeterOpen; // Essence Mod: the meter is a left panel too
 }
 bool IsRightPanelOpen()
 {

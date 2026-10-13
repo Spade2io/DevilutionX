@@ -38,6 +38,8 @@
 #include "controls/remap_keyboard.h"
 #include "diablo.h"
 
+#include "meter.h"
+
 #include "essence_version.h"
 #include "diablo_msg.hpp"
 #include "discord/discord.h"
@@ -378,7 +380,9 @@ void LeftMouseDown(uint16_t modState)
 
 	if (!GetMainPanel().contains(MousePosition)) {
 		if (!gmenu_is_active() && !TryIconCurs()) {
-			if (QuestLogIsOpen && GetLeftPanel().contains(MousePosition)) {
+			if (MeterOpen && CheckMeterClick()) {
+				// Essence Mod: the click was on the meter's panel.
+			} else if (QuestLogIsOpen && GetLeftPanel().contains(MousePosition)) {
 				QuestlogESC();
 			} else if (qtextflag) {
 				qtextflag = false;
@@ -515,6 +519,7 @@ void ClosePanels()
 	CloseCharPanel();
 	SpellbookFlag = false;
 	QuestLogIsOpen = false;
+	MeterOpen = false; // Essence Mod
 }
 
 void PressKey(SDL_Keycode vkey, uint16_t modState)
@@ -2000,7 +2005,7 @@ void InitKeymapActions()
 	    "CycleAutomapType",
 	    N_("Cycle map type"),
 	    N_("Opaque -> Transparent -> Minimap -> None"),
-	    SDLK_M,
+	    SDLK_UNKNOWN, // Essence Mod: M opens the meter; set a key in the options if wanted
 	    CycleAutomapType,
 	    nullptr,
 	    IsGameRunning);
@@ -2035,6 +2040,14 @@ void InitKeymapActions()
 	    N_("Open Quest log."),
 	    'J', // Essence Mod: Q belongs to the spell bar
 	    QuestLogKeyPressed,
+	    nullptr,
+	    CanPlayerTakeAction);
+	options.Keymapper.AddAction(
+	    "Meter",
+	    N_("Meter"),
+	    N_("Open the damage and healing meter."),
+	    'M',
+	    ToggleMeter,
 	    nullptr,
 	    CanPlayerTakeAction);
 	options.Keymapper.AddAction(

@@ -145,6 +145,32 @@ int ApplySpecialAttackDamage(const Player &player, SpellID attack, int weaponDam
 	return weaponDamage;
 }
 
+int GetShieldDamage(const Player &player)
+{
+	for (const int hand : { INVLOC_HAND_LEFT, INVLOC_HAND_RIGHT }) {
+		const Item &item = player.InvBody[hand];
+		if (!item.isEmpty() && item._itype == ItemType::Shield)
+			return std::max<int>(item._iAC, 0);
+	}
+	return -1;
+}
+
+int GetShieldStrikeDamage(const Player &player, SpellID attack)
+{
+	if (!IsExtendedSpell(attack) || !IsValidSpell(attack) || GetSpellData(attack).requiredWeapon != "Shield")
+		return -1;
+	return GetShieldDamage(player);
+}
+
+bool KnowsShieldStrike(const Player &player)
+{
+	for (const auto &[spell, level] : player.extendedSpellLevels) {
+		if (level > 0 && IsValidSpell(spell) && GetSpellData(spell).requiredWeapon == "Shield")
+			return true;
+	}
+	return false;
+}
+
 DamageType GetSpecialAttackDamageType(SpellID attack)
 {
 	if (IsExtendedSpell(attack) && IsValidSpell(attack)) {
@@ -219,7 +245,7 @@ void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID att
 	// "Freeze": the target is held still for the rider's amount in seconds. Every PC has to do
 	// this alike, so they are all told.
 	if (spellData.rider == "Freeze" && !target.hasNoLife())
-		NetSendCmdPowerOnMonster(static_cast<uint16_t>(target.getId()), attack, static_cast<uint32_t>(spellData.riderAmount));
+		NetSendCmdPowerOnMonster(static_cast<uint16_t>(target.getId()), attack, static_cast<uint32_t>(spellData.riderAmount + std::min(ShownPowerLevel(SpellLevelOf(player, attack)) / 5, 2)));
 
 	// "ArmorBonus": the hit deals extra damage from the striker's armor. The rider's amount is
 	// the percentage of their armor that is added, as hit points.

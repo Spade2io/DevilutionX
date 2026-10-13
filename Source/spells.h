@@ -71,7 +71,7 @@ void CastOnSelfNow(SpellID spell);
  * @brief Essence Mod: a power read from essence_powers.tsv lands on a player. Runs on every PC,
  * with the amount the caster's PC worked out.
  */
-void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int amount);
+void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int amount, PowerCastInfo info = {});
 struct Monster;
 /**
  * @brief Essence Mod: a power lands on a monster in a way every PC has to carry out the same.

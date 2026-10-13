@@ -1224,3 +1224,36 @@ six boons, an aura and a Compounding power. With it there are 220 confluences, a
   took while it ran, not an estimate of what the boon prevented.
 - Bryan wants more big cooldown boons that a support character casts on another player (damage,
   armor and so on). They are on the checklist under "Powers to create".
+
+## What was built for 1.02 (2026-10-13)
+Decided with Bryan on 2026-10-12 and 13. None of it has been played by him yet.
+- **Stats.** A racial bonus to Spirit or Recovery now raises mana or health as well. Points from
+  a racial bonus or a boon count toward wearing gear. Boons can add points to Speed (stat
+  `SpeedStat`; `Speed` alone is attack and casting speed) and to Recovery; no power has one yet.
+- **A boon's second effects go by the caster.** The cast message carries the caster's level in
+  the power and whether it sits in their confluence row, so a boon on a friend grows as it
+  does on its caster. A lasting boon is sent again, quietly, when its power gains a level and a
+  few seconds after anyone joins.
+- **Life leech grows:** a quarter of a percent a level on a boon for yourself, an eighth on one
+  that can go on others, half a percent on a timed one (Crimson Feast). It is counted in
+  thousandths of a percent.
+- **Growth.** A hold lasts a second longer at level 5 and at level 10. Regeneration and pool
+  second effects, and the boon left by Invigorate and Genesis, grow by the step for a boon of
+  their size. Chain leaps and revive percentages are unchanged.
+- **Stealth and threat together:** the one cast most recently decides.
+- **Shield strikes** hit for the shield's own armor, not the weapon, with no sword or club rule.
+  The stats panel shows it to a character who knows a shield strike.
+- **Shields** earn their caster experience for damage absorbed (reported about once a second)
+  and no longer take a boon's share. The total is shown over the health globe and inside each
+  friend's portrait.
+- **Experience** is shown in power levels: the bar fills an eighth for each, and the character
+  sheet shows the count and the next multiple of eight.
+- **Icon frames** by kind: special attacks red, spell attacks orange, own lasting boons and
+  auras blue, lasting boons for others purple (red and blue dots), boons on a cooldown lavender
+  (blue and beige dots), healing, shields and cleansing yellow, afflictions that deal no damage
+  grey, special abilities beige.
+- **The boon bar wraps** to further rows at the edge of the screen.
+- **The meter (M):** damage by power, and healing and shields by power with health regeneration
+  and life leech, on the quest log's panel. Totals only. It starts again with every game.
+- **Joining.** The numbers a newcomer's PC works out again are no longer compared where a boon
+  or an item a boon lets them wear could change them.

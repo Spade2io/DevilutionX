@@ -549,6 +549,22 @@ EssenceStat GetEssenceStat(EssenceID essence)
 	return essence != EssenceID::None ? GetSlotStat(SlotOf(essence)) : EssenceStat::None;
 }
 
+int GetTotalPowerLevels(const Player &player)
+{
+	if (&player != MyPlayer)
+		return (std::max<int>(player.getCharacterLevel(), 1) - 1) * PowerLevelsPerCharacterLevel;
+	int total = 0;
+	for (size_t slot = 0; slot < AbilitySlotCount; slot++) {
+		if (SlotStats[slot] == EssenceStat::None)
+			continue;
+		for (const SpellID spell : Abilities[slot]) {
+			if (spell != SpellID::Invalid)
+				total += ShownPowerLevel(player.GetBaseSpellLevel(spell));
+		}
+	}
+	return total;
+}
+
 void GrantEarnedStatPoints(Player &player, bool inGame)
 {
 	// A row taken before stats grew this way is bound now, in the order the rows were taken.

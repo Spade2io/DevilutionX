@@ -235,7 +235,7 @@ std::string GetPowerNumbersText(const Player &player, SpellID spell, int level)
 	} else if (effect == "Mana") {
 		text = StrCat("+", FormatBookAmount(grown(data.effectAmount)), " mana");
 	} else if (IsAnyOf(effect, "Freeze", "GroundFreeze")) {
-		text = StrCat("Held ", data.effectAmount, "s");
+		text = StrCat("Held ", data.effectAmount + std::min(shown / 5, 2), "s");
 	} else if (effect == "Curse") {
 		if (stat == "Accuracy")
 			text = StrCat("-", std::min(WithConfluenceBoost(spell, GetPercentBuffAmount(stat, data.effectAmount, shown)), 95), "% to hit");
@@ -252,7 +252,7 @@ std::string GetPowerNumbersText(const Player &player, SpellID spell, int level)
 		} else if (stat == "Distance") {
 			// Stealth and threat never grow; the second effect riding on them does.
 			if (rides("LifeLeech"))
-				text = StrCat(data.riderAmount / 10, "% health leech");
+				text = StrCat(FormatLeechPercent(data.riderAmount * 100 + 250 * shown), "% health leech");
 			else if (rides("Block"))
 				text = StrCat("+", data.riderAmount + shown, "% block");
 			else if (rides("ToHit"))
@@ -262,7 +262,7 @@ std::string GetPowerNumbersText(const Player &player, SpellID spell, int level)
 			else if (rides("DmgReduction"))
 				text = StrCat(data.riderAmount + (data.riderAmount >= 5 ? shown : shown / 2), " off each physical hit");
 			else if (rides("MaxLife"))
-				text = StrCat("+", 2 * data.riderAmount, "% life"); // a pool riding on another boon counts double
+				text = StrCat("+", GetPercentBuffAmount("MaxLife", 2 * data.riderAmount, shown), "% life"); // a pool riding on another boon counts double
 		} else if (stat == "DamageTaken") {
 			text = StrCat("-", amount, "% damage taken");
 		} else if (stat == "Oath") {
@@ -273,8 +273,10 @@ std::string GetPowerNumbersText(const Player &player, SpellID spell, int level)
 			text = StrCat("+", amount, "%");
 		} else if (stat == "DmgReduction") {
 			text = StrCat(amount, " off each physical hit");
-		} else if (IsAnyOf(stat, "Power", "Spirit")) {
+		} else if (IsAnyOf(stat, "Power", "Spirit", "Recovery")) {
 			text = StrCat("+", amount, " ", stat);
+		} else if (stat == "SpeedStat") {
+			text = StrCat("+", amount, " Speed");
 		} else if (stat == "Armor") {
 			text = StrCat("+", amount, " armor");
 		} else if (stat == "Resist") {
@@ -422,8 +424,8 @@ void DrawAbilityRow(const Surface &out, const Player &player, SpellID sn, size_t
 	const Point iconPosition = GetPanelPosition(UiPanels::Spell, { IconX, top + IconPaddingTop + IconHeight - 1 });
 	DrawSmallSpellIcon(out, iconPosition, sn);
 	// Essence Mod: red around an attack, blue around a lasting buff or aura.
-	if (const uint8_t kindColor = GetPowerKindColor(sn); kindColor != 0)
-		DrawSmallSpellIconFrame(out, iconPosition, kindColor);
+	if (const PowerFrameColors frame = GetPowerFrameColors(sn); frame.first != 0)
+		DrawSmallSpellIconFrame(out, iconPosition, frame);
 	if (sn == player._pRSpell && st == player._pRSplType) {
 		SetSpellTrans(SpellType::Skill);
 		DrawSmallSpellIconBorder(out, iconPosition);

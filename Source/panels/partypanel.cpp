@@ -4,6 +4,9 @@
 #include <optional>
 
 #include "automap.h"
+#include "buffs.h"
+#include "engine/render/text_render.hpp"
+#include "utils/str_cat.hpp"
 #include "control/control.hpp"
 #include "engine/backbuffer_state.hpp"
 #include "engine/clx_sprite.hpp"
@@ -251,6 +254,14 @@ void DrawPartyMemberInfoPanel(const Surface &out)
 			    PortraitFrameSize.width,
 			    PortraitFrameSize.height,
 			    PAL8_RED + 4);
+		}
+
+		// Essence Mod: the shield this player has left, inside the portrait along its bottom edge,
+		// so that it can never reach the boon icons to the right. Gone when they have none.
+		if (const int shield = GetShieldTotal(player); shield > 0 && player._pHitPoints > 0) {
+			DrawString(frameSubregion, StrCat(shield),
+			    Rectangle { Point { 0, PortraitFrameSize.height - (FrameBorderSize * 2) - 14 }, Size { PortraitFrameSize.width - (FrameBorderSize * 2), 12 } },
+			    { .flags = UiFlags::ColorGold | UiFlags::AlignCenter | UiFlags::FontSize12 | UiFlags::Outlined });
 		}
 
 		// Add to the position before continuing to the next item

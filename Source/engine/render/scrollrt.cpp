@@ -5,6 +5,8 @@
  */
 #include "engine/render/scrollrt.h"
 
+#include "meter.h"
+
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -1447,6 +1449,8 @@ void DrawView(const Surface &out, Point startPosition)
 		DrawStash(out);
 	} else if (IsVisualStoreOpen) {
 		DrawVisualStore(out);
+	} else if (MeterOpen) {
+		DrawMeter(out); // Essence Mod
 	}
 
 	if (ShowUniqueItemInfoBox) {

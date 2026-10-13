@@ -205,6 +205,8 @@ std::string_view CmdIdString(_cmd_id cmd)
 	case CMD_FILTHY: return "CMD_FILTHY";
 	case CMD_COMPOUNDHEALS: return "CMD_COMPOUNDHEALS";
 	case CMD_SHAREGOLD: return "CMD_SHAREGOLD";
+	case CMD_SHIELDABSORBED: return "CMD_SHIELDABSORBED";
+	case CMD_SHIELDTOTAL: return "CMD_SHIELDTOTAL";
 	case FAKE_CMD_SETID: return "FAKE_CMD_SETID";
 	case FAKE_CMD_DROPID: return "FAKE_CMD_DROPID";
 	case CMD_INVALID: return "CMD_INVALID";
@@ -2637,6 +2639,23 @@ size_t OnCompoundHeals(const TCmdParam2 &message, Player &player)
 	return sizeof(message);
 }
 
+size_t OnShieldAbsorbed(const TCmdParam4 &message, Player &wearer)
+{
+	// Only the PC of the player who cast the shield has the power to credit.
+	if (gbBufferMsgs != 1 && MyPlayer != nullptr && Swap16LE(message.wParam1) == MyPlayerId)
+		CreditShieldAbsorbed(static_cast<SpellID>(Swap16LE(message.wParam2)), static_cast<int>(Swap16LE(message.wParam3)) * 16, wearer);
+
+	return sizeof(message);
+}
+
+size_t OnShieldTotal(const TCmdParam1 &message, Player &sender)
+{
+	if (gbBufferMsgs != 1)
+		SetShieldTotalOf(sender, Swap16LE(message.wParam1));
+
+	return sizeof(message);
+}
+
 size_t OnShareGold(const TCmdParam2 &message, Player & /*sender*/)
 {
 	// A share of a pile someone else picked up. Each player's bag is known only to their own PC,
@@ -2674,8 +2693,13 @@ size_t OnPowerOnPlayer(const TCmdPowerOnPlayer &message, const Player &caster)
 
 	if (gbBufferMsgs != 1 && message.bPlr < Players.size() && amount <= 192000) {
 		Player &target = Players[message.bPlr];
-		if (target.plractive)
-			ApplyPowerToPlayer(caster, target, spell, static_cast<int>(amount));
+		if (target.plractive) {
+			PowerCastInfo info;
+			info.level = static_cast<int8_t>(std::min(message.bInfo & 15, 10));
+			info.confluence = (message.bInfo & 16) != 0;
+			info.quiet = (message.bInfo & 32) != 0;
+			ApplyPowerToPlayer(caster, target, spell, static_cast<int>(amount), info);
+		}
 	}
 
 	return sizeof(message);
@@ -3391,7 +3415,7 @@ void NetSendCmdPowerOnMonster(uint16_t monsterId, SpellID spell, uint32_t amount
 	NetSendHiPri(MyPlayerId, reinterpret_cast<std::byte *>(&cmd), sizeof(cmd));
 }
 
-void NetSendCmdPowerOnPlayer(const Player &target, SpellID spell, uint32_t amount)
+void NetSendCmdPowerOnPlayer(const Player &target, SpellID spell, uint32_t amount, bool quiet)
 {
 	TCmdPowerOnPlayer cmd;
 
@@ -3402,6 +3426,9 @@ void NetSendCmdPowerOnPlayer(const Player &target, SpellID spell, uint32_t amoun
 	cmd.bPlr = target.getId();
 	cmd.wSpell = Swap16LE(static_cast<uint16_t>(spell));
 	cmd.dwAmount = Swap32LE(amount);
+	// How far this player has trained the power, and whether it is in their confluence row: the
+	// second effects of a boon are sized by these on every PC.
+	cmd.bInfo = static_cast<uint8_t>(std::min(ShownPowerLevel(MyPlayer->GetBaseSpellLevel(spell)), 10) | (IsConfluencePower(spell) ? 16 : 0) | (quiet ? 32 : 0));
 	NetSendHiPri(MyPlayerId, reinterpret_cast<std::byte *>(&cmd), sizeof(cmd));
 }
 
@@ -3616,6 +3643,10 @@ size_t ParseCmd(uint8_t pnum, const TCmd *pCmd, size_t maxCmdSize)
 		return HandleCmd(OnCompoundHeals, player, pCmd, maxCmdSize);
 	case CMD_SHAREGOLD:
 		return HandleCmd(OnShareGold, player, pCmd, maxCmdSize);
+	case CMD_SHIELDABSORBED:
+		return HandleCmd(OnShieldAbsorbed, player, pCmd, maxCmdSize);
+	case CMD_SHIELDTOTAL:
+		return HandleCmd(OnShieldTotal, player, pCmd, maxCmdSize);
 	default:
 		break;
 	}

@@ -145,8 +145,8 @@ void DrawSpellList(const Surface &out)
 		if (!spellListItem.isSelected) {
 			// Essence Mod: red around an attack, blue around a lasting buff or aura. The power under
 			// the cursor keeps the list's own highlight instead.
-			if (const uint8_t kindColor = spellListItem.type == SpellType::Spell ? GetPowerKindColor(spellId) : 0; kindColor != 0)
-				DrawLargeSpellIconBorder(out, spellListItem.location, kindColor);
+			if (const PowerFrameColors frame = spellListItem.type == SpellType::Spell ? GetPowerFrameColors(spellId) : PowerFrameColors {}; frame.first != 0)
+				DrawLargeSpellIconBorder(out, spellListItem.location, frame);
 			continue;
 		}
 

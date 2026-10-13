@@ -66,7 +66,21 @@ bool CancelBuffUnderCursor();
  * whichever cast is stronger, and a timed one takes the new cast and starts its time again.
  * @return false if the player already had a stronger lasting one, so nothing changed.
  */
-bool ActivatePowerBuff(Player &player, SpellID spell, int amount, const Player &caster);
+bool ActivatePowerBuff(Player &player, SpellID spell, int amount, const Player &caster, PowerCastInfo info = {});
+
+/**
+ * @brief Sends again every lasting boon and aura the local player has cast, on themselves and on
+ * others, at its present strength. Used when one of their powers gains a level, and when a player
+ * joins who was not there to hear the casts.
+ * @param only The one power to send, or SpellID::Invalid for all of them.
+ */
+void ResendLastingBoons(SpellID only);
+
+/** @brief Asks for ResendLastingBoons a few seconds from now, once a newcomer has finished loading. */
+void ScheduleBoonResend();
+
+/** @brief A leech size, held in thousandths of a percent, as text: 1250 is "1.25". */
+std::string FormatLeechPercent(int thousandths);
 
 /**
  * @brief How much a player's data-file buffs raise one stat, as a percentage (30 is +30%).
@@ -81,7 +95,7 @@ int GetPowerBuffPercent(const Player &player, std::string_view stat);
 /**
  * @brief Leech: the local player takes back a small share of damage they have just dealt to a
  * monster, as health and as mana. The shares are the sums of the "LifeLeech" and "ManaLeech"
- * second effects on their boons, in tenths of a percent (10 is 1%). Call it on the player's own
+ * second effects on their boons, which GetPowerBuffPercent gives in THOUSANDTHS of a percent (1000 is 1%). Call it on the player's own
  * PC only.
  * @param damage What the monster actually lost, in 64ths of a hit point.
  */
@@ -111,6 +125,20 @@ bool HasHealOverTimeFrom(const Player &target, const Player &caster);
  * and returns what is left to hurt them. Damage is in 64ths of a hit point.
  */
 int AbsorbDamageWithShields(Player &player, int damage);
+
+/**
+ * @brief Gives a shield's power the experience for damage it has absorbed, as a heal earns for
+ * what it restores. Runs on the PC of whoever cast the shield.
+ * @param amount Damage absorbed, in 64ths of a hit point.
+ * @param wearer The player it was on.
+ */
+void CreditShieldAbsorbed(SpellID spell, int amount, const Player &wearer);
+
+/** @brief Every shield on a player added up, in hit points. Exact for the local player; for others, what their PC last said. */
+int GetShieldTotal(const Player &player);
+
+/** @brief Records what another player's PC says their shield total is. */
+void SetShieldTotalOf(const Player &player, int hitPoints);
 
 /** @brief Incoming damage after the player's "DamageTaken" buffs (50 is half damage). */
 int ReduceDamageTaken(const Player &player, int damage);

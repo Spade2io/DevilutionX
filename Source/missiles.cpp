@@ -2660,7 +2660,9 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 	}
 	// "Freeze" holds monsters still for the power's amount in seconds. The same number on every PC,
 	// whatever the caster's level, because every PC must agree on when the monster moves again.
-	const int freezeSeconds = amount;
+	// A hold lasts a second longer at level 5 and again at level 10. The level is the one the cast
+	// itself carried, which every PC was told alike.
+	const int freezeSeconds = amount + std::min(ShownPowerLevel(missile._mispllvl) / 5, 2);
 	amount = ScaleDamageForSpellLevel(amount, std::max<int>(player.GetBaseSpellLevel(spell), 1));
 	// A curse that is a percentage grows by a set step each level, like a percentage buff.
 	if (isCurse && IsExtendedSpell(spell) && IsValidSpell(spell) && IsPercentBuffStat(GetSpellData(spell).buffStat))
@@ -2815,7 +2817,7 @@ void AddCorruption(Missile &missile, AddMissileParameter &parameter)
 			// The rider "Freeze": whatever survives is held for the rider's amount in seconds. Every
 			// PC has to hold it alike, so they are all told.
 			if (extended != nullptr && extended->rider == "Freeze" && !monster.hasNoLife())
-				NetSendCmdPowerOnMonster(static_cast<uint16_t>(monsterId), spell, static_cast<uint32_t>(extended->riderAmount));
+				NetSendCmdPowerOnMonster(static_cast<uint16_t>(monsterId), spell, static_cast<uint32_t>(extended->riderAmount + std::min(ShownPowerLevel(player.GetBaseSpellLevel(spell)) / 5, 2)));
 			// The rider "ResistCut": whatever survives is left open. Every PC is told, as with a curse.
 			if (extended != nullptr && extended->rider == "ResistCut" && !monster.hasNoLife())
 				NetSendCmdPowerOnMonster(static_cast<uint16_t>(monsterId), spell, static_cast<uint32_t>(extended->riderAmount));
@@ -2964,7 +2966,7 @@ uint32_t GetPowerCastAmount(const Player &caster, SpellID spell)
 	const SpellData &spellData = GetSpellData(spell);
 	auto amount = static_cast<uint32_t>(ScaleDamageForSpellLevel(spellData.effectAmount, std::max<int>(caster.GetBaseSpellLevel(spell), 1)));
 	// A buff or aura that adds points to a stat grows by one point a level, not by an eighth.
-	if (IsAnyOf(spellData.buffStat, "Power", "Spirit"))
+	if (IsAnyOf(spellData.buffStat, "Power", "Spirit", "SpeedStat", "Recovery"))
 		amount = static_cast<uint32_t>(spellData.effectAmount + ShownPowerLevel(caster.GetBaseSpellLevel(spell)));
 	// Stealth and threat never grow: a power that carries one grows through its other effect.
 	if (spellData.buffStat == "Distance")

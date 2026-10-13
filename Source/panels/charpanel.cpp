@@ -2,6 +2,7 @@
 
 #include "buffs.h"
 #include "dots.h"
+#include "essences.h"
 
 #include <cstdint>
 #include <expected>
@@ -18,6 +19,7 @@
 #include "engine/render/primitive_render.hpp"
 #include "engine/render/text_render.hpp"
 #include "panels/ui_panels.hpp"
+#include "special_attacks.h"
 #include "player.h"
 #include "tables/playerdat.hpp"
 #include "utils/algorithm/container.hpp"
@@ -140,15 +142,15 @@ PanelEntry panelEntries[] = {
 	    []() { return StyledText { UiFlags::ColorWhite, StrCat(InspectPlayer->getCharacterLevel()) }; } },
 	{ N_("Experience"), { TopRightLabelX, 52 }, 99, 91,
 	    []() {
-	        return StyledText { UiFlags::ColorWhite, FormatInteger(InspectPlayer->_pExperience) };
+	        // Essence Mod: experience is counted in power levels, eight to a character level.
+	        return StyledText { UiFlags::ColorWhite, StrCat(GetTotalPowerLevels(*InspectPlayer)) };
 	    } },
 	{ N_("Next level"), { TopRightLabelX, 80 }, 99, 198,
 	    []() {
 	        if (InspectPlayer->isMaxCharacterLevel()) {
 		        return StyledText { UiFlags::ColorWhitegold, std::string(_("None")) };
 	        }
-	        const uint32_t nextExperienceThreshold = InspectPlayer->getNextExperienceThreshold();
-	        return StyledText { UiFlags::ColorWhite, FormatInteger(nextExperienceThreshold) };
+	        return StyledText { UiFlags::ColorWhite, StrCat((GetTotalPowerLevels(*InspectPlayer) / PowerLevelsPerCharacterLevel + 1) * PowerLevelsPerCharacterLevel) };
 	    } },
 
 	{ N_("Base"), { LeftColumnLabelX, /* set dynamically */ 0 }, 0, 44, {} },
@@ -343,8 +345,13 @@ void DrawExtraStats(const Surface &out, Point panelPosition)
 		// Leonid, a staff or bare hands).
 		{ "Block chance", StrCat(std::clamp(player.GetBlockChance(/*useLevel=*/false), 0, 100), player._pBlockFlag ? "% vs your level" : "% with a shield") },
 	};
-	// Leech from boons, in tenths of a percent. Each is listed only when the player has some.
-	const auto leech = [](int tenths) { return StrCat(tenths / 10, ".", tenths % 10, "% of damage dealt"); };
+	// Leech from boons, in thousandths of a percent. Each is listed only when the player has some.
+	// The chance to block is followed by what a shield strike hits for, for a character who knows one.
+	if (KnowsShieldStrike(player)) {
+		const int shield = GetShieldDamage(player);
+		lines.push_back({ "Shield damage", shield >= 0 ? StrCat(shield, " (its armor)") : std::string("no shield in hand") });
+	}
+	const auto leech = [](int thousandths) { return StrCat(FormatLeechPercent(thousandths), "% of damage dealt"); };
 	if (const int tenths = GetPowerBuffPercent(player, "LifeLeech"); tenths > 0)
 		lines.push_back({ "Health leech", leech(tenths) });
 	if (const int tenths = GetPowerBuffPercent(player, "ManaLeech"); tenths > 0)

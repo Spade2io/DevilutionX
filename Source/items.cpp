@@ -520,9 +520,14 @@ void CalcSelfItems(Player &player)
 	bool changeflag;
 	do {
 		// cap stats to 0
-		const int currstr = std::max(0, sa + player._pBaseStr);
-		const int currmag = std::max(0, ma + player._pBaseMag);
-		const int currdex = std::max(0, da + player._pBaseDex);
+		// Essence Mod: points from a racial power or from a boon count toward what can be worn, as
+		// points from other gear do. If the boon drops, the item switches off until it is back.
+		const auto extra = [&player](int base, std::string_view raceStat, std::string_view boonStat) {
+			return base * GetRacialPercent(player._pClass, raceStat) / 100 + GetPowerBuffPercent(player, boonStat);
+		};
+		const int currstr = std::max(0, sa + player._pBaseStr + extra(player._pBaseStr, "Power", "Power") + GetBuffStrengthBonus(player));
+		const int currmag = std::max(0, ma + player._pBaseMag + extra(player._pBaseMag, "Spirit", "Spirit"));
+		const int currdex = std::max(0, da + player._pBaseDex + extra(player._pBaseDex, "Speed", "SpeedStat"));
 
 		changeflag = false;
 		// Iterate over equipped items and remove stat bonuses if they are not valid
@@ -2538,15 +2543,23 @@ void CalcPlrPrimaryStats(Player &player, int strength, int &magic, int dexterity
 
 	// Essence Mod: "Spirit" buffs add points. (In the game's own terms Spirit is Magic.)
 	magic += GetPowerBuffPercent(player, "Spirit");
+	// Essence Mod: so do boons that add points to Speed (stat "SpeedStat", since "Speed" is attack
+	// and casting speed) and to Recovery.
+	dexterity += GetPowerBuffPercent(player, "SpeedStat");
+	vitality += GetPowerBuffPercent(player, "Recovery");
 	// Essence Mod: a racial power raises the character's own stat by a percentage (a Leonid's Power: 10 becomes
-	// 11). Points from gear and from boons are added afterwards and are not raised.
-	const auto withRace = [&player](int value, std::string_view stat) {
-		return value + value * GetRacialPercent(player._pClass, stat) / 100;
+	// 11). Points from gear and from boons are not raised.
+	const auto raceBonus = [&player](int base, std::string_view stat) {
+		return base * GetRacialPercent(player._pClass, stat) / 100;
 	};
-	player._pStrength = std::clamp(strength + withRace(player._pBaseStr, "Power"), 0, 750);
-	player._pMagic = std::clamp(magic + withRace(player._pBaseMag, "Spirit"), 0, 750);
-	player._pDexterity = std::clamp(dexterity + withRace(player._pBaseDex, "Speed"), 0, 750);
-	player._pVitality = std::clamp(vitality + withRace(player._pBaseVit, "Recovery"), 0, 750);
+	// Spirit and Recovery reach the mana and health pools through "magic" and "vitality", which
+	// the caller passes on, so a racial bonus to either goes in there and raises its pool too.
+	magic += raceBonus(player._pBaseMag, "Spirit");
+	vitality += raceBonus(player._pBaseVit, "Recovery");
+	player._pStrength = std::clamp(strength + player._pBaseStr + raceBonus(player._pBaseStr, "Power"), 0, 750);
+	player._pMagic = std::clamp(magic + player._pBaseMag, 0, 750);
+	player._pDexterity = std::clamp(dexterity + player._pBaseDex + raceBonus(player._pBaseDex, "Speed"), 0, 750);
+	player._pVitality = std::clamp(vitality + player._pBaseVit, 0, 750);
 }
 
 void CalcPlrLightRadius(Player &player, int lrad)

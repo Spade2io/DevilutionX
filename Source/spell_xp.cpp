@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "buffs.h"
+#include "meter.h"
 #include "cooldowns.h"
 #include "essences.h"
 #include "races.h"
@@ -96,6 +97,9 @@ void RaiseSpellLevelIfEarned(Player &player, SpellID spell)
 		RefreshBuffStats(player);
 		// Each level adds a point to the stat the power's essence is bound to.
 		GrantEarnedStatPoints(player, /*inGame=*/true);
+		// A lasting boon from this power that is already out grows now, on this player and on allies.
+		if (&player == MyPlayer)
+			ResendLastingBoons(spell);
 	}
 }
 
@@ -172,6 +176,9 @@ void ShareExperienceWithActiveBuffs(Player &player, uint32_t gained, std::string
 	// The same share for buffs read from essence_powers.tsv.
 	for (const SpellID buffSpell : GetActivePowerBuffs(player)) {
 		if (player.GetBaseSpellLevel(buffSpell) == 0)
+			continue;
+		// A shield earns for the damage it absorbs and nothing else (2026-10-13).
+		if (GetSpellData(buffSpell).buffStat == "Shield")
 			continue;
 		const int divisor = GetSpellCooldownTicks(buffSpell) > 0 ? CooldownBuffExperienceDivisor : BuffExperienceDivisor;
 		const uint32_t buffGain = AwardSpellExperience(player, buffSpell, gained / divisor, 0);
@@ -252,6 +259,8 @@ void AddSpellExperienceForDamage(const Player &player, const Monster &monster, S
 {
 	if (&player != MyPlayer)
 		return;
+	// The meter counts what the monster really lost, whether or not the power is one that learns.
+	MeterAddDamage(spell, std::min(damage, std::max(hitPointsBefore, 0)));
 
 	// Only learned spells grow. Arrows, and spells cast from a staff or scroll, count as plain attacks.
 	// A passive buff earns only its tenth share, so any damage credited to one counts as a plain
@@ -279,6 +288,7 @@ void AddAttackExperienceForDamage(const Player &player, const Monster &monster, 
 {
 	if (&player != MyPlayer)
 		return;
+	MeterAddDamage(SpellID::Invalid, std::min(damage, std::max(hitPointsBefore, 0)));
 
 	// No ability earns the attack's own experience yet; it only feeds the active buffs.
 	const auto worth = static_cast<uint32_t>(WithRacialExperience(player, ExperienceForDamage(player, monster, damage, hitPointsBefore)));
@@ -300,6 +310,8 @@ void AddSpellExperienceForHealing(const Player &caster, const Player &target, Sp
 {
 	if (&caster != MyPlayer || spell == SpellID::Invalid || target._pMaxHP <= 0 || healed <= 0)
 		return;
+	// Healing done, and damage a shield absorbed, both arrive here and go on the meter's second page.
+	MeterAddHealing(spell, healed);
 
 	// Only learned spells grow. Casting from a staff or scroll does not teach the spell.
 	if (caster.GetBaseSpellLevel(spell) == 0)

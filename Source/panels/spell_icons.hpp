@@ -105,6 +105,21 @@ void DrawSmallSpellIconScaled(const Surface &out, Point position, SpellID spell,
 void DrawLargeSpellIconBorder(const Surface &out, Point position, uint8_t color);
 
 /**
+ * Essence Mod: the colour of the frame that says what kind of power an icon is. Two different
+ * colours are laid in a one-pixel checkerboard, which the eye blends: red and blue to purple,
+ * blue and beige to lavender. "first" of 0 means no frame.
+ */
+struct PowerFrameColors {
+	uint8_t first = 0;
+	uint8_t second = 0;
+};
+
+/** @brief The frame for a power: by kind of attack, kind of boon, healing, affliction or special ability. */
+PowerFrameColors GetPowerFrameColors(SpellID spell);
+
+void DrawLargeSpellIconBorder(const Surface &out, Point position, PowerFrameColors colors);
+
+/**
  * Draw an inset 2px border for a small (37x38) spell icon.
  *
  * @param out Output buffer.
@@ -118,10 +133,10 @@ void DrawSmallSpellIconBorder(const Surface &out, Point position);
  * border above to be drawn on the icon itself.
  * @param color A palette colour, used as it is.
  */
-void DrawSmallSpellIconFrame(const Surface &out, Point position, uint8_t color);
+void DrawSmallSpellIconFrame(const Surface &out, Point position, PowerFrameColors colors);
 
 /** @brief Essence Mod: the frame colour for a power's kind (red for attacks, blue for lasting buffs), or 0 for none. */
-uint8_t GetPowerKindColor(SpellID spell);
+
 
 /**
  * @brief Set the color mapping for the `Draw(Small|Large)SpellIcon(Border)` calls.

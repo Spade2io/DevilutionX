@@ -272,6 +272,12 @@ const SHORT_TEXT = {
 //         heals the caster that many hit points (Blood Moon); on a Strike, Wither makes effects
 //         over time on the target deal that percent more until it dies (Exsanguinate).
 //   The Strike rider "HealSelf": the striker is healed for riderHeal when the blow lands.
+//   2026-10-13: Buff stats SpeedStat and Recovery add points to those stats, as Power and Spirit
+//         do ("Speed" alone is attack and casting speed). LifeLeech now grows: a quarter of a
+//         percent a level on a self boon, an eighth on one for others, a half on a timed one.
+//         Regeneration and pool riders grow by the step for a boon of their (doubled) size, and
+//         so does the "boon" of a Heal or Resurrect. A hold lasts a second longer at levels 5
+//         and 10. A shield strike's base damage is the shield's armor, not the weapon.
 //   Buff: switches a buff on for the caster, or for the player aimed at if the power is tagged Ally. "stat" is what it changes; the power's potency is how
 //         much (30 is +30%); "duration" is seconds, or 0 for a lasting buff.
 const TICKS_PER_EFFECT = 10

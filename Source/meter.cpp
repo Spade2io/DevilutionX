@@ -1,0 +1,235 @@
+/**
+ * @file meter.cpp
+ *
+ * Essence Mod: the meter. See meter.h.
+ */
+#include "meter.h"
+
+#include <algorithm>
+#include <cstdint>
+#include <string>
+#include <string_view>
+#include <vector>
+
+#include "DiabloUI/ui_flags.hpp"
+#include "control/control.hpp"
+#include "engine/palette.h"
+#include "engine/point.hpp"
+#include "engine/rectangle.hpp"
+#include "engine/render/clx_render.hpp"
+#include "engine/render/primitive_render.hpp"
+#include "engine/render/text_render.hpp"
+#include "inv.h"
+#include "panels/quest_log.hpp"
+#include "panels/ui_panels.hpp"
+#include "qol/stash.h"
+#include "qol/visual_store.h"
+#include "stores.h"
+#include "quests.h"
+#include "spells.h"
+#include "utils/format_int.hpp"
+#include "utils/str_cat.hpp"
+
+namespace devilution {
+
+bool MeterOpen = false;
+
+namespace {
+
+/** What a line of the meter counts. A power is told apart by its spell; the others have no spell. */
+enum class LineKind : uint8_t {
+	Power,
+	WeaponHits,
+	Regeneration,
+	Leech,
+};
+
+struct Line {
+	LineKind kind;
+	SpellID spell;
+	/** In 64ths of a hit point. */
+	int64_t total;
+};
+
+std::vector<Line> DamageLines;
+std::vector<Line> HealingLines;
+
+/** Which of the two pages is showing: 0 damage, 1 healing and shields. */
+int Page = 0;
+
+void Add(std::vector<Line> &lines, LineKind kind, SpellID spell, int amount)
+{
+	if (amount <= 0)
+		return;
+	for (Line &line : lines) {
+		if (line.kind == kind && line.spell == spell) {
+			line.total += amount;
+			return;
+		}
+	}
+	lines.push_back({ kind, spell, amount });
+}
+
+std::string_view NameOf(const Line &line)
+{
+	switch (line.kind) {
+	case LineKind::WeaponHits:
+		return "Weapon hits";
+	case LineKind::Regeneration:
+		return "Health regeneration";
+	case LineKind::Leech:
+		return "Life leech";
+	case LineKind::Power:
+		break;
+	}
+	return IsValidSpell(line.spell) ? std::string_view { GetSpellData(line.spell).sNameText } : std::string_view { "Unknown" };
+}
+
+std::string Amount(int64_t sixtyFourths)
+{
+	return FormatInteger(static_cast<int>(std::min<int64_t>((sixtyFourths + 32) >> 6, INT32_MAX)));
+}
+
+// The panel is the quest log's: 320 wide and 352 high. These are places on it.
+constexpr int TextLeft = 34;
+constexpr int TextWidth = 252;
+constexpr int TitleTop = 26;
+constexpr int ListTop = 62;
+constexpr int RowHeight = 22;
+constexpr int MaxRows = 10;
+constexpr int BarHeight = 4;
+constexpr int ButtonTop = 300;
+constexpr int ButtonHeight = 16;
+
+/** The three words along the bottom, as places on the panel. */
+constexpr Rectangle DamageButton { { TextLeft, ButtonTop }, { 76, ButtonHeight } };
+constexpr Rectangle HealingButton { { TextLeft + 80, ButtonTop }, { 104, ButtonHeight } };
+constexpr Rectangle ResetButton { { TextLeft + TextWidth - 56, ButtonTop }, { 56, ButtonHeight } };
+
+Rectangle OnScreen(Rectangle onPanel)
+{
+	return { GetPanelPosition(UiPanels::Quest, onPanel.position), onPanel.size };
+}
+
+/** Whether the meter is the left-hand panel being shown: the others are drawn in its place. */
+bool IsShowing()
+{
+	return MeterOpen && !CharFlag && !QuestLogIsOpen && !IsStashOpen && !IsVisualStoreOpen;
+}
+
+} // namespace
+
+void ResetMeter()
+{
+	DamageLines.clear();
+	HealingLines.clear();
+}
+
+void MeterAddDamage(SpellID spell, int amount)
+{
+	if (spell == SpellID::Invalid || spell == SpellID::Null)
+		Add(DamageLines, LineKind::WeaponHits, SpellID::Invalid, amount);
+	else
+		Add(DamageLines, LineKind::Power, spell, amount);
+}
+
+void MeterAddHealing(SpellID spell, int amount)
+{
+	Add(HealingLines, LineKind::Power, spell, amount);
+}
+
+void MeterAddRegeneration(int amount)
+{
+	Add(HealingLines, LineKind::Regeneration, SpellID::Invalid, amount);
+}
+
+void MeterAddLeech(int amount)
+{
+	Add(HealingLines, LineKind::Leech, SpellID::Invalid, amount);
+}
+
+void ToggleMeter()
+{
+	if (IsPlayerInStore())
+		return;
+	if (IsShowing()) {
+		MeterOpen = false;
+		return;
+	}
+	// It takes the place of whatever was open on the left.
+	CloseCharPanel();
+	QuestLogIsOpen = false;
+	CloseGoldWithdraw();
+	CloseStash();
+	CloseVisualStore();
+	MeterOpen = true;
+}
+
+void DrawMeter(const Surface &out)
+{
+	ClxDraw(out, GetPanelPosition(UiPanels::Quest, { 0, 351 }), (*pQLogCel)[0]);
+
+	// The page's lines, biggest first.
+	std::vector<Line> lines = Page == 0 ? DamageLines : HealingLines;
+	std::sort(lines.begin(), lines.end(), [](const Line &a, const Line &b) { return a.total > b.total; });
+	int64_t total = 0;
+	for (const Line &line : lines)
+		total += line.total;
+
+	const std::string_view title = Page == 0 ? "Damage done" : "Healing and shields";
+	DrawString(out, title, OnScreen({ { TextLeft, TitleTop }, { TextWidth, 14 } }), { .flags = UiFlags::ColorWhitegold });
+	DrawString(out, Amount(total), OnScreen({ { TextLeft, TitleTop }, { TextWidth, 14 } }), { .flags = UiFlags::ColorWhitegold | UiFlags::AlignRight });
+
+	if (lines.empty()) {
+		DrawString(out, Page == 0 ? "No damage dealt yet this game." : "No healing or shielding yet this game.",
+		    OnScreen({ { TextLeft, ListTop }, { TextWidth, 14 } }), { .flags = UiFlags::ColorWhite | UiFlags::FontSize12 });
+	}
+
+	// When there are more lines than fit, the last row gathers the rest.
+	const int64_t biggest = lines.empty() ? 1 : std::max<int64_t>(lines.front().total, 1);
+	const uint8_t barColor = Page == 0 ? PAL8_RED + 3 : PAL8_YELLOW + 3;
+	for (int row = 0; row < MaxRows && row < static_cast<int>(lines.size()); row++) {
+		const bool gathers = row == MaxRows - 1 && static_cast<int>(lines.size()) > MaxRows;
+		int64_t amount = lines[row].total;
+		std::string name { NameOf(lines[row]) };
+		if (gathers) {
+			amount = 0;
+			for (size_t i = row; i < lines.size(); i++)
+				amount += lines[i].total;
+			name = StrCat("Everything else (", lines.size() - row, ")");
+		}
+		const int top = ListTop + row * RowHeight;
+		DrawString(out, name, OnScreen({ { TextLeft, top }, { TextWidth - 60, 12 } }), { .flags = UiFlags::ColorWhite | UiFlags::FontSize12 });
+		DrawString(out, Amount(amount), OnScreen({ { TextLeft, top }, { TextWidth, 12 } }), { .flags = UiFlags::ColorWhite | UiFlags::FontSize12 | UiFlags::AlignRight });
+		// The bar is drawn against the biggest line, so the first is always full width.
+		const int width = std::clamp(static_cast<int>(amount * TextWidth / biggest), 1, TextWidth);
+		const Point barAt = GetPanelPosition(UiPanels::Quest, { TextLeft, top + 14 });
+		FillRect(out, barAt.x, barAt.y, TextWidth, BarHeight, PAL16_GRAY + 13);
+		FillRect(out, barAt.x, barAt.y, width, BarHeight, barColor);
+	}
+
+	// The two pages and Reset, as words to click. The page showing is in gold.
+	const auto button = [&](Rectangle place, std::string_view text, bool chosen, UiFlags align) {
+		const Rectangle at = OnScreen(place);
+		const bool hovered = at.contains(MousePosition);
+		DrawString(out, text, at, { .flags = (chosen ? UiFlags::ColorWhitegold : hovered ? UiFlags::ColorWhite : UiFlags::ColorUiSilver) | UiFlags::FontSize12 | align });
+	};
+	button(DamageButton, "Damage", Page == 0, UiFlags::None);
+	button(HealingButton, "Healing and shields", Page == 1, UiFlags::None);
+	button(ResetButton, "Reset", false, UiFlags::AlignRight);
+}
+
+bool CheckMeterClick()
+{
+	if (!IsShowing() || !GetLeftPanel().contains(MousePosition))
+		return false;
+	if (OnScreen(DamageButton).contains(MousePosition))
+		Page = 0;
+	else if (OnScreen(HealingButton).contains(MousePosition))
+		Page = 1;
+	else if (OnScreen(ResetButton).contains(MousePosition))
+		ResetMeter();
+	return true;
+}
+
+} // namespace devilution

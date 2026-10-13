@@ -592,18 +592,8 @@ bool UnPackNetPlayer(const PlayerNetPack &packed, Player &player)
 	// player with a boon running was refused ("sent invalid player data").
 	ValidateFields(player._pDamageMod, SwapSigned32LE(packed.pDamageMod), player._pDamageMod == SwapSigned32LE(packed.pDamageMod));
 	ValidateFields(player.getBaseToBlock(), SwapSigned32LE(packed.pBaseToBlk), player.getBaseToBlock() == SwapSigned32LE(packed.pBaseToBlk));
-	ValidateFields(player._pIMinDam, SwapSigned32LE(packed.pIMinDam), player._pIMinDam == SwapSigned32LE(packed.pIMinDam));
-	ValidateFields(player._pIMaxDam, SwapSigned32LE(packed.pIMaxDam), player._pIMaxDam == SwapSigned32LE(packed.pIMaxDam));
-	ValidateFields(player._pIBonusDam, SwapSigned32LE(packed.pIBonusDam), player._pIBonusDam == SwapSigned32LE(packed.pIBonusDam));
-	ValidateFields(player._pIBonusToHit, SwapSigned32LE(packed.pIBonusToHit), player._pIBonusToHit == SwapSigned32LE(packed.pIBonusToHit));
-	ValidateFields(player._pIBonusAC, SwapSigned32LE(packed.pIBonusAC), player._pIBonusAC == SwapSigned32LE(packed.pIBonusAC));
-	ValidateFields(player._pIBonusDamMod, SwapSigned32LE(packed.pIBonusDamMod), player._pIBonusDamMod == SwapSigned32LE(packed.pIBonusDamMod));
-	ValidateFields(player._pIGetHit, SwapSigned32LE(packed.pIGetHit), player._pIGetHit == SwapSigned32LE(packed.pIGetHit));
-	ValidateFields(player._pIEnAc, SwapSigned32LE(packed.pIEnAc), player._pIEnAc == SwapSigned32LE(packed.pIEnAc));
-	ValidateFields(player._pIFMinDam, SwapSigned32LE(packed.pIFMinDam), player._pIFMinDam == SwapSigned32LE(packed.pIFMinDam));
-	ValidateFields(player._pIFMaxDam, SwapSigned32LE(packed.pIFMaxDam), player._pIFMaxDam == SwapSigned32LE(packed.pIFMaxDam));
-	ValidateFields(player._pILMinDam, SwapSigned32LE(packed.pILMinDam), player._pILMinDam == SwapSigned32LE(packed.pILMinDam));
-	ValidateFields(player._pILMaxDam, SwapSigned32LE(packed.pILMaxDam), player._pILMaxDam == SwapSigned32LE(packed.pILMaxDam));
+	// Essence Mod: nor are the numbers that come from worn items. A boon can be what lets an item
+	// be worn, and this PC does not know the boons of a player who is arriving.
 	ValidateFields(player._pMaxHPBase, player.calculateBaseLife(), player._pMaxHPBase <= player.calculateBaseLife());
 	ValidateFields(player._pMaxManaBase, player.calculateBaseMana(), player._pMaxManaBase <= player.calculateBaseMana());
 

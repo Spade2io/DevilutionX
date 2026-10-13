@@ -951,6 +951,8 @@ void recv_plrinfo(Player &player, const TCmdPlrInfoHdr &header, bool recv)
 	ResetPlayerGFX(player);
 	player.plractive = true;
 	gbActivePlayers++;
+	// Essence Mod: the newcomer was not there when lasting boons were cast, so they are sent again.
+	ScheduleBoonResend();
 
 	std::string_view szEvent;
 	if (sgbPlayerTurnBitTbl[pnum]) {

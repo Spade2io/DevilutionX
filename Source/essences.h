@@ -93,6 +93,13 @@ EssenceStat GetEssenceStat(EssenceID essence);
  */
 void GrantEarnedStatPoints(Player &player, bool inGame);
 
+/**
+ * @brief How many levels a player's powers have gained in all, which is what the character's own
+ * level is counted from: one more for every PowerLevelsPerCharacterLevel of them. Exact for the
+ * local player; for anyone else it is worked back from their level.
+ */
+int GetTotalPowerLevels(const Player &player);
+
 /** @brief The essence an ability belongs to, or None for abilities that have no essence yet. */
 EssenceID GetSpellEssence(SpellID spell);
 

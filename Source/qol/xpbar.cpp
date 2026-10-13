@@ -9,6 +9,7 @@
 #include <cstdint>
 
 #include "control/control.hpp"
+#include "essences.h"
 #include "engine/clx_sprite.hpp"
 #include "engine/load_clx.hpp"
 #include "engine/point.hpp"
@@ -20,6 +21,7 @@
 #include "utils/format.hpp"
 #include "utils/format_int.hpp"
 #include "utils/language.h"
+#include "utils/str_cat.hpp"
 
 namespace devilution {
 
@@ -96,27 +98,10 @@ void DrawXPBar(const Surface &out)
 		return;
 	}
 
-	const uint8_t charLevel = player.getCharacterLevel();
-
-	const uint64_t prevXp = GetNextExperienceThresholdForLevel(charLevel - 1);
-	if (player._pExperience < prevXp)
-		return;
-
-	const uint64_t prevXpDelta1 = player._pExperience - prevXp;
-	const uint64_t prevXpDelta = GetNextExperienceThresholdForLevel(charLevel) - prevXp;
-	const uint64_t fullBar = BarWidth * prevXpDelta1 / prevXpDelta;
-
-	// Figure out how much to fill the last pixel of the XP bar, to make it gradually appear with gained XP
-	const uint64_t onePx = (prevXpDelta / BarWidth) + 1;
-	const uint64_t lastFullPx = fullBar * prevXpDelta / BarWidth;
-
-	const uint64_t fade = (prevXpDelta1 - lastFullPx) * (SilverGradient.size() - 1) / onePx;
-
-	// Draw beginning of bar full brightness
-	DrawBar(out, position, static_cast<int>(fullBar), SilverGradient);
-
-	// End pixels appear gradually
-	DrawEndCap(out, position + Displacement { static_cast<int>(fullBar), 0 }, static_cast<int>(fade), SilverGradient);
+	// Essence Mod: the bar fills an eighth for each level one of the player's powers gains, and is
+	// full when the eighth makes the character's next level.
+	const int inThisLevel = GetTotalPowerLevels(player) % PowerLevelsPerCharacterLevel;
+	DrawBar(out, position, BarWidth * inThisLevel / PowerLevelsPerCharacterLevel, SilverGradient);
 }
 
 bool CheckXPBarInfo()
@@ -149,10 +134,11 @@ bool CheckXPBarInfo()
 
 	InfoColor = UiFlags::ColorWhite;
 
-	AddInfoBoxString(FormatRuntime(_("Experience: {:s}"), FormatInteger(player._pExperience)));
-	const uint32_t nextExperienceThreshold = player.getNextExperienceThreshold();
-	AddInfoBoxString(FormatRuntime(_("Next Level: {:s}"), FormatInteger(nextExperienceThreshold)));
-	AddInfoBoxString(FormatRuntime(_("{:s} to Level {:d}"), FormatInteger(nextExperienceThreshold - player._pExperience), charLevel + 1));
+	// Essence Mod: a character's level comes from the levels of their powers, eight to a level.
+	const int powerLevels = GetTotalPowerLevels(player);
+	const int nextAt = (powerLevels / PowerLevelsPerCharacterLevel + 1) * PowerLevelsPerCharacterLevel;
+	AddInfoBoxString(StrCat("Power levels: ", powerLevels, " of ", nextAt));
+	AddInfoBoxString(StrCat(nextAt - powerLevels, " more to Level ", charLevel + 1));
 
 	return true;
 }

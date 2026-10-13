@@ -68,6 +68,19 @@ DamageType GetSpecialAttackDamageType(SpellID attack);
  * (Flame Cleave). Only powers read from essence_powers.tsv have either.
  * @param damage The damage the swing dealt, in 64ths of a hit point.
  */
+/**
+ * @brief What a strike made with the shield hits for before the power's own bonus: the armor of the
+ * shield in hand, magic on it included. The weapon plays no part.
+ * @return -1 if the attack is not a shield strike or no shield is held.
+ */
+int GetShieldStrikeDamage(const Player &player, SpellID attack);
+
+/** @brief The armor of the shield a player holds, which is its damage in a shield strike; -1 with none. */
+int GetShieldDamage(const Player &player);
+
+/** @brief Whether a player knows any power that strikes with the shield. */
+bool KnowsShieldStrike(const Player &player);
+
 void ApplySpecialAttackExtras(const Player &player, Monster &target, SpellID attack, int damage);
 
 } // namespace devilution

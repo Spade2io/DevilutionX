@@ -437,7 +437,7 @@ void ApplyPowerToMonster(const Player &caster, Monster &monster, SpellID spell, 
 		hold->duration = std::min(amount, 60) * 20; // 20 game ticks to the second
 }
 
-void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int amount)
+void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int amount, PowerCastInfo info)
 {
 	if (!IsExtendedSpell(spell) || !IsValidSpell(spell) || amount <= 0)
 		return;
@@ -447,6 +447,12 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 	const UiFlags textStyle = GetSpellTextColor(spell) | UiFlags::FontSize12;
 	// A separate id from the damage numbers, so the game does not merge the two.
 	const int textId = 2000 + target.getId();
+	// A heal or a resurrection that also leaves a boon (Invigorate, Genesis): the boon's size at the
+	// caster's level, growing by the step for a boon of that size.
+	const auto boonSize = [&] {
+		const int base = GetSpellData(spell).boonAmount;
+		return IsPercentBuffStat(GetSpellData(spell).buffStat) ? GetPercentBuffAmount(GetSpellData(spell).buffStat, base, std::max<int>(info.level, 0)) : base;
+	};
 
 	// "Resurrect": a fallen player is raised with the amount as a percentage of their life. The
 	// player's own PC does the rising, as with the game's Resurrect, and tells the others.
@@ -458,11 +464,11 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 		// their life, over the power's duration. It arrives as a heal over time.
 		if (rider == "Regrow" && spellData.durationSeconds >= 2) {
 			const int pulses = spellData.durationSeconds / 2;
-			ActivatePowerBuff(target, spell, std::max(static_cast<int>(static_cast<int64_t>(target._pMaxHP) * spellData.riderAmount / 100 / pulses), 1), caster);
+			ActivatePowerBuff(target, spell, std::max(static_cast<int>(static_cast<int64_t>(target._pMaxHP) * spellData.riderAmount / 100 / pulses), 1), caster, info);
 		}
 		// A resurrection that also leaves a boon (Genesis) leaves it on the risen too.
 		if (spellData.boonAmount != 0 && effect == "Resurrect")
-			ActivatePowerBuff(target, spell, spellData.boonAmount, caster);
+			ActivatePowerBuff(target, spell, boonSize(), caster, info);
 		if (&target == MyPlayer) {
 			PendingRevivePercent = effect == "Zone" ? 30 : std::clamp(amount, 1, 100);
 			NetSendCmd(true, CMD_PLRALIVE);
@@ -475,7 +481,7 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 	// The rider "Leech": the caster draws life from what they cursed. It arrives as the power's
 	// own heal over time, for the power's duration.
 	if (rider == "Leech") {
-		ActivatePowerBuff(target, spell, amount, caster);
+		ActivatePowerBuff(target, spell, amount, caster, info);
 		return;
 	}
 
@@ -487,7 +493,7 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 	// as a timed buff whose strength is what is left of it. A strike that carries a buff (armor
 	// after the blow, a shield for each enemy struck) arrives here too.
 	if (effect == "Shield" || (effect == "Strike" && !spellData.buffStat.empty())) {
-		ActivatePowerBuff(target, spell, amount, caster);
+		ActivatePowerBuff(target, spell, amount, caster, info);
 		if (target.isOnActiveLevel())
 			AddFloatingNumber(target.position.tile, { 0, 0 }, spellData.buffStat == "Shield" ? StrCat("Shield ", std::max((amount + 32) >> 6, 1)) : std::string(spellData.sNameText), textStyle, textId);
 		return;
@@ -497,8 +503,9 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 		// A bond holds one player at a time: casting it on someone else moves it.
 		if (spellData.buffStat == "Oath")
 			RemovePowerBuffFromOthers(spell, caster, target);
-		const bool applied = ActivatePowerBuff(target, spell, amount, caster);
-		if (target.isOnActiveLevel())
+		const bool applied = ActivatePowerBuff(target, spell, amount, caster, info);
+		// A boon sent again only to bring it up to date says nothing.
+		if (target.isOnActiveLevel() && !info.quiet)
 			AddFloatingNumber(target.position.tile, { 0, 0 }, applied ? std::string(spellData.sNameText) : std::string("Already has a stronger one"), textStyle, textId);
 		return;
 	}
@@ -535,7 +542,7 @@ void ApplyPowerToPlayer(const Player &caster, Player &target, SpellID spell, int
 	// A heal that also leaves a boon (Invigorate, Genesis): the boon first, so a larger health
 	// pool is there to be filled.
 	if (spellData.boonAmount != 0 && IsAnyOf(effect, "Heal", "Resurrect"))
-		ActivatePowerBuff(target, spell, spellData.boonAmount, caster);
+		ActivatePowerBuff(target, spell, boonSize(), caster, info);
 	if (IsAnyOf(effect, "Heal", "HealPercent", "ChainHeal", "Resurrect", "Zone") || rider.starts_with("Heal") || spellData.buffStat == "HealSelf") {
 		const int healed = std::clamp(target._pMaxHP - target._pHitPoints, 0, amount);
 		AddSpellExperienceForHealing(caster, target, spell, healed);

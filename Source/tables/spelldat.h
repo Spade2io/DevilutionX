@@ -34,6 +34,19 @@ enum class SpellType : uint8_t {
  * FirstExtendedSpell up are powers read from essence_powers.tsv; what a character knows of those
  * is kept in the sidecar file instead.
  */
+/**
+ * Essence Mod: what the caster's PC says about a power as it lands on a player. Only that PC knows
+ * how far its player has trained the power and whether it sits in their confluence row.
+ */
+struct PowerCastInfo {
+	/** The caster's level in the power as shown, 0 to 10; -1 if it was not said. */
+	int8_t level = -1;
+	/** Whether the power is in the caster's confluence row, and so a quarter stronger. */
+	bool confluence = false;
+	/** A boon sent again to bring it up to date: nothing is shown over the player. */
+	bool quiet = false;
+};
+
 enum class SpellID : int16_t {
 	Null,
 	FIRST = Null,

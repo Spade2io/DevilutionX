@@ -49,6 +49,8 @@
 #include "objects.h"
 #include "options.h"
 #include "player.h"
+
+#include "meter.h"
 #include "plrmsg.h"
 #include "qol/autopickup.h"
 #include "qol/stash.h"
@@ -628,6 +630,12 @@ bool PlrHitMonst(Player &player, Monster &monster, bool adjacentDamage = false)
 	int dam = RandomIntBetween(mind, maxd);
 	dam += dam * player._pIBonusDam / 100;
 	dam += player._pIBonusDamMod;
+	// Essence Mod: a strike made with the shield hits with the shield. Its damage is the shield's
+	// own armor, in place of the weapon's roll and the weapon's magic (Bryan, 2026-10-13). The
+	// 20% of luck either way is added with every special attack, where the hit is dealt.
+	const int shieldDamage = specialAttack != SpellID::Invalid ? GetShieldStrikeDamage(player, specialAttack) : -1;
+	if (shieldDamage >= 0)
+		dam = shieldDamage;
 	int dam2 = dam << 6;
 	dam += player._pDamageMod;
 
@@ -645,6 +653,9 @@ bool PlrHitMonst(Player &player, Monster &monster, bool adjacentDamage = false)
 	if (player.InvBody[INVLOC_HAND_LEFT]._itype == ItemType::Mace || player.InvBody[INVLOC_HAND_RIGHT]._itype == ItemType::Mace) {
 		phanditype = ItemType::Mace;
 	}
+	// A shield is neither sword nor club: no bonus or penalty against the undead or animals.
+	if (shieldDamage >= 0)
+		phanditype = ItemType::None;
 
 	switch (monster.data().monsterClass) {
 	case MonsterClass::Undead:
@@ -3256,6 +3267,8 @@ void RegenerateLifeAndMana(Player &player)
 
 	if (lifePulse && player._pHitPoints < player._pMaxHP) {
 		const int amount = GetLifeRegenPerSecond(player); // the amount of one pulse, which now comes every 3 seconds
+		if (&player == MyPlayer)
+			MeterAddRegeneration(std::min(amount, player._pMaxHP - player._pHitPoints));
 		player._pHitPoints = std::min(player._pHitPoints + amount, player._pMaxHP);
 		player._pHPBase = std::min(player._pHPBase + amount, player._pMaxHPBase);
 		RedrawComponent(PanelDrawComponent::Health);

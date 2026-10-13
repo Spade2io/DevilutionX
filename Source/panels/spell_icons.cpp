@@ -271,26 +271,100 @@ void DrawLargeSpellIconBorder(const Surface &out, Point position, uint8_t color)
 	UnsafeDrawBorder2px(out, Rectangle { Point { position.x, position.y - height + 1 }, Size { width, height } }, color);
 }
 
-void DrawSmallSpellIconFrame(const Surface &out, Point position, uint8_t color)
+namespace {
+
+/** A border two pixels thick in one colour or, with two, in a checkerboard of both. */
+void DrawFrame2px(const Surface &out, Rectangle rect, PowerFrameColors colors)
+{
+	for (int y = 0; y < rect.size.height; y++) {
+		for (int x = 0; x < rect.size.width; x++) {
+			if (x >= 2 && x < rect.size.width - 2 && y >= 2 && y < rect.size.height - 2)
+				continue;
+			const Point at { rect.position.x + x, rect.position.y + y };
+			if (out.InBounds(at))
+				*out.at(at.x, at.y) = ((x + y) & 1) == 0 ? colors.first : colors.second;
+		}
+	}
+}
+
+} // namespace
+
+void DrawLargeSpellIconBorder(const Surface &out, Point position, PowerFrameColors colors)
+{
+	const int width = (*LargeSpellIcons)[0].width();
+	const int height = (*LargeSpellIcons)[0].height();
+	DrawFrame2px(out, Rectangle { Point { position.x, position.y - height + 1 }, Size { width, height } }, colors);
+}
+
+void DrawSmallSpellIconFrame(const Surface &out, Point position, PowerFrameColors colors)
 {
 	constexpr int Outset = 2;
 	const int width = (*SmallSpellIcons)[0].width();
 	const int height = (*SmallSpellIcons)[0].height();
-	UnsafeDrawBorder2px(out, Rectangle { Point { position.x - Outset, position.y - height + 1 - Outset }, Size { width + 2 * Outset, height + 2 * Outset } }, color);
+	DrawFrame2px(out, Rectangle { Point { position.x - Outset, position.y - height + 1 - Outset }, Size { width + 2 * Outset, height + 2 * Outset } }, colors);
 }
 
-uint8_t GetPowerKindColor(SpellID spell)
+PowerFrameColors GetPowerFrameColors(SpellID spell)
 {
-	// The bright red and bright blue of the palette's fixed ramps, the same ones the tints use.
-	switch (GetPowerKind(spell)) {
-	case PowerKind::Attack:
-		return PAL8_RED + 2;
-	case PowerKind::LastingBuff:
-		return PAL8_BLUE + 2;
-	case PowerKind::Other:
+	// The palette's fixed colours, which look the same in every dungeon (Bryan, 2026-10-13).
+	constexpr uint8_t Red = PAL8_RED + 2;
+	constexpr uint8_t Orange = PAL8_ORANGE + 2;
+	constexpr uint8_t Yellow = PAL8_YELLOW + 2;
+	constexpr uint8_t Blue = PAL8_BLUE + 2;
+	constexpr uint8_t Beige = PAL16_BEIGE + 2;
+	constexpr uint8_t Grey = PAL16_GRAY + 4;
+	constexpr PowerFrameColors SpecialAttack { Red, Red };
+	constexpr PowerFrameColors SpellAttack { Orange, Orange };
+	constexpr PowerFrameColors OwnLastingBoon { Blue, Blue };
+	constexpr PowerFrameColors LastingBoonForOthers { Red, Blue }; // purple
+	constexpr PowerFrameColors CooldownBoon { Blue, Beige };      // lavender
+	constexpr PowerFrameColors HealingOrShield { Yellow, Yellow };
+	constexpr PowerFrameColors Affliction { Grey, Grey };
+	constexpr PowerFrameColors SpecialAbility { Beige, Beige };
+
+	// The game's own spells that the mod keeps.
+	switch (spell) {
+	case SpellID::FlameStrike:
+	case SpellID::InfernoStrike:
+		return SpecialAttack;
+	case SpellID::FireAura:
+	case SpellID::FlamingWeapon:
+		return OwnLastingBoon;
+	case SpellID::Teleport:
+		return SpecialAbility;
+	case SpellID::Healing:
+	case SpellID::HealOther:
+		return HealingOrShield;
+	default:
 		break;
 	}
-	return 0;
+	if (!IsExtendedSpell(spell) || !IsValidSpell(spell))
+		return GetPowerKind(spell) == PowerKind::Attack ? SpellAttack : PowerFrameColors {};
+
+	// A power that is two things takes the colour of its main one: an attack that also heals or
+	// afflicts is still an attack.
+	const SpellData &spellData = GetSpellData(spell);
+	const std::string &effect = spellData.effect;
+	if (effect == "Strike")
+		return SpecialAttack;
+	// Compounding a monster's effects over time is cast like a spell.
+	if (IsAnyOf(effect, "Burst", "GroundBurst", "ChainBurst", "Bolt", "Wave", "Cone", "Chain", "DamageZone", "Burn", "Corruption", "Bleed", "Compound"))
+		return SpellAttack;
+	if (IsAnyOf(effect, "Heal", "HealPercent", "ChainHeal", "Zone", "Shield", "Resurrect", "Cleanse", "Mana", "CompoundHeals"))
+		return HealingOrShield;
+	if (IsAnyOf(effect, "Curse", "Freeze", "GroundFreeze", "Kindle"))
+		return Affliction;
+	if (IsAnyOf(effect, "Aura", "Rebirth"))
+		return OwnLastingBoon;
+	if (effect == "Buff") {
+		// A heal that arrives a little at a time is still a heal.
+		if (spellData.buffStat == "HealPulse")
+			return HealingOrShield;
+		if (spellData.durationSeconds > 0)
+			return CooldownBoon;
+		return spellData.targetsAlly || spellData.effectRadius >= 99 ? LastingBoonForOthers : OwnLastingBoon;
+	}
+	return {};
 }
 
 void DrawSmallSpellIconBorder(const Surface &out, Point position)

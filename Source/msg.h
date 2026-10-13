@@ -446,6 +446,16 @@ enum _cmd_id : uint8_t {
 	//
 	// body (TCmdParam2): the id of the player it is for, the amount of gold
 	CMD_SHAREGOLD,
+	// Essence Mod: a shield another player cast has absorbed damage on the sender. Its caster's PC
+	// gives the shield's power the experience.
+	//
+	// body (TCmdParam4): the caster's player id, the shield's spell id, the damage absorbed in
+	// quarter hit points, unused
+	CMD_SHIELDABSORBED,
+	// Essence Mod: how much shield the sender has on them now, for the party list.
+	//
+	// body (TCmdParam1): hit points of shield
+	CMD_SHIELDTOTAL,
 	// Fake command; set current player for succeeding mega pkt buffer messages.
 	//
 	// body (TFakeCmdPlr)
@@ -542,6 +552,8 @@ struct TCmdPowerOnPlayer {
 	uint8_t bPlr;
 	uint16_t wSpell;
 	uint32_t dwAmount;
+	/** The caster's level in the power as shown (low 4 bits), in their confluence row (16), sent quietly (32). */
+	uint8_t bInfo;
 };
 
 /** Essence Mod: one power landing on one monster, where every PC has to do the same thing. */
@@ -807,7 +819,7 @@ void NetSendCmdChInvItem(bool bHiPri, int invGridIndex);
 void NetSendCmdChBeltItem(bool bHiPri, int beltIndex);
 void NetSendCmdDamage(bool bHiPri, const Player &player, uint32_t dwDam, DamageType damageType);
 /** Essence Mod: tells every PC that the local player's power has landed on a player. */
-void NetSendCmdPowerOnPlayer(const Player &target, SpellID spell, uint32_t amount);
+void NetSendCmdPowerOnPlayer(const Player &target, SpellID spell, uint32_t amount, bool quiet = false);
 /** Essence Mod: tells every PC that the local player's power has landed on a monster. */
 void NetSendCmdPowerOnMonster(uint16_t monsterId, SpellID spell, uint32_t amount);
 void NetSendCmdMonDmg(bool bHiPri, uint16_t wMon, uint32_t dwDam);
