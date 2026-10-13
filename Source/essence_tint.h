@@ -13,6 +13,9 @@
 #include <optional>
 
 #include "DiabloUI/ui_flags.hpp"
+#include "engine/clx_sprite.hpp"
+#include "engine/point.hpp"
+#include "engine/surface.hpp"
 #include "essences.h"
 #include "tables/misdat.h"
 #include "tables/spelldat.h"
@@ -37,6 +40,8 @@ enum class EssenceTint : uint8_t {
 	DullGray,
 	/** Bright orange. */
 	VividOrange,
+	/** The light half of the greys: white, for a Common awakening stone. */
+	White,
 };
 
 /** @brief The lookup table for a tint, for use with ClxDrawTRN. */
@@ -52,6 +57,22 @@ std::optional<EssenceTint> GetSpellTint(SpellID spell);
 
 /** @brief The colour that belongs to an essence, used for its item and its page of the spellbook. */
 std::optional<EssenceTint> GetEssenceTint(EssenceID essence);
+
+struct Item;
+
+/**
+ * @brief Draws an essence or an awakening stone in its colour: an essence in its own, a stone by
+ * its rarity (Common white, Rare blue, Epic purple, Legendary orange). Purple is two colours laid
+ * in a checkerboard, since the palette has none.
+ * @return false if the item has no colour of its own; the caller then draws it as usual.
+ */
+bool DrawItemTinted(const Surface &out, Point position, ClxSprite sprite, const Item &item);
+
+/**
+ * @brief The colour of an awakening stone's name, by its rarity: Common the ordinary white, Rare
+ * blue, Epic beige (the palette has no purple for lettering), Legendary orange.
+ */
+UiFlags GetAwakeningStoneTextColor(const Item &item);
 
 /**
  * @brief The damage type a power belongs to. Its damage is dealt as this type, and every word or

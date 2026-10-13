@@ -54,6 +54,11 @@ struct Line {
 std::vector<Line> DamageLines;
 std::vector<Line> HealingLines;
 
+/** How many times each power has been used: cast, or swung as a special attack. */
+std::vector<std::pair<SpellID, int>> Uses;
+/** How many plain weapon hits have landed. */
+int WeaponHitCount = 0;
+
 /** Which of the two pages is showing: 0 damage, 1 healing and shields. */
 int Page = 0;
 
@@ -76,13 +81,27 @@ std::string_view NameOf(const Line &line)
 	case LineKind::WeaponHits:
 		return "Weapon hits";
 	case LineKind::Regeneration:
-		return "Health regeneration";
+		return "Health regen";
 	case LineKind::Leech:
 		return "Life leech";
 	case LineKind::Power:
 		break;
 	}
 	return IsValidSpell(line.spell) ? std::string_view { GetSpellData(line.spell).sNameText } : std::string_view { "Unknown" };
+}
+
+/** How many uses a line's total is spread over, or 0 where "a use" means nothing (regeneration, leech). */
+int UsesOf(const Line &line)
+{
+	if (line.kind == LineKind::WeaponHits)
+		return WeaponHitCount;
+	if (line.kind != LineKind::Power)
+		return 0;
+	for (const auto &[spell, count] : Uses) {
+		if (spell == line.spell)
+			return count;
+	}
+	return 0;
 }
 
 std::string Amount(int64_t sixtyFourths)
@@ -94,7 +113,12 @@ std::string Amount(int64_t sixtyFourths)
 constexpr int TextLeft = 34;
 constexpr int TextWidth = 252;
 constexpr int TitleTop = 26;
+constexpr int HeaderTop = 46;
 constexpr int ListTop = 62;
+// Columns, each number set against its right-hand edge: the name, uses, the average of one use, the total.
+constexpr int NameWidth = 126;
+constexpr int UsesRight = 160;
+constexpr int EachRight = 204;
 constexpr int RowHeight = 22;
 constexpr int MaxRows = 10;
 constexpr int BarHeight = 4;
@@ -103,7 +127,7 @@ constexpr int ButtonHeight = 16;
 
 /** The three words along the bottom, as places on the panel. */
 constexpr Rectangle DamageButton { { TextLeft, ButtonTop }, { 76, ButtonHeight } };
-constexpr Rectangle HealingButton { { TextLeft + 80, ButtonTop }, { 104, ButtonHeight } };
+constexpr Rectangle HealingButton { { TextLeft + 84, ButtonTop }, { 76, ButtonHeight } };
 constexpr Rectangle ResetButton { { TextLeft + TextWidth - 56, ButtonTop }, { 56, ButtonHeight } };
 
 Rectangle OnScreen(Rectangle onPanel)
@@ -123,6 +147,8 @@ void ResetMeter()
 {
 	DamageLines.clear();
 	HealingLines.clear();
+	Uses.clear();
+	WeaponHitCount = 0;
 }
 
 void MeterAddDamage(SpellID spell, int amount)
@@ -148,6 +174,21 @@ void MeterAddLeech(int amount)
 	Add(HealingLines, LineKind::Leech, SpellID::Invalid, amount);
 }
 
+void MeterAddUse(SpellID spell)
+{
+	if (spell == SpellID::Invalid || spell == SpellID::Null) {
+		WeaponHitCount++;
+		return;
+	}
+	for (auto &[known, count] : Uses) {
+		if (known == spell) {
+			count++;
+			return;
+		}
+	}
+	Uses.emplace_back(spell, 1);
+}
+
 void ToggleMeter()
 {
 	if (IsPlayerInStore())
@@ -167,6 +208,8 @@ void ToggleMeter()
 
 void DrawMeter(const Surface &out)
 {
+	if (!IsShowing())
+		return;
 	ClxDraw(out, GetPanelPosition(UiPanels::Quest, { 0, 351 }), (*pQLogCel)[0]);
 
 	// The page's lines, biggest first.
@@ -176,13 +219,21 @@ void DrawMeter(const Surface &out)
 	for (const Line &line : lines)
 		total += line.total;
 
-	const std::string_view title = Page == 0 ? "Damage done" : "Healing and shields";
-	DrawString(out, title, OnScreen({ { TextLeft, TitleTop }, { TextWidth, 14 } }), { .flags = UiFlags::ColorWhitegold });
-	DrawString(out, Amount(total), OnScreen({ { TextLeft, TitleTop }, { TextWidth, 14 } }), { .flags = UiFlags::ColorWhitegold | UiFlags::AlignRight });
+	const auto text = [&](std::string_view words, int left, int top, int width, UiFlags flags) {
+		DrawString(out, words, OnScreen({ { left, top }, { width, 14 } }), { .flags = flags });
+	};
+	const UiFlags small = UiFlags::FontSize12;
+
+	text(Page == 0 ? "Damage done" : "Healing and shields", TextLeft, TitleTop, TextWidth, UiFlags::ColorWhitegold);
+	text(Amount(total), TextLeft, TitleTop, TextWidth, UiFlags::ColorWhitegold | UiFlags::AlignRight);
 
 	if (lines.empty()) {
-		DrawString(out, Page == 0 ? "No damage dealt yet this game." : "No healing or shielding yet this game.",
-		    OnScreen({ { TextLeft, ListTop }, { TextWidth, 14 } }), { .flags = UiFlags::ColorWhite | UiFlags::FontSize12 });
+		text(Page == 0 ? "No damage dealt yet this game." : "No healing or shielding yet.", TextLeft, ListTop, TextWidth, UiFlags::ColorWhite | small);
+	} else {
+		// What the three columns of numbers are.
+		text("Uses", TextLeft, HeaderTop, UsesRight, UiFlags::ColorGold | small | UiFlags::AlignRight);
+		text("Each", TextLeft, HeaderTop, EachRight, UiFlags::ColorGold | small | UiFlags::AlignRight);
+		text("Total", TextLeft, HeaderTop, TextWidth, UiFlags::ColorGold | small | UiFlags::AlignRight);
 	}
 
 	// When there are more lines than fit, the last row gathers the rest.
@@ -191,16 +242,23 @@ void DrawMeter(const Surface &out)
 	for (int row = 0; row < MaxRows && row < static_cast<int>(lines.size()); row++) {
 		const bool gathers = row == MaxRows - 1 && static_cast<int>(lines.size()) > MaxRows;
 		int64_t amount = lines[row].total;
+		int uses = UsesOf(lines[row]);
 		std::string name { NameOf(lines[row]) };
 		if (gathers) {
 			amount = 0;
+			uses = 0;
 			for (size_t i = row; i < lines.size(); i++)
 				amount += lines[i].total;
-			name = StrCat("Everything else (", lines.size() - row, ")");
+			name = StrCat("The rest (", lines.size() - row, ")");
 		}
 		const int top = ListTop + row * RowHeight;
-		DrawString(out, name, OnScreen({ { TextLeft, top }, { TextWidth - 60, 12 } }), { .flags = UiFlags::ColorWhite | UiFlags::FontSize12 });
-		DrawString(out, Amount(amount), OnScreen({ { TextLeft, top }, { TextWidth, 12 } }), { .flags = UiFlags::ColorWhite | UiFlags::FontSize12 | UiFlags::AlignRight });
+		text(name, TextLeft, top, NameWidth, UiFlags::ColorWhite | small);
+		// The average of one use: what the power did in all, over the times it was used.
+		if (uses > 0) {
+			text(StrCat(uses), TextLeft, top, UsesRight, UiFlags::ColorWhite | small | UiFlags::AlignRight);
+			text(Amount(amount / uses), TextLeft, top, EachRight, UiFlags::ColorWhite | small | UiFlags::AlignRight);
+		}
+		text(Amount(amount), TextLeft, top, TextWidth, UiFlags::ColorWhite | small | UiFlags::AlignRight);
 		// The bar is drawn against the biggest line, so the first is always full width.
 		const int width = std::clamp(static_cast<int>(amount * TextWidth / biggest), 1, TextWidth);
 		const Point barAt = GetPanelPosition(UiPanels::Quest, { TextLeft, top + 14 });
@@ -212,10 +270,10 @@ void DrawMeter(const Surface &out)
 	const auto button = [&](Rectangle place, std::string_view text, bool chosen, UiFlags align) {
 		const Rectangle at = OnScreen(place);
 		const bool hovered = at.contains(MousePosition);
-		DrawString(out, text, at, { .flags = (chosen ? UiFlags::ColorWhitegold : hovered ? UiFlags::ColorWhite : UiFlags::ColorUiSilver) | UiFlags::FontSize12 | align });
+		DrawString(out, text, at, { .flags = (chosen ? UiFlags::ColorWhitegold : hovered ? UiFlags::ColorBlue : UiFlags::ColorWhite) | UiFlags::FontSize12 | align });
 	};
 	button(DamageButton, "Damage", Page == 0, UiFlags::None);
-	button(HealingButton, "Healing and shields", Page == 1, UiFlags::None);
+	button(HealingButton, "Healing", Page == 1, UiFlags::None);
 	button(ResetButton, "Reset", false, UiFlags::AlignRight);
 }
 

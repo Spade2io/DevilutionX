@@ -1095,12 +1095,32 @@ std::span<Item> ActiveHealerItems()
 	}
 }
 
+/**
+ * Essence Mod: test prices. In the debug build, the one Bryan tests on, Pepin sells every essence
+ * and every awakening stone for 1 gold, the Epic and Legendary ones that normally cannot be
+ * bought included. A release build is compiled without _DEBUG, so it can never be on there.
+ */
+#ifdef _DEBUG
+constexpr bool TestPrices = true;
+#else
+constexpr bool TestPrices = false;
+#endif
+
+/** With test prices on, marks an item on Pepin's shelf at 1 gold. */
+void ApplyTestPrice(Item &item)
+{
+	if (!TestPrices)
+		return;
+	item._ivalue = 1;
+	item._iIvalue = 1;
+}
+
 /** Essence Mod: Pepin sells every essence in the item table that has a price. Epic and Legendary ones have none: they must be found. */
 void RefreshEssenceItems()
 {
 	EssenceItems.clear();
 	for (size_t i = 0; i < AllItemsList.size(); i++) {
-		if (AllItemsList[i].iMiscId != IMISC_ESSENCE || AllItemsList[i].iValue == 0)
+		if (AllItemsList[i].iMiscId != IMISC_ESSENCE || (AllItemsList[i].iValue == 0 && !TestPrices))
 			continue;
 		Item item;
 		InitializeItem(item, static_cast<_item_indexes>(i));
@@ -1109,6 +1129,7 @@ void RefreshEssenceItems()
 		item._iCreateInfo = 0; // nothing about an essence is rolled; the row says it all
 		item._iIdentified = true;
 		item._iStatFlag = true;
+		ApplyTestPrice(item);
 		EssenceItems.push_back(item);
 	}
 }
@@ -1124,7 +1145,7 @@ void RefreshAwakeningStoneItems()
 			continue;
 		// A stone that carries tags has no power of its own; the others are sold while on the test list.
 		// One with no price (Epic or Legendary) is never sold.
-		if (AllItemsList[i].iSpell == SpellID::Null ? (AllItemsList[i].iValue == 0 || !IsTagStoneKnown(AllItemsList[i].iName)) : !IsStoneOnSale(AllItemsList[i].iSpell))
+		if (AllItemsList[i].iSpell == SpellID::Null ? ((AllItemsList[i].iValue == 0 && !TestPrices) || !IsTagStoneKnown(AllItemsList[i].iName)) : !IsStoneOnSale(AllItemsList[i].iSpell))
 			continue;
 		Item item;
 		InitializeItem(item, static_cast<_item_indexes>(i));
@@ -1133,6 +1154,7 @@ void RefreshAwakeningStoneItems()
 		item._iCreateInfo = 0; // nothing about a stone is rolled; the row says it all
 		item._iIdentified = true;
 		item._iStatFlag = true;
+		ApplyTestPrice(item);
 		AwakeningStoneItems.push_back(item);
 	}
 

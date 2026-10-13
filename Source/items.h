@@ -186,6 +186,9 @@ constexpr int ItemAnimWidth = 96;
 // Defined in player.h, forward declared here to allow for functions which operate in the context of a player.
 struct Player;
 
+/** Essence Mod: the colour of an awakening stone's name, by its rarity. Defined in essence_tint.cpp. */
+UiFlags GetAwakeningStoneTextColor(const struct Item &item);
+
 struct Item {
 	/** Randomly generated identifier */
 	uint32_t _iSeed = 0;
@@ -431,6 +434,9 @@ struct Item {
 
 	UiFlags getTextColor() const
 	{
+		// Essence Mod: an awakening stone's name is the colour of its rarity.
+		if (_iMiscId == IMISC_AWAKENINGSTONE)
+			return GetAwakeningStoneTextColor(*this);
 		switch (_iMagical) {
 		case ITEM_QUALITY_MAGIC:
 			return UiFlags::ColorBlue;

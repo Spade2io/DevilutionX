@@ -10,6 +10,7 @@
 #include <cstdint>
 
 #include "engine/palette.h"
+#include "engine/render/clx_render.hpp"
 #include "items.h"
 
 namespace devilution {
@@ -121,6 +122,19 @@ const uint8_t *GetEssenceTintTrn(EssenceTint tint)
 	static const TintTable DullBeige = MakeEverythingToSixteenShadeRamp(PAL16_BEIGE);
 	static const TintTable DullGray = MakeEverythingToSixteenShadeRamp(PAL16_GRAY);
 	static const TintTable VividOrange = MakeEverythingToEightShadeRamp(PAL8_ORANGE);
+	// Only the light half of the 16 greys is used, so the whole sprite comes out pale.
+	static const TintTable White = [] {
+		TintTable table = MakeEverythingToSixteenShadeRamp(PAL16_GRAY);
+		for (const uint8_t ramp : { PAL8_BLUE, PAL8_RED, PAL8_YELLOW, PAL8_ORANGE }) {
+			for (uint8_t shade = 0; shade < 8; shade++)
+				table[ramp + shade] = PAL16_GRAY + shade;
+		}
+		for (const uint8_t ramp : { PAL16_BEIGE, PAL16_BLUE, PAL16_YELLOW, PAL16_ORANGE, PAL16_RED, PAL16_GRAY }) {
+			for (uint8_t shade = 0; shade < 16; shade++)
+				table[ramp + shade] = PAL16_GRAY + shade / 2;
+		}
+		return table;
+	}();
 	static const TintTable VividRed = MakeEverythingToEightShadeRamp(PAL8_RED);
 	static const TintTable VividYellow = MakeEverythingToEightShadeRamp(PAL8_YELLOW);
 	static const TintTable VividBlue = MakeWarmToEightShadeRamp(PAL8_BLUE);
@@ -150,6 +164,8 @@ const uint8_t *GetEssenceTintTrn(EssenceTint tint)
 		return DullGray.data();
 	case EssenceTint::VividOrange:
 		return VividOrange.data();
+	case EssenceTint::White:
+		return White.data();
 	}
 	return VividBlue.data();
 }
@@ -291,6 +307,78 @@ std::optional<EssenceTint> GetItemTint(const Item &item)
 	if (const std::optional<EssenceTint> tint = GetEssenceTint(GetSpellEssence(item._iSpell)); tint)
 		return tint;
 	return GetSpellTint(item._iSpell);
+}
+
+bool DrawItemTinted(const Surface &out, Point position, ClxSprite sprite, const Item &item)
+{
+	// An awakening stone takes the colour of its rarity; anything else, the colour it had before.
+	std::optional<EssenceTint> first = GetItemTint(item);
+	std::optional<EssenceTint> second;
+	switch (GetAwakeningStoneRarity(item)) {
+	case 0:
+		first = EssenceTint::White;
+		break;
+	case 1:
+		first = EssenceTint::VividBlue;
+		break;
+	case 2:
+		first = EssenceTint::VividRed;
+		second = EssenceTint::VividBlue;
+		break;
+	case 3:
+		first = EssenceTint::VividOrange;
+		break;
+	default:
+		break;
+	}
+	if (!first)
+		return false;
+	if (!second) {
+		ClxDrawTRN(out, position, sprite, GetEssenceTintTrn(*first));
+		return true;
+	}
+
+	// Two colours in a checkerboard. The second is drawn on a copy of what is already on the
+	// screen there; the first is drawn on the screen; then every other pixel is taken from the
+	// copy. Where the sprite is see-through both hold the same background, so nothing shows.
+	const int width = sprite.width();
+	const int height = sprite.height();
+	static std::optional<OwnedSurface> scratch;
+	if (!scratch || scratch->w() != width || scratch->h() != height)
+		scratch.emplace(width, height);
+	const Point topLeft { position.x, position.y - height + 1 };
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			const Point at { topLeft.x + x, topLeft.y + y };
+			*scratch->at(x, y) = out.InBounds(at) ? *out.at(at.x, at.y) : 0;
+		}
+	}
+	ClxDrawTRN(*scratch, { 0, height - 1 }, sprite, GetEssenceTintTrn(*second));
+	ClxDrawTRN(out, position, sprite, GetEssenceTintTrn(*first));
+	for (int y = 0; y < height; y++) {
+		for (int x = (y & 1); x < width; x += 2) {
+			const Point at { topLeft.x + x, topLeft.y + y };
+			if (out.InBounds(at))
+				*out.at(at.x, at.y) = *scratch->at(x, y);
+		}
+	}
+	return true;
+}
+
+UiFlags GetAwakeningStoneTextColor(const Item &item)
+{
+	switch (GetAwakeningStoneRarity(item)) {
+	case 0:
+		return UiFlags::ColorWhite;
+	case 1:
+		return UiFlags::ColorBlue;
+	case 2:
+		return UiFlags::ColorDullBeige;
+	case 3:
+		return UiFlags::ColorOrange;
+	default:
+		return UiFlags::ColorWhite;
+	}
 }
 
 std::optional<EssenceTint> GetEssenceTint(EssenceID essence)

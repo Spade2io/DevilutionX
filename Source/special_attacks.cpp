@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "cooldowns.h"
+#include "meter.h"
 #include "dots.h"
 #include "levels/gendung.h"
 #include "missiles.h"
@@ -97,6 +98,7 @@ SpellID SpendQueuedSpecialAttack(Player &player)
 	player._pMana -= cost;
 	player._pManaBase -= cost;
 	RedrawComponent(PanelDrawComponent::Mana);
+	MeterAddUse(attack);
 	return attack;
 }
 

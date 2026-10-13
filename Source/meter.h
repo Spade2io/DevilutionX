@@ -36,10 +36,16 @@ void MeterAddRegeneration(int amount);
 /** @brief Counts health the local player's life leech has restored. */
 void MeterAddLeech(int amount);
 
+/**
+ * @brief Counts one use of a power by the local player: a spell cast, or a special attack swung.
+ * SpellID::Invalid counts a plain weapon hit. The meter shows each total beside the average of one use.
+ */
+void MeterAddUse(SpellID spell);
+
 /** @brief Opens or closes the panel (the M key). */
 void ToggleMeter();
 
-/** @brief Draws the panel, on the quest log's stone tablet. */
+/** @brief Draws the panel, on the quest log's stone tablet, if it is the left-hand panel showing. Call it after the party list. */
 void DrawMeter(const Surface &out);
 
 /**

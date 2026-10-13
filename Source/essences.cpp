@@ -853,6 +853,14 @@ int RollEssenceLoot(bool isBoss, bool always)
 	return row;
 }
 
+int GetAwakeningStoneRarity(const Item &item)
+{
+	if (item._iMiscId != IMISC_AWAKENINGSTONE)
+		return -1;
+	const TagStone *stone = FindTagStone(item._iName);
+	return stone != nullptr ? static_cast<int>(stone->rarity) : -1;
+}
+
 int GetEssenceItemWorth(const Item &item)
 {
 	if (!IsAnyOf(item._iMiscId, IMISC_ESSENCE, IMISC_AWAKENINGSTONE))

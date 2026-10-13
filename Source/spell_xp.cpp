@@ -289,6 +289,7 @@ void AddAttackExperienceForDamage(const Player &player, const Monster &monster, 
 	if (&player != MyPlayer)
 		return;
 	MeterAddDamage(SpellID::Invalid, std::min(damage, std::max(hitPointsBefore, 0)));
+	MeterAddUse(SpellID::Invalid);
 
 	// No ability earns the attack's own experience yet; it only feeds the active buffs.
 	const auto worth = static_cast<uint32_t>(WithRacialExperience(player, ExperienceForDamage(player, monster, damage, hitPointsBefore)));

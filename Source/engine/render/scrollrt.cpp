@@ -744,9 +744,8 @@ void DrawItem(const Surface &out, int8_t itemIndex, Point targetBufferPosition, 
 	if (!IsPlayerInStore() && (itemIndex == pcursitem || AutoMapShowItems)) {
 		ClxDrawOutlineSkipColorZero(out, GetOutlineColor(item, false), position, sprite);
 	}
-	if (const std::optional<EssenceTint> tint = GetItemTint(item); tint) {
-		// Essence Mod: an awakening stone on the ground is drawn in its spell's colour.
-		ClxDrawTRN(out, position, sprite, GetEssenceTintTrn(*tint));
+	if (DrawItemTinted(out, position, sprite, item)) {
+		// Essence Mod: an essence on the ground is drawn in its colour, an awakening stone in its rarity's.
 	} else {
 		ClxDrawLight(out, position, sprite, lightTableIndex);
 	}
@@ -1449,8 +1448,6 @@ void DrawView(const Surface &out, Point startPosition)
 		DrawStash(out);
 	} else if (IsVisualStoreOpen) {
 		DrawVisualStore(out);
-	} else if (MeterOpen) {
-		DrawMeter(out); // Essence Mod
 	}
 
 	if (ShowUniqueItemInfoBox) {
@@ -1939,6 +1936,10 @@ void DrawAndBlit()
 
 	if (*GetOptions().Gameplay.showMultiplayerPartyInfo && PartySidePanelOpen)
 		DrawPartyMemberInfoPanel(out);
+
+	// Essence Mod: the meter is drawn last of all, so that the party list and the boon icons,
+	// which share its corner of the screen, are under it and not over it.
+	DrawMeter(out);
 
 	DrawCursor(out);
 

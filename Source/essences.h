@@ -100,6 +100,11 @@ void GrantEarnedStatPoints(Player &player, bool inGame);
  */
 int GetTotalPowerLevels(const Player &player);
 
+struct Item;
+
+/** @brief An awakening stone's rarity: 0 Common, 1 Rare, 2 Epic, 3 Legendary. -1 for anything else. */
+int GetAwakeningStoneRarity(const Item &item);
+
 /** @brief The essence an ability belongs to, or None for abilities that have no essence yet. */
 EssenceID GetSpellEssence(SpellID spell);
 

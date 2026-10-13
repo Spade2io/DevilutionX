@@ -5,6 +5,8 @@
  */
 #include "spells.h"
 
+#include "meter.h"
+
 #include "control/control.hpp"
 #include "cursor.h"
 #ifdef _DEBUG
@@ -225,6 +227,8 @@ void CastSpell(Player &player, SpellID spl, WorldTilePosition src, WorldTilePosi
 	}
 	if (!fizzled) {
 		ConsumeSpell(player, spl);
+		if (&player == MyPlayer)
+			MeterAddUse(spl); // Essence Mod: the meter shows what one use of a power comes to
 		// Essence Mod: a power read from essence_powers.tsv goes on cooldown when it is cast.
 		// (A special attack's cooldown starts when its swing lands instead; see player.cpp.)
 		if (&player == MyPlayer && IsExtendedSpell(spl))

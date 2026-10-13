@@ -555,9 +555,8 @@ void DrawItem(const Item &item, const Surface &out, Point position, ClxSprite cl
 	const bool usable = !IsInspectingPlayer() ? item._iStatFlag : InspectPlayer->CanUseItem(item);
 	if (!usable) {
 		ClxDrawTRN(out, position, clx, GetInfravisionTRN());
-	} else if (const std::optional<EssenceTint> tint = GetItemTint(item); tint) {
-		// Essence Mod: an awakening stone is drawn in its spell's colour.
-		ClxDrawTRN(out, position, clx, GetEssenceTintTrn(*tint));
+	} else if (DrawItemTinted(out, position, clx, item)) {
+		// Essence Mod: an essence is drawn in its colour, an awakening stone in its rarity's.
 	} else {
 		ClxDraw(out, position, clx);
 	}
