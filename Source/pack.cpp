@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <format>
 
+#include "buffs.h"
 #include "engine/random.hpp"
 #include "game_mode.hpp"
 #include "items/validation.h"
@@ -580,22 +581,19 @@ bool UnPackNetPlayer(const PlayerNetPack &packed, Player &player)
 		ValidateField(beltItemUsable, beltItemUsable);
 	}
 
+	// Essence Mod: whoever sat in this seat before may have left boons behind on this PC. A player
+	// arriving has none here until they are cast, or sent, again.
+	ClearBuffs(player);
 	CalcPlrInv(player, false);
 	player._pGold = CalculateGold(player);
 
-	ValidateFields(player._pStrength, SwapSigned32LE(packed.pStrength), player._pStrength == SwapSigned32LE(packed.pStrength));
-	ValidateFields(player._pMagic, SwapSigned32LE(packed.pMagic), player._pMagic == SwapSigned32LE(packed.pMagic));
-	ValidateFields(player._pDexterity, SwapSigned32LE(packed.pDexterity), player._pDexterity == SwapSigned32LE(packed.pDexterity));
-	ValidateFields(player._pVitality, SwapSigned32LE(packed.pVitality), player._pVitality == SwapSigned32LE(packed.pVitality));
-	ValidateFields(player._pHitPoints, SwapSigned32LE(packed.pHitPoints), player._pHitPoints == SwapSigned32LE(packed.pHitPoints));
-	ValidateFields(player._pMaxHP, SwapSigned32LE(packed.pMaxHP), player._pMaxHP == SwapSigned32LE(packed.pMaxHP));
-	ValidateFields(player._pMana, SwapSigned32LE(packed.pMana), player._pMana == SwapSigned32LE(packed.pMana));
-	ValidateFields(player._pMaxMana, SwapSigned32LE(packed.pMaxMana), player._pMaxMana == SwapSigned32LE(packed.pMaxMana));
+	// Essence Mod: the stats, life, mana and armor are not compared with what the player sent.
+	// Boons change all of them, and this PC does not know which boons the player has on, so a
+	// player with a boon running was refused ("sent invalid player data").
 	ValidateFields(player._pDamageMod, SwapSigned32LE(packed.pDamageMod), player._pDamageMod == SwapSigned32LE(packed.pDamageMod));
 	ValidateFields(player.getBaseToBlock(), SwapSigned32LE(packed.pBaseToBlk), player.getBaseToBlock() == SwapSigned32LE(packed.pBaseToBlk));
 	ValidateFields(player._pIMinDam, SwapSigned32LE(packed.pIMinDam), player._pIMinDam == SwapSigned32LE(packed.pIMinDam));
 	ValidateFields(player._pIMaxDam, SwapSigned32LE(packed.pIMaxDam), player._pIMaxDam == SwapSigned32LE(packed.pIMaxDam));
-	ValidateFields(player._pIAC, SwapSigned32LE(packed.pIAC), player._pIAC == SwapSigned32LE(packed.pIAC));
 	ValidateFields(player._pIBonusDam, SwapSigned32LE(packed.pIBonusDam), player._pIBonusDam == SwapSigned32LE(packed.pIBonusDam));
 	ValidateFields(player._pIBonusToHit, SwapSigned32LE(packed.pIBonusToHit), player._pIBonusToHit == SwapSigned32LE(packed.pIBonusToHit));
 	ValidateFields(player._pIBonusAC, SwapSigned32LE(packed.pIBonusAC), player._pIBonusAC == SwapSigned32LE(packed.pIBonusAC));

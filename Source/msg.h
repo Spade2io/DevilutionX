@@ -441,6 +441,11 @@ enum _cmd_id : uint8_t {
 	//
 	// body (TCmdParam2): the power's spell id, the percentage
 	CMD_COMPOUNDHEALS,
+	// Essence Mod: the sender has picked up a pile of gold and this is another player's share of
+	// it. Only that player's own PC puts it in their bag.
+	//
+	// body (TCmdParam2): the id of the player it is for, the amount of gold
+	CMD_SHAREGOLD,
 	// Fake command; set current player for succeeding mega pkt buffer messages.
 	//
 	// body (TFakeCmdPlr)

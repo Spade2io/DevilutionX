@@ -3,6 +3,7 @@
  *
  * Implementation of functions for keeping multiplaye games in sync.
  */
+#include "buffs.h"
 #include "multi.h"
 
 #include "essence_version.h"
@@ -278,6 +279,7 @@ void PlayerLeftMsg(Player &player, bool left)
 	RemoveEnemyReferences(player);
 	RemovePlrMissiles(player);
 	if (left) {
+		ClearBuffs(player); // Essence Mod: their boons go with them
 		const leaveinfo_t leaveReason = sgdwPlayerLeftReasonTbl[player.getId()];
 		const std::string reasonDescription = DescribeLeaveReason(leaveReason);
 		std::string_view pszFmt = _("Player '{:s}' just left the game");

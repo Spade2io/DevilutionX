@@ -1209,3 +1209,18 @@ six boons, an aura and a Compounding power. With it there are 220 confluences, a
 - A strike that sweeps now leaves its effect over time on everything it lands on.
 - Efficient special attacks are +1 for half a point of mana (they were +2 for 1, which was Heavy
   Blow at half price). Static Jolt costs 3 mana.
+
+## Experience for shields and for boons on allies (decided 2026-10-13)
+- **A shield earns for what it absorbs.** Whoever cast a shield earns experience for the damage it
+  soaks up, by the same sum a heal uses, whether the shield is on them or on a friend. The wearer's
+  PC reports what was absorbed about once a second. A shield that runs out unused earns nothing.
+  One shield power never stacks with itself; different shield powers add up.
+- **Lasting boons on allies earn nothing extra.** They already earn through the caster's own copy,
+  and paying for every ally would unbalance them (Bryan).
+- **Cooldown boons on one ally: rule held for later.** Almost none exist. When the first is made:
+  while it runs the receiver's PC totals half of every experience gain the receiver makes, and
+  sends that to the caster when it ends; the receiver loses nothing. It rewards putting the boon
+  on the best target. If a defensive one ever needs its own measure, use the damage the receiver
+  took while it ran, not an estimate of what the boon prevented.
+- Bryan wants more big cooldown boons that a support character casts on another player (damage,
+  armor and so on). They are on the checklist under "Powers to create".

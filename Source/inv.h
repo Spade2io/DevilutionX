@@ -186,6 +186,12 @@ int RoomForGold();
  * @return The leftover amount that didn't fit, if any
  */
 int AddGoldToInventory(Player &player, int value);
+
+/**
+ * @brief Essence Mod: puts a share of gold someone else picked up into the local player's bag.
+ * Gold that finds no room is lost; that takes a bag with every space full of gold.
+ */
+void ReceiveGoldShare(Player &player, int amount);
 bool GoldAutoPlace(Player &player, Item &goldStack);
 void CheckInvSwap(Player &player, inv_body_loc bLoc);
 void inv_update_rem_item(Player &player, inv_body_loc iv);

@@ -1669,13 +1669,15 @@ void CheckInvScrn(bool isShiftHeld, bool isCtrlHeld)
 
 /**
  * Essence Mod: in multiplayer a pile of gold is split evenly among the players on the same level
- * as the one who picks it up. What does not divide evenly, and any share that does not fit in a
- * bag, stays with the one who clicked. Every PC works this out the same way as the pile is taken,
- * so nothing extra has to be sent.
+ * as the one who picks it up. What does not divide evenly stays with the one who clicked.
+ *
+ * A pickup is carried out only on the PC of the player who picked up; the others just see the pile
+ * vanish. So that PC takes the shares out of the pile and sends each other player theirs, and
+ * each player's own PC puts it in their bag (see ReceiveGoldShare).
  */
 void ShareGoldPile(Player &clicker, Item &gold)
 {
-	if (!gbIsMultiplayer || gold._itype != ItemType::Gold)
+	if (!gbIsMultiplayer || gold._itype != ItemType::Gold || &clicker != MyPlayer)
 		return;
 	std::vector<Player *> others;
 	for (Player &other : Players) {
@@ -1690,14 +1692,21 @@ void ShareGoldPile(Player &clicker, Item &gold)
 	const int share = gold._ivalue / static_cast<int>(others.size() + 1);
 	if (share <= 0)
 		return;
-	for (Player *other : others) {
-		const int left = AddGoldToInventory(*other, share);
-		other->_pGold = CalculateGold(*other);
-		gold._ivalue -= share - left;
-		if (other == MyPlayer && left < share)
-			PlaySFX(SfxID::ItemGold);
+	for (const Player *other : others) {
+		gold._ivalue -= share;
+		NetSendCmdParam2(true, CMD_SHAREGOLD, other->getId(), static_cast<uint16_t>(share));
 	}
 	SetPlrHandGoldCurs(gold);
+}
+
+void ReceiveGoldShare(Player &player, int amount)
+{
+	if (amount <= 0)
+		return;
+	const int left = AddGoldToInventory(player, amount);
+	player._pGold = CalculateGold(player);
+	if (left < amount)
+		PlaySFX(SfxID::ItemGold);
 }
 
 void InvGetItem(Player &player, int ii)
